@@ -2,6 +2,7 @@
 Oscar REST API
 ==============
 
-_This package provides a REST API for Oscar.  It is currently in the
+*This package provides a RESTful API for Oscar.  It is currently in the
 requirements gathering phase.  Please use the wiki to view the list of
-requirements._
+requirements and the django-oscar@googlegroups.com mailing list for any
+discussions.*
