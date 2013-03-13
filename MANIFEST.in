@@ -1,0 +1,2 @@
+include *.rst
+recursive-include oscar_stripe/templates *.html
