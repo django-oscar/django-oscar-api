@@ -2,11 +2,20 @@
 import sys
 from coverage import coverage
 from optparse import OptionParser
+import logging
 
 from django.conf import settings
+from oscar import get_core_apps
+from oscar.defaults import OSCAR_SETTINGS
+
+# Disable logging
+logging.disable(logging.CRITICAL)
 
 
 if not settings.configured:
+    # Tweak some of oscar's defaults
+    OSCAR_SETTINGS['OSCAR_EAGER_ALERTS'] = False
+
     settings.configure(
             DATABASES={
                 'default': {
@@ -19,12 +28,20 @@ if not settings.configured:
                 'django.contrib.contenttypes',
                 'django.contrib.sessions',
                 'django.contrib.sites',
-                'oscar_stripe',
+                'oscar_api',
                 'south',
-                ],
+                ] + get_core_apps(),
             DEBUG=False,
             SITE_ID=1,
+            ROOT_URLCONF='tests.urls',
             NOSE_ARGS=['-s', '--with-spec'],
+            # Stuff oscar needs
+            HAYSTACK_CONNECTIONS={
+                'default': {
+                    'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
+                }
+            },
+            **OSCAR_SETTINGS
         )
 
 # Needs to be here to avoid missing SETTINGS env var
@@ -42,7 +59,7 @@ def run_tests(*test_args):
     # Run tests
     test_runner = NoseTestSuiteRunner(verbosity=1)
 
-    c = coverage(source=['oscar_stripe'], omit=['*migrations*', '*tests*'])
+    c = coverage(source=['oscar_api'], omit=['*migrations*', '*tests*'])
     c.start()
     num_failures = test_runner.run_tests(test_args)
     c.stop()
