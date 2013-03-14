@@ -183,7 +183,6 @@ INSTALLED_APPS = [
     'django_extensions',
     'debug_toolbar',
     # Package
-    'oscar_stripe',
     'south',
 ]
 from oscar import get_core_apps
