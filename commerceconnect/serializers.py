@@ -1,9 +1,8 @@
-from django.contrib.auth import get_user_model
-
-from oscar.core.loading import get_model
-
-from rest_framework import serializers
 from commerceconnect.utils import overridable, OscarModelSerializer
+from django.contrib.auth import get_user_model
+from oscar.core.loading import get_model
+from rest_framework import serializers
+
 
 Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
