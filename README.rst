@@ -116,3 +116,10 @@ The above measures ensure the following behaviour:
 3. Keeping the session identifier part of the Session Identification URI the same
    for both anonymous and authenticated users, simplifies tracking and associating
    rest api resources with client application resources.
+
+Final note
+----------
+
+Note that guessing the ``identifier`` of an authenticated or anonymous user and
+therefor hyjacking the session, is nomore difficult then guassing the session id
+stored in a cookie for a web application.
