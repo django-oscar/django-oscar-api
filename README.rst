@@ -45,7 +45,7 @@ checkout, order history etc.
 A client application can upgrade a user by using the login api.
 The following actions will be performed when a user logs in:
 
-1. The user will be authenticated with gigya. The following steps will only be
+1. The user will be authenticated with gigya. The next steps will only be
    performed is login is succesful.
 2. The anonymous cart will be merged with the private cart associated with that
    authenticated user.
@@ -53,7 +53,7 @@ The following actions will be performed when a user logs in:
    for the duration of the session, without further calls to gigya.
 4. The new, merged cart will be associated with this session.
 5. The anonymous session will be terminated.
-5. A response will be issued containing the new session id as a header (more on
+6. A response will be issued containing the new session id as a header (more on
    this later).
 
 Session protocol
