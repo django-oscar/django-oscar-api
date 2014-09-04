@@ -123,3 +123,7 @@ Final note
 Note that guessing the ``identifier`` of an authenticated or anonymous user and
 therefor hyjacking the session, is nomore difficult then guessing the session id
 stored in a cookie for a web application.
+
+Also note that the identifier, which is in the Session Identification URI, not
+used as the session id directly, which means session id's gathered from cookies
+can not be used to authenticate with the header Session-Id.
