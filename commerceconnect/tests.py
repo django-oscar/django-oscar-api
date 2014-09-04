@@ -38,6 +38,7 @@ class UserTest(TestCase):
 class BasketTest(UserTest):
 
     def test_create_basket(self):
+        self.test_admin_user()
         empty = Basket.objects.all()
         self.assertFalse(empty.exists())
 
