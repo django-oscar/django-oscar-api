@@ -17,7 +17,7 @@ levels.
 
 1. gateway level.
    An api token is required to communicate with the rest api.
-   That means that we can authorize clients applications to make use of the
+   That means we can authorize client applications to make use of the
    rest api. Examples of client applications are the sitecore website or a
    mobile application.
 2. User level. Because we don't want resource protection to be the
