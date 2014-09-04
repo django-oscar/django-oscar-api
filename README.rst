@@ -121,5 +121,5 @@ Final note
 ----------
 
 Note that guessing the ``identifier`` of an authenticated or anonymous user and
-therefor hyjacking the session, is nomore difficult then guassing the session id
+therefor hyjacking the session, is nomore difficult then guessing the session id
 stored in a cookie for a web application.
