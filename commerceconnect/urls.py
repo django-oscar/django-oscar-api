@@ -5,6 +5,7 @@ from commerceconnect import views
 
 urlpatterns = patterns('',
     url(r'^$', 'commerceconnect.views.api_root', name='api-root'),
+    url(r'^login/$', views.LoginView.as_view(), name='api-login'),
     url(r'^baskets/$', views.BasketList.as_view(), name='basket-list'),
     url(r'^baskets/(?P<pk>[0-9]+)/$', views.BasketDetail.as_view(), name='basket-detail'),
     url(r'^lines/$', views.LineList.as_view(), name='line-list'),

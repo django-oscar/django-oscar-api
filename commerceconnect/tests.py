@@ -43,18 +43,12 @@ class BasketTest(UserTest):
 
         url = reverse('basket-list')
         data = {'owner': "http://localhost:8000%s" % reverse('user-detail', args=[1])}
-        response = self.client.post(url, json.dumps(data), content_type='application/json')
+        response = self.client.post(url, json.dumps(data), content_type='application/json', session_id="dikke lul")
         self.assertEqual(response.status_code, 201, "It should be possible for a basket to be created, for a specific user.")
 
         data = {}
         response = self.client.post(url, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 201, "It should be possible for a basket to be created for an anonymous user.")
-
-        self.assertEqual(Basket.objects.count(), 2, "2 baskets should after creating 2 baskets.")
-        
-        data = {'owner': "http://localhost:8000%s" % reverse('user-detail', args=[1])}
-        response = self.client.post(url, json.dumps(data), content_type='application/json')
-        # self.assertEqual(response.status_code, 200, "Each user has only 1 basket.")
 
         self.assertEqual(Basket.objects.count(), 2, "2 baskets should after creating 2 baskets.")
 

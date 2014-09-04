@@ -1,10 +1,12 @@
+import hashlib
 import re
 
-from commerceconnect.utils import get_domain
 from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.urlresolvers import reverse
 from django.utils.importlib import import_module
+
+from commerceconnect.utils import get_domain
 
 
 HTTP_SESSION_ID_REGEX = re.compile(r'^SID:(?P<type>.*?):(?P<realm>.*?):(?P<session_id>.+?)(?:[-:][0-9a-fA-F]+)*$')
@@ -20,9 +22,13 @@ def parse_session_id(request):
     return None
 
 
-def session_with_id(session_id):
-    engine = import_module(settings.SESSION_ENGINE)
+def session_id_from_parsed_session_uri(parsed_session_uri):
+    session_id_base = "SID:%(type)s:%(realm)s:%(session_id)s" % parsed_session_uri
+    return hashlib.sha1(session_id_base + settings.SECRET_KEY).hexdigest()
 
+
+def start_or_resume(session_id):
+    engine = import_module(settings.SESSION_ENGINE)
     session = engine.SessionStore(session_id)
 
     if not session.exists(session_id):
@@ -43,11 +49,12 @@ class HeaderSessionMiddleware(SessionMiddleware):
         Parse the session id from the 'Session-Id: ' header when using the api.
         """
         if request.path.startswith(reverse('api-root')):
-            header_session_id = parse_session_id(request)
-            if header_session_id is not None:
-
-                request.session = session_with_id(header_session_id['session_id'])
-                request.session_type = header_session_id['type']
+            parsed_session_uri = parse_session_id(request)
+            if parsed_session_uri is not None:
+                assert(parsed_session_uri['realm'] == get_domain(request))
+                session_id = session_id_from_parsed_session_uri(parsed_session_uri)
+                request.session = start_or_resume(session_id)
+                request.parsed_session_uri = parsed_session_uri
                 return None
 
         return super(HeaderSessionMiddleware, self).process_request(request)
@@ -56,11 +63,10 @@ class HeaderSessionMiddleware(SessionMiddleware):
         """
         Add the 'Session-Id: ' header when using the api.
         """
-        if request.path.startswith(reverse('api-root')) and hasattr(request, 'session'):
-            spec = {
-                'realm': get_domain(request),
-                'session_id': request.session.session_key
-            }
-            response['Session-Id'] = 'SID::%(realm)s:%(session_id)s' % spec
+        if request.path.startswith(reverse('api-root')) \
+            and hasattr(request, 'session') \
+            and hasattr(request, 'parsed_session_uri'):
+            assert(request.session.session_key == session_id_from_parsed_session_uri(request.parsed_session_uri))
+            response['Session-Id'] = 'SID:%(type)s:%(realm)s:%(session_id)s' % request.parsed_session_uri
 
         return super(HeaderSessionMiddleware, self).process_response(request, response)

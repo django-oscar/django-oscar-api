@@ -1,12 +1,11 @@
-from django.contrib.auth import get_user_model
-from django.shortcuts import render
-
+from django.contrib import auth
 from oscar.core.loading import get_model
-from rest_framework import generics
-from rest_framework import renderers
+from rest_framework import generics, status
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework.views import APIView
 
 from commerceconnect import serializers
 
@@ -16,7 +15,7 @@ Line = get_model('basket', 'Line')
 LineAttribute = get_model('basket', 'LineAttribute')
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
-User = get_user_model()
+User = auth.get_user_model()
 
 
 @api_view(('GET',))
@@ -33,6 +32,7 @@ def api_root(request, format=None):
 class BasketList(generics.ListCreateAPIView):
     queryset = Basket.objects.all()
     serializer_class = serializers.BasketSerializer
+    permission_classes = (IsAdminUser,)
 class BasketDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Basket.objects.all()
     serializer_class = serializers.BasketSerializer
@@ -76,3 +76,26 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
+
+
+class LoginView(APIView):
+    # no we don;t need to authenticate users that log in ok?
+    authentication_classes = ()
+
+    def post(self, request, format=None):
+        ser = serializers.LoginSerializer(data=request.DATA)
+        if ser.is_valid():
+            user = ser.object
+            request.user = user
+            # make sure that auth.login doesn't create a new session key
+            request.session[auth.SESSION_KEY] = user.pk
+            auth.login(request, ser.object)
+            request.session.save()
+            return Response()
+
+        return Response(ser.errors, status=status.HTTP_401_UNAUTHORIZED)
+
+    def delete(self, request, format=None):
+        request.session.clear()
+        request.session.delete()
+        return Response()
