@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model, authenticate
 from oscar.core.loading import get_model
 from rest_framework import serializers
 
-from commerceconnect.utils import overridable, OscarModelSerializer
+from commerceconnect.utils import *
 
 
 Basket = get_model('basket', 'Basket')
@@ -36,6 +36,13 @@ class LineAttributeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = LineAttribute
 
+
+class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('url',)
+    def to_native(self, obj):
+        return super(ProductLinkSerializer, self).to_native(obj).get('url')
 
 class ProductSerializer(OscarModelSerializer):
     class Meta:
