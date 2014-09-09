@@ -45,6 +45,8 @@ class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
         return super(ProductLinkSerializer, self).to_native(obj).get('url')
 
 class ProductSerializer(OscarModelSerializer):
+    stockrecords = serializers.HyperlinkedIdentityField(view_name='product-stockrecord-list')
+
     class Meta:
         model = Product
 

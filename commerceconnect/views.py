@@ -68,6 +68,13 @@ class ProductDetail(generics.RetrieveAPIView):
 class StockRecordList(generics.ListAPIView):
     queryset = StockRecord.objects.all()
     serializer_class = serializers.StockRecordSerializer
+
+    def get(self, request, pk=None, *args, **kwargs):
+        if pk is not None:
+            self.queryset = self.queryset.filter(product__id=pk)
+
+        return super(StockRecordList, self).get(request, *args, **kwargs)
+
 class StockRecordDetail(generics.RetrieveAPIView):
     queryset = StockRecord.objects.all()
     serializer_class = serializers.StockRecordSerializer
