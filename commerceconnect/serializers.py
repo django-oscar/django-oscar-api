@@ -40,7 +40,7 @@ class LineAttributeSerializer(serializers.HyperlinkedModelSerializer):
 class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = Product
-        fields = ('url', 'id')
+        fields = overridable('CC_PRODUCT_FIELDS', default=('url', 'id'))
 
 class ProductSerializer(OscarModelSerializer):
     stockrecords = serializers.HyperlinkedIdentityField(view_name='product-stockrecord-list')

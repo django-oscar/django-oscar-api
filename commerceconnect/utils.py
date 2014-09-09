@@ -9,21 +9,31 @@ def overridable(name, default):
     """
     return getattr(settings, name, default)
 
-field_mapping = dict(serializers.ModelSerializer.field_mapping, **{
-    oscar.models.fields.NullCharField: serializers.CharField
-})
-
-class OscarModelSerializer(serializers.ModelSerializer):
-    """
-    Correctly map oscar fields to serializer fields.
-    """
-    field_mapping = field_mapping
+class OscarSerializer(object):
+    field_mapping = dict(serializers.ModelSerializer.field_mapping, **{
+        oscar.models.fields.NullCharField: serializers.CharField
+    })
     
-class OscarHyperlinkedModelSerializer(serializers.HyperlinkedModelSerializer):
+    def to_native(self, obj):
+        num_fields = len(self.get_fields())
+        native = super(OscarSerializer, self).to_native(obj)
+
+        if num_fields == 1:
+            _, val = next(native.iteritems())
+            return val
+        
+        return native
+    
+class OscarModelSerializer(OscarSerializer, serializers.ModelSerializer):
     """
     Correctly map oscar fields to serializer fields.
     """
-    field_mapping = field_mapping
+    
+class OscarHyperlinkedModelSerializer(OscarSerializer, serializers.HyperlinkedModelSerializer):
+    """
+    Correctly map oscar fields to serializer fields.
+    """
+
 
 def get_domain(request):
     return request.get_host().split(':')[0]
