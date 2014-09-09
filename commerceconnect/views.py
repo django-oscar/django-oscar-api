@@ -21,11 +21,14 @@ User = auth.get_user_model()
 @api_view(('GET',))
 def api_root(request, format=None):
     return Response({
+        'login': reverse('api-login', request=request, format=format),
         'baskets': reverse('basket-list', request=request, format=format),
         'lines': reverse('line-list', request=request, format=format),
         'lineattributes': reverse('lineattribute-list', request=request, format=format),
         'products': reverse('product-list', request=request, format=format),
         'stockrecords': reverse('stockrecord-list', request=request, format=format),
+        'users': reverse('user-list', request=request, format=format),
+        
     })
 
 
@@ -73,9 +76,11 @@ class StockRecordDetail(generics.RetrieveAPIView):
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
+    permission_classes = (IsAdminUser,)
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
+    permission_classes = (IsAdminUser,)
 
 
 class LoginView(APIView):

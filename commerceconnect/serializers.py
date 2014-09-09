@@ -40,7 +40,7 @@ class LineAttributeSerializer(serializers.HyperlinkedModelSerializer):
 class ProductSerializer(OscarModelSerializer):
     class Meta:
         model = Product
-    
+
 
 class StockRecordSerializer(serializers.ModelSerializer):
     class Meta:
