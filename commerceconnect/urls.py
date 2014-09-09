@@ -2,7 +2,6 @@ from django.conf.urls import patterns, url
 from rest_framework.urlpatterns import format_suffix_patterns
 from commerceconnect import views
 
-
 urlpatterns = patterns('',
     url(r'^$', 'commerceconnect.views.api_root', name='api-root'),
     url(r'^login/$', views.LoginView.as_view(), name='api-login'),

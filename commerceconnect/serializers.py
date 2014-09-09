@@ -40,9 +40,7 @@ class LineAttributeSerializer(serializers.HyperlinkedModelSerializer):
 class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = Product
-        fields = ('url',)
-    def to_native(self, obj):
-        return super(ProductLinkSerializer, self).to_native(obj).get('url')
+        fields = ('url', 'id')
 
 class ProductSerializer(OscarModelSerializer):
     stockrecords = serializers.HyperlinkedIdentityField(view_name='product-stockrecord-list')
