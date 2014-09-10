@@ -127,7 +127,7 @@ class LoginView(APIView):
             # refuse to login logged in users, to avoid attaching sessions to
             # multiple users at the same time.
             if request.user.is_authenticated():
-                return Response('Session is in use, log out first', status=status.HTTP_405_METHOD_NOT_ALLOWED)
+                return Response({'detail':'Session is in use, log out first'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
             request.user = user
         
