@@ -151,6 +151,7 @@ class LoginView(APIView):
         for anonymous users that means having their basket destroyed as well,
         because there is no way to reach it otherwise.
         """
+        request = request._request
         if request.user.is_anonymous():
             basket = Basket.get_anonymous_basket(request)
             if basket:
@@ -158,5 +159,6 @@ class LoginView(APIView):
 
         request.session.clear()
         request.session.delete()
+        request.session = None
 
         return Response()
