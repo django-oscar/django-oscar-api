@@ -14,6 +14,8 @@ User = get_user_model()
 
 
 class BasketSerializer(serializers.HyperlinkedModelSerializer):
+    lines = serializers.HyperlinkedIdentityField(view_name='basket-lines-list')
+
     class Meta:
         model = Basket
         fields = overridable('CC_BASKET_FIELDS', default=['id', 'owner', 'status', 'vouchers', 'lines'])
