@@ -95,16 +95,28 @@ class UserDetail(generics.RetrieveAPIView):
 
 class LoginView(APIView):
     """
+    Api for logging in users.
+    
+    DELETE:
+    Log the user out by destroying the session.
+    Anonymous users will have their cart destroyed as well, because there is
+    no way to reach it anymoore
+    
+    POST(username, password):
     1. The user will be authenticated. The next steps will only be
        performed is login is succesful. Logging in logged in users results in 405.
     2. The anonymous cart will be merged with the private cart associated with that
        authenticated user.
     3. A new session will be started, this session identifies the authenticated user
-       for the duration of the session, without further calls to gigya.
+       for the duration of the session, without further need for authentication.
     4. The new, merged cart will be associated with this session.
     5. The anonymous session will be terminated.
-    6. A response will be issued containing the new session id as a header (more on
-       this later).
+    6. A response will be issued containing the new session id as a header.
+    
+    GET (enabled in DEBUG mode only):
+    Get the details of the logged in user.
+    If more details are needed, use the ``CC_PRODUCT_FIELDS`` setting to change
+    the fields the ``UserSerializer`` will render.
     """
 
     def get(self, request, format=None):
