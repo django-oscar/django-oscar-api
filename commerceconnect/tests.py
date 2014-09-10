@@ -3,10 +3,15 @@ These tests should pass nomatter in which application the commerceconnect app
 is being used.
 """
 import json
-from oscar.core.loading import get_model
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from django.core.urlresolvers import reverse
+from django.test import TestCase
+from django.utils.importlib import import_module
+
+from oscar.core.loading import get_model
+
 
 User = get_user_model()
 Basket = get_model('basket', 'Basket')
@@ -47,7 +52,6 @@ class UserTest(TestCase):
         User.objects.get(username='admin').delete()
         User.objects.get(username='nobody').delete()
 
-
 class BasketTest(UserTest):
 
     def test_create_basket(self):
@@ -57,7 +61,7 @@ class BasketTest(UserTest):
 
         url = reverse('basket-list')
         data = {'owner': "http://localhost:8000%s" % reverse('user-detail', args=[1])}
-        response = self.client.post(url, json.dumps(data), content_type='application/json', session_id="dikke lul")
+        response = self.client.post(url, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 201, "It should be possible for a basket to be created, for a specific user.")
 
         data = {}
@@ -169,6 +173,69 @@ class LoginTest(UserTest):
         self.assertEqual(response.status_code, 405)
         self.assertEqual(self.client.session.session_key, first_key, 'Since login failed, the user should have the same session')
 
-    def test_logging_out(self):
+    def test_logging_out_with_header(self):
         "After logging out, a user can not use the session id to authenticate anymore"
-        
+        with self.settings(DEBUG=True):
+            url = reverse('api-login')
+            engine = import_module(settings.SESSION_ENGINE)
+            session = engine.SessionStore()
+
+            self.test_login_with_header()
+
+            session_id = self.client.session.session_key
+            self.assertTrue(session.exists(session_id))
+
+            response = self.client.delete(url, content_type='application/json', HTTP_SESSION_ID='SID:AUTH:testserver:kak')
+
+            self.assertFalse(session.exists(session_id))
+            self.assertNotIn('Session-Id', response)
+
+            response = self.client.get(url, content_type='application/json', HTTP_SESSION_ID='SID:AUTH:testserver:kak')
+            self.assertEqual(response.status_code, 401)
+
+    def test_logging_out_anonymous(self):
+        "After logging out, a user can not use the session id to authenticate anymore"
+        with self.settings(DEBUG=True, SESSION_SAVE_EVERY_REQUEST=True):
+            url = reverse('api-login')
+            engine = import_module(settings.SESSION_ENGINE)
+            session = engine.SessionStore()
+            
+            # get a session running
+            response = self.client.get(url, content_type='application/json', HTTP_SESSION_ID='SID:ANON:testserver:kak')
+            session_id = self.client.session.session_key
+
+            self.assertTrue(session.exists(session_id))
+            self.assertEqual(response.status_code, 204)
+            
+            # delete the session
+            response = self.client.delete(url, content_type='application/json', HTTP_SESSION_ID='SID:ANON:testserver:kak')
+
+            self.assertEqual(response.status_code, 200)
+            self.assertFalse(session.exists(session_id))
+            self.assertNotIn('Session-Id', response)
+
+    def test_logging_out_with_cookie(self):
+        "After logging out, a user can not use the session id to authenticate anymore"
+        self.test_login_without_header()
+        with self.settings(DEBUG=True):
+            url = reverse('api-login')
+            engine = import_module(settings.SESSION_ENGINE)
+            session = engine.SessionStore()
+
+            session_id = self.client.session.session_key
+            self.assertTrue(session.exists(session_id))
+
+            response = self.client.delete(url, content_type='application/json')
+            self.assertFalse(session.exists(session_id))
+
+            response = self.client.get(url, content_type='application/json')
+
+            self.assertEqual(response.status_code, 204)
+
+    def test_can_not_start_authenticated_sessions_unauthenticated(self):
+        "While anonymous session will just be started when not existing yet, authenticated ones can only be created by loggin in"
+        with self.settings(DEBUG=True, SESSION_SAVE_EVERY_REQUEST=True):
+            url = reverse('api-login')
+
+            response = self.client.get(url, content_type='application/json', HTTP_SESSION_ID='SID:AUTH:testserver:kak')
+            self.assertEqual(response.status_code, 401)
