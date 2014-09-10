@@ -19,7 +19,12 @@ User = auth.get_user_model()
 
 
 class BasketView(APIView):
-
+    """
+    Api for retrieving a user's basket.
+    
+    GET:
+    Retrieve your basket.
+    """
     def get(self, request, format=None):
         if request.user.is_authenticated():
             basket = Basket.get_user_basket(request.user)

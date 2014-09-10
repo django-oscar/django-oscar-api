@@ -32,7 +32,8 @@ class LoginView(APIView):
        for the duration of the session, without further need for authentication.
     4. The new, merged cart will be associated with this session.
     5. The anonymous session will be terminated.
-    6. A response will be issued containing the new session id as a header.
+    6. A response will be issued containing the new session id as a header (only
+       when the request contained the session header as well).
     
     GET (enabled in DEBUG mode only):
     Get the details of the logged in user.
