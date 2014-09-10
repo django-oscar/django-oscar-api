@@ -1,5 +1,5 @@
 from django.contrib import auth
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
 from rest_framework.response import Response
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
@@ -11,11 +11,10 @@ from commerceconnect import serializers
 __all__ = ('BasketView',)
 
 Basket = get_model('basket', 'Basket')
-Line = get_model('basket', 'Line')
-LineAttribute = get_model('basket', 'LineAttribute')
-Product = get_model('catalogue', 'Product')
-StockRecord = get_model('partner', 'StockRecord')
-User = auth.get_user_model()
+Applicator = get_class('offer.utils', 'Applicator')
+Selector = get_class('partner.strategy', 'Selector')
+
+selector = Selector()
 
 
 class BasketView(APIView):
@@ -34,6 +33,14 @@ class BasketView(APIView):
                 basket = Basket()
                 basket.save()
 
+        basket.strategy = selector.strategy(request=request, user=request.user)
+        self.apply_offers(request, basket)
+
         basket.store_basket(request)
+        
         ser = serializers.BasketSerializer(basket, context={'request': request})
         return Response(ser.data)
+
+    def apply_offers(self, request, basket):
+        if not basket.is_empty:
+            Applicator().apply(request, basket)

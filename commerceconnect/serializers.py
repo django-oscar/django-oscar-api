@@ -15,10 +15,11 @@ User = get_user_model()
 
 class BasketSerializer(serializers.HyperlinkedModelSerializer):
     lines = serializers.HyperlinkedIdentityField(view_name='basket-lines-list')
+    offer_applications = serializers.SerializerMethodField('get_offer_applications')
 
     class Meta:
         model = Basket
-        fields = overridable('CC_BASKET_FIELDS', default=['id', 'owner', 'status', 'vouchers', 'lines', 'url'])
+        fields = overridable('CC_BASKET_FIELDS', default=['id', 'owner', 'status', 'vouchers', 'lines', 'url', 'offer_applications'])
     
     def get_validation_exclusions(self, instance=None):
         """
@@ -28,6 +29,10 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
         """
         return super(BasketSerializer, self).get_validation_exclusions(instance) + ['owner']
 
+    def get_offer_applications(self, obj):
+        if hasattr(obj, 'offer_applications'):
+            return obj.offer_applications.offers
+        return {}
 
 class LineSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
