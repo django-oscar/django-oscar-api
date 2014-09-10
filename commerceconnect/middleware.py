@@ -2,11 +2,13 @@ import re
 
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.urlresolvers import reverse
+from django.http.response import HttpResponse
+from rest_framework import exceptions
 
-from commerceconnect.utils import get_domain, session_id_from_parsed_session_uri, start_or_resume
+from commerceconnect.utils import get_domain, session_id_from_parsed_session_uri, get_session
 
 
-HTTP_SESSION_ID_REGEX = re.compile(r'^SID:(?P<type>.*?):(?P<realm>.*?):(?P<session_id>.+?)(?:[-:][0-9a-fA-F]+)*$')
+HTTP_SESSION_ID_REGEX = re.compile(r'^SID:(?P<type>(?:ANON|AUTH)):(?P<realm>.*?):(?P<session_id>.+?)(?:[-:][0-9a-fA-F]+)*$')
 
 
 def parse_session_id(request):
@@ -17,6 +19,13 @@ def parse_session_id(request):
             return parsed_session_id.groupdict()
     
     return None
+
+
+def start_or_resume(session_id, session_type):
+    if session_type == 'ANON':
+        return get_session(session_id, raise_on_create=False)
+
+    return get_session(session_id, raise_on_create=True)
 
 
 class HeaderSessionMiddleware(SessionMiddleware):
@@ -31,18 +40,23 @@ class HeaderSessionMiddleware(SessionMiddleware):
         Parse the session id from the 'Session-Id: ' header when using the api.
         """
         if request.path.startswith(reverse('api-root')):
-            parsed_session_uri = parse_session_id(request)
-            if parsed_session_uri is not None:
-                assert(parsed_session_uri['realm'] == get_domain(request))
-                session_id = session_id_from_parsed_session_uri(parsed_session_uri)
-                request.session = start_or_resume(session_id)
-                request.parsed_session_uri = parsed_session_uri
+            try:
+                parsed_session_uri = parse_session_id(request)
+                if parsed_session_uri is not None:
+                    assert(parsed_session_uri['realm'] == get_domain(request))
+                    session_id = session_id_from_parsed_session_uri(parsed_session_uri)
+                    request.session = start_or_resume(session_id, session_type=parsed_session_uri['type'])
+                    request.parsed_session_uri = parsed_session_uri
 
-                # since the session id is assigned by the CLIENT, there is no
-                # point in having csrf_protection. Session id's read from
-                # cookies, still need csrf!
-                request.csrf_processing_done = True
-                return None
+                    # since the session id is assigned by the CLIENT, there is no
+                    # point in having csrf_protection. Session id's read from
+                    # cookies, still need csrf!
+                    request.csrf_processing_done = True
+                    return None
+            except exceptions.APIException as e:
+                response = HttpResponse('{"reason": "%s"}' % e.detail)
+                response.status_code = e.status_code
+                return response
 
         return super(HeaderSessionMiddleware, self).process_request(request)
 
@@ -51,7 +65,7 @@ class HeaderSessionMiddleware(SessionMiddleware):
         Add the 'Session-Id: ' header when using the api.
         """
         if request.path.startswith(reverse('api-root')) \
-            and hasattr(request, 'session') \
+            and getattr(request, 'session', None) is not None \
             and hasattr(request, 'parsed_session_uri'):
             assert(request.session.session_key == session_id_from_parsed_session_uri(request.parsed_session_uri))
             response['Session-Id'] = 'SID:%(type)s:%(realm)s:%(session_id)s' % request.parsed_session_uri
