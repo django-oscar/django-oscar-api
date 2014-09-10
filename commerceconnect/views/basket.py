@@ -6,7 +6,6 @@ from rest_framework.permissions import IsAdminUser
 from rest_framework.views import APIView
 
 from commerceconnect import serializers
-from commerceconnect import serializers
 
 
 __all__ = ('BasketView',)
@@ -20,11 +19,15 @@ User = auth.get_user_model()
 
 
 class BasketView(APIView):
+
     def get(self, request, format=None):
         if request.user.is_authenticated():
             basket = Basket.get_user_basket(request.user)
         else:
             basket = Basket.get_anonymous_basket(request)
+            if basket is None:
+                basket = Basket()
+                basket.save()
 
         basket.store_basket(request)
         ser = serializers.BasketSerializer(basket, context={'request': request})

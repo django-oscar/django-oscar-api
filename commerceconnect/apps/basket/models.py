@@ -9,11 +9,15 @@ from oscar.core.loading import is_model_registered
 class AbstractBasket(_AbstractBasket):
 
     @classmethod
+    def _get_basket_id(cls, request):
+        return request.session.get(settings.OSCAR_BASKET_COOKIE_OPEN)
+
+    @classmethod
     def get_anonymous_basket(cls, request):
         """
         Get basket from session.
         """
-        basket_id = request.session.get(settings.OSCAR_BASKET_COOKIE_OPEN)
+        basket_id = cls._get_basket_id(request)
         try:
             basket = cls.open.get(pk=basket_id)
         except cls.DoesNotExist:
@@ -40,6 +44,13 @@ class AbstractBasket(_AbstractBasket):
 
     def store_basket(self, request):
         request.session[settings.OSCAR_BASKET_COOKIE_OPEN] = self.pk
+        request.session.save()
+
+    def request_owner(self, request):
+        if request.user.is_authenticated():
+            return request.user == self.owner
+        
+        return self._get_basket_id(request) == self.pk
 
     class Meta:
         abstract = True

@@ -18,7 +18,7 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Basket
-        fields = overridable('CC_BASKET_FIELDS', default=['id', 'owner', 'status', 'vouchers', 'lines'])
+        fields = overridable('CC_BASKET_FIELDS', default=['id', 'owner', 'status', 'vouchers', 'lines', 'url'])
     
     def get_validation_exclusions(self, instance=None):
         """
