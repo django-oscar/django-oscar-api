@@ -1,12 +1,9 @@
-import hashlib
 import re
 
-from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.urlresolvers import reverse
-from django.utils.importlib import import_module
 
-from commerceconnect.utils import get_domain
+from commerceconnect.utils import get_domain, session_id_from_parsed_session_uri, start_or_resume
 
 
 HTTP_SESSION_ID_REGEX = re.compile(r'^SID:(?P<type>.*?):(?P<realm>.*?):(?P<session_id>.+?)(?:[-:][0-9a-fA-F]+)*$')
@@ -20,21 +17,6 @@ def parse_session_id(request):
             return parsed_session_id.groupdict()
     
     return None
-
-
-def session_id_from_parsed_session_uri(parsed_session_uri):
-    session_id_base = "SID:%(type)s:%(realm)s:%(session_id)s" % parsed_session_uri
-    return hashlib.sha1(session_id_base + settings.SECRET_KEY).hexdigest()
-
-
-def start_or_resume(session_id):
-    engine = import_module(settings.SESSION_ENGINE)
-    session = engine.SessionStore(session_id)
-
-    if not session.exists(session_id):
-        session.save(must_create=True)
-    
-    return session
 
 
 class HeaderSessionMiddleware(SessionMiddleware):
@@ -55,6 +37,11 @@ class HeaderSessionMiddleware(SessionMiddleware):
                 session_id = session_id_from_parsed_session_uri(parsed_session_uri)
                 request.session = start_or_resume(session_id)
                 request.parsed_session_uri = parsed_session_uri
+
+                # since the session id is assigned by the CLIENT, there is no
+                # point in having csrf_protection. Session id's read from
+                # cookies, still need csrf!
+                request.csrf_processing_done = True
                 return None
 
         return super(HeaderSessionMiddleware, self).process_request(request)

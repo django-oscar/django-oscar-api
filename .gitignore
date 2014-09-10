@@ -3,3 +3,5 @@ coverage.xml
 nosetests.xml
 oscar_commerceconnect.egg-info/
 dist/
+logs/
+public/

@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model, authenticate
-from oscar.core.loading import get_model
 from rest_framework import serializers
+from oscar.core.loading import get_model
 
-from commerceconnect.utils import *
+from commerceconnect.utils import OscarModelSerializer, overridable, OscarHyperlinkedModelSerializer
 
 
 Basket = get_model('basket', 'Basket')
@@ -57,6 +57,7 @@ class StockRecordSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
+        fields = overridable('CC_USER_FIELDS', ('username', 'id', 'date_joined',))
 
 
 class LoginSerializer(serializers.Serializer):

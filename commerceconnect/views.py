@@ -1,13 +1,16 @@
+from django.conf import settings
 from django.contrib import auth
 from oscar.core.loading import get_model
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from commerceconnect import serializers
+from commerceconnect.utils import login_and_upgrade_session
 
 
 Basket = get_model('basket', 'Basket')
@@ -91,23 +94,69 @@ class UserDetail(generics.RetrieveAPIView):
 
 
 class LoginView(APIView):
-    # no we don;t need to authenticate users that log in ok?
-    authentication_classes = ()
+    """
+    1. The user will be authenticated. The next steps will only be
+       performed is login is succesful. Logging in logged in users results in 405.
+    2. The anonymous cart will be merged with the private cart associated with that
+       authenticated user.
+    3. A new session will be started, this session identifies the authenticated user
+       for the duration of the session, without further calls to gigya.
+    4. The new, merged cart will be associated with this session.
+    5. The anonymous session will be terminated.
+    6. A response will be issued containing the new session id as a header (more on
+       this later).
+    """
+
+    def get(self, request, format=None):
+        if settings.DEBUG:
+            if request.user.is_authenticated():
+                ser = serializers.UserSerializer(request.user, many=False)
+                return Response(ser.data)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        raise MethodNotAllowed('GET')
 
     def post(self, request, format=None):
         ser = serializers.LoginSerializer(data=request.DATA)
         if ser.is_valid():
+
+            anonymous_basket = Basket.get_anonymous_basket(request)
+            
             user = ser.object
+
+            # refuse to login logged in users, to avoid attaching sessions to
+            # multiple users at the same time.
+            if request.user.is_authenticated():
+                return Response('Session is in use, log out first', status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
             request.user = user
-            # make sure that auth.login doesn't create a new session key
-            request.session[auth.SESSION_KEY] = user.pk
-            auth.login(request, ser.object)
-            request.session.save()
+        
+            login_and_upgrade_session(request._request, user)
+
+            # merge anonymous basket with authenticated basket.
+            basket = Basket.get_user_basket(user)
+            if anonymous_basket is not None:
+                basket.merge(anonymous_basket)
+                anonymous_basket.delete()
+            basket.store_basket(request)
+
             return Response()
 
         return Response(ser.errors, status=status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request, format=None):
+        """
+        Destroy the session.
+        
+        for anonymous users that means having their basket destroyed as well,
+        because there is no way to reach it otherwise.
+        """
+        if request.user.is_anonymous():
+            basket = Basket.get_anonymous_basket(request)
+            if basket:
+                basket.delete()
+
         request.session.clear()
         request.session.delete()
+
         return Response()
