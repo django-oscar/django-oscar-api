@@ -14,6 +14,7 @@ def overridable(name, default):
     """
     return getattr(settings, name, default)
 
+
 class OscarSerializer(object):
     field_mapping = dict(serializers.ModelSerializer.field_mapping, **{
         oscar.models.fields.NullCharField: serializers.CharField
@@ -33,7 +34,8 @@ class OscarModelSerializer(OscarSerializer, serializers.ModelSerializer):
     """
     Correctly map oscar fields to serializer fields.
     """
-    
+
+
 class OscarHyperlinkedModelSerializer(OscarSerializer, serializers.HyperlinkedModelSerializer):
     """
     Correctly map oscar fields to serializer fields.
@@ -43,6 +45,7 @@ class OscarHyperlinkedModelSerializer(OscarSerializer, serializers.HyperlinkedMo
 def get_domain(request):
     return request.get_host().split(':')[0]
     
+
 
 def login_and_upgrade_session(request, user):
     "Upgrade anonymous session to authenticated session"
@@ -87,5 +90,3 @@ def get_session(session_id, raise_on_create=False):
             session.save(must_create=True)
     
     return session
-
-

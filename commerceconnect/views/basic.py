@@ -8,7 +8,6 @@ from oscar.core.loading import get_model
 
 __all__ = (
     'BasketList', 'BasketDetail',
-    'LineList', 'LineDetail',
     'LineAttributeList', 'LineAttributeDetail',
     'ProductList', 'ProductDetail',
     'StockRecordList', 'StockRecordDetail',
@@ -16,7 +15,6 @@ __all__ = (
 )
 
 Basket = get_model('basket', 'Basket')
-Line = get_model('basket', 'Line')
 LineAttribute = get_model('basket', 'LineAttribute')
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
@@ -31,14 +29,6 @@ class BasketDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Basket.objects.all()
     serializer_class = serializers.BasketSerializer
     permission_classes = (permissions.IsAdminUserOrRequestOwner,)
-
-
-class LineList(generics.ListCreateAPIView):
-    queryset = Line.objects.all()
-    serializer_class = serializers.LineSerializer
-class LineDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Line.objects.all()
-    serializer_class = serializers.LineSerializer
 
 
 class LineAttributeList(generics.ListCreateAPIView):
