@@ -149,7 +149,165 @@ class BasketTest(APITest):
 
         self.assertEqual(Basket.open.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
-    def test_basket_permissions(self):
+    def test_basket_read_permissions(self):
         "A regular or anonymous user should not be able to fetch someone elses basket."
-        
+        # anonymous user can retrive a basket.
+        response = self.get('api-basket')
+        self.assertEqual(response.status_code, 200)
+
+        # try to access the urls in the response.
+        parsed_data = json.loads(response.content)
+        basket_url = parsed_data['url']
+        basket_lines = parsed_data['lines']
+
+        response = self.client.get(basket_url)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(basket_lines)
+        self.assertEqual(response.status_code, 200)
+
+        # create a basket for somebody else
+        b = Basket.open.create(owner_id=2)
+        self.assertEqual(str(b.owner), 'nobody')
+        self.assertEqual(b.pk, 2)
+
+        # try to acces somebody else's basket (hihi).
+        url = reverse('basket-detail', args=(2,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403, "Script kiddies should fail to collect other users carts.")
+        url = reverse('basket-lines-list', args=(2,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403, "Script kiddies should fail to collect other users cart items.")
+
+        # now try for authenticated user.
+        self.login('nobody', 'nobody')
+        response = self.get('api-basket')
+        self.assertEqual(response.status_code, 200)
+
+        # try to access the urls in the response.
+        parsed_data = json.loads(response.content)
+        basket_url = parsed_data['url']
+        basket_lines = parsed_data['lines']
+
+        response = self.client.get(basket_url)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(basket_lines)
+        self.assertEqual(response.status_code, 200)
+
+        # try to acces somebody else's basket (hihi).
+        url = reverse('basket-detail', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403, "Script kiddies should fail to collect other users carts.")
+        url = reverse('basket-lines-list', args=(1,))
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403, "Script kiddies should fail to collect other users cart items.")
+
+        # now let's show the power of the admin!
+        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+            self.login('admin', 'admin')
+            response = self.get('api-basket')
+            self.assertEqual(response.status_code, 200)
+
+            # try to access the urls in the response.
+            parsed_data = json.loads(response.content)
+            basket_url = parsed_data['url']
+            basket_lines = parsed_data['lines']
+
+            response = self.client.get(basket_url)
+            self.assertEqual(response.status_code, 200)
+
+            response = self.client.get(basket_lines)
+            self.assertEqual(response.status_code, 200)
+
+            # try to acces somebody else's basket (hihi).
+            url = reverse('basket-detail', args=(1,))
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200, "Staff users can access anything.")
+            url = reverse('basket-lines-list', args=(1,))
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200, "Staff users can access anything.")
+
+        self.assertEqual(Basket.open.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
+
+    def test_basket_read_permissions_header(self):
+        "A regular or anonymous user should not be able to fetch someone elses basket, even when authenticating with a session header."
+        # anonymous user can retrive a basket.
+        response = self.get('api-basket', session_id='anonymous')
+        self.assertEqual(response.status_code, 200)
+
+        # try to access the urls in the response.
+        parsed_data = json.loads(response.content)
+        basket_url = parsed_data['url']
+        basket_lines = parsed_data['lines']
+
+        response = self.client.get(basket_url, HTTP_SESSION_ID='SID:ANON:testserver:anonymous')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(basket_lines, HTTP_SESSION_ID='SID:ANON:testserver:anonymous')
+        self.assertEqual(response.status_code, 200)
+
+        # create a basket for somebody else
+        b = Basket.open.create(owner_id=2)
+        self.assertEqual(str(b.owner), 'nobody')
+        self.assertEqual(b.pk, 2)
+
+        # try to acces somebody else's basket (hihi).
+        url = reverse('basket-detail', args=(2,))
+        response = self.client.get(url, HTTP_SESSION_ID='SID:ANON:testserver:anonymous')
+        self.assertEqual(response.status_code, 403, "Script kiddies should fail to collect other users carts.")
+        url = reverse('basket-lines-list', args=(2,))
+        response = self.client.get(url, HTTP_SESSION_ID='SID:ANON:testserver:anonymous')
+        self.assertEqual(response.status_code, 403, "Script kiddies should fail to collect other users cart items.")
+
+        # now try for authenticated user.
+        self.hlogin('nobody', 'nobody', session_id='nobody')
+        response = self.get('api-basket', session_id='nobody', authenticated=True)
+        self.assertEqual(response.status_code, 200)
+
+        # try to access the urls in the response.
+        parsed_data = json.loads(response.content)
+        basket_url = parsed_data['url']
+        basket_lines = parsed_data['lines']
+
+        response = self.client.get(basket_url, HTTP_SESSION_ID='SID:AUTH:testserver:nobody')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(basket_lines, HTTP_SESSION_ID='SID:AUTH:testserver:nobody')
+        self.assertEqual(response.status_code, 200)
+
+        # try to acces somebody else's basket (hihi).
+        url = reverse('basket-detail', args=(1,))
+        response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:nobody')
+        self.assertEqual(response.status_code, 403, "Script kiddies should fail to collect other users carts.")
+        url = reverse('basket-lines-list', args=(1,))
+        response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:nobody')
+        self.assertEqual(response.status_code, 403, "Script kiddies should fail to collect other users cart items.")
+
+        # now let's show the power of the admin!
+        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+            self.hlogin('admin', 'admin', session_id='admin')
+            response = self.get('api-basket', session_id='admin', authenticated=True)
+            self.assertEqual(response.status_code, 200)
+
+            # try to access the urls in the response.
+            parsed_data = json.loads(response.content)
+            basket_url = parsed_data['url']
+            basket_lines = parsed_data['lines']
+
+            response = self.client.get(basket_url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
+            self.assertEqual(response.status_code, 200)
+
+            response = self.client.get(basket_lines, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
+            self.assertEqual(response.status_code, 200)
+
+            # try to acces somebody else's basket (hihi).
+            url = reverse('basket-detail', args=(1,))
+            response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
+            self.assertEqual(response.status_code, 200, "Staff users can access anything.")
+            url = reverse('basket-lines-list', args=(1,))
+            response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
+            self.assertEqual(response.status_code, 200, "Staff users can access anything.")
+
+        self.assertEqual(Basket.open.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
