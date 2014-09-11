@@ -30,7 +30,7 @@ class BasketView(APIView):
         else:
             basket = Basket.get_anonymous_basket(request)
             if basket is None:
-                basket = Basket()
+                basket = Basket.open.create()
                 basket.save()
 
         basket.strategy = selector.strategy(request=request, user=request.user)
