@@ -85,7 +85,7 @@ class LineList(generics.ListCreateAPIView):
             self._check_basket_permission(request, pk)
             self.queryset = self.queryset.filter(basket__id=pk)
         elif not request.user.is_staff:
-            raise exceptions.PermissionDenied()
+            self.permission_denied(request)
 
         return super(LineList, self).get(request, format)
 
@@ -102,7 +102,7 @@ class LineList(generics.ListCreateAPIView):
                     )
                 )
         elif not request.user.is_staff:
-            raise exceptions.PermissionDenied()
+            self.permission_denied(request)
 
         return super(LineList, self).post(request, format=format)
 

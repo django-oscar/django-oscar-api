@@ -54,16 +54,33 @@ class UserTest(TestCase):
 
 class BasketTest(UserTest):
 
-    def test_create_basket(self):
-        self.test_admin_user()
-        empty = Basket.objects.all()
-        self.assertFalse(empty.exists())
-
+    def test_basket_api_create(self):
         url = reverse('basket-list')
-        data = {'owner': "http://localhost:8000%s" % reverse('user-detail', args=[1])}
+        empty = Basket.objects.all()
+        self.assertFalse(empty.exists(), "There should be no baskets yet.")
+
+        # anonymous        
+        data = {}
+
+        response = self.client.post(url, json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 403, "Anonymous users can not use the basket api to create baskets.")
+
+        # authenticated
+        self.test_non_admin_user()
+        data = {'owner': "http://testserver%s" % reverse('user-detail', args=[2])}
+
+        response = self.client.post(url, json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 403, "Authenticated regular users can not use the basket api to create baskets.")
+
+        # admin
+        self.test_admin_user()
+
+        data = {'owner': "http://testserver%s" % reverse('user-detail', args=[1])}
         response = self.client.post(url, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 201, "It should be possible for a basket to be created, for a specific user.")
-
+        # {"id": 1, "owner": "http://testserver/commerceconnect/users/1/", "status": "Open", "vouchers": [], "lines": "http://testserver/commerceconnect/baskets/1/lines/", "url": "http://testserver/commerceconnect/baskets/1/", "offer_applications": {}}
+        data = json.loads(response.content)
+        self.assertEqual(data['owner'], "http://testserver/commerceconnect/users/1/")
         data = {}
         response = self.client.post(url, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 201, "It should be possible for a basket to be created for an anonymous user.")
