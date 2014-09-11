@@ -135,6 +135,7 @@ class BasketTest(APITest):
         self.assertEqual(Basket.objects.count(), 2, "2 baskets should after creating 2 baskets.")
 
     def test_basket_api_create_header(self):
+        "The basket api create command should work with header based login."
         empty = Basket.open.all()
         self.assertFalse(empty.exists(), "There should be no baskets yet.")
 
@@ -156,7 +157,88 @@ class BasketTest(APITest):
         self.assertEqual(Basket.open.count(), 3, "There should be 2 baskets from loging in and 1 is created with the api.")
             
     def test_retrieve_basket(self):
-        pass
+        "A user can fetch their own basket with the basket API and get's the same basket every time."
+        # anonymous
+        response = self.get('api-basket')
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['owner'], None)
+        basket_id = parsed_data['id']
+        response = self.get('api-basket')
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['id'], basket_id)
+        
+        # authenticated
+        self.login('nobody', 'nobody')
+        response = self.get('api-basket')
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['owner'], "http://testserver/commerceconnect/users/2/")
+        basket_id = parsed_data['id']
+        response = self.get('api-basket')
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['id'], basket_id)
+
+        # admin
+        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+            self.login('admin', 'admin')
+            response = self.get('api-basket')
+            self.assertEqual(response.status_code, 200)
+            parsed_data = json.loads(response.content)
+            self.assertEqual(parsed_data['owner'], "http://testserver/commerceconnect/users/1/")
+            basket_id = parsed_data['id']
+            response = self.get('api-basket')
+            self.assertEqual(response.status_code, 200)
+            parsed_data = json.loads(response.content)
+            self.assertEqual(parsed_data['id'], basket_id)
+
+        self.assertEqual(Basket.open.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
+
+    def test_retrieve_basket_header(self):
+        "Using header authentication the basket api should also work perfectly."
+        # anonymous
+        response = self.get('api-basket', session_id='anonymous')
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['owner'], None)
+        basket_id = parsed_data['id']
+        response = self.get('api-basket', session_id='anonymous')
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['id'], basket_id)
+        
+        # authenticated
+        self.hlogin('nobody', 'nobody', session_id='nobody')
+        response = self.get('api-basket', session_id='nobody', authenticated=True)
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['owner'], "http://testserver/commerceconnect/users/2/")
+        basket_id = parsed_data['id']
+        response = self.get('api-basket', session_id='nobody', authenticated=True)
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['id'], basket_id)
+
+        # admin
+        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+            self.hlogin('admin', 'admin', session_id='admin')
+            response = self.get('api-basket', session_id='admin', authenticated=True)
+            self.assertEqual(response.status_code, 200)
+            parsed_data = json.loads(response.content)
+            self.assertEqual(parsed_data['owner'], "http://testserver/commerceconnect/users/1/")
+            basket_id = parsed_data['id']
+            response = self.get('api-basket', session_id='admin', authenticated=True)
+            self.assertEqual(response.status_code, 200)
+            parsed_data = json.loads(response.content)
+            self.assertEqual(parsed_data['id'], basket_id)
+
+        self.assertEqual(Basket.open.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
+
+    def test_basket_permissions(self):
+        "A regular or anonymous user should not be able to fetch someone elses basket."
+        
 
 class LoginTest(APITest):
     def test_login_with_header(self):
