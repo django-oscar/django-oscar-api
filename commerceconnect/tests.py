@@ -3,7 +3,7 @@ These tests should pass nomatter in which application the commerceconnect app
 is being used.
 """
 import json
-
+import unittest
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
@@ -17,13 +17,7 @@ User = get_user_model()
 Basket = get_model('basket', 'Basket')
 
 
-class UserTest(TestCase):
-    """
-    Let's do it this way instead of fixtures, because it is pretty likely
-    that the User model has been changed by other people, which means the fixtures
-    might not fit.
-    """
-
+class APITest(TestCase):
     longMessage = True
 
     def setUp(self):
@@ -36,25 +30,77 @@ class UserTest(TestCase):
         user.is_superuser = False
         user.save()
 
-    def test_admin_user(self):
-        "Admin user can authenticate with django via the html frontend"
-        result = self.client.login(username='admin', password='admin')
-        self.assertTrue(result, "Admin should be able to log in")
-        self.assertEqual(self.client.session['_auth_user_id'], 1)
+    def login(self, username, password):
+        result =self.client.login(username=username, password=password)
+        self.assertTrue(result, "%s should be able to log in" % username)
+        return True
 
-    def test_non_admin_user(self):
-        "Regular user can authenticate with django via the html frontend"
-        result = self.client.login(username='nobody', password='nobody')
-        self.assertTrue(result, "Nobody should be able to log in")
-        self.assertEqual(self.client.session['_auth_user_id'], 2)
-        
+    def hlogin(self, username, password, session_id):
+        response = self.post('api-login', session_id, username=username, password=password)
+        self.assertEqual(response.status_code, 200, '%s should be able to login via the api' % username)
+        return True
+
+    def api_call(self, url_name, method, session_id=None, authenticated=False, **data):
+        url = reverse(url_name)
+        method = getattr(self.client, method.lower())
+        kwargs = {
+            'content_type': 'application/json',
+        }
+        if session_id is not None:
+            auth_type = 'AUTH' if authenticated else 'ANON'
+            kwargs['HTTP_SESSION_ID'] = 'SID:%s:testserver:%s' % (auth_type, session_id)
+
+        if data:
+            return method(url, json.dumps(data), **kwargs)
+        else:
+            return method(url, **kwargs)
+
+    def get(self, url_name, session_id=None, authenticated=False):
+        return self.api_call(url_name, 'GET', session_id=session_id, authenticated=authenticated)
+
+    def post(self, url_name, session_id=None, authenticated=False, **data):
+        return self.api_call(url_name, 'POST', session_id=session_id, authenticated=authenticated, **data)
+
+    def put(self, url_name, session_id=None, authenticated=False, **data):
+        return self.api_call(url_name, 'PUT', session_id=session_id, authenticated=authenticated, **data)
+
+    def delete(self, url_name, session_id=None, authenticated=False):
+        return self.api_call(url_name, 'DELETE', session_id=session_id, authenticated=authenticated)
+
     def tearDown(self):
         User.objects.get(username='admin').delete()
         User.objects.get(username='nobody').delete()
 
-class BasketTest(UserTest):
+
+class UserTest(APITest):
+    """
+    Check the users are properly created bys setUp.
+
+    Let's do it this way instead of fixtures, because it is pretty likely
+    that the User model has been changed by other people, which means the fixtures
+    might not fit.
+    """
+
+    def test_admin_user(self):
+        "Admin user can authenticate with django via the html frontend"
+        self.login('admin', 'admin')
+        self.assertEqual(self.client.session['_auth_user_id'], 1)
+
+    def test_non_admin_user(self):
+        "Regular user can authenticate with django via the html frontend"
+        self.login('nobody', 'nobody')
+        self.assertEqual(self.client.session['_auth_user_id'], 2)
+
+    def test_admin_header(self):
+        self.hlogin('admin', 'admin', 'admin')
+    
+    def test_non_admin_header(self):
+        self.hlogin('nobody', 'nobody', 'nobody')
+
+class BasketTest(APITest):
 
     def test_basket_api_create(self):
+        "The basket api create command should work with regular cookie based login"
         url = reverse('basket-list')
         empty = Basket.objects.all()
         self.assertFalse(empty.exists(), "There should be no baskets yet.")
@@ -66,45 +112,65 @@ class BasketTest(UserTest):
         self.assertEqual(response.status_code, 403, "Anonymous users can not use the basket api to create baskets.")
 
         # authenticated
-        self.test_non_admin_user()
+        self.login('nobody', 'nobody')
         data = {'owner': "http://testserver%s" % reverse('user-detail', args=[2])}
 
         response = self.client.post(url, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 403, "Authenticated regular users can not use the basket api to create baskets.")
 
         # admin
-        self.test_admin_user()
+        self.login('admin', 'admin')
 
         data = {'owner': "http://testserver%s" % reverse('user-detail', args=[1])}
         response = self.client.post(url, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 201, "It should be possible for a basket to be created, for a specific user.")
-        # {"id": 1, "owner": "http://testserver/commerceconnect/users/1/", "status": "Open", "vouchers": [], "lines": "http://testserver/commerceconnect/baskets/1/lines/", "url": "http://testserver/commerceconnect/baskets/1/", "offer_applications": {}}
+
         data = json.loads(response.content)
         self.assertEqual(data['owner'], "http://testserver/commerceconnect/users/1/")
+
         data = {}
         response = self.client.post(url, json.dumps(data), content_type='application/json')
         self.assertEqual(response.status_code, 201, "It should be possible for a basket to be created for an anonymous user.")
 
         self.assertEqual(Basket.objects.count(), 2, "2 baskets should after creating 2 baskets.")
 
+    def test_basket_api_create_header(self):
+        empty = Basket.open.all()
+        self.assertFalse(empty.exists(), "There should be no baskets yet.")
+
+        if self.hlogin('nobody', 'nobody', session_id='nobody'):
+            response = self.post('basket-list', session_id='nobody', authenticated=True,
+                owner="http://testserver%s" % reverse('user-detail', args=[2])
+            )
+            self.assertEqual(response.status_code, 403, "Authenticated regular users can not use the basket api to create baskets.")
+
+        if self.hlogin('admin', 'admin', session_id='admin'):
+            response = self.post('basket-list', session_id='admin', authenticated=True,
+                owner="http://testserver%s" % reverse('user-detail', args=[1])
+            )
+            self.assertEqual(response.status_code, 201, "It should be possible for a basket to be created, for a specific user.")
+
+            data = json.loads(response.content)
+            self.assertEqual(data['owner'], "http://testserver/commerceconnect/users/1/")
+
+        self.assertEqual(Basket.open.count(), 3, "There should be 2 baskets from loging in and 1 is created with the api.")
+            
     def test_retrieve_basket(self):
         pass
 
-class LoginTest(UserTest):
+class LoginTest(APITest):
     def test_login_with_header(self):
         "Logging in with an anonymous session id header should upgrade to an authenticated session id"
-        url = reverse('api-login')
-        data = {'username': 'nobody', 'password': 'nobody'}
-        response = self.client.post(url, json.dumps(data), content_type='application/json', HTTP_SESSION_ID='SID:ANON:testserver:kak')
+        response = self.post('api-login', username='nobody', password='nobody', session_id='koe')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.client.session['_auth_user_id'], 2)
         self.assertIn('Session-Id', response)
-        self.assertEqual(response.get('Session-Id'), 'SID:AUTH:testserver:kak', 'the session type should be upgraded to AUTH')
+        self.assertEqual(response.get('Session-Id'), 'SID:AUTH:testserver:koe', 'the session type should be upgraded to AUTH')
 
         # check authentication worked
         with self.settings(DEBUG=True, CC_USER_FIELDS=('username', 'id')):
-            response = self.client.get(url, content_type='application/json', HTTP_SESSION_ID=response.get('Session-Id'))
+            response = self.get('api-login', session_id='koe', authenticated=True)
             parsed_response = json.loads(response.content)
 
             self.assertEqual(parsed_response['username'], 'nobody')
@@ -113,43 +179,40 @@ class LoginTest(UserTest):
         # note that this shows that we can move a session from one user to the
         # other! This is the responsibility of the client application!
         with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False, DEBUG=True, CC_USER_FIELDS=('username', 'id')):
-            data = {'username': 'admin', 'password': 'admin'}
-            response = self.client.post(url, json.dumps(data), content_type='application/json', HTTP_SESSION_ID='SID:ANON:testserver:kak')
+            response = self.post('api-login', username='admin', password='admin', session_id='koe')
 
             self.assertEqual(response.status_code, 200)
             self.assertIn('Session-Id', response)
             self.assertEqual(self.client.session['_auth_user_id'], 1)
-            self.assertEqual(response.get('Session-Id'), 'SID:AUTH:testserver:kak', 'the session type should be upgraded to AUTH')
+            self.assertEqual(response.get('Session-Id'), 'SID:AUTH:testserver:koe', 'the session type should be upgraded to AUTH')
 
             # check authentication worked
-            response = self.client.get(url, content_type='application/json', HTTP_SESSION_ID=response.get('Session-Id'))
+            response = self.get('api-login', session_id='koe', authenticated=True)
             parsed_response = json.loads(response.content)
 
             self.assertEqual(response.status_code, 200)
             self.assertEqual(parsed_response['username'], 'admin')
             self.assertEqual(parsed_response['id'], 1)
-
+    
     def test_failed_login_with_header(self):
         "Failed login should not upgrade to an authenticated session"
-        url = reverse('api-login')
-        data = {'username': 'nobody', 'password': 'somebody'}
-        response = self.client.post(url, json.dumps(data), content_type='application/json', HTTP_SESSION_ID='SID:ANON:testserver:kak')
 
+        response = self.post('api-login', username='nobody', password='somebody', session_id='koe')
+        
         self.assertEqual(response.status_code, 401)
         self.assertIn('Session-Id', response)
-        self.assertEqual(response.get('Session-Id'), 'SID:ANON:testserver:kak', 'the session type should NOT be upgraded to AUTH')
+        self.assertEqual(response.get('Session-Id'), 'SID:ANON:testserver:koe', 'the session type should NOT be upgraded to AUTH')
 
         # check authentication didn't work
         with self.settings(DEBUG=True, CC_USER_FIELDS=('username', 'id')):
-            response = self.client.get(url, content_type='application/json')
+            response = self.get('api-login')
             self.assertFalse(response.content)
             self.assertEqual(response.status_code, 204)
 
     def test_login_without_header(self):
         "It should be possible to login using the normal cookie session"
-        url = reverse('api-login')
-        data = {'username': 'nobody', 'password': 'nobody'}
-        response = self.client.post(url, json.dumps(data), content_type='application/json')
+
+        response = self.post('api-login', username='nobody', password='nobody')
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.client.session['_auth_user_id'], 2)
@@ -157,7 +220,7 @@ class LoginTest(UserTest):
 
         # check authentication worked
         with self.settings(DEBUG=True, CC_USER_FIELDS=('username', 'id')):
-            response = self.client.get(url, content_type='application/json')
+            response = self.get('api-login')
             parsed_response = json.loads(response.content)
 
             self.assertEqual(parsed_response['username'], 'nobody')
@@ -166,15 +229,14 @@ class LoginTest(UserTest):
         # using cookie sessions it is not possible to pass 1 session to another 
         # user
         with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False, DEBUG=True, CC_USER_FIELDS=('username', 'id')):
-            data = {'username': 'admin', 'password': 'admin'}
-            response = self.client.post(url, json.dumps(data), content_type='application/json')
+            response = self.post('api-login', username='admin', password='admin')
 
             self.assertEqual(response.status_code, 405)
             self.assertEqual(self.client.session['_auth_user_id'], 2)
             self.assertNotIn('Session-Id', response)
 
             # check we are still authenticated as nobody
-            response = self.client.get(url, content_type='application/json')
+            response = self.get('api-login')
             parsed_response = json.loads(response.content)
 
             self.assertEqual(parsed_response['username'], 'nobody')
@@ -182,18 +244,15 @@ class LoginTest(UserTest):
 
     def test_logged_in_users_can_not_login_again_via_the_api(self):
         "It should not be possible to move a cookie session to a header session"
-        self.test_non_admin_user()
+        self.login(username='nobody', password='nobody')
         first_key = self.client.session.session_key
-        url = reverse('api-login')
-        data = {'username': 'nobody', 'password': 'nobody'}
-        response = self.client.post(url, json.dumps(data), content_type='application/json')
+        response = self.post('api-login', username='nobody', password='nobody')
         self.assertEqual(response.status_code, 405)
         self.assertEqual(self.client.session.session_key, first_key, 'Since login failed, the user should have the same session')
 
     def test_logging_out_with_header(self):
         "After logging out, a user can not use the session id to authenticate anymore"
         with self.settings(DEBUG=True):
-            url = reverse('api-login')
             engine = import_module(settings.SESSION_ENGINE)
             session = engine.SessionStore()
 
@@ -202,57 +261,53 @@ class LoginTest(UserTest):
             session_id = self.client.session.session_key
             self.assertTrue(session.exists(session_id))
 
-            response = self.client.delete(url, content_type='application/json', HTTP_SESSION_ID='SID:AUTH:testserver:kak')
+            response = self.delete('api-login', session_id='koe', authenticated=True)
 
             self.assertFalse(session.exists(session_id))
             self.assertNotIn('Session-Id', response)
 
-            response = self.client.get(url, content_type='application/json', HTTP_SESSION_ID='SID:AUTH:testserver:kak')
+            response = self.get('api-login', session_id='koe', authenticated=True)
             self.assertEqual(response.status_code, 401)
 
     def test_logging_out_anonymous(self):
-        "After logging out, a user can not use the session id to authenticate anymore"
+        "After logging out, an anonymous user can not use the session id to authenticate anymore"
         with self.settings(DEBUG=True, SESSION_SAVE_EVERY_REQUEST=True):
-            url = reverse('api-login')
             engine = import_module(settings.SESSION_ENGINE)
             session = engine.SessionStore()
             
             # get a session running
-            response = self.client.get(url, content_type='application/json', HTTP_SESSION_ID='SID:ANON:testserver:kak')
+            response = self.get('api-login', session_id='koe')
             session_id = self.client.session.session_key
 
             self.assertTrue(session.exists(session_id))
             self.assertEqual(response.status_code, 204)
             
             # delete the session
-            response = self.client.delete(url, content_type='application/json', HTTP_SESSION_ID='SID:ANON:testserver:kak')
+            response = self.delete('api-login', session_id='koe')
 
             self.assertEqual(response.status_code, 200)
             self.assertFalse(session.exists(session_id))
             self.assertNotIn('Session-Id', response)
 
     def test_logging_out_with_cookie(self):
-        "After logging out, a user can not use the session id to authenticate anymore"
+        "After logging out, a user can not use the cookie to authenticate anymore"
         self.test_login_without_header()
         with self.settings(DEBUG=True):
-            url = reverse('api-login')
             engine = import_module(settings.SESSION_ENGINE)
             session = engine.SessionStore()
 
             session_id = self.client.session.session_key
             self.assertTrue(session.exists(session_id))
-
-            response = self.client.delete(url, content_type='application/json')
+            
+            response = self.delete('api-login')
             self.assertFalse(session.exists(session_id))
-
-            response = self.client.get(url, content_type='application/json')
+            
+            response = self.get('api-login')
 
             self.assertEqual(response.status_code, 204)
 
     def test_can_not_start_authenticated_sessions_unauthenticated(self):
         "While anonymous session will just be started when not existing yet, authenticated ones can only be created by loggin in"
         with self.settings(DEBUG=True, SESSION_SAVE_EVERY_REQUEST=True):
-            url = reverse('api-login')
-
-            response = self.client.get(url, content_type='application/json', HTTP_SESSION_ID='SID:AUTH:testserver:kak')
+            response = self.get('api-login', session_id='koe', authenticated=True)
             self.assertEqual(response.status_code, 401)
