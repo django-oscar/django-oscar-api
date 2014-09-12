@@ -89,7 +89,7 @@ included when hashing. When upgrading a user from anonymous to authenticated, a
 new session id will be generated, by replacing ``ANON`` in the original session
 id with ``AUTH`` and performing the hashing again, example: 
 
-``SID:AUTH:www.nuticia.nl:82d7ac3f-135c-4b12-a296-ff3c4701307d``.
+``SID:AUTH:www.nutricia.nl:82d7ac3f-135c-4b12-a296-ff3c4701307d``.
 
 Every response of the REST will also contain the ``Session-Id`` header.
 When a user is logged in, The response will contain a DIFFERENT Session-Id as
