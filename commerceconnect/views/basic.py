@@ -73,10 +73,10 @@ class UserDetail(generics.RetrieveAPIView):
     permission_classes = (IsAdminUser,)
 
 
-class OptionList(generics.ListCreateAPIView):
+class OptionList(generics.ListAPIView):
     queryset = Option.objects.all()
     serializer_class = serializers.OptionSerializer
-class OptionDetail(generics.RetrieveUpdateDestroyAPIView):
+class OptionDetail(generics.RetrieveAPIView):
     queryset = Option.objects.all()
     serializer_class = serializers.OptionSerializer
 
