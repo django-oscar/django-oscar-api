@@ -52,6 +52,11 @@ class AbstractBasket(_AbstractBasket):
         
         return self._get_basket_id(request) == self.pk
 
+    def delete(self, using=None):
+        "Delete basket and all lines"
+        self.flush()
+        super(AbstractBasket, self).delete(using)
+
     class Meta:
         abstract = True
         app_label = 'basket'
