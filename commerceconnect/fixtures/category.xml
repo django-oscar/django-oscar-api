@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="catalogue.category">
+        <field type="CharField" name="path">0001</field>
+        <field type="PositiveIntegerField" name="depth">1</field>
+        <field type="PositiveIntegerField" name="numchild">0</field>
+        <field type="CharField" name="name">Clothing</field>
+        <field type="TextField" name="description"/>
+        <field type="FileField" name="image"/>
+        <field type="SlugField" name="slug">clothing</field>
+        <field type="CharField" name="full_name">Clothing</field>
+    </object>
+</django-objects>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="catalogue.attributeoption">
+        <field to="catalogue.attributeoptiongroup" name="group" rel="ManyToOneRel">1</field>
+        <field type="CharField" name="option">Small</field>
+    </object>
+</django-objects>

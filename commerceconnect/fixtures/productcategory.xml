@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="catalogue.productcategory">
+        <field to="catalogue.product" name="product" rel="ManyToOneRel">1</field>
+        <field to="catalogue.category" name="category" rel="ManyToOneRel">1</field>
+    </object>
+</django-objects>

@@ -1,7 +1,7 @@
 import json
 
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.test import TestCase
 
 
@@ -32,7 +32,11 @@ class APITest(TestCase):
         return True
 
     def api_call(self, url_name, method, session_id=None, authenticated=False, **data):
-        url = reverse(url_name)
+        try:
+            url = reverse(url_name)
+        except NoReverseMatch:
+            url = url_name
+
         method = getattr(self.client, method.lower())
         kwargs = {
             'content_type': 'application/json',
@@ -61,5 +65,3 @@ class APITest(TestCase):
     def tearDown(self):
         User.objects.get(username='admin').delete()
         User.objects.get(username='nobody').delete()
-
-

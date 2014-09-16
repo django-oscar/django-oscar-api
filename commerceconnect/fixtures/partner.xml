@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="partner.partner">
+        <field type="SlugField" name="code">book-partner</field>
+        <field type="CharField" name="name">Book partner</field>
+        <field to="auth.user" name="users" rel="ManyToManyRel"/>
+    </object>
+</django-objects>
