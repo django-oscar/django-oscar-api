@@ -10,6 +10,7 @@ Line = get_model('basket', 'Line')
 LineAttribute = get_model('basket', 'LineAttribute')
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
+Option = get_model('catalogue', 'Option')
 User = get_user_model()
 
 
@@ -34,14 +35,17 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
             return obj.offer_applications.offers
         return {}
 
-class LineSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Line
-
 
 class LineAttributeSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = LineAttribute
+
+
+class LineSerializer(serializers.HyperlinkedModelSerializer):
+    attributes = LineAttributeSerializer(many=True)
+
+    class Meta:
+        model = Line
 
 
 class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
@@ -55,6 +59,11 @@ class ProductSerializer(OscarModelSerializer):
 
     class Meta:
         model = Product
+
+
+class OptionSerializer(OscarModelSerializer):
+    class Meta:
+        model = Option
 
 
 class AddProductSerializer(serializers.Serializer):

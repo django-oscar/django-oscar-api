@@ -19,6 +19,7 @@ def api_root(request, format=None):
         'lines': reverse('line-list', request=request, format=format),
         'lineattributes': reverse('lineattribute-list', request=request, format=format),
         'products': reverse('product-list', request=request, format=format),
+        'options': reverse('option-list', request=request, format=format),
         'stockrecords': reverse('stockrecord-list', request=request, format=format),
         'users': reverse('user-list', request=request, format=format),
         

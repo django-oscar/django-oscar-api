@@ -11,13 +11,15 @@ __all__ = (
     'LineAttributeList', 'LineAttributeDetail',
     'ProductList', 'ProductDetail',
     'StockRecordList', 'StockRecordDetail',
-    'UserList', 'UserDetail'
+    'UserList', 'UserDetail',
+    'OptionList', 'OptionDetail'
 )
 
 Basket = get_model('basket', 'Basket')
 LineAttribute = get_model('basket', 'LineAttribute')
 Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
+Option = get_model('catalogue', 'Option')
 User = auth.get_user_model()
 
 
@@ -56,7 +58,6 @@ class StockRecordList(generics.ListAPIView):
             self.queryset = self.queryset.filter(product__id=pk)
 
         return super(StockRecordList, self).get(request, *args, **kwargs)
-
 class StockRecordDetail(generics.RetrieveAPIView):
     queryset = StockRecord.objects.all()
     serializer_class = serializers.StockRecordSerializer
@@ -70,3 +71,12 @@ class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
     permission_classes = (IsAdminUser,)
+
+
+class OptionList(generics.ListCreateAPIView):
+    queryset = Option.objects.all()
+    serializer_class = serializers.OptionSerializer
+class OptionDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Option.objects.all()
+    serializer_class = serializers.OptionSerializer
+
