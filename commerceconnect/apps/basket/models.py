@@ -3,6 +3,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
 from oscar.apps.basket.abstract_models import AbstractBasket as _AbstractBasket
+from oscar.apps.basket.models import Line, LineAttribute
 from oscar.core.loading import is_model_registered
 
 
