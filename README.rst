@@ -145,3 +145,20 @@ stored in a cookie for a web application.
 Also note that the identifier, which is in the Session Identification URI, not
 used as the session id directly, which means session id's gathered from cookies
 can not be used to authenticate with the header Session-Id.
+
+Usage
+=====
+
+To use the commerceconnect application in an oscar ecommerce site, follow these
+steps:
+
+1. Install the commerceconnect python egg someway.
+2. Add commerceconnect to INSTALLED_APPS.
+3. Use commerceconnect.apps.basket instead of oscar.apps.basket, eg::
+
+    INSTALLED_APPS = INSTALLED_APPS + get_core_apps(['commerceconnect.apps.basket'])
+
+If you need to extend ``oscar.apps.basket``, that is allright, but make sure you
+use ``commerceconnect.apps.basket.abstract_models.Basket`` as a base class to
+your extended model and not the oscar one. Commerceconnect needs some helper
+methods to be on the model.
