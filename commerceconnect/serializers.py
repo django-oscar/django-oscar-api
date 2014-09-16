@@ -37,12 +37,20 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class LineAttributeSerializer(serializers.HyperlinkedModelSerializer):
+    def __init__(self, *args, **kwargs):
+        fields = kwargs.pop('fields', None)
+        super(LineAttributeSerializer, self).__init__(*args, **kwargs)
+        if fields:
+            allowed = set(fields)
+            existing = set(self.fields.keys())
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
     class Meta:
         model = LineAttribute
 
 
 class LineSerializer(serializers.HyperlinkedModelSerializer):
-    attributes = LineAttributeSerializer(many=True)
+    attributes = LineAttributeSerializer(many=True, fields=('url', 'option', 'value'))
 
     class Meta:
         model = Line
@@ -62,6 +70,7 @@ class ProductSerializer(OscarModelSerializer):
 
 
 class OptionSerializer(OscarModelSerializer):
+
     class Meta:
         model = Option
 
