@@ -5,3 +5,4 @@ oscar_commerceconnect.egg-info/
 dist/
 logs/
 public/
+db.sqlite
