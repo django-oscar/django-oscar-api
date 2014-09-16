@@ -50,7 +50,7 @@ class LineAttributeSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class LineSerializer(serializers.HyperlinkedModelSerializer):
-    attributes = LineAttributeSerializer(many=True, fields=('url', 'option', 'value'))
+    attributes = LineAttributeSerializer(many=True, fields=('url', 'option', 'value'), required=False)
 
     class Meta:
         model = Line

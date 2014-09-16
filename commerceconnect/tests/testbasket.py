@@ -353,7 +353,7 @@ class BasketTest(APITest):
             "quantity": 3, 
             "price_currency": "EUR", 
             "price_excl_tax": "100.0", 
-            "price_incl_tax": "121.0"
+            "price_incl_tax": "121.0",
         }
         line_url = reverse('basket-lines-list', args=(basket_id,))
         response = self.post(line_url, **line_data)
