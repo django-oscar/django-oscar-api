@@ -366,11 +366,13 @@ class BasketTest(APITest):
         # now lets start messing around
         response = self.get('api-basket')
         self.assertEqual(response.status_code, 200)
+        basket_id = json.loads(response.content)['id']
 
         # create a basket for another user.
         b = Basket.open.create(owner_id=2)
         self.assertEqual(str(b.owner), 'nobody')
-        self.assertEqual(b.pk, 2)
+        self.assertEqual(Basket.objects.count(), 2)
+        nobody_basket_id = b.pk
         
         # try to access the urls in the response.
         parsed_data = json.loads(response.content)
@@ -379,17 +381,17 @@ class BasketTest(APITest):
         url = reverse('basket-detail', args=(basket_id,))
 
         self.assertEqual(parsed_data['status'], 'Open')
-        response = self.put(url, status='Frozen', id=2)
 
         # try to write to someone else's basket by sending the primary key
         # along.
+        response = self.put(url, status='Frozen', id=nobody_basket_id)
         self.assertEqual(response.status_code, 200)
         parsed_data = json.loads(response.content)
         self.assertEqual(parsed_data['id'], basket_id, 'Primary key value can not be changed.')
         self.assertEqual(parsed_data['status'], 'Frozen')
 
         # try to write to someone else's basket directly
-        url = reverse('basket-detail', args=(2,))
+        url = reverse('basket-detail', args=(nobody_basket_id,))
         response = self.put(url, status='Frozen')
         self.assertEqual(response.status_code, 403)
 
@@ -399,7 +401,7 @@ class BasketTest(APITest):
         
         # try adding lines to someone elses basket
         line_data = {
-            "basket": "http://testserver/commerceconnect/baskets/2/", 
+            "basket": "http://testserver/commerceconnect/baskets/%s/" % nobody_basket_id, 
             "line_reference": "234_345", 
             "product": "http://127.0.0.1:8000/commerceconnect/products/1/", 
             "stockrecord": "http://127.0.0.1:8000/commerceconnect/stockrecords/1/", 
