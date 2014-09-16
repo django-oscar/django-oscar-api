@@ -70,6 +70,12 @@ Session protocol
     are enforced as usual, so this is the preferred method of authentication
     for any untrusted applications.
 
+.. important::
+    When using the session protocol, the client application is 100% responsible
+    for making sure session id's uniquely identify users. A session CAN and
+    WILL be attached to another user if that user logs in with a session id
+    allready in use by someone else.
+
 When using the session protocol for authentication, the rest api will not make
 use of cookies, which are usually used for transferring the session id between
 the client and the backend. Instead we will use the ``Session-Id`` header as
