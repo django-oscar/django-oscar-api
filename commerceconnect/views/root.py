@@ -14,6 +14,7 @@ def api_root(request, format=None):
     return Response({
         'login': reverse('api-login', request=request, format=format),
         'basket': reverse('api-basket', request=request, format=format),
+        'add_product': reverse('api-basket-add-product', request=request, format=format),
         'baskets': reverse('basket-list', request=request, format=format),
         'lines': reverse('line-list', request=request, format=format),
         'lineattributes': reverse('lineattribute-list', request=request, format=format),

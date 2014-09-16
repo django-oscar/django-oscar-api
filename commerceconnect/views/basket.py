@@ -1,17 +1,17 @@
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
-
 from oscar.core.loading import get_model, get_class
-
-from rest_framework import generics, exceptions
+from rest_framework import status, generics, exceptions
+from rest_framework.decorators import api_view
 from rest_framework.relations import HyperlinkedRelatedField
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from commerceconnect import serializers, permissions
+from commerceconnect.views.utils import (apply_offers, get_basket)
 
 
-__all__ = ('BasketView', 'LineList', 'LineDetail')
+__all__ = ('BasketView', 'LineList', 'LineDetail', 'add_product')
 
 Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
@@ -29,25 +29,42 @@ class BasketView(APIView):
     Retrieve your basket.
     """
     def get(self, request, format=None):
-        if request.user.is_authenticated():
-            basket = Basket.get_user_basket(request.user)
-        else:
-            basket = Basket.get_anonymous_basket(request)
-            if basket is None:
-                basket = Basket.open.create()
-                basket.save()
-
-        basket.strategy = selector.strategy(request=request, user=request.user)
-        self.apply_offers(request, basket)
-
-        basket.store_basket(request)
-        
+        basket = get_basket(request)
         ser = serializers.BasketSerializer(basket, context={'request': request})
         return Response(ser.data)
 
-    def apply_offers(self, request, basket):
-        if not basket.is_empty:
-            Applicator().apply(request, basket)
+
+@api_view(('POST',))
+def add_product(request, format=None):
+    """
+    Add a certain quantity of a product to the basket.
+    
+    POST(url, quantity)
+    {
+        "url": "http://testserver/commerceconnect/products/209/",
+        "quantity": 6
+    }
+    
+    NOT IMPLEMENTED: LineAttributes, which are references to catalogue.Option.
+    To Implement make the serializer accept lists of option object, which look
+    like this:
+    {
+        option: "http://testserver/commerceconnect/options/1/,
+        value: "some value"
+    },
+    These should be passed to basket.add_product as a list of dictionaries.
+    """
+    p_ser = serializers.AddProductSerializer(data=request.DATA, context={'request': request})
+    if p_ser.is_valid():
+        basket = get_basket(request)
+        basket.add_product(p_ser.object, quantity=p_ser.init_data.get('quantity'))
+
+        apply_offers(request, basket)
+
+        ser = serializers.BasketSerializer(basket, context={'request': request})
+        return Response(ser.data)
+
+    return Response(p_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 class LineList(generics.ListCreateAPIView):
