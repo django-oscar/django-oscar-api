@@ -59,6 +59,13 @@ The following actions will be performed when a user logs in:
 Session protocol
 ----------------
 
+.. caution::
+    The session protocol should only be used when a *TRUSTED* application needs to
+    perform operations on behalf of a user. Never use the session protocol in any
+    application where the requests can be inspected by an attacker, such as a
+    mobile application. CSRF protection is NOT applied so requests CAN be forged
+    when using the session protocol.
+
 The rest api will not make use of cookies, which are usually used for
 transferring the session id between the client and the backend. Instead we
 will use the ``Session-Id`` header as specified in http://www.w3.org/TR/WD-session-id
