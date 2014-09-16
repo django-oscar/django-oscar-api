@@ -33,6 +33,11 @@ class HeaderSessionMiddleware(SessionMiddleware):
     Implement session through headers:
 
     http://www.w3.org/TR/WD-session-id
+    
+    TODO:
+    Implement gateway protection, with permission options for usage of
+    header sessions. With that in place the api can be used for both trusted
+    and non trusted clients, see README.rst.
     """
     
     def process_request(self, request):
