@@ -64,11 +64,16 @@ Session protocol
     perform operations on behalf of a user. Never use the session protocol in any
     application where the requests can be inspected by an attacker, such as a
     mobile application. CSRF protection is NOT applied so requests CAN be forged
-    when using the session protocol.
+    when using the session protocol. Regular cookie based sessions are still
+    fully functional and the entire REST api should work with this method of
+    authentication as well. When using cookie based session, csrf restrictions
+    are enforced as usual, so this is the preferred method of authentication
+    for any untrusted applications.
 
-The rest api will not make use of cookies, which are usually used for
-transferring the session id between the client and the backend. Instead we
-will use the ``Session-Id`` header as specified in http://www.w3.org/TR/WD-session-id
+When using the session protocol for authentication, the rest api will not make
+use of cookies, which are usually used for transferring the session id between
+the client and the backend. Instead we will use the ``Session-Id`` header as
+specified in http://www.w3.org/TR/WD-session-id
 
 The w3c Session Identification URI specification proposes a format for a session
 identifier as follows::
