@@ -348,8 +348,8 @@ class BasketTest(APITest):
         line_data = {
             "basket": basket_url, 
             "line_reference": "234_345", 
-            "product": "http://127.0.0.1:8000/commerceconnect/products/1/", 
-            "stockrecord": "http://127.0.0.1:8000/commerceconnect/stockrecords/1/", 
+            "product": "http://testserver/commerceconnect/products/1/", 
+            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/", 
             "quantity": 3, 
             "price_currency": "EUR", 
             "price_excl_tax": "100.0", 
@@ -403,8 +403,8 @@ class BasketTest(APITest):
         line_data = {
             "basket": "http://testserver/commerceconnect/baskets/%s/" % nobody_basket_id, 
             "line_reference": "234_345", 
-            "product": "http://127.0.0.1:8000/commerceconnect/products/1/", 
-            "stockrecord": "http://127.0.0.1:8000/commerceconnect/stockrecords/1/", 
+            "product": "http://testserver/commerceconnect/products/1/", 
+            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/", 
             "quantity": 3, 
             "price_currency": "EUR", 
             "price_excl_tax": "100.0", 
@@ -422,3 +422,9 @@ class BasketTest(APITest):
     def test_basket_write_permissions_header(self):
         "A regular or anonymous user should not be able to change another user's basket, when authinticating with session header."
         self.fail("Needs tests for anonymous, authenticated and admin user, same test as in test_basket_write_permissions, but different authentication.")
+
+    def test_add_product(self):
+        "Test if an anonymous user can add a product to his basket"
+        # URLField will not parse http://testserver/ as a valid url :p
+        response = self.post('api-basket-add-product', url="http://testserver.org/commerceconnect/products/1/", quantity=5)
+        self.assertEqual(response.status_code, 200)

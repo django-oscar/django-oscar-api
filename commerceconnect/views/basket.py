@@ -41,7 +41,7 @@ def add_product(request, format=None):
     
     POST(url, quantity)
     {
-        "url": "http://testserver/commerceconnect/products/209/",
+        "url": "http://testserver.org/commerceconnect/products/209/",
         "quantity": 6
     }
     
@@ -49,7 +49,7 @@ def add_product(request, format=None):
     To Implement make the serializer accept lists of option object, which look
     like this:
     {
-        option: "http://testserver/commerceconnect/options/1/,
+        option: "http://testserver.org/commerceconnect/options/1/,
         value: "some value"
     },
     These should be passed to basket.add_product as a list of dictionaries.
