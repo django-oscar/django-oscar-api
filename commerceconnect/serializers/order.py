@@ -62,7 +62,7 @@ class OrderSerializer(serializers.Serializer, OrderPlacementMixin):
             total=attrs.get('total'),
             shipping_method=attrs.get('shipping_method'),
             shipping_charge=attrs.get('shipping_charge'),
-            user=attrs.get('user'),
+            user=self.context.get('user'),
             shipping_adress=attrs.get('shipping_adress'),
             billing_address=attrs.get('billing_address'),
             order_number=order_number,
