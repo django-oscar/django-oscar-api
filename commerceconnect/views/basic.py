@@ -1,9 +1,9 @@
 from django.contrib import auth
+from oscar.core.loading import get_model
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
 
 from commerceconnect import serializers, permissions
-from oscar.core.loading import get_model
 
 
 __all__ = (
@@ -12,7 +12,9 @@ __all__ = (
     'ProductList', 'ProductDetail',
     'StockRecordList', 'StockRecordDetail',
     'UserList', 'UserDetail',
-    'OptionList', 'OptionDetail'
+    'OptionList', 'OptionDetail',
+    'CountryList', 'CountryDetail',
+    'ShippingMethodList', 'ShippingMethodDetail',
 )
 
 Basket = get_model('basket', 'Basket')
@@ -21,36 +23,52 @@ Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Option = get_model('catalogue', 'Option')
 User = auth.get_user_model()
+ShippingMethod = get_model('shipping', 'OrderAndItemCharges')
+Country = get_model('address', 'Country')
+
+class CountryList(generics.ListAPIView):
+    serializer_class = serializers.CountrySerializer
+    model = Country
+class CountryDetail(generics.RetrieveAPIView):
+    serializer_class = serializers.CountrySerializer
+    model = Country
+
+class ShippingMethodList(generics.ListAPIView):
+    serializer_class = serializers.ShippingMethodSerializer
+    model = ShippingMethod
+class ShippingMethodDetail(generics.RetrieveAPIView):
+    serializer_class = serializers.ShippingMethodSerializer
+    model = ShippingMethod
 
 
 class BasketList(generics.ListCreateAPIView):
-    queryset = Basket.objects.all()
+    model = Basket
     serializer_class = serializers.BasketSerializer
     permission_classes = (IsAdminUser,)
 class BasketDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Basket.objects.all()
+    model = Basket
     serializer_class = serializers.BasketSerializer
     permission_classes = (permissions.IsAdminUserOrRequestOwner,)
 
 
 class LineAttributeList(generics.ListCreateAPIView):
-    queryset = LineAttribute.objects.all()
+    model = LineAttribute
     serializer_class = serializers.LineAttributeSerializer
 class LineAttributeDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = LineAttribute.objects.all()
+    model = LineAttribute
     serializer_class = serializers.LineAttributeSerializer
 
 
 class ProductList(generics.ListAPIView):
-    queryset = Product.objects.all()
+    model = Product
     serializer_class = serializers.ProductLinkSerializer
 class ProductDetail(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
+    model = Product
     serializer_class = serializers.ProductSerializer
 
 
 class StockRecordList(generics.ListAPIView):
-    queryset = StockRecord.objects.all()
+    model = StockRecord
     serializer_class = serializers.StockRecordSerializer
 
     def get(self, request, pk=None, *args, **kwargs):
@@ -59,24 +77,24 @@ class StockRecordList(generics.ListAPIView):
 
         return super(StockRecordList, self).get(request, *args, **kwargs)
 class StockRecordDetail(generics.RetrieveAPIView):
-    queryset = StockRecord.objects.all()
+    model = StockRecord
     serializer_class = serializers.StockRecordSerializer
 
 
 class UserList(generics.ListAPIView):
-    queryset = User.objects.all()
+    model = User
     serializer_class = serializers.UserSerializer
     permission_classes = (IsAdminUser,)
 class UserDetail(generics.RetrieveAPIView):
-    queryset = User.objects.all()
+    model = User
     serializer_class = serializers.UserSerializer
     permission_classes = (IsAdminUser,)
 
 
 class OptionList(generics.ListAPIView):
-    queryset = Option.objects.all()
+    model = Option
     serializer_class = serializers.OptionSerializer
 class OptionDetail(generics.RetrieveAPIView):
-    queryset = Option.objects.all()
+    model = Option
     serializer_class = serializers.OptionSerializer
 

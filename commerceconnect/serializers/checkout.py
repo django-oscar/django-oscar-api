@@ -1,23 +1,27 @@
 from django.conf import settings
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 
-from commerceconnect.utils import OscarHyperlinkedModelSerializer
+from commerceconnect.utils import OscarHyperlinkedModelSerializer, OscarModelSerializer
+from commerceconnect.views.utils import prepare_basket
 
 
 OrderPlacementMixin = get_class('checkout.mixins', 'OrderPlacementMixin')
 ShippingAddress = get_model('order', 'ShippingAddress')
 BillingAddress = get_model('order', 'BillingAddress')
+Order = get_model('order', 'Order')
+Basket = get_model('basket', 'Basket')
+ShippingMethod = get_model('shipping', 'OrderAndItemCharges')
+Country = get_model('address', 'Country')
 
 class PriceSerializer(serializers.Serializer):
     currency = serializers.CharField(max_length=12, default=settings.OSCAR_DEFAULT_CURRENCY, required=False)
-    excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12, default=0, required=True)
-    incl_tax = serializers.DecimalField(decimal_places=2, max_digits=12, default=0, required=False)
-    tax = serializers.DecimalField(decimal_places=2, max_digits=12, default=0, required=False)
+    excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12, required=True)
+    incl_tax = serializers.DecimalField(decimal_places=2, max_digits=12, required=False)
+    tax = serializers.DecimalField(decimal_places=2, max_digits=12, required=False)
 
     def restore_object(self, attrs, instance=None):
-        print attrs
         if instance is not None:
             instance.currency = attrs.get('currency')
             instance.excl_tax = attrs.get('excl_tax')
@@ -32,23 +36,51 @@ class PriceSerializer(serializers.Serializer):
             )
 
         return instance
-        
+
+
+class CountrySerializer(OscarHyperlinkedModelSerializer):
+    class Meta:
+        model = Country
+
 
 class ShippingAddressSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = ShippingAddress
+class InlineShippingAddressSerializer(OscarModelSerializer):
+    country = serializers.HyperlinkedRelatedField(view_name='country-detail')
+    class Meta:
+        model = ShippingAddress
+
 
 class BillingAddressSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = BillingAddress
+class InlineBillingAddressSerializer(OscarModelSerializer):
+    country = serializers.HyperlinkedRelatedField(view_name='country-detail')
+    class Meta:
+        model = BillingAddress
 
 
-class OrderSerializer(serializers.Serializer, OrderPlacementMixin):
-    basket = serializers.HyperlinkedRelatedField(view_name='basket-detail', required=True)
+class ShippingMethodSerializer(OscarHyperlinkedModelSerializer):
+    class Meta:
+        model = ShippingMethod
+        view_name = 'shippingmethod-detail'
+
+
+class OrderSerializer(OscarModelSerializer):
+    shipping_address = InlineShippingAddressSerializer(many=False, required=False)
+    billing_address = InlineBillingAddressSerializer(many=False, required=False)
+
+    class Meta:
+        model = Order
+
+
+class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
+    basket = serializers.HyperlinkedRelatedField(view_name='basket-detail', queryset=Basket.open)
     total = PriceSerializer(many=False, required=True)
-    shipping_method = serializers.CharField(max_length=128, required=True)
+    shipping_method = serializers.HyperlinkedRelatedField(view_name='shippingmethod-detail', queryset=ShippingMethod.objects, required=True)
     shipping_charge = PriceSerializer(many=False, required=True)
-    shipping_adress = ShippingAddressSerializer(many=False, required=False)
+    shipping_address = ShippingAddressSerializer(many=False, required=False)
     billing_address = BillingAddressSerializer(many=False, required=False)
 
     def restore_object(self, attrs, instance=None):
@@ -57,13 +89,17 @@ class OrderSerializer(serializers.Serializer, OrderPlacementMixin):
 
         basket = attrs.get('basket')
         order_number = self.generate_order_number(basket)
-        return self.place_order(
-            basket=basket,
-            total=attrs.get('total'),
-            shipping_method=attrs.get('shipping_method'),
-            shipping_charge=attrs.get('shipping_charge'),
-            user=self.context.get('user'),
-            shipping_adress=attrs.get('shipping_adress'),
-            billing_address=attrs.get('billing_address'),
-            order_number=order_number,
-        )
+        try:
+            request = self.context['request']
+            return self.place_order(
+                order_number=order_number,
+                user=request.user,
+                basket=prepare_basket(basket, request),
+                shipping_address=attrs.get('shipping_address'),
+                shipping_method=attrs.get('shipping_method'),
+                shipping_charge=attrs.get('shipping_charge'),
+                billing_address=attrs.get('billing_address'),
+                order_total=attrs.get('total'),
+            )
+        except ValueError as e:
+            raise exceptions.NotAcceptable(e.message)

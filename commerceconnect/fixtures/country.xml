@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="NL" model="address.country">
+        <field type="CharField" name="iso_3166_1_a3">NLD</field>
+        <field type="CharField" name="iso_3166_1_numeric">528</field>
+        <field type="CharField" name="printable_name">Netherlands</field>
+        <field type="CharField" name="name">Kingdom of the Netherlands</field>
+        <field type="PositiveSmallIntegerField" name="display_order">0</field>
+        <field type="BooleanField" name="is_shipping_country">True</field>
+    </object>
+</django-objects>

@@ -23,6 +23,11 @@ urlpatterns = patterns('',
     url(r'^options/(?P<pk>[0-9]+)/$', views.OptionDetail.as_view(), name='option-detail'),
     url(r'^users/$', views.UserList.as_view(), name='user-list'),
     url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view(), name='user-detail'),
+    url(r'^checkout/$', views.CheckoutView.as_view(), name='api-checkout'),
+    url(r'^shippingmethods/$', views.ShippingMethodList.as_view(), name='shippingmethod-list'),
+    url(r'^shippingmethods/(?P<pk>[0-9]+)/$', views.ShippingMethodDetail.as_view(), name='shippingmethod-detail'),
+    url(r'^countries/$', views.CountryList.as_view(), name='country-list'),
+    url(r'^countries/(?P<pk>[A-z]+)/$', views.CountryDetail.as_view(), name='country-detail'),
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

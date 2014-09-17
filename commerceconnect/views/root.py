@@ -14,7 +14,10 @@ def PUBLIC_APIS(request, format):
         ('login', reverse('api-login', request=request, format=format)),
         ('basket', reverse('api-basket', request=request, format=format)),
         ('basket-add-product', reverse('api-basket-add-product', request=request, format=format)),
+        ('checkout', reverse('api-checkout', request=request, format=format)),
         ('products', reverse('product-list', request=request, format=format)),
+        ('shippingmethods', reverse('shippingmethod-list', request=request, format=format)),
+        ('countries', reverse('country-list', request=request, format=format)),
     ]
 
 def PROTECTED_APIS(request, format):

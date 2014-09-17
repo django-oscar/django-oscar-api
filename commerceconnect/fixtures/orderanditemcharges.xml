@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="shipping.orderanditemcharges">
+        <field type="SlugField" name="code">by-foot</field>
+        <field type="CharField" name="name">by foot</field>
+        <field type="TextField" name="description">Your items will be shipped by foot</field>
+        <field type="DecimalField" name="price_per_order">3</field>
+        <field type="DecimalField" name="price_per_item">1</field>
+        <field type="DecimalField" name="free_shipping_threshold">
+            <None/>
+        </field>
+        <field to="address.country" name="countries" rel="ManyToManyRel"/>
+    </object>
+</django-objects>
