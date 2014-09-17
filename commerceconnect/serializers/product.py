@@ -24,7 +24,7 @@ class AddProductSerializer(serializers.Serializer):
     Serializes and validates an add to basket request.
     """
     quantity = serializers.IntegerField(default=1, required=True)
-    url = serializers.URLField(required=True)
+    url = serializers.HyperlinkedRelatedField(view_name='product-detail', queryset=Product.objects, required=True)
 
     class Meta:
         model = Product
@@ -33,10 +33,5 @@ class AddProductSerializer(serializers.Serializer):
     def restore_object(self, attrs, instance=None):
         if instance is not None:
             return instance
-
-        product_url_parser = serializers.HyperlinkedRelatedField(
-            view_name='product-detail',
-            queryset=Product.objects,
-        )
-
-        return product_url_parser.from_native(attrs.get('url'))
+        
+        return attrs['url']

@@ -425,6 +425,5 @@ class BasketTest(APITest):
 
     def test_add_product(self):
         "Test if an anonymous user can add a product to his basket"
-        # URLField will not parse http://testserver/ as a valid url :p
-        response = self.post('api-basket-add-product', url="http://testserver.org/commerceconnect/products/1/", quantity=5)
+        response = self.post('api-basket-add-product', url="http://testserver/commerceconnect/products/1/", quantity=5)
         self.assertEqual(response.status_code, 200)
