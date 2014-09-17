@@ -75,6 +75,9 @@ class OrderSerializer(OscarModelSerializer):
         model = Order
 
 
+# TODO: At the moment, only regular shipping charges are possible.
+# Most likely CheckoutSerializer should also accept WeightBased shipping
+# charges.
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     basket = serializers.HyperlinkedRelatedField(view_name='basket-detail', queryset=Basket.open)
     total = PriceSerializer(many=False, required=True)
