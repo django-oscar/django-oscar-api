@@ -1,14 +1,12 @@
-from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
-from oscar.core.loading import get_model, get_class
 from rest_framework import status, generics, exceptions
 from rest_framework.decorators import api_view
-from rest_framework.relations import HyperlinkedRelatedField
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from commerceconnect import serializers, permissions
-from commerceconnect.views.utils import (apply_offers, get_basket)
+from commerceconnect import serializers
+from commerceconnect.views.utils import (apply_offers, get_basket, BasketPermissionMixin)
+from oscar.core.loading import get_model, get_class
 
 
 __all__ = ('BasketView', 'LineList', 'LineDetail', 'add_product')
@@ -67,7 +65,7 @@ def add_product(request, format=None):
     return Response(p_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
-class LineList(generics.ListCreateAPIView):
+class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
     """
     Api for adding lines to a basket.
     
@@ -94,12 +92,10 @@ class LineList(generics.ListCreateAPIView):
     """
     queryset = Line.objects.all()
     serializer_class = serializers.LineSerializer
-    # The permission class is mainly used to check Basket permission!
-    permission_classes = (permissions.IsAdminUserOrRequestOwner,)
 
     def get(self, request, pk=None, format=None):
         if pk is not None:
-            self._check_basket_permission(request, pk)
+            self.check_basket_permission(request, pk)
             self.queryset = self.queryset.filter(basket__id=pk)
         elif not request.user.is_staff:
             self.permission_denied(request)
@@ -107,11 +103,11 @@ class LineList(generics.ListCreateAPIView):
         return super(LineList, self).get(request, format)
 
     def post(self, request, pk=None, format=None):
-        data_basket = self._get_data_basket(request.DATA, format)
-        self._check_basket_permission(request, basket=data_basket)
+        data_basket = self.get_data_basket(request.DATA, format)
+        self.check_basket_permission(request, basket=data_basket)
 
         if pk is not None:
-            url_basket = self._check_basket_permission(request, basket_pk=pk)
+            url_basket = self.check_basket_permission(request, basket_pk=pk)
             if url_basket != data_basket:
                 raise exceptions.NotAcceptable(
                     _('Target basket inconsistent %s != %s') % (
@@ -122,29 +118,6 @@ class LineList(generics.ListCreateAPIView):
             self.permission_denied(request)
 
         return super(LineList, self).post(request, format=format)
-
-    def _get_data_basket(self, DATA, format):
-        "Parse basket from relation hyperlink"
-        basket_parser = HyperlinkedRelatedField(
-            view_name='basket-detail',
-            queryset=Basket.open,
-            format=format
-        )
-        try:
-            basket_uri = DATA.get('basket')
-            data_basket = basket_parser.from_native(basket_uri)
-        except ValidationError as e:
-            raise exceptions.NotAcceptable(e.messages)
-        else:
-            return data_basket
-
-    def _check_basket_permission(self, request, basket_pk=None, basket=None):
-        "Check if the user may access this basket"
-        if basket is None:
-            basket = generics.get_object_or_404(Basket.open, pk=basket_pk)
-        self.check_object_permissions(request, basket)
-        return basket
-        
 
 
 class LineDetail(generics.RetrieveUpdateDestroyAPIView):
