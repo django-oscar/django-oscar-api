@@ -6,7 +6,10 @@ from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 from rest_framework import serializers, exceptions
 
-from commerceconnect.utils import OscarHyperlinkedModelSerializer, OscarModelSerializer
+from commerceconnect.utils import (
+    OscarHyperlinkedModelSerializer,
+    OscarModelSerializer
+)
 from commerceconnect.views.utils import prepare_basket
 
 
@@ -19,10 +22,14 @@ ShippingMethod = get_model('shipping', 'OrderAndItemCharges')
 Country = get_model('address', 'Country')
 
 class PriceSerializer(serializers.Serializer):
-    currency = serializers.CharField(max_length=12, default=settings.OSCAR_DEFAULT_CURRENCY, required=False)
-    excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12, required=True)
-    incl_tax = serializers.DecimalField(decimal_places=2, max_digits=12, required=False)
-    tax = serializers.DecimalField(decimal_places=2, max_digits=12, required=False)
+    currency = serializers.CharField(
+        max_length=12, default=settings.OSCAR_DEFAULT_CURRENCY, required=False)
+    excl_tax = serializers.DecimalField(
+        decimal_places=2, max_digits=12, required=True)
+    incl_tax = serializers.DecimalField(
+        decimal_places=2, max_digits=12, required=False)
+    tax = serializers.DecimalField(
+        decimal_places=2, max_digits=12, required=False)
 
     def restore_object(self, attrs, instance=None):
         if instance is not None:
@@ -47,10 +54,12 @@ class CountrySerializer(OscarHyperlinkedModelSerializer):
 
 
 class ShippingAddressSerializer(OscarHyperlinkedModelSerializer):
+
     class Meta:
         model = ShippingAddress
 class InlineShippingAddressSerializer(OscarModelSerializer):
     country = serializers.HyperlinkedRelatedField(view_name='country-detail')
+
     class Meta:
         model = ShippingAddress
 
@@ -60,6 +69,7 @@ class BillingAddressSerializer(OscarHyperlinkedModelSerializer):
         model = BillingAddress
 class InlineBillingAddressSerializer(OscarModelSerializer):
     country = serializers.HyperlinkedRelatedField(view_name='country-detail')
+
     class Meta:
         model = BillingAddress
 
@@ -71,8 +81,10 @@ class ShippingMethodSerializer(OscarHyperlinkedModelSerializer):
 
 
 class OrderSerializer(OscarModelSerializer):
-    shipping_address = InlineShippingAddressSerializer(many=False, required=False)
-    billing_address = InlineBillingAddressSerializer(many=False, required=False)
+    shipping_address = InlineShippingAddressSerializer(
+        many=False, required=False)
+    billing_address = InlineBillingAddressSerializer(
+        many=False, required=False)
     payment_url = serializers.SerializerMethodField('get_payment_url')
 
     def get_payment_url(self, obj):
@@ -80,7 +92,8 @@ class OrderSerializer(OscarModelSerializer):
             return reverse('api-payment', args=(obj.pk,))
         except NoReverseMatch:
             msg = "You need to implement a view named 'api-payment' " \
-            "which redirects to the payment provider and sets up the callbacks." 
+                "which redirects to the payment provider and sets up the " \
+                "callbacks."
             warnings.warn(msg)
             return msg
 
@@ -92,9 +105,12 @@ class OrderSerializer(OscarModelSerializer):
 # Most likely CheckoutSerializer should also accept WeightBased shipping
 # charges.
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
-    basket = serializers.HyperlinkedRelatedField(view_name='basket-detail', queryset=Basket.open)
+    basket = serializers.HyperlinkedRelatedField(
+        view_name='basket-detail', queryset=Basket.open)
     total = PriceSerializer(many=False, required=True)
-    shipping_method = serializers.HyperlinkedRelatedField(view_name='shippingmethod-detail', queryset=ShippingMethod.objects, required=True)
+    shipping_method = serializers.HyperlinkedRelatedField(
+        view_name='shippingmethod-detail', queryset=ShippingMethod.objects,
+        required=True)
     shipping_charge = PriceSerializer(many=False, required=True)
     shipping_address = ShippingAddressSerializer(many=False, required=False)
     billing_address = BillingAddressSerializer(many=False, required=False)

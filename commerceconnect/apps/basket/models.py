@@ -6,4 +6,4 @@ if not is_model_registered('basket', 'Basket'):
     class Basket(AbstractBasket):
         pass
 
-from oscar.apps.basket.models import Line, LineAttribute #noqa
+from oscar.apps.basket.models import Line, LineAttribute  # noqa

@@ -5,7 +5,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from commerceconnect import serializers
-from commerceconnect.views.utils import (apply_offers, get_basket, BasketPermissionMixin)
+from commerceconnect.views.utils import (
+    apply_offers,
+    get_basket,
+    BasketPermissionMixin
+)
 from oscar.core.loading import get_model, get_class
 
 
@@ -22,13 +26,14 @@ selector = Selector()
 class BasketView(APIView):
     """
     Api for retrieving a user's basket.
-    
+
     GET:
     Retrieve your basket.
     """
     def get(self, request, format=None):
         basket = get_basket(request)
-        ser = serializers.BasketSerializer(basket, context={'request': request})
+        ser = serializers.BasketSerializer(basket,
+                                           context={'request': request})
         return Response(ser.data)
 
 
@@ -36,13 +41,13 @@ class BasketView(APIView):
 def add_product(request, format=None):
     """
     Add a certain quantity of a product to the basket.
-    
+
     POST(url, quantity)
     {
         "url": "http://testserver.org/commerceconnect/products/209/",
         "quantity": 6
     }
-    
+
     NOT IMPLEMENTED: LineAttributes, which are references to catalogue.Option.
     To Implement make the serializer accept lists of option object, which look
     like this:
@@ -52,14 +57,17 @@ def add_product(request, format=None):
     },
     These should be passed to basket.add_product as a list of dictionaries.
     """
-    p_ser = serializers.AddProductSerializer(data=request.DATA, context={'request': request})
+    p_ser = serializers.AddProductSerializer(data=request.DATA,
+                                             context={'request': request})
     if p_ser.is_valid():
         basket = get_basket(request)
-        basket.add_product(p_ser.object, quantity=p_ser.init_data.get('quantity'))
+        basket.add_product(p_ser.object,
+                           quantity=p_ser.init_data.get('quantity'))
 
         apply_offers(request, basket)
 
-        ser = serializers.BasketSerializer(basket, context={'request': request})
+        ser = serializers.BasketSerializer(basket,
+                                           context={'request': request})
         return Response(ser.data)
 
     return Response(p_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -68,25 +76,27 @@ def add_product(request, format=None):
 class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
     """
     Api for adding lines to a basket.
-    
+
     Permission will be checked,
     Regular users may only access their own basket,
     staff users may access any basket.
-    
+
     GET:
     A list of basket lines.
-    
-    POST(basket, line_reference, product, stockrecord, quantity, price_currency, price_excl_tax, price_incl_tax):
+
+    POST(basket, line_reference, product, stockrecord,
+         quantity, price_currency, price_excl_tax, price_incl_tax):
     Add a line to the basket, example::
 
         {
-            "basket": "http://127.0.0.1:8000/commerceconnect/baskets/100/", 
-            "line_reference": "234_345", 
-            "product": "http://127.0.0.1:8000/commerceconnect/products/209/", 
-            "stockrecord": "http://127.0.0.1:8000/commerceconnect/stockrecords/100/", 
-            "quantity": 3, 
-            "price_currency": "EUR", 
-            "price_excl_tax": "100.0", 
+            "basket": "http://127.0.0.1:8000/commerceconnect/baskets/100/",
+            "line_reference": "234_345",
+            "product": "http://127.0.0.1:8000/commerceconnect/products/209/",
+            "stockrecord":
+                "http://127.0.0.1:8000/commerceconnect/stockrecords/100/",
+            "quantity": 3,
+            "price_currency": "EUR",
+            "price_excl_tax": "100.0",
             "price_incl_tax": "121.0"
         }
     """

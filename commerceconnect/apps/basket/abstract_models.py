@@ -49,7 +49,7 @@ class AbstractBasket(_AbstractBasket):
     def request_owner(self, request):
         if request.user.is_authenticated():
             return request.user == self.owner
-        
+
         return self._get_basket_id(request) == self.pk
 
     def delete(self, using=None):

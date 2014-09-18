@@ -6,13 +6,15 @@ from rest_framework.relations import HyperlinkedRelatedField
 from commerceconnect import permissions
 
 
-__all__ = ('prepare_basket', 'get_basket', 'apply_offers', 'BasketPermissionMixin')
+__all__ = (
+    'prepare_basket', 'get_basket', 'apply_offers', 'BasketPermissionMixin')
 
 Basket = get_model('basket', 'Basket')
 Applicator = get_class('offer.utils', 'Applicator')
 Selector = get_class('partner.strategy', 'Selector')
 
 selector = Selector()
+
 
 def apply_offers(request, basket):
     "Apply offers and discounts to cart"
@@ -70,4 +72,3 @@ class BasketPermissionMixin(object):
             basket = generics.get_object_or_404(Basket.open, pk=basket_pk)
         self.check_object_permissions(request, basket)
         return basket
-

@@ -7,8 +7,9 @@ from commerceconnect.views.utils import BasketPermissionMixin
 class CheckoutView(BasketPermissionMixin, views.APIView):
     """
     Prepare an order for checkout.
-    
-    POST(basket, total, shipping_method, shipping_charge, shipping_address, billing_address):
+
+    POST(basket, total, shipping_method, shipping_charge,
+         shipping_address,billing_address):
     {
         "basket": "http://testserver/commerceconnect/baskets/1/",
         "total": {
@@ -21,7 +22,8 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
             "excl_tax": "10.0",
             "tax": "0.6"
         },
-        "shipping_method": "http://127.0.0.1:8000/commerceconnect/shippingmethods/1/",
+        "shipping_method":
+            "http://127.0.0.1:8000/commerceconnect/shippingmethods/1/",
         "shipping_address": {
             "country": "http://127.0.0.1:8000/commerceconnect/countries/NL/",
             "first_name": "Henk",
@@ -43,15 +45,17 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
         # TODO: Make it possible to create orders with options.
         # at the moment, no options are passed to this method, which means they
         # are also not created.
-        
+
         data_basket = self.get_data_basket(request.DATA, format)
-        basket = self.check_basket_permission(request, basket_pk=data_basket.pk)
+        basket = self.check_basket_permission(request,
+                                              basket_pk=data_basket.pk)
 
         # by now an error should have been raised if someone was messing
         # around with the basket, so asume invariant
         assert(data_basket == basket)
 
-        c_ser = CheckoutSerializer(data=request.DATA, context={'request': request})
+        c_ser = CheckoutSerializer(data=request.DATA,
+                                   context={'request': request})
         if c_ser.is_valid():
             order = c_ser.object
             basket.freeze()

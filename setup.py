@@ -39,7 +39,7 @@ setup(
         'djangorestframework'
     ],
     # mark test target to require extras.
-    extras_require = {
-        'test':  []
+    extras_require={
+        'test': []
     },
 )

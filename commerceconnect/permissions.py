@@ -1,11 +1,12 @@
 from rest_framework.permissions import BasePermission
 
+
 class IsAdminUserOrRequestOwner(BasePermission):
     """
     Permission that checks if this object belongg to this request.
-    
+
     A method called ``request_owner(request)`` will be called on the object::
-    
+
         obj.request_owner(request_owner)
     """
 

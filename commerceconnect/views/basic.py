@@ -26,12 +26,14 @@ User = auth.get_user_model()
 ShippingMethod = get_model('shipping', 'OrderAndItemCharges')
 Country = get_model('address', 'Country')
 
+
 class CountryList(generics.ListAPIView):
     serializer_class = serializers.CountrySerializer
     model = Country
 class CountryDetail(generics.RetrieveAPIView):
     serializer_class = serializers.CountrySerializer
     model = Country
+
 
 class ShippingMethodList(generics.ListAPIView):
     serializer_class = serializers.ShippingMethodSerializer
@@ -97,4 +99,3 @@ class OptionList(generics.ListAPIView):
 class OptionDetail(generics.RetrieveAPIView):
     model = Option
     serializer_class = serializers.OptionSerializer
-

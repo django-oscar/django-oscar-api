@@ -13,19 +13,23 @@ Option = get_model('catalogue', 'Option')
 
 class BasketSerializer(serializers.HyperlinkedModelSerializer):
     lines = serializers.HyperlinkedIdentityField(view_name='basket-lines-list')
-    offer_applications = serializers.SerializerMethodField('get_offer_applications')
+    offer_applications = serializers.SerializerMethodField(
+        'get_offer_applications')
 
     class Meta:
         model = Basket
-        fields = overridable('CC_BASKET_FIELDS', default=['id', 'owner', 'status', 'vouchers', 'lines', 'url', 'offer_applications'])
-    
+        fields = overridable('CC_BASKET_FIELDS', default=[
+            'id', 'owner', 'status', 'vouchers', 'lines',
+            'url', 'offer_applications'])
+
     def get_validation_exclusions(self, instance=None):
         """
         This is needed because oscar declared the owner field as ``null=True``,
         but ``blank=False``. That means the validator will claim you can not
         leave this value set to None.
         """
-        return super(BasketSerializer, self).get_validation_exclusions(instance) + ['owner']
+        return super(BasketSerializer, self).get_validation_exclusions(
+            instance) + ['owner']
 
     def get_offer_applications(self, obj):
         if hasattr(obj, 'offer_applications'):
@@ -42,12 +46,14 @@ class LineAttributeSerializer(serializers.HyperlinkedModelSerializer):
             existing = set(self.fields.keys())
             for field_name in existing - allowed:
                 self.fields.pop(field_name)
+
     class Meta:
         model = LineAttribute
 
 
 class LineSerializer(serializers.HyperlinkedModelSerializer):
-    attributes = LineAttributeSerializer(many=True, fields=('url', 'option', 'value'), required=False)
+    attributes = LineAttributeSerializer(
+        many=True, fields=('url', 'option', 'value'), required=False)
 
     class Meta:
         model = Line
@@ -60,7 +66,6 @@ class OptionSerializer(OscarModelSerializer):
 
 
 class StockRecordSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = StockRecord
-
-

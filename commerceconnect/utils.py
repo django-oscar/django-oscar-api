@@ -19,7 +19,7 @@ class OscarSerializer(object):
     field_mapping = dict(serializers.ModelSerializer.field_mapping, **{
         oscar.models.fields.NullCharField: serializers.CharField
     })
-    
+
     def to_native(self, obj):
         num_fields = len(self.get_fields())
         native = super(OscarSerializer, self).to_native(obj)
@@ -27,16 +27,17 @@ class OscarSerializer(object):
         if num_fields == 1:
             _, val = next(native.iteritems())
             return val
-        
+
         return native
-    
+
 class OscarModelSerializer(OscarSerializer, serializers.ModelSerializer):
     """
     Correctly map oscar fields to serializer fields.
     """
 
 
-class OscarHyperlinkedModelSerializer(OscarSerializer, serializers.HyperlinkedModelSerializer):
+class OscarHyperlinkedModelSerializer(
+        OscarSerializer, serializers.HyperlinkedModelSerializer):
     """
     Correctly map oscar fields to serializer fields.
     """
@@ -44,7 +45,6 @@ class OscarHyperlinkedModelSerializer(OscarSerializer, serializers.HyperlinkedMo
 
 def get_domain(request):
     return request.get_host().split(':')[0]
-    
 
 
 def login_and_upgrade_session(request, user):
@@ -68,8 +68,9 @@ def login_and_upgrade_session(request, user):
 
         # Mark the new session as owned by the user we are logging in.
         request.session[auth.SESSION_KEY] = user.pk
-        if hasattr(user, 'get_session_auth_hash'): # django 1.7
-            request.session[auth.HASH_SESSION_KEY] = user.get_session_auth_hash()
+        if hasattr(user, 'get_session_auth_hash'):  # django 1.7
+            request.session[auth.HASH_SESSION_KEY] = \
+                user.get_session_auth_hash()
 
     # now login so the session can be used for authentication purposes.
     auth.login(request, user)
@@ -77,7 +78,8 @@ def login_and_upgrade_session(request, user):
 
 
 def session_id_from_parsed_session_uri(parsed_session_uri):
-    session_id_base = "SID:%(type)s:%(realm)s:%(session_id)s" % parsed_session_uri
+    session_id_base = "SID:%(type)s:%(realm)s:%(session_id)s" % (
+        parsed_session_uri)
     return hashlib.sha1(session_id_base + settings.SECRET_KEY).hexdigest()
 
 
@@ -90,5 +92,5 @@ def get_session(session_id, raise_on_create=False):
             raise exceptions.NotAuthenticated()
         else:
             session.save(must_create=True)
-    
+
     return session

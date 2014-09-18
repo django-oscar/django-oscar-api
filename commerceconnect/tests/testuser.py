@@ -11,8 +11,8 @@ class UserTest(APITest):
     Check the users are properly created bys setUp.
 
     Let's do it this way instead of fixtures, because it is pretty likely
-    that the User model has been changed by other people, which means the fixtures
-    might not fit.
+    that the User model has been changed by other people, which means the
+    fixtures might not fit.
     """
 
     def test_admin_user(self):
@@ -27,6 +27,6 @@ class UserTest(APITest):
 
     def test_admin_header(self):
         self.hlogin('admin', 'admin', 'admin')
-    
+
     def test_non_admin_header(self):
         self.hlogin('nobody', 'nobody', 'nobody')
