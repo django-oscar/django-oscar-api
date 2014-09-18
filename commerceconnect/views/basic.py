@@ -27,6 +27,8 @@ ShippingMethod = get_model('shipping', 'OrderAndItemCharges')
 Country = get_model('address', 'Country')
 
 
+# TODO: For all API's in this file, the permissions should be checked if they
+# are sensible.
 class CountryList(generics.ListAPIView):
     serializer_class = serializers.CountrySerializer
     model = Country
