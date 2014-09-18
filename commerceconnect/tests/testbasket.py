@@ -427,3 +427,8 @@ class BasketTest(APITest):
         "Test if an anonymous user can add a product to his basket"
         response = self.post('api-basket-add-product', url="http://testserver/commerceconnect/products/1/", quantity=5)
         self.assertEqual(response.status_code, 200)
+    
+    @unittest.skip
+    def test_basket_line_permissions(self):
+        "Prove that the sensitive information associated with basket lines, can not be viewed by another user in any way (except admins)"
+        self.fail('not implemented')

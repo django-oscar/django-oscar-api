@@ -1,10 +1,13 @@
-from commerceconnect.tests.utils import APITest
 import json
-"""
-{
-    "
-}
-"""
+import unittest
+
+from oscar.core.loading import get_model
+from commerceconnect.tests.utils import APITest
+
+
+Basket = get_model('basket', 'Basket')
+
+
 class CheckOutTest(APITest):
     fixtures = [
         'product', 'productcategory', 'productattribute', 'productclass',
@@ -13,12 +16,14 @@ class CheckOutTest(APITest):
     ]
     
     def test_checkout(self):
-        "Let's see if it does anything"
+        "Test if an order can be placed as an authenticated user with session based auth."
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
-        basket_url = json.loads(response.content).get('url')
-        
+        basket = json.loads(response.content)
+        basket_url = basket.get('url')
+        basket_id = basket.get('id')
+
         request = {
             'basket': basket_url,
             'total': {
@@ -54,4 +59,24 @@ class CheckOutTest(APITest):
         response = self.post('api-checkout', **request)
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
 
+    @unittest.skip
+    def test_checkout_header(self):
+        "Prove that nobody can checkout his cart when authenticating with header session"
+        self.fail('Please add implementation')
+
+    @unittest.skip
+    def test_anonymous_checkout(self):
+        "Can anonymous users check out a cart? If so prove it with a test"
+        self.fail('Please add implementation')
+
+    @unittest.skip
+    def test_checkout_permissions(self):
+        "Prove that someone can not check out someone elses cart by mistake"
+        self.fail('Please add implementation')
+    
+    @unittest.skip
+    def test_cart_immutable_after_checkout(self):
+        "Prove that the cart can not be changed with the webservice by users in any way after checkout has been made."
+        self.fail("It might be that admin users can actually still modify a checked out cart (frozen)")

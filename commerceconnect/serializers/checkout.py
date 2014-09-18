@@ -1,4 +1,7 @@
+import warnings
+
 from django.conf import settings
+from django.core.urlresolvers import reverse, NoReverseMatch
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 from rest_framework import serializers, exceptions
@@ -70,6 +73,16 @@ class ShippingMethodSerializer(OscarHyperlinkedModelSerializer):
 class OrderSerializer(OscarModelSerializer):
     shipping_address = InlineShippingAddressSerializer(many=False, required=False)
     billing_address = InlineBillingAddressSerializer(many=False, required=False)
+    payment_url = serializers.SerializerMethodField('get_payment_url')
+
+    def get_payment_url(self, obj):
+        try:
+            return reverse('api-payment', args=(obj.pk,))
+        except NoReverseMatch:
+            msg = "You need to implement a view named 'api-payment' " \
+            "which redirects to the payment provider and sets up the callbacks." 
+            warnings.warn(msg)
+            return msg
 
     class Meta:
         model = Order

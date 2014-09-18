@@ -6,7 +6,6 @@ from rest_framework import generics
 from commerceconnect.views.utils import BasketPermissionMixin, get_basket
 from commerceconnect.serializers import OrderSerializer, CheckoutSerializer, ShippingMethodSerializer
 
-
 class CheckoutView(BasketPermissionMixin, views.APIView):
     """
     Prepare an order for checkout.
@@ -43,6 +42,10 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
     returns the order object.
     """
     def post(self, request, format=None):
+        # TODO: Make it possible to create orders with options.
+        # at the moment, no options are passed to this method, which means they
+        # are also not created.
+        
         data_basket = self.get_data_basket(request.DATA, format)
         basket = self.check_basket_permission(request, basket_pk=data_basket.pk)
 
@@ -53,6 +56,7 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
         c_ser = CheckoutSerializer(data=request.DATA, context={'request': request})
         if c_ser.is_valid():
             order = c_ser.object
+            basket.freeze()
             o_ser = OrderSerializer(order, context={'request': request})
             return response.Response(o_ser.data)
 
