@@ -1,10 +1,8 @@
-from oscar.core.loading import get_model
-from rest_framework import status
-from rest_framework import views
-from rest_framework import response
-from rest_framework import generics
-from commerceconnect.views.utils import BasketPermissionMixin, get_basket
-from commerceconnect.serializers import OrderSerializer, CheckoutSerializer, ShippingMethodSerializer
+from rest_framework import status, views, response
+
+from commerceconnect.serializers import OrderSerializer, CheckoutSerializer
+from commerceconnect.views.utils import BasketPermissionMixin
+
 
 class CheckoutView(BasketPermissionMixin, views.APIView):
     """

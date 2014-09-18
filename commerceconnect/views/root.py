@@ -1,10 +1,8 @@
 import collections
-from django.contrib import auth
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-
-from oscar.core.loading import get_model
 
 
 __all__ = ('api_root',)

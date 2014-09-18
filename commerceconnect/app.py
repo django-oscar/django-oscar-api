@@ -1,8 +1,7 @@
-from oscar.core.loading import feature_hidden
+from oscar.core.application import Application
 from oscar.views.decorators import permissions_required
 
 from commerceconnect.urls import urlpatterns
-from oscar.core.application import Application
 
 
 class CommerceConnectApplication(Application):
