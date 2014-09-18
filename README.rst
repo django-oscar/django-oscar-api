@@ -158,7 +158,31 @@ steps:
 
     INSTALLED_APPS = INSTALLED_APPS + get_core_apps(['commerceconnect.apps.basket'])
 
+4. Add the application's urls to your urlconf::
+    
+    from commerceconnect.app import application as api
+    urlpatterns = patterns('',
+        ... all the things you allready got
+        url(r'^commerceconnect/', include(aoi.urls)),
+    )
+
 If you need to extend ``oscar.apps.basket``, that is allright, but make sure you
 use ``commerceconnect.apps.basket.abstract_models.Basket`` as a base class to
 your extended model and not the oscar one. Commerceconnect needs some helper
 methods to be on the model.
+
+Extending and overriding
+------------------------
+
+When needed, the functionality of the rest api can be overridden.
+The entry point for customization is ``commerceconnect.app:Application``.
+In your own app, you can extend this class, and override some of the urls to
+direct them to your own views. You can subclass any of the views in commerceconnect,
+or just write your own from scratch.
+
+So to modify some of the functionality in commerceconnect, do the following:
+
+1. Create a new django app with ``manage.py startapp``
+2. Create a file named app.py and in there extend commerceconnect.app:Application.
+3. Direct some of the urls to your own (subclassed) views.
+4. Include your own app in INSTALLED_APPS and urls.py instead of commerceconnect.
