@@ -63,7 +63,7 @@ class CheckOutTest(APITest):
 
     @unittest.skip
     def test_checkout_header(self):
-        "Prove that nobody can checkout his cart when authenticating with header session"
+        "Prove that the user 'nobody' can checkout his cart when authenticating with header session"
         self.fail('Please add implementation')
 
     @unittest.skip
