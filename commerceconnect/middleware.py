@@ -3,6 +3,7 @@ import re
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponse
+from django.utils.translation import ugettext as _
 from rest_framework import exceptions
 
 from commerceconnect.utils import get_domain, session_id_from_parsed_session_uri, get_session
@@ -48,7 +49,14 @@ class HeaderSessionMiddleware(SessionMiddleware):
             try:
                 parsed_session_uri = parse_session_id(request)
                 if parsed_session_uri is not None:
-                    assert(parsed_session_uri['realm'] == get_domain(request))
+                    domain = get_domain(request)
+                    if parsed_session_uri['realm'] != domain:
+                        raise exceptions.NotAcceptable(
+                            _('Can not accept cookie with realm %s on realm %s') % (
+                                parsed_session_uri['realm'],
+                                domain
+                            )
+                        )
                     session_id = session_id_from_parsed_session_uri(parsed_session_uri)
                     request.session = start_or_resume(session_id, session_type=parsed_session_uri['type'])
                     request.parsed_session_uri = parsed_session_uri
