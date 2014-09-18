@@ -80,3 +80,8 @@ class CheckOutTest(APITest):
     def test_cart_immutable_after_checkout(self):
         "Prove that the cart can not be changed with the webservice by users in any way after checkout has been made."
         self.fail("It might be that admin users can actually still modify a checked out cart (frozen)")
+
+    @unittest.skip
+    def test_client_can_not_falsify_picing(self):
+        "Prove that the total and shippingcharge variable sent along with a checkout request, can not be manipulated"
+        self.fail('checkout variable can not be used to buy products for prices they are not available at.')
