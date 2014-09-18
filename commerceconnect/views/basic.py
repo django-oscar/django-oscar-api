@@ -77,7 +77,7 @@ class StockRecordList(generics.ListAPIView):
 
     def get(self, request, pk=None, *args, **kwargs):
         if pk is not None:
-            self.queryset = self.queryset.filter(product__id=pk)
+            self.queryset = self.get_queryset().filter(product__id=pk)
 
         return super(StockRecordList, self).get(request, *args, **kwargs)
 class StockRecordDetail(generics.RetrieveAPIView):
