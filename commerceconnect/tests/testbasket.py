@@ -329,7 +329,7 @@ class BasketTest(APITest):
         basket_url = parsed_data['url']
         self.assertEqual(parsed_data['status'], 'Open')
 
-        # change status to frozen
+        # change status to saved
         url = reverse('basket-detail', args=(basket_id,))
         response = self.put(url, status='Saved')
 
@@ -385,15 +385,15 @@ class BasketTest(APITest):
 
         # try to write to someone else's basket by sending the primary key
         # along.
-        response = self.put(url, status='Frozen', id=nobody_basket_id)
+        response = self.put(url, status='Saved', id=nobody_basket_id)
         self.assertEqual(response.status_code, 200)
         parsed_data = json.loads(response.content)
         self.assertEqual(parsed_data['id'], basket_id, 'Primary key value can not be changed.')
-        self.assertEqual(parsed_data['status'], 'Frozen')
+        self.assertEqual(parsed_data['status'], 'Saved')
 
         # try to write to someone else's basket directly
         url = reverse('basket-detail', args=(nobody_basket_id,))
-        response = self.put(url, status='Frozen')
+        response = self.put(url, status='Saved')
         self.assertEqual(response.status_code, 403)
 
         # try to delete someone else's basket
@@ -431,7 +431,7 @@ class BasketTest(APITest):
         self.assertIn(reverse('user-detail', args=(2,)), owner_url)
         self.assertEqual(parsed_data['status'], 'Open')
 
-        # change status to frozen
+        # change status to saved
         url = reverse('basket-detail', args=(basket_id,))
         response = self.put(url, status='Saved', session_id='nobody', authenticated=True)
 
@@ -487,19 +487,19 @@ class BasketTest(APITest):
 
         # try to write to someone else's basket by sending the primary key
         # along.
-        response = self.put(url, status='Frozen', id=somebody_basket_id)
+        response = self.put(url, status='Saved', session_id='nobody', authenticated=True, id=somebody_basket_id)
         self.assertEqual(response.status_code, 200)
         parsed_data = json.loads(response.content)
         self.assertEqual(parsed_data['id'], basket_id, 'Primary key value can not be changed.')
-        self.assertEqual(parsed_data['status'], 'Frozen')
+        self.assertEqual(parsed_data['status'], 'Saved')
 
         # try to write to someone else's basket directly
         url = reverse('basket-detail', args=(somebody_basket_id,))
-        response = self.put(url, status='Frozen')
+        response = self.put(url, status='Saved', session_id='nobody', authenticated=True)
         self.assertEqual(response.status_code, 403)
 
         # try to delete someone else's basket
-        response = self.delete(url)
+        response = self.delete(url, session_id='nobody', authenticated=True)
         self.assertEqual(response.status_code, 403)
 
         # try adding lines to someone elses basket
@@ -514,12 +514,110 @@ class BasketTest(APITest):
             "price_incl_tax": "121.0"
         }
         url = reverse('basket-lines-list', args=(basket_id,))
-        response = self.post(url, **line_data)
+        response = self.post(url, session_id='nobody', authenticated=True, **line_data)
         self.assertEqual(response.status_code, 403)
-        
-        ######################################################################
-        # NEEDS TEST FOR ADMIN USER!!!                                       #
-        ######################################################################
+
+    def test_basket_write_permissions_admin(self):
+        "An admin user can change someone elses basket."
+
+        # now try for authenticated user.
+        self.hlogin('admin', 'admin', session_id='admin')
+        response = self.get('api-basket', session_id='admin', authenticated=True)
+        self.assertEqual(response.status_code, 200)
+
+        # try to access the urls in the response.
+        parsed_data = json.loads(response.content)
+        basket_id = parsed_data['id']
+        basket_url = parsed_data['url']
+        owner_url = parsed_data['owner']
+        self.assertIn(reverse('user-detail', args=(1,)), owner_url)
+        self.assertEqual(parsed_data['status'], 'Open')
+
+        # change status to saved
+        url = reverse('basket-detail', args=(basket_id,))
+        response = self.put(url, status='Saved', session_id='admin', authenticated=True)
+
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['id'], basket_id)
+        self.assertEqual(parsed_data['status'], 'Saved')
+
+        # and back to open again
+        response = self.put(url, status='Open', session_id='admin', authenticated=True)
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['id'], basket_id)
+        self.assertEqual(parsed_data['status'], 'Open')
+
+        # write a line to the basket
+        line_data = {
+            "basket": basket_url,
+            "line_reference": "234_345",
+            "product": "http://testserver/commerceconnect/products/1/",
+            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/",
+            "quantity": 3,
+            "price_currency": "EUR",
+            "price_excl_tax": "100.0",
+            "price_incl_tax": "121.0",
+        }
+        line_url = reverse('basket-lines-list', args=(basket_id,))
+        response = self.post(line_url, session_id='admin', authenticated=True, **line_data)
+        self.assertEqual(response.status_code, 201)
+
+        # throw the basket away
+        response = self.delete(url, session_id='admin', authenticated=True)
+        self.assertEqual(response.status_code, 204)
+
+        # now lets start messing around
+        response = self.get('api-basket', session_id='admin', authenticated=True)
+        self.assertEqual(response.status_code, 200)
+        basket_id = json.loads(response.content)['id']
+
+        # create a basket for another user.
+        b = Basket.editable.create(owner_id=3)
+        self.assertEqual(str(b.owner), 'somebody')
+        self.assertEqual(Basket.objects.count(), 2)
+        somebody_basket_id = b.pk
+
+        # try to access the urls in the response.
+        parsed_data = json.loads(response.content)
+        basket_id = parsed_data['id']
+        basket_url = parsed_data['url']
+        url = reverse('basket-detail', args=(basket_id,))
+
+        self.assertEqual(parsed_data['status'], 'Open')
+
+        # try to write to someone else's basket by sending the primary key
+        # along.
+        response = self.put(url, status='Saved', session_id='admin', authenticated=True, id=somebody_basket_id)
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['id'], basket_id, 'Primary key value can not be changed.')
+        self.assertEqual(parsed_data['status'], 'Saved')
+
+        # try to write to someone else's basket directly
+        url = reverse('basket-detail', args=(somebody_basket_id,))
+        response = self.put(url, status='Saved')
+        self.assertEqual(response.status_code, 200)
+
+        # try adding lines to someone elses basket
+        line_data = {
+            "basket": "http://testserver/commerceconnect/baskets/%s/" % somebody_basket_id,
+            "line_reference": "234_345",
+            "product": "http://testserver/commerceconnect/products/1/",
+            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/",
+            "quantity": 3,
+            "price_currency": "EUR",
+            "price_excl_tax": "100.0",
+            "price_incl_tax": "121.0"
+        }
+        zurl = reverse('basket-lines-list', args=(basket_id,))
+        response = self.post(zurl, session_id='admin', authenticated=True, **line_data)
+        self.assertEqual(response.status_code, 406)
+
+        # try to delete someone else's basket
+        response = self.delete(url, session_id='admin', authenticated=True)
+        self.assertEqual(response.status_code, 204)
 
     @unittest.skip
     def test_basket_write_permissions_header(self):
@@ -535,3 +633,8 @@ class BasketTest(APITest):
     def test_basket_line_permissions(self):
         "Prove that the sensitive information associated with basket lines, can not be viewed by another user in any way (except admins)"
         self.fail('not implemented')
+
+    @unittest.skip
+    def test_frozen_basket_can_not_be_accessed(self):
+        "Prove that frozen baskets can nolonger be accessed by the user."
+        self.fail('you are wrong!')
