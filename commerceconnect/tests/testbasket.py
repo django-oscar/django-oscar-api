@@ -837,3 +837,8 @@ class BasketTest(APITest):
     def test_frozen_basket_can_not_be_accessed(self):
         "Prove that frozen baskets can nolonger be accessed by the user."
         self.fail('you are wrong!')
+
+    @unittest.skip
+    def test_header_login_does_not_cause_regular_login(self):
+        "Prove that there is not a bug in the test client that logs a user in when doing hlogin."
+        self.fail('no wai')
