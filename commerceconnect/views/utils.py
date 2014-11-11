@@ -37,7 +37,7 @@ def get_basket(request):
     else:
         basket = Basket.get_anonymous_basket(request)
         if basket is None:
-            basket = Basket.open.create()
+            basket = Basket.editable.create()
             basket.save()
 
     return prepare_basket(basket, request)
@@ -55,7 +55,7 @@ class BasketPermissionMixin(object):
         "Parse basket from relation hyperlink"
         basket_parser = HyperlinkedRelatedField(
             view_name='basket-detail',
-            queryset=Basket.open,
+            queryset=Basket.editable,
             format=format
         )
         try:
@@ -69,6 +69,6 @@ class BasketPermissionMixin(object):
     def check_basket_permission(self, request, basket_pk=None, basket=None):
         "Check if the user may access this basket"
         if basket is None:
-            basket = generics.get_object_or_404(Basket.open, pk=basket_pk)
+            basket = generics.get_object_or_404(Basket.editable, pk=basket_pk)
         self.check_object_permissions(request, basket)
         return basket

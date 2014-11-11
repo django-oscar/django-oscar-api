@@ -5,11 +5,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from commerceconnect import serializers
+from commerceconnect.views.mixin import PutIsPatchMixin
 from commerceconnect.views.utils import (
     apply_offers,
     get_basket,
     BasketPermissionMixin
 )
+
 from oscar.core.loading import get_model, get_class
 
 
@@ -130,6 +132,6 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
         return super(LineList, self).post(request, format=format)
 
 
-class LineDetail(generics.RetrieveUpdateDestroyAPIView):
+class LineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     queryset = Line.objects.all()
     serializer_class = serializers.LineSerializer

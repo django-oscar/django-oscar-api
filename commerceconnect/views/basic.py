@@ -4,7 +4,7 @@ from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
 
 from commerceconnect import serializers, permissions
-
+from .mixin import PutIsPatchMixin
 
 __all__ = (
     'BasketList', 'BasketDetail',
@@ -49,7 +49,7 @@ class BasketList(generics.ListCreateAPIView):
     model = Basket
     serializer_class = serializers.BasketSerializer
     permission_classes = (IsAdminUser,)
-class BasketDetail(generics.RetrieveUpdateDestroyAPIView):
+class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     model = Basket
     serializer_class = serializers.BasketSerializer
     permission_classes = (permissions.IsAdminUserOrRequestOwner,)
@@ -58,7 +58,7 @@ class BasketDetail(generics.RetrieveUpdateDestroyAPIView):
 class LineAttributeList(generics.ListCreateAPIView):
     model = LineAttribute
     serializer_class = serializers.LineAttributeSerializer
-class LineAttributeDetail(generics.RetrieveUpdateDestroyAPIView):
+class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     model = LineAttribute
     serializer_class = serializers.LineAttributeSerializer
 
