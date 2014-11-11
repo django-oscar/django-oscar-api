@@ -20,10 +20,20 @@ class APITest(TestCase):
         user.is_staff = True
         user.is_superuser = True
         user.save()
+
         user = User.objects.create_user(
             username='nobody',
             email='nobody@nobody.niks',
             password='nobody'
+        )
+        user.is_staff = False
+        user.is_superuser = False
+        user.save()
+
+        user = User.objects.create_user(
+            username='somebody',
+            email='somebody@nobody.niks',
+            password='somebody'
         )
         user.is_staff = False
         user.is_superuser = False

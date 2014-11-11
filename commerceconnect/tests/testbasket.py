@@ -54,7 +54,7 @@ class BasketTest(APITest):
 
     def test_basket_api_create_header(self):
         "The basket api create command should work with header based login."
-        empty = Basket.open.all()
+        empty = Basket.editable.all()
         self.assertFalse(empty.exists(), "There should be no baskets yet.")
 
         if self.hlogin('nobody', 'nobody', session_id='nobody'):
@@ -72,7 +72,7 @@ class BasketTest(APITest):
             data = json.loads(response.content)
             self.assertEqual(data['owner'], "http://testserver/commerceconnect/users/1/")
 
-        self.assertEqual(Basket.open.count(), 3, "There should be 2 baskets from loging in and 1 is created with the api.")
+        self.assertEqual(Basket.editable.count(), 3, "There should be 2 baskets from loging in and 1 is created with the api.")
             
     def test_retrieve_basket(self):
         "A user can fetch their own basket with the basket API and get's the same basket every time."
@@ -112,7 +112,7 @@ class BasketTest(APITest):
             parsed_data = json.loads(response.content)
             self.assertEqual(parsed_data['id'], basket_id)
 
-        self.assertEqual(Basket.open.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
+        self.assertEqual(Basket.editable.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
     def test_retrieve_basket_header(self):
         "Using header authentication the basket api should also work perfectly."
@@ -152,7 +152,7 @@ class BasketTest(APITest):
             parsed_data = json.loads(response.content)
             self.assertEqual(parsed_data['id'], basket_id)
 
-        self.assertEqual(Basket.open.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
+        self.assertEqual(Basket.editable.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
     def test_basket_read_permissions(self):
         "A regular or anonymous user should not be able to fetch someone elses basket."
@@ -172,7 +172,7 @@ class BasketTest(APITest):
         self.assertEqual(response.status_code, 200)
 
         # create a basket for somebody else
-        b = Basket.open.create(owner_id=2)
+        b = Basket.editable.create(owner_id=2)
         self.assertEqual(str(b.owner), 'nobody')
         self.assertEqual(b.pk, 2)
 
@@ -233,7 +233,7 @@ class BasketTest(APITest):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200, "Staff users can access anything.")
 
-        self.assertEqual(Basket.open.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
+        self.assertEqual(Basket.editable.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
     def test_basket_read_permissions_header(self):
         "A regular or anonymous user should not be able to fetch someone elses basket, even when authenticating with a session header."
@@ -253,7 +253,7 @@ class BasketTest(APITest):
         self.assertEqual(response.status_code, 200)
 
         # create a basket for somebody else
-        b = Basket.open.create(owner_id=2)
+        b = Basket.editable.create(owner_id=2)
         self.assertEqual(str(b.owner), 'nobody')
         self.assertEqual(b.pk, 2)
 
@@ -314,10 +314,10 @@ class BasketTest(APITest):
             response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
             self.assertEqual(response.status_code, 200, "Staff users can access anything.")
 
-        self.assertEqual(Basket.open.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
+        self.assertEqual(Basket.editable.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
-    def test_basket_write_permissions(self):
-        "A regular or anonymous user should not be able to change someone elses basket."
+    def test_basket_write_permissions_anonymous(self):
+        "An anonymous user should not be able to change someone elses basket."
 
         # anonymous user
         response = self.get('api-basket')
@@ -331,11 +331,12 @@ class BasketTest(APITest):
 
         # change status to frozen
         url = reverse('basket-detail', args=(basket_id,))
-        response = self.put(url, status='Frozen')
+        response = self.put(url, status='Saved')
+
         self.assertEqual(response.status_code, 200)
         parsed_data = json.loads(response.content)
         self.assertEqual(parsed_data['id'], basket_id)
-        self.assertEqual(parsed_data['status'], 'Frozen')
+        self.assertEqual(parsed_data['status'], 'Saved')
 
         # and back to open again
         response = self.put(url, status='Open')
@@ -369,7 +370,7 @@ class BasketTest(APITest):
         basket_id = json.loads(response.content)['id']
 
         # create a basket for another user.
-        b = Basket.open.create(owner_id=2)
+        b = Basket.editable.create(owner_id=2)
         self.assertEqual(str(b.owner), 'nobody')
         self.assertEqual(Basket.objects.count(), 2)
         nobody_basket_id = b.pk
@@ -414,8 +415,110 @@ class BasketTest(APITest):
         response = self.post(url, **line_data)
         self.assertEqual(response.status_code, 403)
 
+    def test_basket_write_permissions_authenticated(self):
+        "An authenticated user should not be able to change someone elses basket."
+
+        # now try for authenticated user.
+        self.hlogin('nobody', 'nobody', session_id='nobody')
+        response = self.get('api-basket', session_id='nobody', authenticated=True)
+        self.assertEqual(response.status_code, 200)
+
+        # try to access the urls in the response.
+        parsed_data = json.loads(response.content)
+        basket_id = parsed_data['id']
+        basket_url = parsed_data['url']
+        owner_url = parsed_data['owner']
+        self.assertIn(reverse('user-detail', args=(2,)), owner_url)
+        self.assertEqual(parsed_data['status'], 'Open')
+
+        # change status to frozen
+        url = reverse('basket-detail', args=(basket_id,))
+        response = self.put(url, status='Saved', session_id='nobody', authenticated=True)
+
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['id'], basket_id)
+        self.assertEqual(parsed_data['status'], 'Saved')
+
+        # and back to open again
+        response = self.put(url, status='Open', session_id='nobody', authenticated=True)
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['id'], basket_id)
+        self.assertEqual(parsed_data['status'], 'Open')
+
+        # write a line to the basket
+        line_data = {
+            "basket": basket_url, 
+            "line_reference": "234_345", 
+            "product": "http://testserver/commerceconnect/products/1/", 
+            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/", 
+            "quantity": 3, 
+            "price_currency": "EUR", 
+            "price_excl_tax": "100.0", 
+            "price_incl_tax": "121.0",
+        }
+        line_url = reverse('basket-lines-list', args=(basket_id,))
+        response = self.post(line_url, session_id='nobody', authenticated=True, **line_data)
+        self.assertEqual(response.status_code, 201)
+
+        # throw the basket away
+        response = self.delete(url, session_id='nobody', authenticated=True)
+        self.assertEqual(response.status_code, 204)
+
+        # now lets start messing around
+        response = self.get('api-basket', session_id='nobody', authenticated=True)
+        self.assertEqual(response.status_code, 200)
+        basket_id = json.loads(response.content)['id']
+
+        # create a basket for another user.
+        b = Basket.editable.create(owner_id=3)
+        self.assertEqual(str(b.owner), 'somebody')
+        self.assertEqual(Basket.objects.count(), 2)
+        somebody_basket_id = b.pk
+
+        # try to access the urls in the response.
+        parsed_data = json.loads(response.content)
+        basket_id = parsed_data['id']
+        basket_url = parsed_data['url']
+        url = reverse('basket-detail', args=(basket_id,))
+
+        self.assertEqual(parsed_data['status'], 'Open')
+
+        # try to write to someone else's basket by sending the primary key
+        # along.
+        response = self.put(url, status='Frozen', id=somebody_basket_id)
+        self.assertEqual(response.status_code, 200)
+        parsed_data = json.loads(response.content)
+        self.assertEqual(parsed_data['id'], basket_id, 'Primary key value can not be changed.')
+        self.assertEqual(parsed_data['status'], 'Frozen')
+
+        # try to write to someone else's basket directly
+        url = reverse('basket-detail', args=(somebody_basket_id,))
+        response = self.put(url, status='Frozen')
+        self.assertEqual(response.status_code, 403)
+
+        # try to delete someone else's basket
+        response = self.delete(url)
+        self.assertEqual(response.status_code, 403)
+
+        # try adding lines to someone elses basket
+        line_data = {
+            "basket": "http://testserver/commerceconnect/baskets/%s/" % somebody_basket_id,
+            "line_reference": "234_345",
+            "product": "http://testserver/commerceconnect/products/1/",
+            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/",
+            "quantity": 3,
+            "price_currency": "EUR",
+            "price_excl_tax": "100.0",
+            "price_incl_tax": "121.0"
+        }
+        url = reverse('basket-lines-list', args=(basket_id,))
+        response = self.post(url, **line_data)
+        self.assertEqual(response.status_code, 403)
+        
         ######################################################################
-        # NEEDS TEST FOR AUTHENTICATED AND ADMIN USER!!!                     #
+        # NEEDS TEST FOR ADMIN USER!!!                                       #
         ######################################################################
 
     @unittest.skip

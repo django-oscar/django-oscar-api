@@ -6,3 +6,4 @@ dist/
 logs/
 public/
 db.sqlite
+.ropeproject
