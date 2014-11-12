@@ -167,9 +167,9 @@ steps:
     )
 
 If you need to extend ``oscar.apps.basket``, that is allright, but make sure you
-use ``commerceconnect.apps.basket.abstract_models.Basket`` as a base class to
+use the bases in ``commerceconnect.apps.basket.abstract_models`` as a base class to
 your extended model and not the oscar one. Commerceconnect needs some helper
-methods to be on the model.
+methods to be on the model, for authentication.
 
 Extending and overriding
 ------------------------

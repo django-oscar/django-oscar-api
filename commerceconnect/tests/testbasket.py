@@ -829,6 +829,12 @@ class BasketTest(APITest):
         self.login('somebody', 'somebody')
         self.response = self.get(line0url)
         self.response.assertStatusEqual(403)
+        
+        # admin can cheat
+        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+            self.login('admin', 'admin')
+            self.response = self.get(line0url)
+            self.response.assertStatusEqual(200)
 
     def test_basket_line_permissions_header(self):
         "A user's Basket lines can not be viewed by another user in any way (except admins), even with header authetication"
@@ -851,10 +857,40 @@ class BasketTest(APITest):
         self.response = self.get(line0url, session_id='somebody', authenticated=True)
         self.response.assertStatusEqual(403)
 
-    @unittest.skip
+        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+            self.hlogin('admin', 'admin', session_id='admin')
+            self.response = self.get(line0url, session_id='admin', authenticated=True)
+            self.response.assertStatusEqual(200)
+
     def test_frozen_basket_can_not_be_accessed(self):
         "Prove that frozen baskets can nolonger be accessed by the user."
-        self.fail('you are wrong!')
+        self.login('nobody', 'nobody')
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('status', 'Open')
+
+        # change status to saved
+        url = reverse('basket-detail', args=(self.response['id'],))
+        self.response = self.put(url, status='Frozen')
+        self.response.assertValueEqual('status', 'Frozen')
+
+        self.response = self.get(url)
+        self.response.assertStatusEqual(403)
+
+    def test_frozen_basket_can_not_be_accessed_header(self):
+        "Prove that frozen baskets can nolonger be accessed by the user, even with header authentication"
+        self.hlogin('nobody', 'nobody', session_id='nobody')
+        self.response = self.get('api-basket', session_id='nobody', authenticated=True)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('status', 'Open')
+
+        # change status to saved
+        url = reverse('basket-detail', args=(self.response['id'],))
+        self.response = self.put(url, status='Frozen', session_id='nobody', authenticated=True)
+        self.response.assertValueEqual('status', 'Frozen')
+
+        self.response = self.get(url, session_id='nobody', authenticated=True)
+        self.response.assertStatusEqual(403)
 
     def test_header_login_does_not_cause_regular_login(self):
         "Prove that there is not a bug in the test client that logs a user in when doing hlogin."
