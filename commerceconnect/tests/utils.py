@@ -126,8 +126,11 @@ class ParsedReponse(object):
     @response.setter
     def response(self, response):
         self._response = response
-        self.body = json.loads(response.content)
         self.status_code = response.status_code
+        try:
+            self.body = json.loads(response.content)
+        except:
+            self.body = None
 
     def __getattr__(self, name):
         return self._response.__getattr__(name)
