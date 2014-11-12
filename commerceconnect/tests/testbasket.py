@@ -786,12 +786,27 @@ class BasketTest(APITest):
             self.response = self.delete(url, session_id='admin', authenticated=True)
             self.response.assertStatusEqual(204)
 
-    def test_add_product(self):
+    def test_add_product_anonymous(self):
         "Test if an anonymous user can add a product to his basket"
         self.response = self.post('api-basket-add-product', url="http://testserver/commerceconnect/products/1/", quantity=5)
         self.response.assertStatusEqual(200)
-    
-    @unittest.skip
+
+        self.response = self.get(self.response['lines'])
+        self.assertEqual(len(self.response.body), 1)
+        line0 = self.response.body[0]
+        self.assertEqual(line0['product'], "http://testserver/commerceconnect/products/1/")
+
+    def test_add_product_authenticated(self):
+        "Test if an authenticated user can add a product to his basket"
+        self.login('nobody', 'nobody')
+        self.response = self.post('api-basket-add-product', url="http://testserver/commerceconnect/products/1/", quantity=5)
+        self.response.assertStatusEqual(200)
+
+        self.response = self.get(self.response['lines'])
+        self.assertEqual(len(self.response.body), 1)
+        line0 = self.response.body[0]
+        self.assertEqual(line0['product'], "http://testserver/commerceconnect/products/1/")
+
     def test_basket_line_permissions(self):
         "Prove that the sensitive information associated with basket lines, can not be viewed by another user in any way (except admins)"
         self.fail('not implemented')

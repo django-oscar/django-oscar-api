@@ -143,3 +143,6 @@ class ParsedReponse(object):
     
     def assertValueEqual(self, value_name, value, message=None):
         self.t.assertEqual(self[value_name], value, message)
+
+    def __str__(self):
+        return str(self._response)
