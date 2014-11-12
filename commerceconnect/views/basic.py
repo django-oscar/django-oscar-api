@@ -58,7 +58,7 @@ class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
 class LineAttributeList(generics.ListCreateAPIView):
     model = LineAttribute
     serializer_class = serializers.LineAttributeSerializer
-class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
+class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveAPIView):
     model = LineAttribute
     serializer_class = serializers.LineAttributeSerializer
 
