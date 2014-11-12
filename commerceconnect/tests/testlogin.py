@@ -13,7 +13,6 @@ class LoginTest(APITest):
         response = self.post('api-login', username='nobody', password='nobody', session_id='koe')
 
         self.assertEqual(response.status_code, 200)
-        # self.assertEqual(self.client.cookies['_auth_user_id'], 2)
         self.assertIn('Session-Id', response)
         self.assertEqual(response.get('Session-Id'), 'SID:AUTH:testserver:koe', 'the session type should be upgraded to AUTH')
 
