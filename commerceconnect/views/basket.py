@@ -4,14 +4,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from commerceconnect import serializers
-from commerceconnect.views.mixin import PutIsPatchMixin
-from commerceconnect.views.utils import (
+from commerceconnect import serializers, permissions
+from commerceconnect.apps.basket.utils import (
     apply_offers,
-    get_basket,
-    BasketPermissionMixin
+    get_basket
 )
-
+from commerceconnect.views.mixin import PutIsPatchMixin
+from commerceconnect.views.utils import BasketPermissionMixin
 from oscar.core.loading import get_model, get_class
 
 
@@ -135,3 +134,4 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
 class LineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     queryset = Line.objects.all()
     serializer_class = serializers.LineSerializer
+    permission_classes = (permissions.IsAdminUserOrRequestOwner,)

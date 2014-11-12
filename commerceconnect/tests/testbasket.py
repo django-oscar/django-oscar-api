@@ -856,7 +856,12 @@ class BasketTest(APITest):
         "Prove that frozen baskets can nolonger be accessed by the user."
         self.fail('you are wrong!')
 
-    @unittest.skip
     def test_header_login_does_not_cause_regular_login(self):
         "Prove that there is not a bug in the test client that logs a user in when doing hlogin."
-        self.fail('no wai')
+        self.hlogin('nobody', 'nobody', session_id='nobody')
+        with self.settings(DEBUG=True):
+            self.response = self.get('api-login')
+            self.response.assertStatusEqual(204)
+            self.response = self.get('api-login', session_id='nobody', authenticated=True)
+            self.response.assertStatusEqual(200)
+            self.response.assertValueEqual('username', 'nobody')

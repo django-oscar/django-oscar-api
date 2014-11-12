@@ -6,11 +6,11 @@ from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 from rest_framework import serializers, exceptions
 
+from commerceconnect.apps.basket.utils import prepare_basket
 from commerceconnect.utils import (
     OscarHyperlinkedModelSerializer,
     OscarModelSerializer
 )
-from commerceconnect.views.utils import prepare_basket
 
 
 OrderPlacementMixin = get_class('checkout.mixins', 'OrderPlacementMixin')
@@ -106,7 +106,7 @@ class OrderSerializer(OscarModelSerializer):
 # charges.
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     basket = serializers.HyperlinkedRelatedField(
-        view_name='basket-detail', queryset=Basket.open)
+        view_name='basket-detail', queryset=Basket.editable)
     total = PriceSerializer(many=False, required=True)
     shipping_method = serializers.HyperlinkedRelatedField(
         view_name='shippingmethod-detail', queryset=ShippingMethod.objects,

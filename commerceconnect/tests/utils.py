@@ -1,7 +1,9 @@
 import json
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse, NoReverseMatch
+from django.http import SimpleCookie
 from django.test import TestCase
 
 
@@ -67,10 +69,17 @@ class APITest(TestCase):
             kwargs['HTTP_SESSION_ID'] = 'SID:%s:testserver:%s' % (
                 auth_type, session_id)
 
+        response = None
         if data:
-            return method(url, json.dumps(data), **kwargs)
+            response = method(url, json.dumps(data), **kwargs)
         else:
-            return method(url, **kwargs)
+            response = method(url, **kwargs)
+        
+        # throw away cookies when using session_id authentication
+        if session_id is not None:
+            self.client.cookies = SimpleCookie()
+
+        return response
 
     def get(self, url_name, session_id=None, authenticated=False):
         return self.api_call(
