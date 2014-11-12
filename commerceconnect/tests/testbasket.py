@@ -795,6 +795,7 @@ class BasketTest(APITest):
         self.assertEqual(len(self.response.body), 1)
         line0 = self.response.body[0]
         self.assertEqual(line0['product'], "http://testserver/commerceconnect/products/1/")
+        self.assertEqual(line0['quantity'], 5)
 
     def test_add_product_authenticated(self):
         "Test if an authenticated user can add a product to his basket"
@@ -806,10 +807,49 @@ class BasketTest(APITest):
         self.assertEqual(len(self.response.body), 1)
         line0 = self.response.body[0]
         self.assertEqual(line0['product'], "http://testserver/commerceconnect/products/1/")
+        self.assertEqual(line0['quantity'], 5)
 
     def test_basket_line_permissions(self):
-        "Prove that the sensitive information associated with basket lines, can not be viewed by another user in any way (except admins)"
-        self.fail('not implemented')
+        "A user's Basket lines can not be viewed by another user in any way (except admins)"
+        self.login('nobody', 'nobody')
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
+        
+        self.response = self.post('api-basket-add-product', url="http://testserver/commerceconnect/products/1/", quantity=5)
+        self.response = self.get(self.response['lines'])
+        line0 = self.response.body[0]
+        line0url = line0['url']
+
+        self.response = self.get(line0url)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('product', "http://testserver/commerceconnect/products/1/")
+        self.response.assertValueEqual('quantity', 5)
+
+        # now let's try to cheat
+        self.login('somebody', 'somebody')
+        self.response = self.get(line0url)
+        self.response.assertStatusEqual(403)
+
+    def test_basket_line_permissions_header(self):
+        "A user's Basket lines can not be viewed by another user in any way (except admins), even with header authetication"
+        self.hlogin('nobody', 'nobody', session_id='nobody')
+        self.response = self.get('api-basket', session_id='nobody', authenticated=True)
+        self.response.assertStatusEqual(200)
+        
+        self.response = self.post('api-basket-add-product', url="http://testserver/commerceconnect/products/1/", quantity=5, session_id='nobody', authenticated=True)
+        self.response = self.get(self.response['lines'], session_id='nobody', authenticated=True)
+        line0 = self.response.body[0]
+        line0url = line0['url']
+
+        self.response = self.get(line0url, session_id='nobody', authenticated=True)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('product', "http://testserver/commerceconnect/products/1/")
+        self.response.assertValueEqual('quantity', 5)
+
+        # now let's try to cheat
+        self.hlogin('somebody', 'somebody', session_id='somebody')
+        self.response = self.get(line0url, session_id='somebody', authenticated=True)
+        self.response.assertStatusEqual(403)
 
     @unittest.skip
     def test_frozen_basket_can_not_be_accessed(self):
