@@ -1,4 +1,5 @@
 import json
+from re import match
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -152,6 +153,15 @@ class ParsedReponse(object):
     
     def assertValueEqual(self, value_name, value, message=None):
         self.t.assertEqual(self[value_name], value, message)
+
+    def assertObjectIdEqual(self, value_name, value, message=None):
+        pattern = ".*?/commerceconnect/.*?/(?P<object_id>\d+)/?"
+        m = match(pattern, self[value_name])
+        if (m):
+            object_id = int(m.groupdict()["object_id"])
+        else:
+            object_id = None
+        self.t.assertEqual(object_id, value, message)
 
     def __str__(self):
         return str(self._response)

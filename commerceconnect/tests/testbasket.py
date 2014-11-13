@@ -42,7 +42,7 @@ class BasketTest(APITest):
         data = {'owner': "http://testserver%s" % reverse('user-detail', args=[1])}
         self.response = self.client.post(url, json.dumps(data), content_type='application/json')
         self.response.assertStatusEqual(201, "It should be possible for a basket to be created, for a specific user.")
-        self.response.assertValueEqual('owner', "http://testserver/commerceconnect/users/1/")
+        self.response.assertObjectIdEqual('owner', 1)
 
         data = {}
         self.response = self.client.post(url, json.dumps(data), content_type='application/json')
@@ -65,7 +65,7 @@ class BasketTest(APITest):
                 owner="http://testserver%s" % reverse('user-detail', args=[1])
             )
             self.response.assertStatusEqual(201, "It should be possible for a basket to be created, for a specific user.")
-            self.response.assertValueEqual('owner', "http://testserver/commerceconnect/users/1/")
+            self.response.assertObjectIdEqual('owner', 1)
 
         self.assertEqual(Basket.editable.count(), 3, "There should be 2 baskets from loging in and 1 is created with the api.")
             
@@ -85,7 +85,7 @@ class BasketTest(APITest):
         self.login('nobody', 'nobody')
         self.response = self.get('api-basket')
         self.response.assertStatusEqual(200)
-        self.response.assertValueEqual('owner', "http://testserver/commerceconnect/users/2/")
+        self.response.assertObjectIdEqual('owner', 2)
         basket_id = self.response['id']
 
         self.response = self.get('api-basket')
@@ -97,7 +97,7 @@ class BasketTest(APITest):
             self.login('admin', 'admin')
             self.response = self.get('api-basket')
             self.response.assertStatusEqual(200)
-            self.response.assertValueEqual('owner', "http://testserver/commerceconnect/users/1/")
+            self.response.assertObjectIdEqual('owner', 1)
             basket_id = self.response['id']
 
             self.response = self.get('api-basket')
@@ -122,7 +122,7 @@ class BasketTest(APITest):
         self.hlogin('nobody', 'nobody', session_id='nobody')
         self.response = self.get('api-basket', session_id='nobody', authenticated=True)
         self.response.assertStatusEqual(200)
-        self.response.assertValueEqual('owner', "http://testserver/commerceconnect/users/2/")
+        self.response.assertObjectIdEqual('owner', 2)
         basket_id = self.response['id']
 
         self.response = self.get('api-basket', session_id='nobody', authenticated=True)
@@ -134,7 +134,7 @@ class BasketTest(APITest):
             self.hlogin('admin', 'admin', session_id='admin')
             self.response = self.get('api-basket', session_id='admin', authenticated=True)
             self.response.assertStatusEqual(200)
-            self.response.assertValueEqual('owner', "http://testserver/commerceconnect/users/1/")
+            self.response.assertObjectIdEqual('owner', 1)
             basket_id = self.response['id']
 
             self.response = self.get('api-basket', session_id='admin', authenticated=True)
