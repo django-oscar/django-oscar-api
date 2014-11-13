@@ -6,7 +6,7 @@ __version__ = "0.0.2"
 
 setup(
     # package name in pypi
-    name='oscar-commerceconnect',
+    name='django-oscar-commerce-connect',
     # extract version from module.
     version=__version__,
     description="REST API module for django-oscar",
