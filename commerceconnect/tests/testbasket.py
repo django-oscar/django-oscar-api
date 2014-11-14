@@ -333,8 +333,8 @@ class BasketTest(APITest):
         line_data = {
             "basket": basket_url, 
             "line_reference": "234_345", 
-            "product": "http://testserver/commerceconnect/products/1/", 
-            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/", 
+            "product": "http://testserver/nl-nl/commerceconnect/products/1/", 
+            "stockrecord": "http://testserver/nl-nl/commerceconnect/stockrecords/1/", 
             "quantity": 3, 
             "price_currency": "EUR", 
             "price_excl_tax": "100.0", 
@@ -384,10 +384,10 @@ class BasketTest(APITest):
         
         # try adding lines to someone elses basket
         line_data = {
-            "basket": "http://testserver/commerceconnect/baskets/%s/" % nobody_basket_id, 
+            "basket": "http://testserver/nl-nl/commerceconnect/baskets/%s/" % nobody_basket_id, 
             "line_reference": "234_345", 
-            "product": "http://testserver/commerceconnect/products/1/", 
-            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/", 
+            "product": "http://testserver/nl-nl/commerceconnect/products/1/", 
+            "stockrecord": "http://testserver/nl-nl/commerceconnect/stockrecords/1/", 
             "quantity": 3, 
             "price_currency": "EUR", 
             "price_excl_tax": "100.0", 
@@ -430,8 +430,8 @@ class BasketTest(APITest):
         line_data = {
             "basket": basket_url, 
             "line_reference": "234_345", 
-            "product": "http://testserver/commerceconnect/products/1/", 
-            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/", 
+            "product": "http://testserver/nl-nl/commerceconnect/products/1/", 
+            "stockrecord": "http://testserver/nl-nl/commerceconnect/stockrecords/1/", 
             "quantity": 3, 
             "price_currency": "EUR", 
             "price_excl_tax": "100.0", 
@@ -481,10 +481,10 @@ class BasketTest(APITest):
 
         # try adding lines to someone elses basket
         line_data = {
-            "basket": "http://testserver/commerceconnect/baskets/%s/" % somebody_basket_id,
+            "basket": "http://testserver/nl-nl/commerceconnect/baskets/%s/" % somebody_basket_id,
             "line_reference": "234_345",
-            "product": "http://testserver/commerceconnect/products/1/",
-            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/",
+            "product": "http://testserver/nl-nl/commerceconnect/products/1/",
+            "stockrecord": "http://testserver/nl-nl/commerceconnect/stockrecords/1/",
             "quantity": 3,
             "price_currency": "EUR",
             "price_excl_tax": "100.0",
@@ -527,8 +527,8 @@ class BasketTest(APITest):
         line_data = {
             "basket": basket_url, 
             "line_reference": "234_345", 
-            "product": "http://testserver/commerceconnect/products/1/", 
-            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/", 
+            "product": "http://testserver/nl-nl/commerceconnect/products/1/", 
+            "stockrecord": "http://testserver/nl-nl/commerceconnect/stockrecords/1/", 
             "quantity": 3, 
             "price_currency": "EUR", 
             "price_excl_tax": "100.0", 
@@ -578,10 +578,10 @@ class BasketTest(APITest):
 
         # try adding lines to someone elses basket
         line_data = {
-            "basket": "http://testserver/commerceconnect/baskets/%s/" % somebody_basket_id,
+            "basket": "http://testserver/nl-nl/commerceconnect/baskets/%s/" % somebody_basket_id,
             "line_reference": "234_345",
-            "product": "http://testserver/commerceconnect/products/1/",
-            "stockrecord": "http://testserver/commerceconnect/stockrecords/1/",
+            "product": "http://testserver/nl-nl/commerceconnect/products/1/",
+            "stockrecord": "http://testserver/nl-nl/commerceconnect/stockrecords/1/",
             "quantity": 3,
             "price_currency": "EUR",
             "price_excl_tax": "100.0",
@@ -625,8 +625,8 @@ class BasketTest(APITest):
             line_data = {
                 "basket": basket_url,
                 "line_reference": "234_345",
-                "product": "http://testserver/commerceconnect/products/1/",
-                "stockrecord": "http://testserver/commerceconnect/stockrecords/1/",
+                "product": "http://testserver/nl-nl/commerceconnect/products/1/",
+                "stockrecord": "http://testserver/nl-nl/commerceconnect/stockrecords/1/",
                 "quantity": 3,
                 "price_currency": "EUR",
                 "price_excl_tax": "100.0",
@@ -672,10 +672,10 @@ class BasketTest(APITest):
 
             # try adding lines to someone elses basket
             line_data = {
-                "basket": "http://testserver/commerceconnect/baskets/%s/" % somebody_basket_id,
+                "basket": "http://testserver/nl-nl/commerceconnect/baskets/%s/" % somebody_basket_id,
                 "line_reference": "234_345",
-                "product": "http://testserver/commerceconnect/products/1/",
-                "stockrecord": "http://testserver/commerceconnect/stockrecords/1/",
+                "product": "http://testserver/nl-nl/commerceconnect/products/1/",
+                "stockrecord": "http://testserver/nl-nl/commerceconnect/stockrecords/1/",
                 "quantity": 3,
                 "price_currency": "EUR",
                 "price_excl_tax": "100.0",
@@ -722,8 +722,8 @@ class BasketTest(APITest):
             line_data = {
                 "basket": basket_url,
                 "line_reference": "234_345",
-                "product": "http://testserver/commerceconnect/products/1/",
-                "stockrecord": "http://testserver/commerceconnect/stockrecords/1/",
+                "product": "http://testserver/nl-nl/commerceconnect/products/1/",
+                "stockrecord": "http://testserver/nl-nl/commerceconnect/stockrecords/1/",
                 "quantity": 3,
                 "price_currency": "EUR",
                 "price_excl_tax": "100.0",
@@ -769,10 +769,10 @@ class BasketTest(APITest):
 
             # try adding lines to someone elses basket
             line_data = {
-                "basket": "http://testserver/commerceconnect/baskets/%s/" % somebody_basket_id,
+                "basket": "http://testserver/nl-nl/commerceconnect/baskets/%s/" % somebody_basket_id,
                 "line_reference": "234_345",
-                "product": "http://testserver/commerceconnect/products/1/",
-                "stockrecord": "http://testserver/commerceconnect/stockrecords/1/",
+                "product": "http://testserver/nl-nl/commerceconnect/products/1/",
+                "stockrecord": "http://testserver/nl-nl/commerceconnect/stockrecords/1/",
                 "quantity": 3,
                 "price_currency": "EUR",
                 "price_excl_tax": "100.0",
@@ -788,25 +788,25 @@ class BasketTest(APITest):
 
     def test_add_product_anonymous(self):
         "Test if an anonymous user can add a product to his basket"
-        self.response = self.post('api-basket-add-product', url="http://testserver/commerceconnect/products/1/", quantity=5)
+        self.response = self.post('api-basket-add-product', url="http://testserver/nl-nl/commerceconnect/products/1/", quantity=5)
         self.response.assertStatusEqual(200)
 
         self.response = self.get(self.response['lines'])
         self.assertEqual(len(self.response.body), 1)
         line0 = self.response.body[0]
-        self.assertEqual(line0['product'], "http://testserver/commerceconnect/products/1/")
+        self.assertEqual(line0['product'], "http://testserver/nl-nl/commerceconnect/products/1/")
         self.assertEqual(line0['quantity'], 5)
 
     def test_add_product_authenticated(self):
         "Test if an authenticated user can add a product to his basket"
         self.login('nobody', 'nobody')
-        self.response = self.post('api-basket-add-product', url="http://testserver/commerceconnect/products/1/", quantity=5)
+        self.response = self.post('api-basket-add-product', url="http://testserver/nl-nl/commerceconnect/products/1/", quantity=5)
         self.response.assertStatusEqual(200)
 
         self.response = self.get(self.response['lines'])
         self.assertEqual(len(self.response.body), 1)
         line0 = self.response.body[0]
-        self.assertEqual(line0['product'], "http://testserver/commerceconnect/products/1/")
+        self.assertEqual(line0['product'], "http://testserver/nl-nl/commerceconnect/products/1/")
         self.assertEqual(line0['quantity'], 5)
 
     def test_basket_line_permissions(self):
@@ -815,14 +815,14 @@ class BasketTest(APITest):
         self.response = self.get('api-basket')
         self.response.assertStatusEqual(200)
         
-        self.response = self.post('api-basket-add-product', url="http://testserver/commerceconnect/products/1/", quantity=5)
+        self.response = self.post('api-basket-add-product', url="http://testserver/nl-nl/commerceconnect/products/1/", quantity=5)
         self.response = self.get(self.response['lines'])
         line0 = self.response.body[0]
         line0url = line0['url']
 
         self.response = self.get(line0url)
         self.response.assertStatusEqual(200)
-        self.response.assertValueEqual('product', "http://testserver/commerceconnect/products/1/")
+        self.response.assertValueEqual('product', "http://testserver/nl-nl/commerceconnect/products/1/")
         self.response.assertValueEqual('quantity', 5)
 
         # now let's try to cheat
@@ -842,14 +842,14 @@ class BasketTest(APITest):
         self.response = self.get('api-basket', session_id='nobody', authenticated=True)
         self.response.assertStatusEqual(200)
         
-        self.response = self.post('api-basket-add-product', url="http://testserver/commerceconnect/products/1/", quantity=5, session_id='nobody', authenticated=True)
+        self.response = self.post('api-basket-add-product', url="http://testserver/nl-nl/commerceconnect/products/1/", quantity=5, session_id='nobody', authenticated=True)
         self.response = self.get(self.response['lines'], session_id='nobody', authenticated=True)
         line0 = self.response.body[0]
         line0url = line0['url']
 
         self.response = self.get(line0url, session_id='nobody', authenticated=True)
         self.response.assertStatusEqual(200)
-        self.response.assertValueEqual('product', "http://testserver/commerceconnect/products/1/")
+        self.response.assertValueEqual('product', "http://testserver/nl-nl/commerceconnect/products/1/")
         self.response.assertValueEqual('quantity', 5)
 
         # now let's try to cheat
