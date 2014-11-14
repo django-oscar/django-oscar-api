@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from oscar.apps.basket.abstract_models import AbstractBasket as _AbstractBasket, AbstractLine as _AbstractLine
 from oscar.apps.basket.managers import OpenBasketManager, SavedBasketManager
+from oscar.core.utils import get_default_currency
 
 from commerceconnect.apps.basket.managers import EditableBasketManager
 from commerceconnect.apps.basket.utils import get_basket
@@ -86,6 +87,11 @@ class AbstractLine(_AbstractLine):
             return basket.request_owner(request)
         
         return False
+
+    def save(self, *args, **kwargs):
+        if not self.price_currency:
+            self.price_currency = get_default_currency()
+        return _AbstractLine.save(self, *args, **kwargs)
 
     class Meta:
         abstract = True
