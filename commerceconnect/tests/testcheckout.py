@@ -31,14 +31,14 @@ class CheckOutTest(APITest):
                 'excl_tax':'100.0',
                 'tax':'21.0'
             },
-            'shipping_method': "http://127.0.0.1:8000/commerceconnect/shippingmethods/1/",
+            'shipping_method': "http://127.0.0.1:8000/nl-nl/commerceconnect/shippingmethods/1/",
             'shipping_charge': {
                 'currency': 'EUR',
                 'excl_tax':'10.0',
                 'tax':'0.6'
             },
             "shipping_address": {
-                "country": "http://127.0.0.1:8000/commerceconnect/countries/NL/",
+                "country": "http://127.0.0.1:8000/nl-nl/commerceconnect/countries/NL/",
                 "first_name": "Henk",
                 "last_name": "Van den Heuvel",
                 "line1": "Roemerlaan 44",
@@ -54,7 +54,7 @@ class CheckOutTest(APITest):
         }
         response = self.post('api-checkout', **request)
         self.assertEqual(response.status_code, 406)
-        response = self.post('api-basket-add-product', url="http://testserver/commerceconnect/products/1/", quantity=5)
+        response = self.post('api-basket-add-product', url="http://testserver/nl-nl/commerceconnect/products/1/", quantity=5)
         self.assertEqual(response.status_code, 200)
         response = self.post('api-checkout', **request)
 

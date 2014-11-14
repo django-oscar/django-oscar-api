@@ -4,11 +4,9 @@
         <field to="catalogue.product" name="product" rel="ManyToOneRel">1</field>
         <field to="partner.partner" name="partner" rel="ManyToOneRel">1</field>
         <field type="CharField" name="partner_sku">clf-large</field>
-        <field type="CharField" name="price_currency">GBP</field>
+        <field type="CharField" name="price_currency">EUR</field>
         <field type="DecimalField" name="price_excl_tax">10</field>
-        <field type="DecimalField" name="price_retail">
-            <None/>
-        </field>
+        <field type="DecimalField" name="price_retail">12.10</field>
         <field type="DecimalField" name="cost_price">
             <None/>
         </field>
@@ -26,11 +24,9 @@
         <field to="catalogue.product" name="product" rel="ManyToOneRel">2</field>
         <field to="partner.partner" name="partner" rel="ManyToOneRel">1</field>
         <field type="CharField" name="partner_sku">clf-med</field>
-        <field type="CharField" name="price_currency">GBP</field>
+        <field type="CharField" name="price_currency">EUR</field>
         <field type="DecimalField" name="price_excl_tax">10</field>
-        <field type="DecimalField" name="price_retail">
-            <None/>
-        </field>
+        <field type="DecimalField" name="price_retail">12.10</field>
         <field type="DecimalField" name="cost_price">
             <None/>
         </field>
