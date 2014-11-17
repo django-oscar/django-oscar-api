@@ -1,16 +1,22 @@
+import logging
 import re
 
 from django.contrib.sessions.middleware import SessionMiddleware
+from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponse
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions
+from rest_framework import authentication
 
 from commerceconnect.utils import (
     get_domain,
     session_id_from_parsed_session_uri,
     get_session
 )
+from commerceconnect import models
+
+logger = logging.getLogger(__name__)
 
 HTTP_SESSION_ID_REGEX = re.compile(
     r'^SID:(?P<type>(?:ANON|AUTH)):(?P<realm>.*?):(?P<session_id>.+?)(?:[-:][0-9a-fA-F]+){0,2}$')
@@ -73,6 +79,12 @@ def start_or_resume(session_id, session_type):
     return get_session(session_id, raise_on_create=True)
 
 
+def is_api_request(request):
+    path = request.path.lower()
+    api_root = reverse('api-root').lower()
+    return path.startswith(api_root)
+
+
 class HeaderSessionMiddleware(SessionMiddleware):
     """
     Implement session through headers:
@@ -89,7 +101,7 @@ class HeaderSessionMiddleware(SessionMiddleware):
         """
         Parse the session id from the 'Session-Id: ' header when using the api.
         """
-        if request.path.startswith(reverse('api-root')):
+        if is_api_request(request):
             try:
                 parsed_session_uri = parse_session_id(request)
                 if parsed_session_uri is not None:
@@ -123,7 +135,7 @@ class HeaderSessionMiddleware(SessionMiddleware):
         """
         Add the 'Session-Id: ' header when using the api.
         """
-        if request.path.startswith(reverse('api-root')) \
+        if is_api_request(request) \
                 and getattr(request, 'session', None) is not None \
                 and hasattr(request, 'parsed_session_uri'):
             assert(request.session.session_key ==
@@ -135,3 +147,19 @@ class HeaderSessionMiddleware(SessionMiddleware):
 
         return super(HeaderSessionMiddleware, self).process_response(
             request, response)
+
+
+class ApiGatewayMiddleWare(object):
+    """
+    Protect the api gateway with token.
+    """
+    def process_request(self, request):
+        if is_api_request(request):
+            key = authentication.get_authorization_header(request)
+            if models.ApiKey.objects.filter(key=key).exists():
+                return None
+
+            logger.error('No credentials provided')
+            raise PermissionDenied()
+
+        return None
