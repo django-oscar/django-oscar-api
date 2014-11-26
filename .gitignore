@@ -7,3 +7,10 @@ logs/
 public/
 db.sqlite
 .ropeproject
+.Python
+bin/
+include/
+lib/
+*.egg-info/
+*.pyc
+version-django-oscar-commerce-connect.txt
