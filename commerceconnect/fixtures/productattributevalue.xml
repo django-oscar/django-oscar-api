@@ -2,7 +2,7 @@
 <django-objects version="1.0">
     <object pk="1" model="catalogue.productattributevalue">
         <field to="catalogue.productattribute" name="attribute" rel="ManyToOneRel">1</field>
-        <field to="catalogue.product" name="product" rel="ManyToOneRel">2</field>
+        <field to="catalogue.product" name="product" rel="ManyToOneRel">1</field>
         <field type="TextField" name="value_text">
             <None/>
         </field>

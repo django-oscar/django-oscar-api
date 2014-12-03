@@ -60,7 +60,6 @@ class APITest(TestCase):
             url = reverse(url_name)
         except NoReverseMatch:
             url = url_name
-
         method = getattr(self.client, method.lower())
         kwargs = {
             'content_type': 'application/json',
@@ -75,7 +74,6 @@ class APITest(TestCase):
             response = method(url, json.dumps(data), **kwargs)
         else:
             response = method(url, **kwargs)
-        
         # throw away cookies when using session_id authentication
         if session_id is not None:
             self.client.cookies = SimpleCookie()
