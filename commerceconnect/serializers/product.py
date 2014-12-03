@@ -45,7 +45,6 @@ class ProductSerializer(OscarModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='product-detail')
     stockrecords = serializers.HyperlinkedIdentityField(
         view_name='product-stockrecord-list')
-    # attributes = ProductAttributeSerializer(many=True, required=False)
     attributes = ProductAttributeValueSerializer(many=True,
                                                  required=False,
                                                  source="attribute_values")
