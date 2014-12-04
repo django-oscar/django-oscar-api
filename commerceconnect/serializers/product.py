@@ -64,7 +64,7 @@ class ProductSerializer(OscarModelSerializer):
             'CC_PRODUCTDETAIL_FIELDS',
             default=('url', 'id', 'title', 'description',
                      'date_created', 'date_updated', 'recommended_products',
-                     'attributes', 'stockrecords'))
+                     'attributes', 'stockrecords', 'images'))
 
 
 class AddProductSerializer(serializers.Serializer):
