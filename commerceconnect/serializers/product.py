@@ -11,6 +11,7 @@ from oscar.core.loading import get_model
 Product = get_model('catalogue', 'Product')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
+ProductImage = get_model('catalogue', 'ProductImage')
 
 
 class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
@@ -41,6 +42,11 @@ class ProductAttributeSerializer(OscarModelSerializer):
         fields = ('name', 'productattributevalue_set')
 
 
+class ProductImageSerializer(OscarModelSerializer):
+    class Meta:
+        model = ProductImage
+
+
 class ProductSerializer(OscarModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='product-detail')
     stockrecords = serializers.HyperlinkedIdentityField(
@@ -50,6 +56,7 @@ class ProductSerializer(OscarModelSerializer):
                                                  source="attribute_values")
     categories = serializers.RelatedField(many=True)
     product_class = serializers.RelatedField()
+    images = ProductImageSerializer(many=True)
 
     class Meta:
         model = Product
