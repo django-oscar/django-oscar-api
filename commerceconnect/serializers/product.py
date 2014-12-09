@@ -3,7 +3,8 @@ from rest_framework import serializers
 from commerceconnect.utils import (
     OscarModelSerializer,
     overridable,
-    OscarHyperlinkedModelSerializer
+    OscarHyperlinkedModelSerializer,
+    OscarStrategySerializer
 )
 from oscar.core.loading import get_model
 
@@ -47,6 +48,22 @@ class ProductImageSerializer(OscarModelSerializer):
         model = ProductImage
 
 
+class ProductPriceSerializer(OscarStrategySerializer):
+    excl_tax = serializers.DecimalField(source="info.price.excl_tax")
+    incl_tax = serializers.DecimalField(source="info.price.incl_tax")
+    is_tax_known = serializers.BooleanField(source="info.price.incl_tax")
+    tax = serializers.DecimalField(source="info.price.tax")
+    currency = serializers.CharField(source="info.price.currency")
+
+
+class ProductAvailabilitySerializer(OscarStrategySerializer):
+    is_available_to_buy = serializers.BooleanField(
+        source="info.availability.is_available_to_buy")
+    num_available = serializers.IntegerField(
+        source="info.availability.num_available")
+    message = serializers.CharField(source="info.availability.message")
+
+
 class ProductSerializer(OscarModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='product-detail')
     stockrecords = serializers.HyperlinkedIdentityField(
@@ -57,6 +74,9 @@ class ProductSerializer(OscarModelSerializer):
     categories = serializers.RelatedField(many=True)
     product_class = serializers.RelatedField()
     images = ProductImageSerializer(many=True)
+    price = serializers.HyperlinkedIdentityField(view_name='product-price')
+    availability = serializers.HyperlinkedIdentityField(
+        view_name='product-availability')
 
     class Meta:
         model = Product
@@ -64,7 +84,7 @@ class ProductSerializer(OscarModelSerializer):
             'CC_PRODUCTDETAIL_FIELDS',
             default=('url', 'id', 'title', 'description',
                      'date_created', 'date_updated', 'recommended_products',
-                     'attributes', 'stockrecords', 'images'))
+                     'attributes', 'stockrecords', 'images', 'price'))
 
 
 class AddProductSerializer(serializers.Serializer):
