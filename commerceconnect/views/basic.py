@@ -1,9 +1,7 @@
 from django.contrib import auth
 from oscar.core.loading import get_model
 from rest_framework import generics
-from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAdminUser
-from rest_framework.views import APIView
 from commerceconnect import serializers, permissions
 from .mixin import PutIsPatchMixin
 
@@ -34,6 +32,8 @@ Country = get_model('address', 'Country')
 class CountryList(generics.ListAPIView):
     serializer_class = serializers.CountrySerializer
     model = Country
+
+
 class CountryDetail(generics.RetrieveAPIView):
     serializer_class = serializers.CountrySerializer
     model = Country
@@ -42,6 +42,8 @@ class CountryDetail(generics.RetrieveAPIView):
 class ShippingMethodList(generics.ListAPIView):
     serializer_class = serializers.ShippingMethodSerializer
     model = ShippingMethod
+
+
 class ShippingMethodDetail(generics.RetrieveAPIView):
     serializer_class = serializers.ShippingMethodSerializer
     model = ShippingMethod
@@ -51,6 +53,8 @@ class BasketList(generics.ListCreateAPIView):
     model = Basket
     serializer_class = serializers.BasketSerializer
     permission_classes = (IsAdminUser,)
+
+
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     model = Basket
     serializer_class = serializers.BasketSerializer
@@ -60,25 +64,31 @@ class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
 class LineAttributeList(generics.ListCreateAPIView):
     model = LineAttribute
     serializer_class = serializers.LineAttributeSerializer
+
+
 class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveAPIView):
     model = LineAttribute
     serializer_class = serializers.LineAttributeSerializer
 
 
-
 class ProductList(generics.ListAPIView):
     model = Product
     serializer_class = serializers.ProductLinkSerializer
+
+
 class ProductDetail(generics.RetrieveAPIView):
     model = Product
     serializer_class = serializers.ProductSerializer
+
+
 class ProductPrice(generics.RetrieveAPIView):
     model = Product
     serializer_class = serializers.ProductPriceSerializer
+
+
 class ProductAvailability(generics.RetrieveAPIView):
     model = Product
     serializer_class = serializers.ProductAvailabilitySerializer
-
 
 
 class StockRecordList(generics.ListAPIView):
@@ -90,6 +100,8 @@ class StockRecordList(generics.ListAPIView):
             self.queryset = self.get_queryset().filter(product__id=pk)
 
         return super(StockRecordList, self).get(request, *args, **kwargs)
+
+
 class StockRecordDetail(generics.RetrieveAPIView):
     model = StockRecord
     serializer_class = serializers.StockRecordSerializer
@@ -99,6 +111,8 @@ class UserList(generics.ListAPIView):
     model = User
     serializer_class = serializers.UserSerializer
     permission_classes = (IsAdminUser,)
+
+
 class UserDetail(generics.RetrieveAPIView):
     model = User
     serializer_class = serializers.UserSerializer
@@ -108,6 +122,8 @@ class UserDetail(generics.RetrieveAPIView):
 class OptionList(generics.ListAPIView):
     model = Option
     serializer_class = serializers.OptionSerializer
+
+
 class OptionDetail(generics.RetrieveAPIView):
     model = Option
     serializer_class = serializers.OptionSerializer
