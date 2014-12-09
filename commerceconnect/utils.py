@@ -40,9 +40,8 @@ class OscarStrategySerializer(serializers.Serializer):
 
     def __init__(self, *args, **kwargs):
         super(OscarStrategySerializer, self).__init__(*args, **kwargs)
-
-        request = self.context.get('request')
-        user = request.get('user') if request else None
+        request = self.context.get('request', None)
+        user = request.user if request else None
         strategy = Selector().strategy(request=request, user=user)
         self.object.info = strategy.fetch_for_product(self.object)
 
