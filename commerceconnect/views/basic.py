@@ -1,6 +1,7 @@
 from django.contrib import auth
 from oscar.core.loading import get_model
 from rest_framework import generics
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
 from commerceconnect import serializers, permissions
 from .mixin import PutIsPatchMixin
@@ -85,7 +86,7 @@ class ProductDetail(generics.RetrieveAPIView):
     serializer_class = serializers.ProductSerializer
 
 
-class ProductPrice(generics.RetrieveAPIView):
+class ProductPrice(APIView):
 
     def get(self, request, pk=None, format=None):
         product = Product.objects.get(id=pk)
