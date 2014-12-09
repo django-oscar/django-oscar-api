@@ -4,8 +4,10 @@ from django.conf import settings
 from django.contrib import auth
 from django.utils.importlib import import_module
 from rest_framework import serializers, exceptions
-
+from oscar.core.loading import get_class
 import oscar.models.fields
+
+Selector = get_class('partner.strategy', 'Selector')
 
 
 def overridable(name, default):
@@ -29,6 +31,22 @@ class OscarSerializer(object):
             return val
 
         return native
+
+
+class OscarStrategySerializer(serializers.Serializer):
+    """Provides easy access to the price and stock information provided by 
+        our strategy
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(OscarStrategySerializer, self).__init__(*args, **kwargs)
+        strategy = Selector().strategy(
+            request=self.context['request'],
+            user=self.context['request'].user)
+        self.object.info = strategy.fetch_for_product(self.object)
+
+
+
 
 class OscarModelSerializer(OscarSerializer, serializers.ModelSerializer):
     """
