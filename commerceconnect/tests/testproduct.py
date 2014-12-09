@@ -27,7 +27,7 @@ class ProductTest(APITest):
         self.response.assertStatusEqual(200)
         default_fields = ['stockrecords', 'description', 'title', 'url',
                           'date_updated', 'recommended_products', 'attributes',
-                          'date_created', 'id']
+                          'date_created', 'id', 'price', 'availability']
         for field in default_fields:
             self.assertIn(field, self.response.body)
         self.response.assertValueEqual('title', "Oscar T-shirt")
