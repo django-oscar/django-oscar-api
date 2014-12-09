@@ -1,8 +1,9 @@
 from django.contrib import auth
 from oscar.core.loading import get_model
 from rest_framework import generics
+from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAdminUser
-
+from rest_framework.views import APIView
 from commerceconnect import serializers, permissions
 from .mixin import PutIsPatchMixin
 
@@ -10,6 +11,7 @@ __all__ = (
     'BasketList', 'BasketDetail',
     'LineAttributeList', 'LineAttributeDetail',
     'ProductList', 'ProductDetail',
+    'ProductPrice', 'ProductAvailability',
     'StockRecordList', 'StockRecordDetail',
     'UserList', 'UserDetail',
     'OptionList', 'OptionDetail',
@@ -63,12 +65,20 @@ class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveAPIView):
     serializer_class = serializers.LineAttributeSerializer
 
 
+
 class ProductList(generics.ListAPIView):
     model = Product
     serializer_class = serializers.ProductLinkSerializer
 class ProductDetail(generics.RetrieveAPIView):
     model = Product
     serializer_class = serializers.ProductSerializer
+class ProductPrice(generics.RetrieveAPIView):
+    model = Product
+    serializer_class = serializers.ProductPriceSerializer
+class ProductAvailability(generics.RetrieveAPIView):
+    model = Product
+    serializer_class = serializers.ProductAvailabilitySerializer
+
 
 
 class StockRecordList(generics.ListAPIView):
