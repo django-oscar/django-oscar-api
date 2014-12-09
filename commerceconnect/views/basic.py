@@ -4,6 +4,10 @@ from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
 from commerceconnect import serializers, permissions
 from .mixin import PutIsPatchMixin
+from oscar.core.loading import get_class
+from rest_framework.response import Response
+
+Selector = get_class('partner.strategy', 'Selector')
 
 __all__ = (
     'BasketList', 'BasketDetail',
@@ -82,8 +86,14 @@ class ProductDetail(generics.RetrieveAPIView):
 
 
 class ProductPrice(generics.RetrieveAPIView):
-    model = Product
-    serializer_class = serializers.ProductPriceSerializer
+
+    def get(self, request, pk=None, format=None):
+        product = Product.objects.get(id=pk)
+        strategy = Selector().strategy(request=request, user=request.user)
+        price = strategy.fetch_for_product(product).price
+        ser = serializers.PriceSerializer(price,
+                                          context={'request': request})
+        return Response(ser.data)
 
 
 class ProductAvailability(generics.RetrieveAPIView):

@@ -48,14 +48,6 @@ class ProductImageSerializer(OscarModelSerializer):
         model = ProductImage
 
 
-class ProductPriceSerializer(OscarStrategySerializer):
-    excl_tax = serializers.DecimalField(source="info.price.excl_tax")
-    incl_tax = serializers.DecimalField(source="info.price.incl_tax")
-    is_tax_known = serializers.BooleanField(source="info.price.incl_tax")
-    tax = serializers.DecimalField(source="info.price.tax")
-    currency = serializers.CharField(source="info.price.currency")
-
-
 class ProductAvailabilitySerializer(OscarStrategySerializer):
     is_available_to_buy = serializers.BooleanField(
         source="info.availability.is_available_to_buy")
