@@ -34,18 +34,17 @@ class OscarSerializer(object):
 
 
 class OscarStrategySerializer(serializers.Serializer):
-    """Provides easy access to the price and stock information provided by 
+    """Provides easy access to the price and stock information provided by
         our strategy
     """
 
     def __init__(self, *args, **kwargs):
         super(OscarStrategySerializer, self).__init__(*args, **kwargs)
-        strategy = Selector().strategy(
-            request=self.context['request'],
-            user=self.context['request'].user)
+
+        request = self.context.get('request')
+        user = request.get('user') if request else None
+        strategy = Selector().strategy(request=request, user=user)
         self.object.info = strategy.fetch_for_product(self.object)
-
-
 
 
 class OscarModelSerializer(OscarSerializer, serializers.ModelSerializer):
