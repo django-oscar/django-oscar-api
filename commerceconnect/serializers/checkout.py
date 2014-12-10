@@ -12,7 +12,6 @@ from commerceconnect.utils import (
     OscarModelSerializer
 )
 
-
 OrderPlacementMixin = get_class('checkout.mixins', 'OrderPlacementMixin')
 ShippingAddress = get_model('order', 'ShippingAddress')
 BillingAddress = get_model('order', 'BillingAddress')
@@ -20,6 +19,7 @@ Order = get_model('order', 'Order')
 Basket = get_model('basket', 'Basket')
 ShippingMethod = get_model('shipping', 'OrderAndItemCharges')
 Country = get_model('address', 'Country')
+
 
 class PriceSerializer(serializers.Serializer):
     currency = serializers.CharField(
@@ -54,9 +54,10 @@ class CountrySerializer(OscarHyperlinkedModelSerializer):
 
 
 class ShippingAddressSerializer(OscarHyperlinkedModelSerializer):
-
     class Meta:
         model = ShippingAddress
+
+
 class InlineShippingAddressSerializer(OscarModelSerializer):
     country = serializers.HyperlinkedRelatedField(view_name='country-detail')
 
@@ -67,6 +68,8 @@ class InlineShippingAddressSerializer(OscarModelSerializer):
 class BillingAddressSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = BillingAddress
+
+
 class InlineBillingAddressSerializer(OscarModelSerializer):
     country = serializers.HyperlinkedRelatedField(view_name='country-detail')
 
