@@ -1,12 +1,17 @@
+import functools
+import itertools
+
 from django.contrib import auth
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
 from rest_framework import generics
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
-from commerceconnect import serializers, permissions
-from .mixin import PutIsPatchMixin
-from oscar.core.loading import get_class
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .mixin import PutIsPatchMixin
+from commerceconnect import serializers, permissions
+from commerceconnect.apps.basket.utils import prepare_basket
+
 
 Selector = get_class('partner.strategy', 'Selector')
 
@@ -59,12 +64,20 @@ class BasketList(generics.ListCreateAPIView):
     serializer_class = serializers.BasketSerializer
     permission_classes = (IsAdminUser,)
 
+    def get_queryset(self):
+        qs = super(BasketList, self).get_queryset()
+        return itertools.imap(
+            functools.partial(prepare_basket, request=self.request), 
+            qs)
 
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     model = Basket
     serializer_class = serializers.BasketSerializer
     permission_classes = (permissions.IsAdminUserOrRequestOwner,)
-
+    
+    def get_object(self, queryset=None):
+        basket = super(BasketDetail, self).get_object(queryset)
+        return prepare_basket(basket, self.request)
 
 class LineAttributeList(generics.ListCreateAPIView):
     model = LineAttribute

@@ -31,7 +31,7 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Basket
         fields = overridable('CC_BASKET_FIELDS', default=[
-            'id', 'owner', 'status', 'vouchers', 'lines',
+            'id', 'owner', 'status', 'lines',
             'url', 'offer_applications', 'total_excl_tax',
             'total_excl_tax_excl_discounts', 'total_incl_tax',
             'total_incl_tax_excl_discounts', 'total_tax', 'voucher_discounts'])
