@@ -11,10 +11,17 @@ StockRecord = get_model('partner', 'StockRecord')
 Option = get_model('catalogue', 'Option')
 
 
+class OfferDiscountSerializer(serializers.Serializer):
+    description = serializers.CharField()
+    name = serializers.CharField()
+    discount = serializers.DecimalField(decimal_places=2, max_digits=12)
+
+class VoucherDiscountSerializer(OfferDiscountSerializer):
+    voucher = OscarModelSerializer(required=False)
+
 class BasketSerializer(serializers.HyperlinkedModelSerializer):
     lines = serializers.HyperlinkedIdentityField(view_name='basket-lines-list')
-    offer_applications = serializers.SerializerMethodField(
-        'get_offer_applications')
+    offer_discounts = OfferDiscountSerializer(many=True)
     total_excl_tax = serializers.DecimalField(
         decimal_places=2, max_digits=12, required=True)
     total_excl_tax_excl_discounts = serializers.DecimalField(
@@ -25,16 +32,15 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
         decimal_places=2, max_digits=12, required=True)
     total_tax = serializers.DecimalField(
         decimal_places=2, max_digits=12, required=True)
-    voucher_discounts = serializers.DecimalField(
-        decimal_places=2, max_digits=12, required=True)
+    voucher_discounts = VoucherDiscountSerializer(many=True)
 
     class Meta:
         model = Basket
         fields = overridable('CC_BASKET_FIELDS', default=[
             'id', 'owner', 'status', 'lines',
-            'url', 'offer_applications', 'total_excl_tax',
+            'url', 'total_excl_tax',
             'total_excl_tax_excl_discounts', 'total_incl_tax',
-            'total_incl_tax_excl_discounts', 'total_tax', 'voucher_discounts'])
+            'total_incl_tax_excl_discounts', 'total_tax', 'voucher_discounts', 'offer_discounts'])
 
     def get_validation_exclusions(self, instance=None):
         """
@@ -44,11 +50,6 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
         """
         return super(BasketSerializer, self).get_validation_exclusions(
             instance) + ['owner']
-
-    def get_offer_applications(self, obj):
-        if hasattr(obj, 'offer_applications'):
-            return obj.offer_applications.offers
-        return {}
 
 
 class LineAttributeSerializer(serializers.HyperlinkedModelSerializer):
