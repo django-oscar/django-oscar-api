@@ -927,3 +927,13 @@ class BasketTest(APITest):
             quantity=5)
         self.response.assertStatusEqual(200)
         self.response.assertValueEqual('total_incl_tax', '50.00')
+
+    def test_add_product_above_stock(self):
+        """Test if an anonymous user cannot add more products to his
+            basket when stock is not sufficient
+        """
+        self.response = self.post(
+            'api-basket-add-product',
+            url="http://testserver/nl-nl/commerceconnect/products/1/",
+            quantity=25)
+        self.response.assertStatusEqual(406)

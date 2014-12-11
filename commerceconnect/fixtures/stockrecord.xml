@@ -10,7 +10,7 @@
         <field type="DecimalField" name="cost_price">
             <None/>
         </field>
-        <field type="PositiveIntegerField" name="num_in_stock">0</field>
+        <field type="PositiveIntegerField" name="num_in_stock">20</field>
         <field type="IntegerField" name="num_allocated">
             <None/>
         </field>
@@ -30,7 +30,7 @@
         <field type="DecimalField" name="cost_price">
             <None/>
         </field>
-        <field type="PositiveIntegerField" name="num_in_stock">0</field>
+        <field type="PositiveIntegerField" name="num_in_stock">20</field>
         <field type="IntegerField" name="num_allocated">
             <None/>
         </field>
