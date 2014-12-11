@@ -926,5 +926,4 @@ class BasketTest(APITest):
             url="http://testserver/nl-nl/commerceconnect/products/1/",
             quantity=5)
         self.response.assertStatusEqual(200)
-        from ipdb import set_trace; set_trace()
-
+        self.response.assertValueEqual('total_incl_tax', '50.00')
