@@ -918,3 +918,13 @@ class BasketTest(APITest):
             url="http://testserver/nl-nl/commerceconnect/products/1/",
             quantity=3)
         self.response.assertStatusEqual(406)
+
+    def test_total_prices_anonymous(self):
+        "Test if the prices calcualted by the basket are ok"
+        self.response = self.post(
+            'api-basket-add-product',
+            url="http://testserver/nl-nl/commerceconnect/products/1/",
+            quantity=5)
+        self.response.assertStatusEqual(200)
+        from ipdb import set_trace; set_trace()
+
