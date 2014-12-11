@@ -1,6 +1,5 @@
 import json
-import unittest
-
+from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from oscar.core.loading import get_model
@@ -17,6 +16,12 @@ class BasketTest(APITest):
         'productattributevalue', 'category', 'attributeoptiongroup', 'attributeoption',
         'stockrecord', 'partner'
     ]
+
+    def setUp(self):
+        # make sure we have this disabled for most of the tests
+        settings.OSCAR_MAX_BASKET_QUANTITY_THRESHOLD = None
+        super(BasketTest, self).setUp()
+
     def test_basket_api_create(self):
         "The basket api create command should work with regular cookie based login"
         url = reverse('basket-list')
@@ -797,6 +802,7 @@ class BasketTest(APITest):
         self.assertEqual(line0['product'], "http://testserver/nl-nl/commerceconnect/products/1/")
         self.assertEqual(line0['quantity'], 5)
 
+
     def test_add_product_authenticated(self):
         "Test if an authenticated user can add a product to his basket"
         self.login('nobody', 'nobody')
@@ -901,3 +907,14 @@ class BasketTest(APITest):
             self.response = self.get('api-login', session_id='nobody', authenticated=True)
             self.response.assertStatusEqual(200)
             self.response.assertValueEqual('username', 'nobody')
+
+    def test_add_product_limit_basket(self):
+        """Test if an anonymous user cannot add more than two products to his
+            basket when amount of baskets is limited
+        """
+        settings.OSCAR_MAX_BASKET_QUANTITY_THRESHOLD = 2
+        self.response = self.post(
+            'api-basket-add-product',
+            url="http://testserver/nl-nl/commerceconnect/products/1/",
+            quantity=3)
+        self.response.assertStatusEqual(406)

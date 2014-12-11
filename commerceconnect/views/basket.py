@@ -62,14 +62,15 @@ def add_product(request, format=None):
                                              context={'request': request})
     if p_ser.is_valid():
         basket = get_basket(request)
-        basket.add_product(p_ser.object,
-                           quantity=p_ser.init_data.get('quantity'))
-
-        apply_offers(request, basket)
-
-        ser = serializers.BasketSerializer(basket,
-                                           context={'request': request})
-        return Response(ser.data)
+        quantity = p_ser.init_data.get('quantity')
+        allowed, message = basket.is_quantity_allowed(quantity)
+        if allowed:
+            basket.add_product(p_ser.object, quantity=quantity)
+            apply_offers(request, basket)
+            ser = serializers.BasketSerializer(
+                basket,  context={'request': request})
+            return Response(ser.data)
+        return Response(message, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     return Response(p_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
