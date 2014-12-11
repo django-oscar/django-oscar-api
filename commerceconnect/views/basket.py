@@ -69,17 +69,17 @@ def add_product(request, format=None):
         # check if product is available at all
         if not availability.is_available_to_buy:
             return Response(
-                availability.message, status=status.HTTP_406_NOT_ACCEPTABLE)
+                {'reason': availability.message}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         # check if we can buy this quantity
         allowed, message = availability.is_purchase_permitted(quantity)
         if not allowed:
-            return Response(message, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'reason': message}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         # check if there is a limit on amount
         allowed, message = basket.is_quantity_allowed(quantity)
         if not allowed:
-            return Response(message, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({'reason': message}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
         basket.add_product(p_ser.object, quantity=quantity)
         apply_offers(request, basket)
@@ -87,7 +87,7 @@ def add_product(request, format=None):
             basket,  context={'request': request})
         return Response(ser.data)
 
-    return Response(p_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
+    return Response({'reason': p_ser.errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
