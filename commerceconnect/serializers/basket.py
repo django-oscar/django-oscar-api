@@ -11,19 +11,24 @@ StockRecord = get_model('partner', 'StockRecord')
 Option = get_model('catalogue', 'Option')
 Voucher = get_model('voucher', 'Voucher')
 
+
 class VoucherSerializer(OscarModelSerializer):
     class Meta:
         model = Voucher
         fields = overridable('CC_VOUCHER_FIELDS', default=[
             'name', 'code', 'start_datetime', 'end_datetime'
         ])
+
+
 class OfferDiscountSerializer(serializers.Serializer):
     description = serializers.CharField()
     name = serializers.CharField()
     discount = serializers.DecimalField(decimal_places=2, max_digits=12)
 
+
 class VoucherDiscountSerializer(OfferDiscountSerializer):
     voucher = VoucherSerializer(required=False)
+
 
 class BasketSerializer(serializers.HyperlinkedModelSerializer):
     lines = serializers.HyperlinkedIdentityField(view_name='basket-lines-list')
