@@ -32,18 +32,18 @@ class VoucherDiscountSerializer(OfferDiscountSerializer):
 
 class BasketSerializer(serializers.HyperlinkedModelSerializer):
     lines = serializers.HyperlinkedIdentityField(view_name='basket-lines-list')
-    offer_discounts = OfferDiscountSerializer(many=True)
+    offer_discounts = OfferDiscountSerializer(many=True, required=False)
     total_excl_tax = serializers.DecimalField(
-        decimal_places=2, max_digits=12, required=True)
+        decimal_places=2, max_digits=12, required=False)
     total_excl_tax_excl_discounts = serializers.DecimalField(
-        decimal_places=2, max_digits=12, required=True)
+        decimal_places=2, max_digits=12, required=False)
     total_incl_tax = serializers.DecimalField(
-        decimal_places=2, max_digits=12, required=True)
+        decimal_places=2, max_digits=12, required=False)
     total_incl_tax_excl_discounts = serializers.DecimalField(
-        decimal_places=2, max_digits=12, required=True)
+        decimal_places=2, max_digits=12, required=False)
     total_tax = serializers.DecimalField(
-        decimal_places=2, max_digits=12, required=True)
-    voucher_discounts = VoucherDiscountSerializer(many=True)
+        decimal_places=2, max_digits=12, required=False)
+    voucher_discounts = VoucherDiscountSerializer(many=True, required=False)
 
     class Meta:
         model = Basket
