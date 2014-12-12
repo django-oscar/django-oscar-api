@@ -5,6 +5,9 @@ __all__ = ('prepare_basket', 'get_basket', 'apply_offers', )
 
 
 Applicator = get_class('offer.utils', 'Applicator')
+Selector = get_class('partner.strategy', 'Selector')
+
+selector = Selector()
 
 
 def apply_offers(request, basket):
@@ -14,7 +17,10 @@ def apply_offers(request, basket):
 
 
 def prepare_basket(basket, request):
-    basket.strategy = request.strategy
+    if request.strategy:
+        basket.strategy = request.strategy
+    else:
+        basket.strategy = selector.strategy(request=request, user=request.user)
     apply_offers(request, basket)
 
     basket.store_basket(request)
