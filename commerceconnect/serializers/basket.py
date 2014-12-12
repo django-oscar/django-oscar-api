@@ -43,6 +43,7 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
         decimal_places=2, max_digits=12, required=False)
     total_tax = serializers.DecimalField(
         decimal_places=2, max_digits=12, required=False)
+    currency = serializers.CharField(required=False)
     voucher_discounts = VoucherDiscountSerializer(many=True, required=False)
 
     class Meta:
@@ -51,7 +52,8 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
             'id', 'owner', 'status', 'lines',
             'url', 'total_excl_tax',
             'total_excl_tax_excl_discounts', 'total_incl_tax',
-            'total_incl_tax_excl_discounts', 'total_tax', 'voucher_discounts', 'offer_discounts'])
+            'total_incl_tax_excl_discounts', 'total_tax', 'currency',
+            'voucher_discounts', 'offer_discounts'])
 
     def get_validation_exclusions(self, instance=None):
         """
