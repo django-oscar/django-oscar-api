@@ -5,9 +5,7 @@ __all__ = ('prepare_basket', 'get_basket', 'apply_offers', )
 
 
 Applicator = get_class('offer.utils', 'Applicator')
-Selector = get_class('partner.strategy', 'Selector')
-
-selector = Selector()
+Selector = None
 
 
 def apply_offers(request, basket):
@@ -17,12 +15,18 @@ def apply_offers(request, basket):
 
 
 def prepare_basket(basket, request):
-    if request.strategy:
-        basket.strategy = request.strategy
-    else:
-        basket.strategy = selector.strategy(request=request, user=request.user)
-    apply_offers(request, basket)
+    # fixes too early import of Selector
+    global Selector
 
+    if hasattr(request, 'strategy'):
+        basket.strategy = request.strategy
+    else:  # in management commands, the request might not be available.
+        if Selector is None:
+            Selector = get_class('partner.strategy', 'Selector')
+        basket.strategy = Selector().strategy(
+            request=request, user=request.user)
+
+    apply_offers(request, basket)
     basket.store_basket(request)
     return basket
 
