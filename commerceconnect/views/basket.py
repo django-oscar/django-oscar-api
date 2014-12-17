@@ -88,6 +88,17 @@ def add_product(request, format=None):
 
 @api_view(('POST',))
 def add_voucher(request, format=None):
+    """
+    Add a voucher to the basket.
+    
+    POST(vouchercode)
+    {
+        "vouchercode": "kjadjhgadjgh7667"
+    }
+    
+    Will return 200 and the voucher as json if succesful.
+    If unsuccessful, will return 406 with the error.
+    """
     v_ser = serializers.VoucherAddSerializer(data=request.DATA,
                                              context={'request': request})
     if v_ser.is_valid():
