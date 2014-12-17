@@ -1,4 +1,8 @@
 from django.utils.translation import ugettext_lazy as _
+
+from oscar.apps.basket import signals
+from oscar.core.loading import get_model
+
 from rest_framework import status, generics, exceptions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -11,8 +15,7 @@ from commerceconnect.apps.basket.utils import (
 )
 from commerceconnect.views.mixin import PutIsPatchMixin
 from commerceconnect.views.utils import BasketPermissionMixin
-from oscar.core.loading import get_model, get_class
-from oscar.apps.basket import signals
+
 
 __all__ = ('BasketView', 'LineList', 'LineDetail', 'add_product', 'add_voucher')
 
@@ -123,6 +126,8 @@ def add_voucher(request, format=None):
 
         ser = serializers.VoucherSerializer(voucher, context={'request': request})
         return Response(ser.data)
+
+    return Response(v_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
