@@ -12,16 +12,12 @@ from commerceconnect.apps.basket.utils import (
 from commerceconnect.views.mixin import PutIsPatchMixin
 from commerceconnect.views.utils import BasketPermissionMixin
 from oscar.core.loading import get_model, get_class
+from oscar.apps.basket import signals
 
-
-__all__ = ('BasketView', 'LineList', 'LineDetail', 'add_product')
+__all__ = ('BasketView', 'LineList', 'LineDetail', 'add_product', 'add_voucher')
 
 Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
-Applicator = get_class('offer.utils', 'Applicator')
-Selector = get_class('partner.strategy', 'Selector')
-
-selector = Selector()
 
 
 class BasketView(APIView):
@@ -88,6 +84,34 @@ def add_product(request, format=None):
         return Response(ser.data)
 
     return Response({'reason': p_ser.errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+@api_view(('POST',))
+def add_voucher(request, format=None):
+    v_ser = serializers.VoucherAddSerializer(data=request.DATA,
+                                             context={'request': request})
+    if v_ser.is_valid():
+        basket = get_basket(request)
+        voucher = v_ser.object
+        basket.vouchers.add(voucher)
+
+        signals.voucher_addition.send(
+            sender=None, basket=basket, voucher=voucher)
+        
+        # Recalculate discounts to see if the voucher gives any
+        apply_offers(request, basket)
+        discounts_after = basket.offer_applications
+
+        # Look for discounts from this new voucher
+        for discount in discounts_after:
+            if discount['voucher'] and discount['voucher'] == voucher:
+                break
+        else:
+            basket.vouchers.remove(voucher)
+            return Response({'reason':_("Your basket does not qualify for a voucher discount")}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        ser = serializers.VoucherSerializer(voucher, context={'request': request})
+        return Response(ser.data)
 
 
 class LineList(BasketPermissionMixin, generics.ListCreateAPIView):

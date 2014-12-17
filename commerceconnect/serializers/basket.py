@@ -1,7 +1,12 @@
+import logging
 from rest_framework import serializers
 
 from commerceconnect.utils import overridable, OscarModelSerializer
+from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
+
+
+logger= logging.getLogger(__name__)
 
 
 Basket = get_model('basket', 'Basket')
@@ -97,3 +102,39 @@ class StockRecordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockRecord
+
+
+class VoucherAddSerializer(serializers.Serializer):
+    vouchercode = serializers.CharField(max_length=128, required=True)
+    
+    def validate(self, attrs):
+        request = self.context.get('request')
+        try:
+            voucher = Voucher.objects.get(code=attrs.get('vouchercode'))
+
+            # check expiry date
+            if not voucher.is_active():
+                message = _("The '%(code)s' voucher has expired") % {
+                    'code': voucher.code
+                }
+                raise serializers.ValidationError(message)
+
+            # check voucher rules
+            is_available, message = voucher.is_available_to_user(request.user)
+            if not is_available:
+                raise serializers.ValidationError(message)
+
+        except Voucher.DoesNotExist:
+            raise serializers.ValidationError(_('Voucher code unknown'))
+
+        return attrs
+
+    def restore_object(self, attrs, instance=None):
+        if not instance:
+            code = attrs.get('vouchercode')
+            try:
+                instance = Voucher.objects.get(code=code)
+            except Voucher.DoesNotExist:
+                logger.error('Voucher not found %s' % code)
+        
+        return instance
