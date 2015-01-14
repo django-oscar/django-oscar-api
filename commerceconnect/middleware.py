@@ -138,9 +138,11 @@ class HeaderSessionMiddleware(SessionMiddleware):
         if is_api_request(request) \
                 and getattr(request, 'session', None) is not None \
                 and hasattr(request, 'parsed_session_uri'):
-            assert(request.session.session_key ==
-                   session_id_from_parsed_session_uri(
-                       request.parsed_session_uri))
+            session_key = request.session.session_key
+            parsed_session_key = session_id_from_parsed_session_uri(
+                request.parsed_session_uri)
+            assert(session_key == parsed_session_key), \
+                    '%s is not equal to %s' % (session_key, parsed_session_key)
             response['Session-Id'] = \
                 'SID:%(type)s:%(realm)s:%(session_id)s' % (
                     request.parsed_session_uri)
