@@ -6,7 +6,7 @@ __version__ = "0.0.13"
 
 setup(
     # package name in pypi
-    name='django-oscar-commerce-connect',
+    name='django-oscar-api',
     # extract version from module.
     version=__version__,
     description="REST API module for django-oscar",
@@ -18,15 +18,15 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: Unix',
-        'Programming Language :: Python']
-    ),
+        'Programming Language :: Python'
+    ],
     keywords='',
     author='Lars van de Kerkhof, Martijn Jacobs',
     author_email='lars@permanentmarkers.nl, martijn@devopsconsulting.nl',
     url='https://github.com/tangentlabs/django-oscar-api',
     license='BSD',
     # include all packages in the egg, except the test package.
-    packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+    packages=find_packages(exclude=['ez_setup', 'examples', 'tests', 'sandbox']),
     # for avoiding conflict have one namespace for all apc related eggs.
     namespace_packages=[],
     # include non python files
