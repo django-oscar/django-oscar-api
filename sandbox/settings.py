@@ -6,6 +6,8 @@ ALLOWED_HOSTS = []
 
 BASE_DIR = os.path.dirname(__file__)
 
+CC_BLOCK_ADMIN_API_ACCESS = False
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -31,6 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
     'django.contrib.staticfiles',
     'compressor',
+    'django_nose',
     'rest_framework',
     'oscarapi',
 ] + get_core_apps([
@@ -39,20 +42,90 @@ INSTALLED_APPS = [
 
 LANGUAGE_CODE = 'en-us'
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'root': {
+        'level': 'DEBUG' if DEBUG else 'INFO',
+        'handlers': ['console',],
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s',
+        },
+        'simple': {
+            'format': '[%(asctime)s] %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'filters': ['require_debug_false'],
+        },
+    },
+    'loggers': {
+        # Django loggers
+        'django': {
+            'propagate': True,
+        },
+        'django.db': {
+            'level': 'WARNING'
+        },
+        'django.request': {
+            'handlers': ['mail_admins',],
+            'level': 'ERROR',
+            'propagate': False
+        },
+        # Third party
+        'south': {
+            'level': 'INFO',
+        },
+        'sorl.thumbnail': {
+            'level': 'ERROR',
+        },
+        # Suppress output of this debug toolbar panel
+        'template_timings_panel': {
+            'handlers': ['null'],
+        }
+    }
+}
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MIDDLEWARE_CLASSES = (
-    'oscarapi.middleware.HeaderSessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'oscarapi.middleware.HeaderSessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'oscar.apps.basket.middleware.BasketMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
+
+REST_FRAMEWORK = {
+    'CHARSET': 'utf-8',
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.UnicodeJSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    )
+}
 
 ROOT_URLCONF = 'urls'
 
@@ -83,6 +156,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'oscar.apps.customer.notifications.context_processors.notifications',
     'oscar.core.context_processors.metadata',
 )
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 TIME_ZONE = 'UTC'
 

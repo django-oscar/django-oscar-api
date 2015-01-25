@@ -40,6 +40,6 @@ setup(
     ],
     # mark test target to require extras.
     extras_require={
-        'test': []
+        'test': ['django-nose',]
     },
 )
