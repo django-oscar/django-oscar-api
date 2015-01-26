@@ -4,9 +4,9 @@ Oscar REST API
 
 This package provides a RESTful API for `django-oscar`_.
 
-.. _`django-oscar`: https://github.com/tangentlabs/django-oscar
+.. _`django-oscar`: https://github.com/django-oscar/django-oscar
 .. _`django-oscar@googlegroups.com`: https://groups.google.com/forum/?fromgroups#!forum/django-oscar
-.. _`on the wiki`: https://github.com/tangentlabs/django-oscar-api/wiki
+.. _`on the wiki`: https://github.com/django-oscar/django-oscar-api/wiki
 
 Rest api Gateway & resource protection.
 ---------------------------------------
@@ -18,7 +18,7 @@ levels.
 1. gateway level.
    An api token is required to communicate with the rest api.
    That means we can authorize client applications to make use of the
-   rest api. Examples of client applications are the sitecore website or a
+   rest api. Examples of client applications are a website or a
    mobile application.
 2. User level. Because we don't want resource protection to be the
    responsibility of the client application, we need restrictions of resource
@@ -45,12 +45,12 @@ checkout, order history etc.
 A client application can upgrade a user by using the login api.
 The following actions will be performed when a user logs in:
 
-1. The user will be authenticated with gigya. The next steps will only be
+1. The user will be authenticated with the rest api. The next steps will only be
    performed is login is succesful.
 2. The anonymous cart will be merged with the private cart associated with that
    authenticated user.
 3. A new session will be started, this session identifies the authenticated user
-   for the duration of the session, without further calls to gigya.
+   for the duration of the session.
 4. The new, merged cart will be associated with this session.
 5. The anonymous session will be terminated.
 6. A response will be issued containing the new session id as a header (more on
@@ -107,7 +107,7 @@ included when hashing. When upgrading a user from anonymous to authenticated, a
 new session id will be generated, by replacing ``ANON`` in the original session
 id with ``AUTH`` and performing the hashing again, example: 
 
-``SID:AUTH:www.nutricia.nl:82d7ac3f-135c-4b12-a296-ff3c4701307d``.
+``SID:AUTH:www.example.com:82d7ac3f-135c-4b12-a296-ff3c4701307d``.
 
 Every response of the REST will also contain the ``Session-Id`` header.
 When a user is logged in, The response will contain a DIFFERENT Session-Id as
