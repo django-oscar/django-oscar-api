@@ -162,7 +162,11 @@ class ApiGatewayMiddleWare(object):
             if models.ApiKey.objects.filter(key=key).exists():
                 return None
 
-            logger.error('No credentials provided')
+            logger.error('Invalid credentials provided for %s:%s by %s' % (
+                request.method,
+                request.path,
+                request.META.get('REMOTE_ADDR', '<unknown>')
+            ))
             raise PermissionDenied()
 
         return None
