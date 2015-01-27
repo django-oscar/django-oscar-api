@@ -8,44 +8,44 @@ This package provides a RESTful API for `django-oscar`_.
 .. _`django-oscar@googlegroups.com`: https://groups.google.com/forum/?fromgroups#!forum/django-oscar
 .. _`on the wiki`: https://github.com/django-oscar/django-oscar-api/wiki
 
-Rest api Gateway & resource protection.
+REST API Gateway & resource protection.
 ---------------------------------------
 
-Because we need the rest api to fascilitate the same usage patterns as
-a regular oscar html frontend, we need protection of resources on several
+Because we need the REST API to fascilitate the same usage patterns as
+a regular oscar HTML frontend, we need protection of resources on several
 levels.
 
 1. gateway level.
-   An api token is required to communicate with the rest api.
+   An API token is required to communicate with the REST API.
    That means we can authorize client applications to make use of the
-   rest api. Examples of client applications are a website or a
+   REST API. Examples of client applications are a website or a
    mobile application.
 2. User level. Because we don't want resource protection to be the
    responsibility of the client application, we need restrictions of resource
-   access on a user level. The user will use the rest api through an authorized
+   access on a user level. The user will use the REST API through an authorized
    client application. A user must only be able to access his own resources and
-   it must be strictly enforced inside the rest api, that there is no way an
-   api client application can access resources of a different user than the one
-   identified to the rest api. Effectively an authorized client application can
+   it must be strictly enforced inside the REST API, that there is no way an
+   API client application can access resources of a different user than the one
+   identified to the REST API. Effectively an authorized client application can
    only manipulate resources on a user level and not on an administrator level.
 
 
 Anonymous users
 ---------------
 
-Just like the oscar html frontend, some part of the functionality of oscar is
+Just like the oscar HTML frontend, some part of the functionality of oscar is
 available to anonymous users. That doesn't mean an anonymous user can not be
 identified. They are identified by their session, the same way as in a regular
-html frontend.
+HTML frontend.
 
 There is an upgrade path for an anonymous user, to become an authenticated user,
 which opens up the functionality restricted to authenticated users, such as
 checkout, order history etc.
 
-A client application can upgrade a user by using the login api.
+A client application can upgrade a user by using the login API.
 The following actions will be performed when a user logs in:
 
-1. The user will be authenticated with the rest api. The next steps will only be
+1. The user will be authenticated with the REST API. The next steps will only be
    performed is login is succesful.
 2. The anonymous cart will be merged with the private cart associated with that
    authenticated user.
@@ -65,7 +65,7 @@ Session protocol
     application where the requests can be inspected by an attacker, such as a
     mobile application. CSRF protection is NOT applied so requests CAN be forged
     when using the session protocol. Regular cookie based sessions are still
-    fully functional and the entire REST api should work with this method of
+    fully functional and the entire REST API should work with this method of
     authentication as well. When using cookie based session, csrf restrictions
     are enforced as usual, so this is the preferred method of authentication
     for any untrusted applications.
@@ -76,7 +76,7 @@ Session protocol
     WILL be attached to another user if that user logs in with a session id
     allready in use by someone else.
 
-When using the session protocol for authentication, the rest api will not make
+When using the session protocol for authentication, the REST API will not make
 use of cookies, which are usually used for transferring the session id between
 the client and the backend. Instead we will use the ``Session-Id`` header as
 specified in http://www.w3.org/TR/WD-session-id
@@ -109,7 +109,7 @@ id with ``AUTH`` and performing the hashing again, example:
 
 ``SID:AUTH:www.example.com:82d7ac3f-135c-4b12-a296-ff3c4701307d``.
 
-Every response of the REST will also contain the ``Session-Id`` header.
+Every response of the REST API will also contain the ``Session-Id`` header.
 When a user is logged in, The response will contain a DIFFERENT Session-Id as
 the request, because ANON will be replaced with AUTH.
 
@@ -133,7 +133,7 @@ The above measures ensure the following behaviour:
    for a user that has logged out of the client application.
 3. Keeping the session identifier part of the Session Identification URI the same
    for both anonymous and authenticated users, simplifies tracking and associating
-   rest api resources with client application resources.
+   REST API resources with client application resources.
 
 Final note
 ----------
@@ -174,7 +174,7 @@ methods to be on the model, for authentication.
 Extending and overriding
 ------------------------
 
-When needed, the functionality of the rest api can be overridden.
+When needed, the functionality of the REST API can be overridden.
 The entry point for customization is ``oscarapi.app:Application``.
 In your own app, you can extend this class, and override some of the urls to
 direct them to your own views. You can subclass any of the views in oscarapi,
