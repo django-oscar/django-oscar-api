@@ -1,7 +1,7 @@
 .PHONY: test install sandbox
 
 install:
-	python setup.py develop
+	pip install -e .
 	pip install django-oscar-api[test]
 
 sandbox: install

@@ -5,7 +5,7 @@ oscar_commerceconnect.egg-info/
 dist/
 logs/
 public/
-db.sqlite
+db.sqlite3
 .ropeproject
 .Python
 bin/
