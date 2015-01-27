@@ -6,7 +6,7 @@ ALLOWED_HOSTS = []
 
 BASE_DIR = os.path.dirname(__file__)
 
-CC_BLOCK_ADMIN_API_ACCESS = False
+OSCARAPI_BLOCK_ADMIN_API_ACCESS = False
 
 DATABASES = {
     'default': {

@@ -39,7 +39,7 @@ class LoginView(APIView):
 
     GET (enabled in DEBUG mode only):
     Get the details of the logged in user.
-    If more details are needed, use the ``CC_PRODUCT_FIELDS`` setting to change
+    If more details are needed, use the ``OSCARAPI_PRODUCT_FIELDS`` setting to change
     the fields the ``UserSerializer`` will render.
     """
 

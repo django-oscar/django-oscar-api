@@ -98,7 +98,7 @@ class BasketTest(APITest):
         self.response.assertValueEqual('id', basket_id)
 
         # admin
-        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             self.login('admin', 'admin')
             self.response = self.get('api-basket')
             self.response.assertStatusEqual(200)
@@ -135,7 +135,7 @@ class BasketTest(APITest):
         self.response.assertValueEqual('id', basket_id)
 
         # admin
-        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             self.hlogin('admin', 'admin', session_id='admin')
             self.response = self.get('api-basket', session_id='admin', authenticated=True)
             self.response.assertStatusEqual(200)
@@ -202,7 +202,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(403, "Script kiddies should fail to collect other users cart items.")
 
         # now let's show the power of the admin!
-        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             self.login('admin', 'admin')
             self.response = self.get('api-basket')
             self.response.assertStatusEqual(200)
@@ -283,7 +283,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(403, "Script kiddies should fail to collect other users cart items.")
 
         # now let's show the power of the admin!
-        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             self.hlogin('admin', 'admin', session_id='admin')
             self.response = self.get('api-basket', session_id='admin', authenticated=True)
             self.response.assertStatusEqual(200)
@@ -599,7 +599,7 @@ class BasketTest(APITest):
     def test_basket_write_permissions_admin(self):
         "An admin user can change someone elses basket."
 
-        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             # now try for authenticated user.
             self.login('admin', 'admin')
             self.response = self.get('api-basket')
@@ -696,7 +696,7 @@ class BasketTest(APITest):
 
     def test_basket_write_permissions_header_admin(self):
         "An admin user can change someone elses basket, when authinticating with session header."
-        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             # now try for authenticated user.
             self.hlogin('admin', 'admin', session_id='admin')
             self.response = self.get('api-basket', session_id='admin', authenticated=True)
@@ -837,7 +837,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(403)
         
         # admin can cheat
-        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             self.login('admin', 'admin')
             self.response = self.get(line0url)
             self.response.assertStatusEqual(200)
@@ -863,7 +863,7 @@ class BasketTest(APITest):
         self.response = self.get(line0url, session_id='somebody', authenticated=True)
         self.response.assertStatusEqual(403)
 
-        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False):
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             self.hlogin('admin', 'admin', session_id='admin')
             self.response = self.get(line0url, session_id='admin', authenticated=True)
             self.response.assertStatusEqual(200)

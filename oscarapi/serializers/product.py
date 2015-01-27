@@ -18,7 +18,7 @@ ProductImage = get_model('catalogue', 'ProductImage')
 class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = Product
-        fields = overridable('CC_PRODUCT_FIELDS', default=('url',
+        fields = overridable('OSCARAPI_PRODUCT_FIELDS', default=('url',
                                                            'id',
                                                            'title'))
 
@@ -73,7 +73,7 @@ class ProductSerializer(OscarModelSerializer):
     class Meta:
         model = Product
         fields = overridable(
-            'CC_PRODUCTDETAIL_FIELDS',
+            'OSCARAPI_PRODUCTDETAIL_FIELDS',
             default=('url', 'id', 'title', 'description',
                      'date_created', 'date_updated', 'recommended_products',
                      'attributes', 'stockrecords', 'images', 'price',

@@ -20,7 +20,7 @@ Voucher = get_model('voucher', 'Voucher')
 class VoucherSerializer(OscarModelSerializer):
     class Meta:
         model = Voucher
-        fields = overridable('CC_VOUCHER_FIELDS', default=[
+        fields = overridable('OSCARAPI_VOUCHER_FIELDS', default=[
             'name', 'code', 'start_datetime', 'end_datetime'
         ])
 
@@ -53,7 +53,7 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Basket
-        fields = overridable('CC_BASKET_FIELDS', default=[
+        fields = overridable('OSCARAPI_BASKET_FIELDS', default=[
             'id', 'owner', 'status', 'lines',
             'url', 'total_excl_tax',
             'total_excl_tax_excl_discounts', 'total_incl_tax',

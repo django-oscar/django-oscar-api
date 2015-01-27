@@ -17,7 +17,7 @@ class LoginTest(APITest):
         self.assertEqual(response.get('Session-Id'), 'SID:AUTH:testserver:koe', 'the session type should be upgraded to AUTH')
 
         # check authentication worked
-        with self.settings(DEBUG=True, CC_USER_FIELDS=('username', 'id')):
+        with self.settings(DEBUG=True, OSCARAPI_USER_FIELDS=('username', 'id')):
             response = self.get('api-login', session_id='koe', authenticated=True)
             parsed_response = json.loads(response.content)
 
@@ -26,7 +26,7 @@ class LoginTest(APITest):
 
         # note that this shows that we can move a session from one user to the
         # other! This is the responsibility of the client application!
-        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False, DEBUG=True, CC_USER_FIELDS=('username', 'id')):
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False, DEBUG=True, OSCARAPI_USER_FIELDS=('username', 'id')):
             response = self.post('api-login', username='admin', password='admin', session_id='koe')
 
             self.assertEqual(response.status_code, 200)
@@ -51,7 +51,7 @@ class LoginTest(APITest):
         self.assertEqual(response.get('Session-Id'), 'SID:ANON:testserver:koe', 'the session type should NOT be upgraded to AUTH')
 
         # check authentication didn't work
-        with self.settings(DEBUG=True, CC_USER_FIELDS=('username', 'id')):
+        with self.settings(DEBUG=True, OSCARAPI_USER_FIELDS=('username', 'id')):
             response = self.get('api-login')
             self.assertFalse(response.content)
             self.assertEqual(response.status_code, 204)
@@ -66,7 +66,7 @@ class LoginTest(APITest):
         self.assertNotIn('Session-Id', response)
 
         # check authentication worked
-        with self.settings(DEBUG=True, CC_USER_FIELDS=('username', 'id')):
+        with self.settings(DEBUG=True, OSCARAPI_USER_FIELDS=('username', 'id')):
             response = self.get('api-login')
             parsed_response = json.loads(response.content)
 
@@ -75,7 +75,7 @@ class LoginTest(APITest):
 
         # using cookie sessions it is not possible to pass 1 session to another 
         # user
-        with self.settings(CC_BLOCK_ADMIN_API_ACCESS=False, DEBUG=True, CC_USER_FIELDS=('username', 'id')):
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False, DEBUG=True, OSCARAPI_USER_FIELDS=('username', 'id')):
             response = self.post('api-login', username='admin', password='admin')
 
             self.assertEqual(response.status_code, 405)

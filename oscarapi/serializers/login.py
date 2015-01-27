@@ -10,7 +10,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = overridable('CC_USER_FIELDS', (
+        fields = overridable('OSCARAPI_USER_FIELDS', (
             'username', 'id', 'date_joined',))
 
 
@@ -27,7 +27,7 @@ class LoginSerializer(serializers.Serializer):
         elif not user.is_active:
             raise serializers.ValidationError(
                 'Can not log in as inactive user')
-        elif user.is_staff and overridable('CC_BLOCK_ADMIN_API_ACCESS', True):
+        elif user.is_staff and overridable('OSCARAPI_BLOCK_ADMIN_API_ACCESS', True):
             raise serializers.ValidationError(
                 'Staff users can not log in via the rest api')
 
