@@ -125,7 +125,8 @@ class HeaderSessionMiddleware(SessionMiddleware):
                     request.csrf_processing_done = True
                     return None
             except exceptions.APIException as e:
-                response = HttpResponse('{"reason": "%s"}' % e.detail)
+                response = HttpResponse('{"reason": "%s"}' % e.detail,
+                                        content_type='application/json')
                 response.status_code = e.status_code
                 return response
 
