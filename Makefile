@@ -2,6 +2,7 @@
 
 install:
 	python setup.py develop
+	pip install django-oscar-api[test]
 
 sandbox: install
 	python sandbox/manage.py syncdb --noinput
