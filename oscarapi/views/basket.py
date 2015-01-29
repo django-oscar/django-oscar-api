@@ -1,7 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 
 from oscar.apps.basket import signals
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
 
 from rest_framework import status, generics, exceptions
 from rest_framework.decorators import api_view
@@ -17,10 +17,11 @@ from oscarapi.views.mixin import PutIsPatchMixin
 from oscarapi.views.utils import BasketPermissionMixin
 
 
-__all__ = ('BasketView', 'LineList', 'LineDetail', 'add_product', 'add_voucher')
+__all__ = ('BasketView', 'LineList', 'LineDetail', 'add_product', 'add_voucher', 'shipping_methods')
 
 Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
+Repository = get_class('shipping.repository', 'Repository')
 
 
 class BasketView(APIView):
@@ -129,6 +130,20 @@ def add_voucher(request, format=None):
 
     return Response(v_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
+@api_view(('GET',))
+def shipping_methods(request, format=None):
+    """
+    Get the available shipping methods and their cost for this order.
+    
+    GET:
+    A list of shipping method details and the prices.
+    """
+    basket = get_basket(request)
+    shiping_methods = Repository().get_shipping_methods(
+        basket=request.basket, user=request.user,
+        request=request)
+    ser = serializers.ShippingMethodSerializer(shiping_methods, many=True, context={'basket': basket})
+    return Response(ser.data)
 
 class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
     """

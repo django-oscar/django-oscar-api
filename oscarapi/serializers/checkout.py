@@ -2,6 +2,7 @@ import warnings
 
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
+from django.utils.translation import gettext as _
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 from rest_framework import serializers, exceptions
@@ -17,8 +18,8 @@ ShippingAddress = get_model('order', 'ShippingAddress')
 BillingAddress = get_model('order', 'BillingAddress')
 Order = get_model('order', 'Order')
 Basket = get_model('basket', 'Basket')
-ShippingMethod = get_model('shipping', 'OrderAndItemCharges')
 Country = get_model('address', 'Country')
+Repository = get_class('shipping.repository', 'Repository')
 
 
 class PriceSerializer(serializers.Serializer):
@@ -77,10 +78,14 @@ class InlineBillingAddressSerializer(OscarModelSerializer):
         model = BillingAddress
 
 
-class ShippingMethodSerializer(OscarHyperlinkedModelSerializer):
-    class Meta:
-        model = ShippingMethod
-        view_name = 'shippingmethod-detail'
+class ShippingMethodSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=128)
+    name = serializers.CharField(max_length=128)
+    price = serializers.SerializerMethodField('calculate_price')
+    
+    def calculate_price(self, obj):
+        price = obj.calculate(self.context.get('basket'))
+        return PriceSerializer(price).data
 
 
 class OrderSerializer(OscarModelSerializer):
@@ -104,32 +109,73 @@ class OrderSerializer(OscarModelSerializer):
         model = Order
 
 
-# TODO: At the moment, only regular shipping charges are possible.
-# Most likely CheckoutSerializer should also accept WeightBased shipping
-# charges.
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     basket = serializers.HyperlinkedRelatedField(
         view_name='basket-detail', queryset=Basket.objects)
     total = PriceSerializer(many=False, required=True)
-    shipping_method = serializers.HyperlinkedRelatedField(
-        view_name='shippingmethod-detail', queryset=ShippingMethod.objects,
-        required=True)
-    shipping_charge = PriceSerializer(many=False, required=True)
+    shipping_method_code = serializers.CharField(max_length=128, required=False)
+    shipping_charge = PriceSerializer(many=False, required=False)
     shipping_address = ShippingAddressSerializer(many=False, required=False)
     billing_address = BillingAddressSerializer(many=False, required=False)
+
+    def validate(self, attrs):
+        request = self.context['request']
+        basket = attrs.get('basket')
+        basket = prepare_basket(basket, request)
+        shipping_method = self._shipping_method(
+            request, basket,
+            attrs.get('shipping_method_code'),
+            attrs.get('shipping_address')
+        )
+        shipping_charge = shipping_method.calculate(basket)
+        posted_shipping_charge = attrs.get('shipping_charge')
+
+        # test submitted data.
+        if posted_shipping_charge is not None and \
+            not posted_shipping_charge == shipping_charge:
+            message = _('Shipping price incorrect %s != %s' % (
+                posted_shipping_charge, shipping_charge
+            ))
+            raise serializers.ValidationError(message)
+
+        total = attrs.get('total')
+        if total.excl_tax != basket.total_excl_tax:
+            message = _('Total incorrect %s != %s' % (
+                total.excl_tax,
+                basket.total_excl_tax
+            ))
+            raise serializers.ValidationError(message)
+
+        if total.tax != basket.total_tax:
+            message = _('Total incorrect %s != %s' % (
+                total.tax,
+                basket.total_tax
+            ))
+            raise serializers.ValidationError(message)
+
+        if request.user.is_anonymous() and not settings.OSCAR_ALLOW_ANON_CHECKOUT:
+            message = _('Anonymous checkout forbidden')
+            raise serializers.ValidationError(message)
+
+        # update attrs with validated data.
+        attrs['shipping_method'] = shipping_method
+        attrs['shipping_charge'] = shipping_charge
+        attrs['basket'] = basket
+        return attrs
 
     def restore_object(self, attrs, instance=None):
         if instance is not None:
             return instance
 
-        basket = attrs.get('basket')
-        order_number = self.generate_order_number(basket)
         try:
+            basket = attrs.get('basket')
+            order_number = self.generate_order_number(basket)
             request = self.context['request']
+
             return self.place_order(
                 order_number=order_number,
                 user=request.user,
-                basket=prepare_basket(basket, request),
+                basket=basket,
                 shipping_address=attrs.get('shipping_address'),
                 shipping_method=attrs.get('shipping_method'),
                 shipping_charge=attrs.get('shipping_charge'),
@@ -138,3 +184,29 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
             )
         except ValueError as e:
             raise exceptions.NotAcceptable(e.message)
+
+    def _shipping_method(self, request, basket,
+                         shipping_method_code, shipping_address):
+        repo = Repository()
+
+        default = repo.get_default_shipping_method(
+            basket=basket, 
+            user=request.user,
+            request=request,
+            shipping_addr=shipping_address
+        )
+
+        if shipping_method_code is not None:
+            methods = repo.get_shipping_methods(
+                basket=basket,
+                user=request.user,
+                request=request,
+                shipping_addr=shipping_address
+            )
+
+            find_method = (s for s in methods if s.code == shipping_method_code)
+            shipping_method = next(find_method, default)
+            return shipping_method
+
+        return default
+
