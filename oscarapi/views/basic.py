@@ -24,7 +24,6 @@ __all__ = (
     'UserList', 'UserDetail',
     'OptionList', 'OptionDetail',
     'CountryList', 'CountryDetail',
-    'ShippingMethodList', 'ShippingMethodDetail',
 )
 
 Basket = get_model('basket', 'Basket')
@@ -33,7 +32,6 @@ Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Option = get_model('catalogue', 'Option')
 User = auth.get_user_model()
-ShippingMethod = get_model('shipping', 'OrderAndItemCharges')
 Country = get_model('address', 'Country')
 
 
@@ -47,16 +45,6 @@ class CountryList(generics.ListAPIView):
 class CountryDetail(generics.RetrieveAPIView):
     serializer_class = serializers.CountrySerializer
     model = Country
-
-
-class ShippingMethodList(generics.ListAPIView):
-    serializer_class = serializers.ShippingMethodSerializer
-    model = ShippingMethod
-
-
-class ShippingMethodDetail(generics.RetrieveAPIView):
-    serializer_class = serializers.ShippingMethodSerializer
-    model = ShippingMethod
 
 
 class BasketList(generics.ListCreateAPIView):

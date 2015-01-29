@@ -28,14 +28,14 @@ class CheckOutTest(APITest):
             'basket': basket_url,
             'total': {
                 'currency': 'EUR',
-                'excl_tax':'100.0',
-                'tax':'21.0'
+                'excl_tax':'50.0',
+                'tax':'0.0'
             },
-            'shipping_method': "http://127.0.0.1:8000/api/shippingmethods/1/",
+            'shipping_method_code': "no-shipping-required",
             'shipping_charge': {
                 'currency': 'EUR',
-                'excl_tax':'10.0',
-                'tax':'0.6'
+                'excl_tax':'0.00',
+                'tax':'0.00'
             },
             "shipping_address": {
                 "country": "http://127.0.0.1:8000/api/countries/NL/",
@@ -57,7 +57,45 @@ class CheckOutTest(APITest):
         response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
         self.assertEqual(response.status_code, 200)
         response = self.post('api-checkout', **request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
 
+    def test_checkout_implicit_shipping(self):
+        "Test if an order can be placed without specifying shipping method."
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = json.loads(response.content)
+        basket_url = basket.get('url')
+        basket_id = basket.get('id')
+
+        request = {
+            'basket': basket_url,
+            'total': {
+                'currency': 'EUR',
+                'excl_tax':'50.0',
+                'tax':'0.0'
+            },
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            }
+        }
+        response = self.post('api-checkout', **request)
+        self.assertEqual(response.status_code, 406)
+        response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.assertEqual(response.status_code, 200)
+        response = self.post('api-checkout', **request)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
 
