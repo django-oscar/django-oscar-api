@@ -4,7 +4,7 @@ from oscar.views.decorators import permissions_required
 from oscarapi.urls import urlpatterns
 
 
-class CommerceConnectApplication(Application):
+class RESTApiApplication(Application):
     def get_url_decorator(self, pattern):
         "Fixes bug in Application.get_url_decorator wich would decorate None values."
         permissions = self.get_permissions(pattern.name)
@@ -17,4 +17,4 @@ class CommerceConnectApplication(Application):
         return self.post_process_urls(urlpatterns)
 
 
-application = CommerceConnectApplication()
+application = RESTApiApplication()
