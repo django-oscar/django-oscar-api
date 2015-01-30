@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="catalogue.productattribute">
+        <field to="catalogue.productclass" name="product_class" rel="ManyToOneRel">1</field>
+        <field type="CharField" name="name">Size</field>
+        <field type="SlugField" name="code">size</field>
+        <field type="CharField" name="type">option</field>
+        <field to="catalogue.attributeoptiongroup" name="option_group" rel="ManyToOneRel">1</field>
+        <field type="BooleanField" name="required">True</field>
+    </object>
+</django-objects>

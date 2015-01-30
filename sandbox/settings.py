@@ -1,214 +1,168 @@
 import os
+from oscar import get_core_apps
+from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
-# Django settings for oscar project.
-PROJECT_DIR = os.path.dirname(__file__)
-location = lambda x: os.path.join(os.path.dirname(os.path.realpath(__file__)), x)
+ALLOWED_HOSTS = []
 
-DEBUG = True
-TEMPLATE_DEBUG = True
-SQL_DEBUG = True
+BASE_DIR = os.path.dirname(__file__)
 
-ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
-)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-MANAGERS = ADMINS
+OSCARAPI_BLOCK_ADMIN_API_ACCESS = False
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': location('db.sqlite'),                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
-# Local time zone for this installation. Choices can be found here:
-# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be available on all operating systems.
-# On Unix systems, a value of None will cause Django to use the same
-# timezone as the operating system.
-# If running in a Windows environment this must be set to the same as your
-# system time zone.
-TIME_ZONE = 'Europe/London'
+DEBUG = True
 
-# Language code for this installation. All choices can be found here:
-# http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
-
-SITE_ID = 1
-
-# If you set this to False, Django will make some optimizations so as not
-# to load the internationalization machinery.
-USE_I18N = True
-
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale
-USE_L10N = True
-
-# Absolute path to the directory that holds media.
-# Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = location("public/media")
-
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash if there is a path component (optional in other cases).
-# Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/media/'
-
-# URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
-# trailing slash.
-# Examples: "http://foo.com/media/", "/media/".
-#ADMIN_MEDIA_PREFIX = '/media/admin/'
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = (location('static/'),)
-STATIC_ROOT = location('public/static')
-
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = '$)a7n&o80u!6y5t-+jrd3)3!%vh&shg$wqpjpxc!ar&p#!)n1a'
-
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.request",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.contrib.messages.context_processors.messages",
-    # Oscar specific
-    'oscar.apps.search.context_processors.search_form',
-    'oscar.apps.promotions.context_processors.promotions',
-    'oscar.apps.checkout.context_processors.checkout',
-    'oscar.core.context_processors.metadata',
-)
-
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.transaction.TransactionMiddleware',
-    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'oscar.apps.basket.middleware.BasketMiddleware',
-)
-
-INTERNAL_IPS = ('127.0.0.1',)
-
-ROOT_URLCONF = 'urls'
-
-from oscar import OSCAR_MAIN_TEMPLATE_DIR
-TEMPLATE_DIRS = (
-    location('templates'),
-    OSCAR_MAIN_TEMPLATE_DIR,
-)
-
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
-        },
-        'simple': {
-            'format': '%(levelname)s %(message)s'
-        },
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': '',
     },
-    'handlers': {
-        'null': {
-            'level':'DEBUG',
-            'class':'django.utils.log.NullHandler',
-        },
-        'console':{
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
-            'formatter': 'verbose'
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers':['null'],
-            'propagate': True,
-            'level':'INFO',
-        },
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
-        'oscar.checkout': {
-            'handlers': ['console'],
-            'propagate': True,
-            'level':'INFO',
-        },
-        'django.db.backends': {
-            'handlers':['null'],
-            'propagate': False,
-            'level':'DEBUG',
-        },
-    }
 }
-
 
 INSTALLED_APPS = [
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    'django.contrib.admin',
     'django.contrib.flatpages',
     'django.contrib.staticfiles',
-    # Development
-    'django_extensions',
-    'debug_toolbar',
-    # Package
-    'south',
-]
-from oscar import get_core_apps
-INSTALLED_APPS += get_core_apps()
+    'compressor',
+    'django_nose',
+    'rest_framework',
+    'oscarapi',
+] + get_core_apps([
+    'oscarapi.apps.basket',
+])
 
-AUTHENTICATION_BACKENDS = (
-    'oscar.apps.customer.auth_backends.Emailbackend',
-    'django.contrib.auth.backends.ModelBackend',
+LANGUAGE_CODE = 'en-us'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'root': {
+        'level': 'DEBUG' if DEBUG else 'INFO',
+        'handlers': ['console',],
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s',
+        },
+        'simple': {
+            'format': '[%(asctime)s] %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'django.utils.log.NullHandler',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'filters': ['require_debug_false'],
+        },
+    },
+    'loggers': {
+        # Django loggers
+        'django': {
+            'propagate': True,
+        },
+        'django.db': {
+            'level': 'WARNING'
+        },
+        'django.request': {
+            'handlers': ['mail_admins',],
+            'level': 'ERROR',
+            'propagate': False
+        },
+        # Third party
+        'south': {
+            'level': 'INFO',
+        },
+        'sorl.thumbnail': {
+            'level': 'ERROR',
+        },
+        # Suppress output of this debug toolbar panel
+        'template_timings_panel': {
+            'handlers': ['null'],
+        }
+    }
+}
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'oscarapi.middleware.HeaderSessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'oscar.apps.basket.middleware.BasketMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
 
-LOGIN_REDIRECT_URL = '/accounts/'
-APPEND_SLASH = True
-
-DEBUG_TOOLBAR_CONFIG = {
-    'INTERCEPT_REDIRECTS': False
+REST_FRAMEWORK = {
+    'CHARSET': 'utf-8',
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.UnicodeJSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    )
 }
 
-# Oscar settings
+ROOT_URLCONF = 'urls'
+
+SECRET_KEY = 'li0$-gnv)76g$yf7p@(cg-^_q7j6df5cx$o-gsef5hd68phj!4'
+
+SITE_ID = 1
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+TEMPLATE_DEBUG = True
+TEMPLATE_DIRS = (
+    os.path.join(BASE_DIR, 'templates'),
+    OSCAR_MAIN_TEMPLATE_DIR,
+)
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.request',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.core.context_processors.tz',
+    'django.contrib.messages.context_processors.messages',
+    'oscar.apps.search.context_processors.search_form',
+    'oscar.apps.promotions.context_processors.promotions',
+    'oscar.apps.checkout.context_processors.checkout',
+    'oscar.apps.customer.notifications.context_processors.notifications',
+    'oscar.core.context_processors.metadata',
+)
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+TIME_ZONE = 'UTC'
+
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+
 from oscar.defaults import *
-OSCAR_ALLOW_ANON_CHECKOUT = True
-
-# Haystack settings
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
-    },
-}
-
-OSCAR_SHOP_TAGLINE = 'API'

@@ -1,0 +1,16 @@
+.coverage
+coverage.xml
+nosetests.xml
+oscar_commerceconnect.egg-info/
+dist/
+logs/
+public/
+db.sqlite3
+.ropeproject
+.Python
+bin/
+include/
+lib/
+*.egg-info/
+*.pyc
+version-django-oscar-commerce-connect.txt

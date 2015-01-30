@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="catalogue.attributeoptiongroup">
+        <field type="CharField" name="name">Sizes</field>
+    </object>
+</django-objects>

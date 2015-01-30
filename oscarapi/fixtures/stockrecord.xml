@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="partner.stockrecord">
+        <field to="catalogue.product" name="product" rel="ManyToOneRel">1</field>
+        <field to="partner.partner" name="partner" rel="ManyToOneRel">1</field>
+        <field type="CharField" name="partner_sku">clf-large</field>
+        <field type="CharField" name="price_currency">EUR</field>
+        <field type="DecimalField" name="price_excl_tax">10</field>
+        <field type="DecimalField" name="price_retail">12.10</field>
+        <field type="DecimalField" name="cost_price">
+            <None/>
+        </field>
+        <field type="PositiveIntegerField" name="num_in_stock">20</field>
+        <field type="IntegerField" name="num_allocated">
+            <None/>
+        </field>
+        <field type="PositiveIntegerField" name="low_stock_threshold">
+            <None/>
+        </field>
+        <field type="DateTimeField" name="date_created">2013-12-13T11:37:08.232000+00:00</field>
+        <field type="DateTimeField" name="date_updated">2013-12-13T11:37:08.232000+00:00</field>
+    </object>
+    <object pk="2" model="partner.stockrecord">
+        <field to="catalogue.product" name="product" rel="ManyToOneRel">2</field>
+        <field to="partner.partner" name="partner" rel="ManyToOneRel">1</field>
+        <field type="CharField" name="partner_sku">clf-med</field>
+        <field type="CharField" name="price_currency">EUR</field>
+        <field type="DecimalField" name="price_excl_tax">10</field>
+        <field type="DecimalField" name="price_retail">12.10</field>
+        <field type="DecimalField" name="cost_price">
+            <None/>
+        </field>
+        <field type="PositiveIntegerField" name="num_in_stock">20</field>
+        <field type="IntegerField" name="num_allocated">
+            <None/>
+        </field>
+        <field type="PositiveIntegerField" name="low_stock_threshold">
+            <None/>
+        </field>
+        <field type="DateTimeField" name="date_created">2013-12-13T11:37:45.928000+00:00</field>
+        <field type="DateTimeField" name="date_updated">2013-12-13T11:37:45.928000+00:00</field>
+    </object>
+</django-objects>

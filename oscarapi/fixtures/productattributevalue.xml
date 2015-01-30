@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="catalogue.productattributevalue">
+        <field to="catalogue.productattribute" name="attribute" rel="ManyToOneRel">1</field>
+        <field to="catalogue.product" name="product" rel="ManyToOneRel">1</field>
+        <field type="TextField" name="value_text">
+            <None/>
+        </field>
+        <field type="IntegerField" name="value_integer">
+            <None/>
+        </field>
+        <field type="NullBooleanField" name="value_boolean">
+            <None/>
+        </field>
+        <field type="FloatField" name="value_float">
+            <None/>
+        </field>
+        <field type="TextField" name="value_richtext">
+            <None/>
+        </field>
+        <field type="DateField" name="value_date">
+            <None/>
+        </field>
+        <field to="catalogue.attributeoption" name="value_option" rel="ManyToOneRel">1</field>
+        <field type="FileField" name="value_file"/>
+        <field type="FileField" name="value_image"/>
+        <field to="contenttypes.contenttype" name="entity_content_type" rel="ManyToOneRel">
+            <None/>
+        </field>
+        <field type="PositiveIntegerField" name="entity_object_id">
+            <None/>
+        </field>
+    </object>
+</django-objects>
