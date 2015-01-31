@@ -8,6 +8,11 @@ This package provides a RESTful API for `django-oscar`_.
 .. _`django-oscar@googlegroups.com`: https://groups.google.com/forum/?fromgroups#!forum/django-oscar
 .. _`on the wiki`: https://github.com/django-oscar/django-oscar-api/wiki
 
+Continuous integration status:
+
+.. image:: https://travis-ci.org/django-oscar/django-oscar-api.svg?branch=master
+    :target: https://travis-ci.org/django-oscar/django-oscar-api
+
 REST API Gateway & resource protection.
 ---------------------------------------
 
