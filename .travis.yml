@@ -18,7 +18,7 @@ env:
         - DJANGO=Django==1.7.1
 
 install:
-    - pip install -e $DJANGO . --download-cache $HOME/.pip-cache
+    - pip install $DJANGO -e . --download-cache $HOME/.pip-cache
 
 script:
     - make test
