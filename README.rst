@@ -104,7 +104,7 @@ identifier as follows::
         Optional Hexadecimal encoded Integer containing a monotonically increasing counter value. A client should increment the count field after each operation.
 
 
-An example of a session identifier would be: ``SID:ANON:www.nuticia.nl:82d7ac3f-135c-4b12-a296-ff3c4701307d``.
+An example of a session identifier would be: ``SID:ANON:www.example.com:82d7ac3f-135c-4b12-a296-ff3c4701307d``.
 This identifier will be hashed to fit in 40 bytes to yield the final session key.
 
 The ``thread`` and ``count`` values, while allowed will be ignored and not
