@@ -142,7 +142,7 @@ class ParsedReponse(object):
             self.body = None
 
     def __getattr__(self, name):
-        return self._response.__getattr__(name)
+        return getattr(self._response, name)
     
     def __getitem__(self, name):
         return self.body[name]
