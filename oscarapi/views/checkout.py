@@ -8,8 +8,8 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
     """
     Prepare an order for checkout.
 
-    POST(basket, total, shipping_method, shipping_charge,
-         shipping_address,billing_address):
+    POST(basket, total, shipping_address,
+         [shipping_method_code, shipping_charge, billing_address]):
     {
         "basket": "http://testserver/oscarapi/baskets/1/",
         "total": {
@@ -22,8 +22,7 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
             "excl_tax": "10.0",
             "tax": "0.6"
         },
-        "shipping_method":
-            "http://127.0.0.1:8000/oscarapi/shippingmethods/1/",
+        "shipping_method_code": "no-shipping-required",
         "shipping_address": {
             "country": "http://127.0.0.1:8000/oscarapi/countries/NL/",
             "first_name": "Henk",
