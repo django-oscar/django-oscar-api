@@ -146,7 +146,10 @@ class ParsedReponse(object):
     
     def __getitem__(self, name):
         return self.body[name]
-    
+
+    def __len__(self):
+        return len(self.body)
+
     def assertStatusEqual(self, code, message=None):
         self.t.assertEqual(self.status_code, code, message)
     

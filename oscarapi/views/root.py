@@ -19,6 +19,7 @@ def PUBLIC_APIS(r, f):
         ('basket-shipping-methods', reverse('api-basket-shipping-methods', request=r,
                                        format=f)),
         ('checkout', reverse('api-checkout', request=r, format=f)),
+        ('orders', reverse('order-list', request=r, format=f)),
         ('products', reverse('product-list', request=r, format=f)),
         ('countries', reverse('country-list', request=r, format=f)),
     ]
