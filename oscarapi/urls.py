@@ -28,6 +28,8 @@ urlpatterns = patterns('',
     url(r'^users/$', views.UserList.as_view(), name='user-list'),
     url(r'^users/(?P<pk>[0-9]+)/$', views.UserDetail.as_view(), name='user-detail'),
     url(r'^checkout/$', views.CheckoutView.as_view(), name='api-checkout'),
+    url(r'^orders/$', views.OrderList.as_view(), name='order-list'),
+    url(r'^orders/(?P<pk>[0-9]+)/$', views.OrderDetail.as_view(), name='order-detail'),
     url(r'^countries/$', views.CountryList.as_view(), name='country-list'),
     url(r'^countries/(?P<pk>[A-z]+)/$', views.CountryDetail.as_view(), name='country-detail'),
 )

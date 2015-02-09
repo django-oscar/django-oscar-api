@@ -109,6 +109,12 @@ class CheckOutTest(APITest):
         self.response.assertStatusEqual(200)
         self.login(username='nobody', password='nobody')
 
+    def test_checkout_creates_an_order(self):
+        "After checkout has been done, a user should have gained an order object"
+        self.test_checkout()
+        self.response = self.get('order-list')
+        self.assertEqual(len(self.response), 1, 'An order should have been created.')
+
     @unittest.skip
     def test_checkout_header(self):
         "Prove that the user 'nobody' can checkout his cart when authenticating with header session"

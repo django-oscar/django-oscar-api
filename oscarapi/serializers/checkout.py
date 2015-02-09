@@ -10,7 +10,8 @@ from rest_framework import serializers, exceptions
 from oscarapi.basket.operations import prepare_basket
 from oscarapi.utils import (
     OscarHyperlinkedModelSerializer,
-    OscarModelSerializer
+    OscarModelSerializer,
+    overridable
 )
 
 OrderPlacementMixin = get_class('checkout.mixins', 'OrderPlacementMixin')
@@ -88,7 +89,7 @@ class ShippingMethodSerializer(serializers.Serializer):
         return PriceSerializer(price).data
 
 
-class OrderSerializer(OscarModelSerializer):
+class OrderSerializer(OscarHyperlinkedModelSerializer):
     shipping_address = InlineShippingAddressSerializer(
         many=False, required=False)
     billing_address = InlineBillingAddressSerializer(
@@ -107,6 +108,12 @@ class OrderSerializer(OscarModelSerializer):
 
     class Meta:
         model = Order
+        fields = overridable('OSCARAPI_ORDER_FIELD', default=('number',
+            'basket', 'url',
+            'user', 'billing_address', 'currency', 'total_incl_tax',
+            'total_excl_tax', 'shipping_incl_tax', 'shipping_excl_tax',
+            'shipping_address', 'shipping_method', 'shipping_code', 'status',
+            'guest_email', 'date_placed'))
 
 
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):

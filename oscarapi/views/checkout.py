@@ -1,7 +1,27 @@
-from rest_framework import status, views, response
+from rest_framework import status, views, response, generics
 
+from oscar.core.loading import get_model
 from oscarapi.serializers import OrderSerializer, CheckoutSerializer
+from oscarapi.permissions import IsOwner
 from oscarapi.views.utils import BasketPermissionMixin
+
+Order = get_model('order', 'Order')
+
+__all__ = ('CheckoutView', 'OrderList', 'OrderDetail')
+
+
+class OrderList(generics.ListAPIView):
+    model = Order
+    serializer_class = OrderSerializer
+    permission_classes = (IsOwner,)
+
+    def get_queryset(self):
+        qs = super(OrderList, self).get_queryset()
+        return qs.filter(user=self.request.user)
+class OrderDetail(generics.RetrieveAPIView):
+    model = Order
+    serializer_class = OrderSerializer
+    permission_classes = (IsOwner,)
 
 
 class CheckoutView(BasketPermissionMixin, views.APIView):
