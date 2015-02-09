@@ -6,7 +6,7 @@ from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 from rest_framework import serializers, exceptions
 
-from oscarapi.apps.basket.utils import prepare_basket
+from oscarapi.basket.operations import prepare_basket
 from oscarapi.utils import (
     OscarHyperlinkedModelSerializer,
     OscarModelSerializer
@@ -109,7 +109,7 @@ class OrderSerializer(OscarModelSerializer):
 # charges.
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     basket = serializers.HyperlinkedRelatedField(
-        view_name='basket-detail', queryset=Basket.editable)
+        view_name='basket-detail', queryset=Basket.objects)
     total = PriceSerializer(many=False, required=True)
     shipping_method = serializers.HyperlinkedRelatedField(
         view_name='shippingmethod-detail', queryset=ShippingMethod.objects,

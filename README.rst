@@ -159,22 +159,13 @@ steps:
 
 1. Install the oscarapi python egg someway.
 2. Add oscarapi to INSTALLED_APPS.
-3. Use oscarapi.apps.basket instead of oscar.apps.basket, eg::
-
-    INSTALLED_APPS = INSTALLED_APPS + get_core_apps(['oscarapi.apps.basket'])
-
-4. Add the application's urls to your urlconf::
+3. Add the application's urls to your urlconf::
     
     from oscarapi.app import application as api
     urlpatterns = patterns('',
         ... all the things you allready got
         url(r'^oscarapi/', include(aoi.urls)),
     )
-
-If you need to extend ``oscar.apps.basket``, that is allright, but make sure you
-use the bases in ``oscarapi.apps.basket.abstract_models`` as a base class to
-your extended model and not the oscar one. Commerceconnect needs some helper
-methods to be on the model, for authentication.
 
 Extending and overriding
 ------------------------

@@ -36,9 +36,7 @@ INSTALLED_APPS = [
     'django_nose',
     'rest_framework',
     'oscarapi',
-] + get_core_apps([
-    'oscarapi.apps.basket',
-])
+] + get_core_apps()
 
 LANGUAGE_CODE = 'en-us'
 

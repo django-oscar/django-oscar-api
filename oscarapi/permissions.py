@@ -1,20 +1,24 @@
 from rest_framework.permissions import BasePermission
+from oscarapi.basket.operations import request_contains_basket, request_contains_line
 
-
-class IsAdminUserOrRequestOwner(BasePermission):
-    """
-    Permission that checks if this object belongg to this request.
-
-    A method called ``request_owner(request)`` will be called on the object::
-
-        obj.request_owner(request_owner)
-    """
-
+class HasUser(BasePermission):
+    "Only anonymous and authenticated users can access this resource."
     def has_permission(self, request, view):
         return request.user
 
-    def has_object_permission(self, request, view, obj):
-        if hasattr(obj, 'request_owner'):
-            return obj.request_owner(request) or request.user.is_staff
 
-        return False
+class IsAdminUserOrRequestContainsBasket(HasUser):
+    """
+    Permission class that checks if a request contains a basket.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        return request_contains_basket(request, obj) or request.user.is_staff
+
+class IsAdminUserOrRequestContainsLine(BasePermission):
+    """
+    Permission class that checks if a request contains the basket this line
+    belongs to.
+    """
+    def has_object_permission(self, request, view, obj):
+        return request_contains_line(request, obj) or request.user.is_staff

@@ -1,17 +1,62 @@
+"This module contains operation on baskets and lines"
 from django.conf import settings
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
-
-from oscar.core.loading import get_model
-from oscar.apps.basket.abstract_models import AbstractBasket as _AbstractBasket, AbstractLine as _AbstractLine
-from oscar.apps.basket.managers import OpenBasketManager, SavedBasketManager
+from oscar.core.loading import get_model, get_class
 from oscar.core.utils import get_default_currency
 
-from oscarapi.apps.basket.managers import EditableBasketManager
-from oscarapi.apps.basket.utils import get_basket
-
+__all__ = (
+    'apply_offers',
+    'prepare_basket',
+    'get_basket',
+    'get_basket_id_from_session',
+    'get_anonymous_basket',
+    'get_user_basket',
+    'store_basket_in_session',
+    'request_contains_basket',
+    'flush_and_delete_basket',
+    'request_contains_line',
+    'save_line_with_default_currency',
+)
 
 Basket = get_model('basket', 'Basket')
+Applicator = get_class('offer.utils', 'Applicator')
+Selector = None
+
+
+def apply_offers(request, basket):
+    "Apply offers and discounts to cart"
+    if not basket.is_empty:
+        Applicator().apply(request, basket)
+
+
+def prepare_basket(basket, request):
+    # fixes too early import of Selector
+    # TODO: check if this is still true, now the basket models nolonger
+    #       require this module to be loaded.
+    global Selector
+
+    if hasattr(request, 'strategy'):
+        basket.strategy = request.strategy
+    else:  # in management commands, the request might not be available.
+        if Selector is None:
+            Selector = get_class('partner.strategy', 'Selector')
+        basket.strategy = Selector().strategy(
+            request=request, user=request.user)
+
+    apply_offers(request, basket)
+    store_basket_in_session(basket, request.session)
+    return basket
+
+
+def get_basket(request, prepare=True):
+    "Get basket from the request."
+    if request.user.is_authenticated():
+        basket = get_user_basket(request.user)
+    else:
+        basket = get_anonymous_basket(request)
+        if basket is None:
+            basket = Basket.objects.create()
+            basket.save()
+    return prepare_basket(basket, request) if prepare else basket
 
 
 def get_basket_id_from_session(request):
@@ -24,7 +69,7 @@ def get_anonymous_basket(request):
     basket_id = get_basket_id_from_session(request)
     try:
         basket = Basket.objects.get(pk=basket_id)
-    except Bakset.DoesNotExist:
+    except Basket.DoesNotExist:
         basket = None
 
     return basket
@@ -56,7 +101,7 @@ def request_contains_basket(request, basket):
         if request.user.is_authenticated():
             return request.user == basket.owner
 
-        return get_basket_id_from_session(request) == self.pk
+        return get_basket_id_from_session(request) == basket.pk
 
     return False
 
