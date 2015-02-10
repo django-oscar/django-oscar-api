@@ -113,7 +113,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
             'user', 'billing_address', 'currency', 'total_incl_tax',
             'total_excl_tax', 'shipping_incl_tax', 'shipping_excl_tax',
             'shipping_address', 'shipping_method', 'shipping_code', 'status',
-            'guest_email', 'date_placed'))
+            'guest_email', 'date_placed', 'payment_url'))
 
 
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
