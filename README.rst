@@ -164,7 +164,7 @@ steps:
     from oscarapi.app import application as api
     urlpatterns = patterns('',
         ... all the things you allready got
-        url(r'^oscarapi/', include(aoi.urls)),
+        url(r'^oscarapi/', include(api.urls)),
     )
 
 Extending and overriding
