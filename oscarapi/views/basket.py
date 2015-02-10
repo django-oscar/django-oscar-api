@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from oscarapi import serializers, permissions
-from oscarapi.apps.basket.utils import (
+from oscarapi.basket.operations import (
     apply_offers,
     get_basket
 )
@@ -190,4 +190,4 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
 class LineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     queryset = Line.objects.all()
     serializer_class = serializers.LineSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestOwner,)
+    permission_classes = (permissions.IsAdminUserOrRequestContainsLine,)

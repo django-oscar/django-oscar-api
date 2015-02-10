@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 from oscarapi import serializers
 from oscarapi.utils import login_and_upgrade_session
+from oscarapi.basket import operations
 from oscar.core.loading import get_model
 
 
@@ -56,7 +57,7 @@ class LoginView(APIView):
         ser = serializers.LoginSerializer(data=request.DATA)
         if ser.is_valid():
 
-            anonymous_basket = Basket.get_anonymous_basket(request)
+            anonymous_basket = operations.get_anonymous_basket(request)
 
             user = ser.object
 
@@ -72,11 +73,11 @@ class LoginView(APIView):
             login_and_upgrade_session(request._request, user)
 
             # merge anonymous basket with authenticated basket.
-            basket = Basket.get_user_basket(user)
+            basket = operations.get_user_basket(user)
             if anonymous_basket is not None:
                 basket.merge(anonymous_basket)
                 anonymous_basket.delete()
-            basket.store_basket(request)
+            operations.store_basket_in_session(basket, request.session)
 
             return Response()
 
@@ -91,9 +92,9 @@ class LoginView(APIView):
         """
         request = request._request
         if request.user.is_anonymous():
-            basket = Basket.get_anonymous_basket(request)
+            basket = operations.get_anonymous_basket(request)
             if basket:
-                basket.delete()
+                operations.flush_and_delete_basket(basket)
 
         request.session.clear()
         request.session.delete()

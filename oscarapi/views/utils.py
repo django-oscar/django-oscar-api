@@ -17,13 +17,13 @@ class BasketPermissionMixin(object):
     on a basket instance.
     """
     # The permission class is mainly used to check Basket permission!
-    permission_classes = (permissions.IsAdminUserOrRequestOwner,)
+    permission_classes = (permissions.IsAdminUserOrRequestContainsBasket,)
 
     def get_data_basket(self, DATA, format):
         "Parse basket from relation hyperlink"
         basket_parser = HyperlinkedRelatedField(
             view_name='basket-detail',
-            queryset=Basket.editable,
+            queryset=Basket.objects,
             format=format
         )
         try:
@@ -37,6 +37,6 @@ class BasketPermissionMixin(object):
     def check_basket_permission(self, request, basket_pk=None, basket=None):
         "Check if the user may access this basket"
         if basket is None:
-            basket = generics.get_object_or_404(Basket.editable, pk=basket_pk)
+            basket = generics.get_object_or_404(Basket.objects, pk=basket_pk)
         self.check_object_permissions(request, basket)
         return basket

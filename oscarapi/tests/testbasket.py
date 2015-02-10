@@ -56,7 +56,7 @@ class BasketTest(APITest):
 
     def test_basket_api_create_header(self):
         "The basket api create command should work with header based login."
-        empty = Basket.editable.all()
+        empty = Basket.objects.all()
         self.assertFalse(empty.exists(), "There should be no baskets yet.")
 
         if self.hlogin('nobody', 'nobody', session_id='nobody'):
@@ -72,7 +72,7 @@ class BasketTest(APITest):
             self.response.assertStatusEqual(201, "It should be possible for a basket to be created, for a specific user.")
             self.response.assertObjectIdEqual('owner', 1)
 
-        self.assertEqual(Basket.editable.count(), 3, "There should be 2 baskets from loging in and 1 is created with the api.")
+        self.assertEqual(Basket.objects.count(), 3, "There should be 2 baskets from loging in and 1 is created with the api.")
             
     def test_retrieve_basket(self):
         "A user can fetch their own basket with the basket API and get's the same basket every time."
@@ -109,7 +109,7 @@ class BasketTest(APITest):
             self.response.assertStatusEqual(200)
             self.response.assertValueEqual('id', basket_id)
 
-        self.assertEqual(Basket.editable.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
+        self.assertEqual(Basket.objects.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
     def test_retrieve_basket_header(self):
         "Using header authentication the basket api should also work perfectly."
@@ -146,7 +146,7 @@ class BasketTest(APITest):
             self.response.assertStatusEqual(200)
             self.response.assertValueEqual('id', basket_id)
 
-        self.assertEqual(Basket.editable.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
+        self.assertEqual(Basket.objects.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
     def test_basket_read_permissions(self):
         "A regular or anonymous user should not be able to fetch someone elses basket."
@@ -165,7 +165,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(200)
 
         # create a basket for somebody else
-        b = Basket.editable.create(owner_id=2)
+        b = Basket.objects.create(owner_id=2)
         self.assertEqual(str(b.owner), 'nobody')
         self.assertEqual(b.pk, 2)
 
@@ -226,7 +226,7 @@ class BasketTest(APITest):
             self.response = self.client.get(url)
             self.response.assertStatusEqual(200, "Staff users can access anything.")
 
-        self.assertEqual(Basket.editable.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
+        self.assertEqual(Basket.objects.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
     def test_basket_read_permissions_header(self):
         "A regular or anonymous user should not be able to fetch someone elses basket, even when authenticating with a session header."
@@ -245,7 +245,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(200)
 
         # create a basket for somebody else
-        b = Basket.editable.create(owner_id=2)
+        b = Basket.objects.create(owner_id=2)
         self.assertEqual(str(b.owner), 'nobody')
         self.assertEqual(b.pk, 2)
 
@@ -307,7 +307,7 @@ class BasketTest(APITest):
             self.response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
             self.response.assertStatusEqual(200, "Staff users can access anything.")
 
-        self.assertEqual(Basket.editable.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
+        self.assertEqual(Basket.objects.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
     def test_basket_write_permissions_anonymous(self):
         "An anonymous user should not be able to change someone elses basket."
@@ -359,7 +359,7 @@ class BasketTest(APITest):
         basket_id = self.response['id']
 
         # create a basket for another user.
-        b = Basket.editable.create(owner_id=2)
+        b = Basket.objects.create(owner_id=2)
         self.assertEqual(str(b.owner), 'nobody')
         self.assertEqual(Basket.objects.count(), 2)
         nobody_basket_id = b.pk
@@ -456,7 +456,7 @@ class BasketTest(APITest):
         basket_id = self.response['id']
 
         # create a basket for another user.
-        b = Basket.editable.create(owner_id=3)
+        b = Basket.objects.create(owner_id=3)
         self.assertEqual(str(b.owner), 'somebody')
         self.assertEqual(Basket.objects.count(), 2)
         somebody_basket_id = b.pk
@@ -553,7 +553,7 @@ class BasketTest(APITest):
         basket_id = self.response['id']
 
         # create a basket for another user.
-        b = Basket.editable.create(owner_id=3)
+        b = Basket.objects.create(owner_id=3)
         self.assertEqual(str(b.owner), 'somebody')
         self.assertEqual(Basket.objects.count(), 2)
         somebody_basket_id = b.pk
@@ -651,7 +651,7 @@ class BasketTest(APITest):
             basket_id = self.response['id']
 
             # create a basket for another user.
-            b = Basket.editable.create(owner_id=3)
+            b = Basket.objects.create(owner_id=3)
             self.assertEqual(str(b.owner), 'somebody')
             self.assertEqual(Basket.objects.count(), 2)
             somebody_basket_id = b.pk
@@ -748,7 +748,7 @@ class BasketTest(APITest):
             basket_id = self.response['id']
 
             # create a basket for another user.
-            b = Basket.editable.create(owner_id=3)
+            b = Basket.objects.create(owner_id=3)
             self.assertEqual(str(b.owner), 'somebody')
             self.assertEqual(Basket.objects.count(), 2)
             somebody_basket_id = b.pk
