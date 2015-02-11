@@ -61,6 +61,16 @@ class CheckOutTest(APITest):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
 
+    def test_can_login_with_frozen_user_basket(self):
+        "When a user has an unpaid order, he should still be able to log in"
+        self.test_checkout()
+        self.delete('api-login')
+        self.get('api-basket')
+        self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.response = self.post('api-login', username='nobody', password='nobody')
+        self.response.assertStatusEqual(200)
+        self.login(username='nobody', password='nobody')
+
     @unittest.skip
     def test_checkout_header(self):
         "Prove that the user 'nobody' can checkout his cart when authenticating with header session"
