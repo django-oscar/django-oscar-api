@@ -62,13 +62,15 @@ def get_basket(request, prepare=True):
 def get_basket_id_from_session(request):
     return request.session.get(settings.OSCAR_BASKET_COOKIE_OPEN)
 
+def editable_baskets():
+    return Basket.objects.filter(status__in=["Open", "Saved"])
 
 def get_anonymous_basket(request):
     "Get basket from session."
 
     basket_id = get_basket_id_from_session(request)
     try:
-        basket = Basket.objects.get(pk=basket_id)
+        basket = editable_baskets().get(pk=basket_id)
     except Basket.DoesNotExist:
         basket = None
 
@@ -79,11 +81,11 @@ def get_user_basket(user):
     "get basket for a user."
 
     try:
-        basket, __ = Basket.objects.get_or_create(owner=user)
+        basket, __ = editable_baskets().get_or_create(owner=user)
     except Basket.MultipleObjectsReturned:
         # Not sure quite how we end up here with multiple baskets.
         # We merge them and create a fresh one
-        old_baskets = list(Basket.objects.filter(owner=user))
+        old_baskets = list(editable_baskets().filter(owner=user))
         basket = old_baskets[0]
         for other_basket in old_baskets[1:]:
             basket.merge(other_basket, add_quantities=False)
