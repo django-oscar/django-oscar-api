@@ -111,7 +111,7 @@ def request_contains_basket(request, basket):
 def flush_and_delete_basket(basket, using=None):
     "Delete basket and all lines"
     basket.flush()
-    bakset.delete(using)
+    basket.delete(using)
 
 
 def request_contains_line(request, line):
