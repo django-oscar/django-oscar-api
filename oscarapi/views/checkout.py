@@ -28,15 +28,11 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
     """
     Prepare an order for checkout.
 
-    POST(basket, total, shipping_address,
-         [shipping_method_code, shipping_charge, billing_address]):
+    POST(basket, shipping_address,
+         [total, shipping_method_code, shipping_charge, billing_address]):
     {
         "basket": "http://testserver/oscarapi/baskets/1/",
-        "total": {
-            "currency": "EUR",
-            "excl_tax": "100.0",
-            "tax": "21.0"
-        },
+        "total": "100.0",
         "shipping_charge": {
             "currency": "EUR",
             "excl_tax": "10.0",
