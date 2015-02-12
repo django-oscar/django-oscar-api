@@ -2,6 +2,7 @@
 from django.conf import settings
 from oscar.core.loading import get_model, get_class
 from oscar.core.utils import get_default_currency
+from oscar.core.prices import Price
 
 __all__ = (
     'apply_offers',
@@ -126,3 +127,11 @@ def save_line_with_default_currency(line, *args, **kwargs):
     if not line.price_currency:
         line.price_currency = get_default_currency()
     return line.save(*args, **kwargs)
+
+
+def get_total_price(basket):
+    return Price(
+        getattr(basket,'currency', get_default_currency()),
+        basket.total_excl_tax,
+        incl_tax=basket.total_incl_tax
+    )

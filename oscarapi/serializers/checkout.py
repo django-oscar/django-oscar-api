@@ -7,7 +7,10 @@ from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 from rest_framework import serializers, exceptions
 
-from oscarapi.basket.operations import prepare_basket
+from oscarapi.basket.operations import (
+    prepare_basket,
+    get_total_price
+)
 from oscarapi.utils import (
     OscarHyperlinkedModelSerializer,
     OscarModelSerializer,
@@ -119,7 +122,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     basket = serializers.HyperlinkedRelatedField(
         view_name='basket-detail', queryset=Basket.objects)
-    total = PriceSerializer(many=False, required=True)
+    total = serializers.DecimalField(required=False)
     shipping_method_code = serializers.CharField(max_length=128, required=False)
     shipping_charge = PriceSerializer(many=False, required=False)
     shipping_address = ShippingAddressSerializer(many=False, required=False)
@@ -146,25 +149,20 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
             raise serializers.ValidationError(message)
 
         total = attrs.get('total')
-        if total.excl_tax != basket.total_excl_tax:
-            message = _('Total incorrect %s != %s' % (
-                total.excl_tax,
-                basket.total_excl_tax
-            ))
-            raise serializers.ValidationError(message)
-
-        if total.tax != basket.total_tax:
-            message = _('Total incorrect %s != %s' % (
-                total.tax,
-                basket.total_tax
-            ))
-            raise serializers.ValidationError(message)
+        if total is not None:
+            if total != basket.total_incl_tax:
+                message = _('Total incorrect %s != %s' % (
+                    total,
+                    basket.total_incl_tax
+                ))
+                raise serializers.ValidationError(message)
 
         if request.user.is_anonymous() and not settings.OSCAR_ALLOW_ANON_CHECKOUT:
             message = _('Anonymous checkout forbidden')
             raise serializers.ValidationError(message)
 
         # update attrs with validated data.
+        attrs['total'] = get_total_price(basket)
         attrs['shipping_method'] = shipping_method
         attrs['shipping_charge'] = shipping_charge
         attrs['basket'] = basket
