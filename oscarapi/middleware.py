@@ -8,11 +8,13 @@ from django.http.response import HttpResponse
 from django.utils.translation import ugettext as _
 from rest_framework import exceptions
 from rest_framework import authentication
+from django.conf import settings
 
 from oscarapi.utils import (
     get_domain,
     session_id_from_parsed_session_uri,
-    get_session
+    get_session,
+    i18n_path_regex
 )
 from oscarapi import models
 
@@ -21,27 +23,17 @@ logger = logging.getLogger(__name__)
 HTTP_SESSION_ID_REGEX = re.compile(
     r'^SID:(?P<type>(?:ANON|AUTH)):(?P<realm>.*?):(?P<session_id>.+?)(?:[-:][0-9a-fA-F]+){0,2}$')
 
-LANGUAGE_IN_URL = re.compile(r'(/[a-z][a-z]-[a-z][a-z])(/.*$)')
+LANGUAGE_IN_PATH = i18n_path_regex()
 
 
 def remove_locale_from_path(path):
     """
     Removes locale from path.
-
-    >>> path = "/nl-nl/api/basket"
-    >>> remove_locale_from_path(path)
-    '/api/basket'
-    >>>
-    >>> path = "/nl-nl/api/basket/20/lines"
-    >>> remove_locale_from_path(path)
-    '/api/basket/20/lines'
-    >>>
-    >>> path = "/api/basket"
-    >>> remove_locale_from_path(path)
-    '/api/basket'
     """
-    i18n = LANGUAGE_IN_URL.match(path)
-    return i18n.groups()[1] if i18n else path
+    if settings.USE_I18N:
+        i18n = LANGUAGE_IN_PATH.match(path)
+        return i18n.groups()[1] if i18n else path
+    return path
 
 
 def parse_session_id(request):

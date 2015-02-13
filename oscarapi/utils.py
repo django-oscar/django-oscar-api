@@ -1,4 +1,5 @@
 import hashlib
+import re
 
 from django.conf import settings
 from django.contrib import auth
@@ -110,3 +111,20 @@ def get_session(session_id, raise_on_create=False):
             session.save(must_create=True)
 
     return session
+
+
+def i18n_path_regex():
+    """
+    Returns a regex which matches the language prefixes generated
+    by i18n_patterns from settings.LANGUAGES
+
+    >>> path = "/{0}/api/basket".format(settings.LANGUAGES[0][0])
+    >>> regex = i18n_path_regex()
+    >>> match = regex.match(path)
+    >>> match.groups()[1]
+    '/api/basket'
+    """
+    language_keys = dict(settings.LANGUAGES).keys()
+    matchstring = "|".join(language_keys)
+    return re.compile(
+        r'(/(?:{0}))(/.*$)'.format(matchstring).lower())
