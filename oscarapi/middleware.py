@@ -21,6 +21,25 @@ logger = logging.getLogger(__name__)
 HTTP_SESSION_ID_REGEX = re.compile(
     r'^SID:(?P<type>(?:ANON|AUTH)):(?P<realm>.*?):(?P<session_id>.+?)(?:[-:][0-9a-fA-F]+){0,2}$')
 
+LANGUAGE_IN_URL = re.compile(r'(/[^/]*)(/.*$)')
+
+
+def remove_locale_from_url(url):
+    """
+    Removes locale from url.
+
+    >>> url = "http://localhost/nl-nl/api/basket"
+    >>> remove_language_from_url(url)
+    'http://localhost/nl-nl/api/basket'
+    >>>
+    >>> url = "http://localhost/api/basket"
+    >>> remove_language_from_url(url)
+    'http://localhost/api/basket'
+    """
+
+    i18n = LANGUAGE_IN_URL.match(url)
+    return i18n.groups()[1] if i18n else url
+
 
 def parse_session_id(request):
     """
@@ -80,8 +99,8 @@ def start_or_resume(session_id, session_type):
 
 
 def is_api_request(request):
-    path = request.path.lower()
-    api_root = reverse('api-root').lower()
+    path = remove_locale_from_url(request.path.lower())
+    api_root = remove_locale_from_url(reverse('api-root').lower())
     return path.startswith(api_root)
 
 
