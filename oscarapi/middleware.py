@@ -137,7 +137,7 @@ class HeaderSessionMiddleware(SessionMiddleware, IsApiRequest):
         """
         Add the 'Session-Id: ' header when using the api.
         """
-        if HeaderSessionMiddleware.is_api_request(request) \
+        if self.is_api_request(request) \
                 and getattr(request, 'session', None) is not None \
                 and hasattr(request, 'parsed_session_uri'):
             session_key = request.session.session_key
