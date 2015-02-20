@@ -25,7 +25,7 @@ HTTP_SESSION_ID_REGEX = re.compile(
 def parse_session_id(request):
     """
     Parse a session id from the request.
-    
+
     >>> class request:
     ...      META = {'HTTP_SESSION_ID': None}
     >>>
@@ -79,13 +79,15 @@ def start_or_resume(session_id, session_type):
     return get_session(session_id, raise_on_create=True)
 
 
-def is_api_request(request):
-    path = request.path.lower()
-    api_root = reverse('api-root').lower()
-    return path.startswith(api_root)
+class IsApiRequest(object):
+    @staticmethod
+    def is_api_request(request):
+        path = request.path.lower()
+        api_root = reverse('api-root').lower()
+        return path.startswith(api_root)
 
 
-class HeaderSessionMiddleware(SessionMiddleware):
+class HeaderSessionMiddleware(SessionMiddleware, IsApiRequest):
     """
     Implement session through headers:
 
@@ -96,12 +98,11 @@ class HeaderSessionMiddleware(SessionMiddleware):
     header sessions. With that in place the api can be used for both trusted
     and non trusted clients, see README.rst.
     """
-
     def process_request(self, request):
         """
         Parse the session id from the 'Session-Id: ' header when using the api.
         """
-        if is_api_request(request):
+        if self.is_api_request(request):
             try:
                 parsed_session_uri = parse_session_id(request)
                 if parsed_session_uri is not None:
@@ -136,14 +137,14 @@ class HeaderSessionMiddleware(SessionMiddleware):
         """
         Add the 'Session-Id: ' header when using the api.
         """
-        if is_api_request(request) \
+        if self.is_api_request(request) \
                 and getattr(request, 'session', None) is not None \
                 and hasattr(request, 'parsed_session_uri'):
             session_key = request.session.session_key
             parsed_session_key = session_id_from_parsed_session_uri(
                 request.parsed_session_uri)
             assert(session_key == parsed_session_key), \
-                    '%s is not equal to %s' % (session_key, parsed_session_key)
+                '%s is not equal to %s' % (session_key, parsed_session_key)
             response['Session-Id'] = \
                 'SID:%(type)s:%(realm)s:%(session_id)s' % (
                     request.parsed_session_uri)
@@ -152,12 +153,12 @@ class HeaderSessionMiddleware(SessionMiddleware):
             request, response)
 
 
-class ApiGatewayMiddleWare(object):
+class ApiGatewayMiddleWare(IsApiRequest):
     """
     Protect the api gateway with token.
     """
     def process_request(self, request):
-        if is_api_request(request):
+        if self.is_api_request(request):
             key = authentication.get_authorization_header(request)
             if models.ApiKey.objects.filter(key=key).exists():
                 return None
