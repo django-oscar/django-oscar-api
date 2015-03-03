@@ -13,6 +13,16 @@ Product = get_model('catalogue', 'Product')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 ProductImage = get_model('catalogue', 'ProductImage')
+Option = get_model('catalogue', 'Option')
+
+
+class OptionSerializer(OscarHyperlinkedModelSerializer):
+
+    class Meta:
+        model = Option
+        fields = overridable('OSCARAPI_OPTION_FIELDS', default=[
+            'url', 'id', 'name', 'code', 'type'
+        ])
 
 
 class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
@@ -69,6 +79,7 @@ class ProductSerializer(OscarModelSerializer):
     price = serializers.HyperlinkedIdentityField(view_name='product-price')
     availability = serializers.HyperlinkedIdentityField(
         view_name='product-availability')
+    options = OptionSerializer(many=True, required=False)
 
     class Meta:
         model = Product

@@ -1,7 +1,7 @@
 import logging
 from rest_framework import serializers
 
-from oscarapi.utils import overridable, OscarModelSerializer
+from oscarapi.utils import overridable, OscarModelSerializer, OscarHyperlinkedModelSerializer
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 
@@ -13,7 +13,6 @@ Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
 LineAttribute = get_model('basket', 'LineAttribute')
 StockRecord = get_model('partner', 'StockRecord')
-Option = get_model('catalogue', 'Option')
 Voucher = get_model('voucher', 'Voucher')
 
 
@@ -90,12 +89,6 @@ class LineSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Line
-
-
-class OptionSerializer(OscarModelSerializer):
-
-    class Meta:
-        model = Option
 
 
 class StockRecordSerializer(serializers.ModelSerializer):
