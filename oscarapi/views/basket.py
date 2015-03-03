@@ -46,24 +46,29 @@ def add_product(request, format=None):
     POST(url, quantity)
     {
         "url": "http://testserver.org/oscarapi/products/209/",
-        "quantity": 6
+        "quantity": 6,
     }
 
-    NOT IMPLEMENTED: LineAttributes, which are references to catalogue.Option.
-    To Implement make the serializer accept lists of option object, which look
-    like this:
+    If you've got some options to configure for the product to add to the
+    basket, you should pass the optional ``options`` property:
     {
-        option: "http://testserver.org/oscarapi/options/1/,
-        value: "some value"
-    },
-    These should be passed to basket.add_product as a list of dictionaries.
+        "url": "http://testserver.org/oscarapi/products/209/",
+        "quantity": 6,
+        "options": [{
+            "option": "http://testserver.org/oscarapi/options/1/",
+            "value": "some value"
+        }]
+    }
     """
     p_ser = serializers.AddProductSerializer(data=request.DATA,
                                              context={'request': request})
     if p_ser.is_valid():
         basket = get_basket(request)
-        product = p_ser.object
-        quantity = p_ser.init_data.get('quantity')
+
+        product = p_ser.object['url']
+        quantity = p_ser.object['quantity']
+        options = p_ser.object.get('options', [])
+
         availability = basket.strategy.fetch_for_product(product).availability
 
         # check if product is available at all
@@ -81,7 +86,7 @@ def add_product(request, format=None):
         if not allowed:
             return Response({'reason': message}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        basket.add_product(p_ser.object, quantity=quantity)
+        basket.add_product(product, quantity=quantity, options=options)
         apply_offers(request, basket)
         ser = serializers.BasketSerializer(
             basket,  context={'request': request})
@@ -130,6 +135,7 @@ def add_voucher(request, format=None):
 
     return Response(v_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
+
 @api_view(('GET',))
 def shipping_methods(request, format=None):
     """
@@ -144,6 +150,7 @@ def shipping_methods(request, format=None):
         request=request)
     ser = serializers.ShippingMethodSerializer(shiping_methods, many=True, context={'basket': basket})
     return Response(ser.data)
+
 
 class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
     """

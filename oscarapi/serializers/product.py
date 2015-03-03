@@ -91,6 +91,11 @@ class ProductSerializer(OscarModelSerializer):
                      'availability'))
 
 
+class OptionValueSerializer(serializers.Serializer):
+    option = serializers.HyperlinkedRelatedField(view_name='option-detail', queryset=Option.objects)
+    value = serializers.CharField()
+
+
 class AddProductSerializer(serializers.Serializer):
     """
     Serializes and validates an add to basket request.
@@ -99,13 +104,7 @@ class AddProductSerializer(serializers.Serializer):
     url = serializers.HyperlinkedRelatedField(
         view_name='product-detail', queryset=Product.objects,
         required=True)
+    options = OptionValueSerializer(many=True, required=False)
 
     class Meta:
         model = Product
-        fields = ['quantity', 'url']
-
-    def restore_object(self, attrs, instance=None):
-        if instance is not None:
-            return instance
-
-        return attrs['url']
