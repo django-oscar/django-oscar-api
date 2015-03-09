@@ -106,12 +106,12 @@ class AddProductView(APIView):
 def add_voucher(request, format=None):
     """
     Add a voucher to the basket.
-    
+
     POST(vouchercode)
     {
         "vouchercode": "kjadjhgadjgh7667"
     }
-    
+
     Will return 200 and the voucher as json if succesful.
     If unsuccessful, will return 406 with the error.
     """
@@ -124,7 +124,7 @@ def add_voucher(request, format=None):
 
         signals.voucher_addition.send(
             sender=None, basket=basket, voucher=voucher)
-        
+
         # Recalculate discounts to see if the voucher gives any
         apply_offers(request, basket)
         discounts_after = basket.offer_applications
@@ -135,9 +135,13 @@ def add_voucher(request, format=None):
                 break
         else:
             basket.vouchers.remove(voucher)
-            return Response({'reason':_("Your basket does not qualify for a voucher discount")}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response(
+                {'reason': _(
+                    "Your basket does not qualify for a voucher discount")},
+                status=status.HTTP_406_NOT_ACCEPTABLE)
 
-        ser = serializers.VoucherSerializer(voucher, context={'request': request})
+        ser = serializers.VoucherSerializer(
+            voucher, context={'request': request})
         return Response(ser.data)
 
     return Response(v_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
