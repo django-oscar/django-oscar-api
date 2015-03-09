@@ -39,7 +39,24 @@ class BasketView(APIView):
 
 
 class AddProductView(APIView):
+    """
+    Add a certain quantity of a product to the basket.
 
+    POST(url, quantity)
+    {
+        "url": "http://testserver.org/commerceconnect/products/209/",
+        "quantity": 6
+    }
+
+    NOT IMPLEMENTED: LineAttributes, which are references to
+    catalogue.Option. To Implement make the serializer accept lists
+    of option object, which look like this:
+    {
+        option: "http://testserver.org/commerceconnect/options/1/,
+        value: "some value"
+    },
+    These should be passed to basket.add_product as a list of dictionaries.
+    """
     def validate(self, basket, product, quantity):
         availability = basket.strategy.fetch_for_product(
             product).availability
@@ -61,24 +78,6 @@ class AddProductView(APIView):
         return True, ""
 
     def post(self, request, format=None):
-        """
-        Add a certain quantity of a product to the basket.
-
-        POST(url, quantity)
-        {
-            "url": "http://testserver.org/commerceconnect/products/209/",
-            "quantity": 6
-        }
-
-        NOT IMPLEMENTED: LineAttributes, which are references to
-        catalogue.Option. To Implement make the serializer accept lists
-        of option object, which look like this:
-        {
-            option: "http://testserver.org/commerceconnect/options/1/,
-            value: "some value"
-        },
-        These should be passed to basket.add_product as a list of dictionaries.
-        """
         p_ser = serializers.AddProductSerializer(
             data=request.DATA, context={'request': request})
         if p_ser.is_valid():
