@@ -59,7 +59,7 @@ class AddProductView(APIView):
             "value": "some value"
         }]
     }
-   """
+    """
     def validate(self, basket, product, quantity):
         availability = basket.strategy.fetch_for_product(
             product).availability
@@ -77,6 +77,7 @@ class AddProductView(APIView):
         allowed, message = basket.is_quantity_allowed(quantity)
         if not allowed:
             return False, quantity
+        return True, None
 
     def post(self, request, format=None):
         p_ser = serializers.AddProductSerializer(
@@ -96,7 +97,7 @@ class AddProductView(APIView):
             basket.add_product(product, quantity=quantity, options=options)
             apply_offers(request, basket)
             ser = serializers.BasketSerializer(
-                basket,  context={'request': request})
+                basket, context={'request': request})
             return Response(ser.data)
 
         return Response(
