@@ -63,7 +63,7 @@ class AddProductView(APIView):
 
         # check if product is available at all
         if not availability.is_available_to_buy:
-            return False, availability.reason
+            return False, availability.message
 
         # check if we can buy this quantity
         allowed, message = availability.is_purchase_permitted(quantity)
