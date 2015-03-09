@@ -17,7 +17,8 @@ from oscarapi.views.mixin import PutIsPatchMixin
 from oscarapi.views.utils import BasketPermissionMixin
 
 
-__all__ = ('BasketView', 'LineList', 'LineDetail', 'add_product', 'add_voucher', 'shipping_methods')
+__all__ = ('BasketView', 'LineList', 'LineDetail', 'AddProductView',
+           'add_voucher', 'shipping_methods')
 
 Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
@@ -38,15 +39,14 @@ class BasketView(APIView):
         return Response(ser.data)
 
 
-@api_view(('POST',))
-def add_product(request, format=None):
+class AddProductView(APIView):
     """
     Add a certain quantity of a product to the basket.
 
     POST(url, quantity)
     {
         "url": "http://testserver.org/oscarapi/products/209/",
-        "quantity": 6,
+        "quantity": 6
     }
 
     If you've got some options to configure for the product to add to the
@@ -59,40 +59,48 @@ def add_product(request, format=None):
             "value": "some value"
         }]
     }
-    """
-    p_ser = serializers.AddProductSerializer(data=request.DATA,
-                                             context={'request': request})
-    if p_ser.is_valid():
-        basket = get_basket(request)
-
-        product = p_ser.object['url']
-        quantity = p_ser.object['quantity']
-        options = p_ser.object.get('options', [])
-
-        availability = basket.strategy.fetch_for_product(product).availability
+   """
+    def validate(self, basket, product, quantity):
+        availability = basket.strategy.fetch_for_product(
+            product).availability
 
         # check if product is available at all
         if not availability.is_available_to_buy:
-            return Response(
-                {'reason': availability.message}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return False, availability.message
 
         # check if we can buy this quantity
         allowed, message = availability.is_purchase_permitted(quantity)
         if not allowed:
-            return Response({'reason': message}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return False, message
 
         # check if there is a limit on amount
         allowed, message = basket.is_quantity_allowed(quantity)
         if not allowed:
-            return Response({'reason': message}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return False, quantity
 
-        basket.add_product(product, quantity=quantity, options=options)
-        apply_offers(request, basket)
-        ser = serializers.BasketSerializer(
-            basket,  context={'request': request})
-        return Response(ser.data)
+    def post(self, request, format=None):
+        p_ser = serializers.AddProductSerializer(
+            data=request.DATA, context={'request': request})
+        if p_ser.is_valid():
+            basket = get_basket(request)
+            product = p_ser.object['url']
+            quantity = p_ser.init_data.get('quantity')
+            options = p_ser.object.get('options', [])
 
-    return Response({'reason': p_ser.errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            basket_valid, message = self.validate(basket, product, quantity)
+            if not basket_valid:
+                return Response(
+                    {'reason': message},
+                    status=status.HTTP_406_NOT_ACCEPTABLE)
+
+            basket.add_product(product, quantity=quantity, options=options)
+            apply_offers(request, basket)
+            ser = serializers.BasketSerializer(
+                basket,  context={'request': request})
+            return Response(ser.data)
+
+        return Response(
+            {'reason': p_ser.errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 @api_view(('POST',))
