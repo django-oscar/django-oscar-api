@@ -85,7 +85,7 @@ class AddProductView(APIView):
         if p_ser.is_valid():
             basket = get_basket(request)
             product = p_ser.object['url']
-            quantity = p_ser.init_data.get('quantity')
+            quantity = p_ser.object['quantity']
             options = p_ser.object.get('options', [])
 
             basket_valid, message = self.validate(basket, product, quantity)
