@@ -14,10 +14,12 @@ class OrderList(generics.ListAPIView):
     model = Order
     serializer_class = OrderSerializer
     permission_classes = (IsOwner,)
+    queryset = Order.objects
 
     def get_queryset(self):
-        qs = super(OrderList, self).get_queryset()
-        return qs.filter(user=self.request.user)
+        return self.queryset.filter(user=self.request.user)
+
+
 class OrderDetail(generics.RetrieveAPIView):
     model = Order
     serializer_class = OrderSerializer
