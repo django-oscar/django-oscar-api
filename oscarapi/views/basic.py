@@ -40,23 +40,25 @@ Country = get_model('address', 'Country')
 class CountryList(generics.ListAPIView):
     serializer_class = serializers.CountrySerializer
     model = Country
+    queryset = Country.objects
 
 
 class CountryDetail(generics.RetrieveAPIView):
     serializer_class = serializers.CountrySerializer
     model = Country
+    queryset = Country.objects
 
 
 class BasketList(generics.ListCreateAPIView):
     model = Basket
     serializer_class = serializers.BasketSerializer
     permission_classes = (IsAdminUser,)
+    queryset = Basket.objects
 
     def get_queryset(self):
-        qs = super(BasketList, self).get_queryset()
         return itertools.imap(
             functools.partial(
-                prepare_basket, request=self.request), qs
+                prepare_basket, request=self.request), self.queryset.all()
             )
 
 
@@ -106,45 +108,57 @@ class ProductPrice(APIView):
         return Response(ser.data)
 
 
-class ProductAvailability(generics.RetrieveAPIView):
-    model = Product
-    queryset = Product.objects
-    serializer_class = serializers.ProductAvailabilitySerializer
+class ProductAvailability(APIView):
+
+    def get(self, request, pk=None, format=None):
+        product = Product.objects.get(id=pk)
+        strategy = Selector().strategy(request=request, user=request.user)
+        availability = strategy.fetch_for_product(product).availability
+        ser = serializers.ProductAvailabilitySerializer(
+            availability, context={'request': request})
+        return Response(ser.data)
 
 
 class StockRecordList(generics.ListAPIView):
     model = StockRecord
+    queryset = StockRecord.objects
     serializer_class = serializers.StockRecordSerializer
+    queryset = StockRecord.objects
 
     def get(self, request, pk=None, *args, **kwargs):
         if pk is not None:
-            self.queryset = self.get_queryset().filter(product__id=pk)
+            self.queryset = self.queryset.filter(product__id=pk)
 
         return super(StockRecordList, self).get(request, *args, **kwargs)
 
 
 class StockRecordDetail(generics.RetrieveAPIView):
     model = StockRecord
+    queryset = StockRecord.objects
     serializer_class = serializers.StockRecordSerializer
 
 
 class UserList(generics.ListAPIView):
     model = User
+    queryset = User.objects
     serializer_class = serializers.UserSerializer
     permission_classes = (IsAdminUser,)
 
 
 class UserDetail(generics.RetrieveAPIView):
     model = User
+    queryset = User.objects
     serializer_class = serializers.UserSerializer
     permission_classes = (IsAdminUser,)
 
 
 class OptionList(generics.ListAPIView):
     model = Option
+    queryset = Option.objects
     serializer_class = serializers.OptionSerializer
 
 
 class OptionDetail(generics.RetrieveAPIView):
     model = Option
     serializer_class = serializers.OptionSerializer
+    queryset = Option.objects
