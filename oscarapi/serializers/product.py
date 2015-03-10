@@ -28,9 +28,10 @@ class OptionSerializer(OscarHyperlinkedModelSerializer):
 class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = Product
-        fields = overridable('OSCARAPI_PRODUCT_FIELDS', default=('url',
-                                                           'id',
-                                                           'title'))
+        fields = overridable(
+            'OSCARAPI_PRODUCT_FIELDS', default=(
+                'url', 'id', 'title')
+            )
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
