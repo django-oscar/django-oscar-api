@@ -28,7 +28,7 @@ class BasketPermissionMixin(object):
         )
         try:
             basket_uri = DATA.get('basket')
-            data_basket = basket_parser.from_native(basket_uri)
+            data_basket = basket_parser.to_internal_value(basket_uri)
         except ValidationError as e:
             raise exceptions.NotAcceptable(e.messages)
         else:
