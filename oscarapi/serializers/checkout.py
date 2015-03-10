@@ -64,7 +64,8 @@ class ShippingAddressSerializer(OscarHyperlinkedModelSerializer):
 
 
 class InlineShippingAddressSerializer(OscarModelSerializer):
-    country = serializers.HyperlinkedRelatedField(view_name='country-detail')
+    country = serializers.HyperlinkedRelatedField(
+        view_name='country-detail', queryset=Country.objects)
 
     class Meta:
         model = ShippingAddress
@@ -76,7 +77,8 @@ class BillingAddressSerializer(OscarHyperlinkedModelSerializer):
 
 
 class InlineBillingAddressSerializer(OscarModelSerializer):
-    country = serializers.HyperlinkedRelatedField(view_name='country-detail')
+    country = serializers.HyperlinkedRelatedField(
+        view_name='country-detail', queryset=Country.objects)
 
     class Meta:
         model = BillingAddress
@@ -122,8 +124,10 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     basket = serializers.HyperlinkedRelatedField(
         view_name='basket-detail', queryset=Basket.objects)
-    total = serializers.DecimalField(required=False)
-    shipping_method_code = serializers.CharField(max_length=128, required=False)
+    total = serializers.DecimalField(
+        decimal_places=2, max_digits=12, required=False)
+    shipping_method_code = serializers.CharField(
+        max_length=128, required=False)
     shipping_charge = PriceSerializer(many=False, required=False)
     shipping_address = ShippingAddressSerializer(many=False, required=False)
     billing_address = BillingAddressSerializer(many=False, required=False)
