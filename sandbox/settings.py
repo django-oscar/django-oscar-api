@@ -120,7 +120,7 @@ MIDDLEWARE_CLASSES = (
 REST_FRAMEWORK = {
     'CHARSET': 'utf-8',
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.UnicodeJSONRenderer',
+        'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     )
 }
