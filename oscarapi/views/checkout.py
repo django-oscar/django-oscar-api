@@ -72,7 +72,7 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
         c_ser = CheckoutSerializer(data=request.DATA,
                                    context={'request': request})
         if c_ser.is_valid():
-            order = c_ser.object
+            order = c_ser.save()
             basket.freeze()
             o_ser = OrderSerializer(order, context={'request': request})
             return response.Response(o_ser.data)
