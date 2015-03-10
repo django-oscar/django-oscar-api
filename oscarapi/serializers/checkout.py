@@ -72,7 +72,7 @@ class ShippingMethodSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=128)
     name = serializers.CharField(max_length=128)
     price = serializers.SerializerMethodField('calculate_price')
-    
+
     def calculate_price(self, obj):
         price = obj.calculate(self.context.get('basket'))
         return PriceSerializer(price).data
@@ -97,8 +97,8 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
 
     class Meta:
         model = Order
-        fields = overridable('OSCARAPI_ORDER_FIELD', default=('number',
-            'basket', 'url',
+        fields = overridable('OSCARAPI_ORDER_FIELD', default=(
+            'number', 'basket', 'url',
             'user', 'billing_address', 'currency', 'total_incl_tax',
             'total_excl_tax', 'shipping_incl_tax', 'shipping_excl_tax',
             'shipping_address', 'shipping_method', 'shipping_code', 'status',
@@ -182,7 +182,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
         repo = Repository()
 
         default = repo.get_default_shipping_method(
-            basket=basket, 
+            basket=basket,
             user=request.user,
             request=request,
             shipping_addr=shipping_address
@@ -196,9 +196,9 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
                 shipping_addr=shipping_address
             )
 
-            find_method = (s for s in methods if s.code == shipping_method_code)
+            find_method = (
+                s for s in methods if s.code == shipping_method_code)
             shipping_method = next(find_method, default)
             return shipping_method
 
         return default
-
