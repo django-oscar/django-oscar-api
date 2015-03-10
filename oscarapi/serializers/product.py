@@ -39,9 +39,9 @@ class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
 class ProductAttributeValueSerializer(OscarModelSerializer):
     name = serializers.RelatedField(
         source="attribute", queryset=ProductAttribute.objects)
-    value = serializers.SerializerMethodField('get_attributevalue')
+    value = serializers.SerializerMethodField()
 
-    def get_attributevalue(self, obj):
+    def get_value(self, obj):
         return obj.value
 
     class Meta:
