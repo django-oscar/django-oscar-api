@@ -3,8 +3,7 @@ from rest_framework import serializers
 from oscarapi.utils import (
     OscarModelSerializer,
     overridable,
-    OscarHyperlinkedModelSerializer,
-    OscarStrategySerializer
+    OscarHyperlinkedModelSerializer
 )
 from oscar.core.loading import get_model
 
@@ -38,10 +37,7 @@ class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
     name = serializers.StringRelatedField(source="attribute")
-    value = serializers.SerializerMethodField()
-
-    def get_value(self, obj):
-        return obj.value
+    value = serializers.StringRelatedField()
 
     class Meta:
         model = ProductAttributeValue
@@ -61,12 +57,10 @@ class ProductImageSerializer(OscarModelSerializer):
         model = ProductImage
 
 
-class ProductAvailabilitySerializer(OscarStrategySerializer):
-    is_available_to_buy = serializers.BooleanField(
-        source="info.availability.is_available_to_buy")
-    num_available = serializers.IntegerField(
-        source="info.availability.num_available")
-    message = serializers.CharField(source="info.availability.message")
+class ProductAvailabilitySerializer(serializers.Serializer):
+    is_available_to_buy = serializers.BooleanField()
+    num_available = serializers.IntegerField()
+    message = serializers.CharField()
 
 
 class ProductSerializer(OscarModelSerializer):
@@ -76,9 +70,9 @@ class ProductSerializer(OscarModelSerializer):
     attributes = ProductAttributeValueSerializer(many=True,
                                                  required=False,
                                                  source="attribute_values")
-    categories = serializers.StringRelatedField(many=True)
-    product_class = serializers.StringRelatedField()
-    images = ProductImageSerializer(many=True)
+    categories = serializers.StringRelatedField(many=True, required=False)
+    product_class = serializers.StringRelatedField(required=False)
+    images = ProductImageSerializer(many=True, required=False)
     price = serializers.HyperlinkedIdentityField(view_name='product-price')
     availability = serializers.HyperlinkedIdentityField(
         view_name='product-availability')
