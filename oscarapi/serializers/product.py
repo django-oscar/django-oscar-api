@@ -10,6 +10,8 @@ from oscar.core.loading import get_model
 
 
 Product = get_model('catalogue', 'Product')
+ProductClass = get_model('catalogue', 'ProductClass')
+ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 ProductImage = get_model('catalogue', 'ProductImage')
@@ -35,7 +37,8 @@ class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
-    name = serializers.RelatedField(source="attribute")
+    name = serializers.RelatedField(
+        source="attribute", queryset=ProductAttribute.objects)
     value = serializers.SerializerMethodField('get_value')
 
     def get_value(self, obj):
@@ -74,8 +77,10 @@ class ProductSerializer(OscarModelSerializer):
     attributes = ProductAttributeValueSerializer(many=True,
                                                  required=False,
                                                  source="attribute_values")
-    categories = serializers.RelatedField(many=True)
-    product_class = serializers.RelatedField()
+    categories = serializers.RelatedField(
+        many=True, queryset=ProductCategory.objects)
+    product_class = serializers.RelatedField(
+        queryset=ProductClass.objects)
     images = ProductImageSerializer(many=True)
     price = serializers.HyperlinkedIdentityField(view_name='product-price')
     availability = serializers.HyperlinkedIdentityField(
@@ -93,7 +98,8 @@ class ProductSerializer(OscarModelSerializer):
 
 
 class OptionValueSerializer(serializers.Serializer):
-    option = serializers.HyperlinkedRelatedField(view_name='option-detail', queryset=Option.objects)
+    option = serializers.HyperlinkedRelatedField(
+        view_name='option-detail', queryset=Option.objects)
     value = serializers.CharField()
 
 
@@ -101,7 +107,7 @@ class AddProductSerializer(serializers.Serializer):
     """
     Serializes and validates an add to basket request.
     """
-    quantity = serializers.IntegerField(default=1, required=True)
+    quantity = serializers.IntegerField(required=True)
     url = serializers.HyperlinkedRelatedField(
         view_name='product-detail', queryset=Product.objects,
         required=True)
