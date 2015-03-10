@@ -36,22 +36,6 @@ class PriceSerializer(serializers.Serializer):
     tax = serializers.DecimalField(
         decimal_places=2, max_digits=12, required=False)
 
-    def restore_object(self, attrs, instance=None):
-        if instance is not None:
-            instance.currency = attrs.get('currency')
-            instance.excl_tax = attrs.get('excl_tax')
-            instance.incl_tax = attrs.get('incl_tax')
-            instance.tax = attrs.get('tax')
-        else:
-            instance = prices.Price(
-                currency=attrs.get('currency'),
-                excl_tax=attrs.get('excl_tax'),
-                incl_tax=attrs.get('incl_tax'),
-                tax=attrs.get('tax'),
-            )
-
-        return instance
-
 
 class CountrySerializer(OscarHyperlinkedModelSerializer):
     class Meta:
@@ -99,7 +83,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
         many=False, required=False)
     billing_address = InlineBillingAddressSerializer(
         many=False, required=False)
-    payment_url = serializers.SerializerMethodField('get_payment_url')
+    payment_url = serializers.SerializerMethodField()
 
     def get_payment_url(self, obj):
         try:
@@ -144,13 +128,14 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
         shipping_charge = shipping_method.calculate(basket)
         posted_shipping_charge = attrs.get('shipping_charge')
 
-        # test submitted data.
-        if posted_shipping_charge is not None and \
-            not posted_shipping_charge == shipping_charge:
-            message = _('Shipping price incorrect %s != %s' % (
-                posted_shipping_charge, shipping_charge
-            ))
-            raise serializers.ValidationError(message)
+        if posted_shipping_charge is not None:
+            posted_shipping_charge = prices.Price(**posted_shipping_charge)
+            # test submitted data.
+            if not posted_shipping_charge == shipping_charge:
+                message = _('Shipping price incorrect %s != %s' % (
+                    posted_shipping_charge, shipping_charge
+                ))
+                raise serializers.ValidationError(message)
 
         total = attrs.get('total')
         if total is not None:
@@ -172,24 +157,22 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
         attrs['basket'] = basket
         return attrs
 
-    def restore_object(self, attrs, instance=None):
-        if instance is not None:
-            return instance
-
+    def create(self, validated_data):
         try:
-            basket = attrs.get('basket')
+            basket = validated_data.get('basket')
             order_number = self.generate_order_number(basket)
             request = self.context['request']
-
+            shipping_address = ShippingAddress(
+                **validated_data['shipping_address'])
             return self.place_order(
                 order_number=order_number,
                 user=request.user,
                 basket=basket,
-                shipping_address=attrs.get('shipping_address'),
-                shipping_method=attrs.get('shipping_method'),
-                shipping_charge=attrs.get('shipping_charge'),
-                billing_address=attrs.get('billing_address'),
-                order_total=attrs.get('total'),
+                shipping_address=shipping_address,
+                shipping_method=validated_data.get('shipping_method'),
+                shipping_charge=validated_data.get('shipping_charge'),
+                billing_address=validated_data.get('billing_address'),
+                order_total=validated_data.get('total'),
             )
         except ValueError as e:
             raise exceptions.NotAcceptable(e.message)
