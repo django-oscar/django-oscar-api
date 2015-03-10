@@ -39,9 +39,9 @@ class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
 class ProductAttributeValueSerializer(OscarModelSerializer):
     name = serializers.RelatedField(
         source="attribute", queryset=ProductAttribute.objects)
-    value = serializers.SerializerMethodField('get_value')
+    value = serializers.SerializerMethodField('get_attributevalue')
 
-    def get_value(self, obj):
+    def get_attributevalue(self, obj):
         return obj.value
 
     class Meta:
@@ -91,10 +91,11 @@ class ProductSerializer(OscarModelSerializer):
         model = Product
         fields = overridable(
             'OSCARAPI_PRODUCTDETAIL_FIELDS',
-            default=('url', 'id', 'title', 'description',
-                     'date_created', 'date_updated', 'recommended_products',
-                     'attributes', 'stockrecords', 'images', 'price',
-                     'availability'))
+            default=(
+                'url', 'id', 'title', 'description',
+                'date_created', 'date_updated', 'recommended_products',
+                'attributes', 'categories', 'product_class',
+                'stockrecords', 'images', 'price', 'availability', 'options'))
 
 
 class OptionValueSerializer(serializers.Serializer):
