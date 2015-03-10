@@ -34,19 +34,6 @@ class OscarSerializer(object):
         return native
 
 
-class OscarStrategySerializer(serializers.Serializer):
-    """Provides easy access to the price and stock information provided by
-        our strategy
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(OscarStrategySerializer, self).__init__(*args, **kwargs)
-        request = self.context.get('request')
-        user = request.user if request is not None else None
-        strategy = Selector().strategy(request=request, user=user)
-        self.object.info = strategy.fetch_for_product(self.object)
-
-
 class OscarModelSerializer(OscarSerializer, serializers.ModelSerializer):
     """
     Correctly map oscar fields to serializer fields.
