@@ -58,13 +58,15 @@ class BasketList(generics.ListCreateAPIView):
             functools.partial(prepare_basket, request=self.request), 
             qs)
 
+
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     model = Basket
     serializer_class = serializers.BasketSerializer
     permission_classes = (permissions.IsAdminUserOrRequestContainsBasket,)
-    
-    def get_object(self, queryset=None):
-        basket = super(BasketDetail, self).get_object(queryset)
+    queryset = Basket.objects
+
+    def get_object(self):
+        basket = super(BasketDetail, self).get_object()
         return prepare_basket(basket, self.request)
 
 class LineAttributeList(generics.ListCreateAPIView):
