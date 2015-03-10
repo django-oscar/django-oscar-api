@@ -55,8 +55,9 @@ class BasketList(generics.ListCreateAPIView):
     def get_queryset(self):
         qs = super(BasketList, self).get_queryset()
         return itertools.imap(
-            functools.partial(prepare_basket, request=self.request), 
-            qs)
+            functools.partial(
+                prepare_basket, request=self.request), qs
+            )
 
 
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
@@ -68,6 +69,7 @@ class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     def get_object(self):
         basket = super(BasketDetail, self).get_object()
         return prepare_basket(basket, self.request)
+
 
 class LineAttributeList(generics.ListCreateAPIView):
     model = LineAttribute
