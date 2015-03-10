@@ -59,7 +59,7 @@ class ProductImageSerializer(OscarModelSerializer):
 
 class ProductAvailabilitySerializer(serializers.Serializer):
     is_available_to_buy = serializers.BooleanField()
-    num_available = serializers.IntegerField()
+    num_available = serializers.IntegerField(required=False)
     message = serializers.CharField()
 
 
