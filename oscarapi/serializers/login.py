@@ -40,8 +40,5 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'Staff users can not log in via the rest api')
 
+        self.object = user
         return attrs
-
-    def get_user(self):
-        return authenticate(username=self.validated_data['username'],
-                            password=self.validated_data['password'])
