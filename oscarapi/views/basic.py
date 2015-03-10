@@ -73,21 +73,25 @@ class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
 
 class LineAttributeList(generics.ListCreateAPIView):
     model = LineAttribute
+    queryset = LineAttribute.objects
     serializer_class = serializers.LineAttributeSerializer
 
 
 class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveAPIView):
     model = LineAttribute
+    queryset = LineAttribute.objects
     serializer_class = serializers.LineAttributeSerializer
 
 
 class ProductList(generics.ListAPIView):
     model = Product
+    queryset = Product.objects
     serializer_class = serializers.ProductLinkSerializer
 
 
 class ProductDetail(generics.RetrieveAPIView):
     model = Product
+    queryset = Product.objects
     serializer_class = serializers.ProductSerializer
 
 
@@ -104,6 +108,7 @@ class ProductPrice(APIView):
 
 class ProductAvailability(generics.RetrieveAPIView):
     model = Product
+    queryset = Product.objects
     serializer_class = serializers.ProductAvailabilitySerializer
 
 
