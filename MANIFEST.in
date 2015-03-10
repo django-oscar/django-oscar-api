@@ -1,3 +1,6 @@
 include *.rst
-recursive-include oscar_stripe/templates *.html
-recursive-include oscarapi/tests/*.py
+include LICENSE
+include Makefile
+recursive-include oscarapi *.py
+recursive-include oscarapi *.xml
+recursive-include sandbox *.py
