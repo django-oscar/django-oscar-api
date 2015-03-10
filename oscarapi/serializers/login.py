@@ -36,6 +36,6 @@ class LoginSerializer(serializers.Serializer):
 
         return attrs
 
-    def restore_object(self, attrs, instance=None):
-        return authenticate(username=attrs['username'],
-                            password=attrs['password'])
+    def get_user(self):
+        return authenticate(username=self.validated_data['username'],
+                            password=self.validated_data['password'])
