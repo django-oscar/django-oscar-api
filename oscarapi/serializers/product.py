@@ -37,8 +37,7 @@ class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
-    name = serializers.RelatedField(
-        source="attribute", queryset=ProductAttribute.objects)
+    name = serializers.StringRelatedField(source="attribute")
     value = serializers.SerializerMethodField()
 
     def get_value(self, obj):
@@ -77,10 +76,8 @@ class ProductSerializer(OscarModelSerializer):
     attributes = ProductAttributeValueSerializer(many=True,
                                                  required=False,
                                                  source="attribute_values")
-    categories = serializers.RelatedField(
-        many=True, queryset=ProductCategory.objects)
-    product_class = serializers.RelatedField(
-        queryset=ProductClass.objects)
+    categories = serializers.StringRelatedField(many=True)
+    product_class = serializers.StringRelatedField()
     images = ProductImageSerializer(many=True)
     price = serializers.HyperlinkedIdentityField(view_name='product-price')
     availability = serializers.HyperlinkedIdentityField(
