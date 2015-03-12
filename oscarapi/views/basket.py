@@ -60,7 +60,7 @@ class AddProductView(APIView):
         }]
     }
     """
-    def validate(self, basket, product, quantity):
+    def validate(self, basket, product, quantity, options):
         availability = basket.strategy.fetch_for_product(
             product).availability
 
@@ -88,7 +88,7 @@ class AddProductView(APIView):
             quantity = p_ser.object['quantity']
             options = p_ser.object.get('options', [])
 
-            basket_valid, message = self.validate(basket, product, quantity)
+            basket_valid, message = self.validate(basket, product, quantity, options)
             if not basket_valid:
                 return Response(
                     {'reason': message},
