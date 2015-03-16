@@ -128,6 +128,9 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     shipping_address = ShippingAddressSerializer(many=False, required=False)
     billing_address = BillingAddressSerializer(many=False, required=False)
 
+    def get_initial_order_status(self, basket):
+        return overridable('OSCARAPI_INITIAL_ORDER_STATUS', default='new')
+
     def validate(self, attrs):
         request = self.context['request']
         basket = attrs.get('basket')
