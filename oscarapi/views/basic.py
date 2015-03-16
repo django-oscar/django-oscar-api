@@ -6,7 +6,6 @@ from oscar.core.loading import get_model, get_class
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .mixin import PutIsPatchMixin
 from oscarapi import serializers, permissions
@@ -97,25 +96,25 @@ class ProductDetail(generics.RetrieveAPIView):
     serializer_class = serializers.ProductSerializer
 
 
-class ProductPrice(APIView):
+class ProductPrice(generics.RetrieveAPIView):
 
     def get(self, request, pk=None, format=None):
         product = Product.objects.get(id=pk)
         strategy = Selector().strategy(request=request, user=request.user)
-        price = strategy.fetch_for_product(product).price
-        ser = serializers.PriceSerializer(price,
-                                          context={'request': request})
+        ser = serializers.PriceSerializer(
+            strategy.fetch_for_product(product).price,
+            context={'request': request})
         return Response(ser.data)
 
 
-class ProductAvailability(APIView):
+class ProductAvailability(generics.RetrieveAPIView):
 
     def get(self, request, pk=None, format=None):
         product = Product.objects.get(id=pk)
         strategy = Selector().strategy(request=request, user=request.user)
-        availability = strategy.fetch_for_product(product).availability
-        ser = serializers.ProductAvailabilitySerializer(
-            availability, context={'request': request})
+        ser = serializers.AvailabilitySerializer(
+            strategy.fetch_for_product(product).availability,
+            context={'request': request})
         return Response(ser.data)
 
 
