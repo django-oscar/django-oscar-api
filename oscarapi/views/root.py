@@ -23,6 +23,7 @@ def PUBLIC_APIS(r, f):
         ('shippingmethods', reverse('shippingmethod-list', request=r,
                                     format=f)),
         ('countries', reverse('country-list', request=r, format=f)),
+        ('payment types', reverse('sourcetype-list', request=r, format=f)),
     ]
 
 
