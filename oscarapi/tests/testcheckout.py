@@ -23,19 +23,54 @@ class CheckOutTest(APITest):
         basket = json.loads(response.content)
         basket_url = basket.get('url')
         basket_id = basket.get('id')
+        request = {
+            'basket': basket_url,
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            }
+        }
+        response = self.post('api-shipping', **request)
+        self.assertEqual(response.status_code, 406)
+        response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.assertEqual(response.status_code, 200)
+        response = self.post('api-shipping', **request)
+        self.assertEqual(response.status_code, 200)
+        shipping = json.loads(response.content)
+        shipping_charge = shipping.get('shipping_charge')
+        shipping_method_code = shipping.get('shipping_method_code')
+
+        request = {
+            'basket': basket_url,
+            'shipping_charge': shipping_charge
+        }
+
+        response = self.post('api-total', **request)
+        self.assertEqual(response.status_code, 200)
+        total = json.loads(response.content).get('total')
 
         request = {
             'basket': basket_url,
             'total': {
                 'currency': 'EUR',
-                'excl_tax':'100.0',
-                'tax':'21.0'
+                'excl_tax':'110.0',
+                'tax':'210.0'
             },
-            'shipping_method': "http://127.0.0.1:8000/api/shippingmethods/1/",
+            'shipping_method': shipping_method_code,
             'shipping_charge': {
                 'currency': 'EUR',
-                'excl_tax':'10.0',
-                'tax':'0.6'
+                'excl_tax':'100.0',
+                'tax':'0.60'
             },
             "shipping_address": {
                 "country": "http://127.0.0.1:8000/api/countries/NL/",
@@ -54,8 +89,10 @@ class CheckOutTest(APITest):
         }
         response = self.post('api-checkout', **request)
         self.assertEqual(response.status_code, 406)
-        response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
-        self.assertEqual(response.status_code, 200)
+        request['shipping_charge'] = shipping_charge
+        response = self.post('api-checkout', **request)
+        self.assertEqual(response.status_code, 406)
+        request['total'] = total
         response = self.post('api-checkout', **request)
 
         self.assertEqual(response.status_code, 200)
@@ -95,3 +132,57 @@ class CheckOutTest(APITest):
     def test_client_can_not_falsify_picing(self):
         "Prove that the total and shippingcharge variable sent along with a checkout request, can not be manipulated"
         self.fail('checkout variable can not be used to buy products for prices they are not available at.')
+
+
+class TotalTest(APITest):
+    fixtures = [
+        'product', 'productcategory', 'productattribute', 'productclass',
+        'productattributevalue', 'category', 'attributeoptiongroup', 'attributeoption',
+        'stockrecord', 'partner', 'orderanditemcharges', 'country'
+    ]
+
+    def test_checkout(self):
+        "Test if an order can be placed as an authenticated user with session based auth."
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = json.loads(response.content)
+        basket_url = basket.get('url')
+        basket_id = basket.get('id')
+
+        request = {
+            'basket': basket_url,
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            }
+        }
+        response = self.get('api-shipping')
+        self.assertTrue(response.status_code, 400)
+
+        response = self.post('api-shipping', **request)
+        self.assertTrue(response.status_code, 406)
+        response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.assertEqual(response.status_code, 200)
+        response = self.post('api-shipping', **request)
+        self.assertEqual(response.status_code, 200)
+        shipping = json.loads(response.content)
+        shipping_charge = shipping.get('shipping_charge')
+
+        request = {
+            'basket': basket_url,
+            'shipping_charge': shipping_charge
+        }
+
+        response = self.post('api-total', **request)
+        self.assertEqual(response.status_code, 200)

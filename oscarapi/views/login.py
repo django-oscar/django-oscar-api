@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 
 from oscarapi import serializers
 from oscarapi.utils import login_and_upgrade_session
@@ -15,7 +16,7 @@ __all__ = ('LoginView',)
 Basket = get_model('basket', 'Basket')
 
 
-class LoginView(APIView):
+class LoginView(GenericAPIView):
     """
     Api for logging in users.
 
@@ -43,6 +44,8 @@ class LoginView(APIView):
     If more details are needed, use the ``OSCARAPI_PRODUCT_FIELDS`` setting to change
     the fields the ``UserSerializer`` will render.
     """
+
+    serializer_class = serializers.LoginSerializer
 
     def get(self, request, format=None):
         if settings.DEBUG:
