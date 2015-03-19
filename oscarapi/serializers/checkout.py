@@ -112,11 +112,13 @@ class OrderSerializer(OscarModelSerializer):
 # TODO: At the moment, only regular shipping charges are possible.
 # Most likely CheckoutSerializer should also accept WeightBased shipping
 # charges.
-class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin, GetShippingMixin):
+class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin,
+                         GetShippingMixin):
     basket = serializers.HyperlinkedRelatedField(
         view_name='basket-detail', queryset=Basket.objects)
     total = PriceSerializer(many=False, required=True)
-    shipping_method_code = serializers.CharField(max_length=128, required=False)
+    shipping_method_code = serializers.CharField(
+        max_length=128, required=False)
     shipping_charge = PriceSerializer(many=False, required=False)
     shipping_address = ShippingAddressSerializer(many=False, required=False)
     billing_address = BillingAddressSerializer(many=False, required=False)
@@ -136,7 +138,8 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin, GetShippin
                 attrs.get('shipping_method_code'),
                 shipping_address
             )
-        billing_address = self.get_billing_address(shipping_address) if attrs.get('billing_address', None) is None \
+        billing_address = self.get_billing_address(shipping_address) \
+            if attrs.get('billing_address', None) is None \
             else attrs.get('billing_address', None)
 
         if not shipping_method:
