@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="payment.sourcetype">
+        <field type="CharField" name="name">PayPal</field>
+        <field type="SlugField" name="code">paypal</field>
+    </object>
+    <object pk="2" model="payment.sourcetype">
+        <field type="CharField" name="name">Stripe</field>
+        <field type="SlugField" name="code">stripe</field>
+    </object>
+</django-objects>
