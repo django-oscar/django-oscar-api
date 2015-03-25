@@ -4,4 +4,8 @@
         <field to="catalogue.product" name="product" rel="ManyToOneRel">1</field>
         <field to="catalogue.category" name="category" rel="ManyToOneRel">1</field>
     </object>
+    <object pk="2" model="catalogue.productcategory">
+        <field to="catalogue.product" name="product" rel="ManyToOneRel">3</field>
+        <field to="catalogue.category" name="category" rel="ManyToOneRel">2</field>
+    </object>
 </django-objects>

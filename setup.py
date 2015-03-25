@@ -36,10 +36,11 @@ setup(
     install_requires=[
         'setuptools',
         'django-oscar>=0.6',
-        'djangorestframework<3.0.0'
+        'djangorestframework<3.0.0',
+        'django-filter>=0.7'
     ],
     # mark test target to require extras.
     extras_require={
-        'test': ['django-nose',]
+        'test': ['django-nose']
     },
 )

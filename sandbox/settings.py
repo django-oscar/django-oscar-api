@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'compressor',
     'django_nose',
     'rest_framework',
+    'django_filters',
     'oscarapi',
 ] + get_core_apps()
 

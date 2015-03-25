@@ -10,4 +10,14 @@
         <field type="SlugField" name="slug">clothing</field>
         <field type="CharField" name="full_name">Clothing</field>
     </object>
+    <object pk="2" model="catalogue.category">
+        <field type="CharField" name="path">0002</field>
+        <field type="PositiveIntegerField" name="depth">1</field>
+        <field type="PositiveIntegerField" name="numchild">0</field>
+        <field type="CharField" name="name">Parfumes</field>
+        <field type="TextField" name="description"/>
+        <field type="FileField" name="image"/>
+        <field type="SlugField" name="slug">parfumes</field>
+        <field type="CharField" name="full_name">Parfumes</field>
+    </object>
 </django-objects>

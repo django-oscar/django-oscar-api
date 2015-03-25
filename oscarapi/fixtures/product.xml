@@ -36,4 +36,22 @@
         <field type="BooleanField" name="is_discountable">True</field>
         <field to="catalogue.option" name="product_options" rel="ManyToManyRel"/>
     </object>
+    <object pk="3" model="catalogue.product">
+        <field type="CharField" name="structure">parent</field>
+        <field type="CharField" name="upc"/>
+        <field to="catalogue.product" name="parent" rel="ManyToOneRel">
+            <None/>
+        </field>
+        <field type="CharField" name="title">Oscar parfume</field>
+        <field type="SlugField" name="slug">oscar-parfume</field>
+        <field type="TextField" name="description"/>
+        <field to="catalogue.productclass" name="product_class" rel="ManyToOneRel">2</field>
+        <field type="FloatField" name="rating">
+            <None/>
+        </field>
+        <field type="DateTimeField" name="date_created">2013-12-12T16:33:57.426000+00:00</field>
+        <field type="DateTimeField" name="date_updated">2013-12-12T16:33:57.426000+00:00</field>
+        <field type="BooleanField" name="is_discountable">True</field>
+        <field to="catalogue.option" name="product_options" rel="ManyToManyRel"/>
+    </object>
 </django-objects>

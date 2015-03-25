@@ -61,7 +61,8 @@ class APITest(TestCase):
             url = reverse(url_name)
         except NoReverseMatch:
             url = url_name
-        method = getattr(self.client, method.lower())
+        method_name = method.lower()
+        method = getattr(self.client, method_name)
         kwargs = {
             'content_type': 'application/json',
         }
@@ -72,7 +73,11 @@ class APITest(TestCase):
 
         response = None
         if data:
-            response = method(url, json.dumps(data), **kwargs)
+            # In get method we need dictionary for params
+            if method_name == 'get':
+                response = method(url, data, **kwargs)
+            else:
+                response = method(url, json.dumps(data), **kwargs)
         else:
             response = method(url, **kwargs)
         # throw away cookies when using session_id authentication
@@ -81,11 +86,13 @@ class APITest(TestCase):
 
         return response
 
-    def get(self, url_name, session_id=None, authenticated=False):
+    def get(self, url_name, session_id=None, authenticated=False, **data):
+        # Add params to get method
         return self.api_call(
             url_name, 'GET',
             session_id=session_id,
-            authenticated=authenticated
+            authenticated=authenticated,
+            **data
         )
 
     def post(self, url_name, session_id=None, authenticated=False, **data):
@@ -122,7 +129,7 @@ class APITest(TestCase):
     @response.setter
     def response(self, response):
         self._response = ParsedReponse(response, self)
-    
+
 class ParsedReponse(object):
     def __init__(self, response, unittestcase):
         self.response = response
@@ -131,7 +138,7 @@ class ParsedReponse(object):
     @property
     def response(self):
         return self._response
-    
+
     @response.setter
     def response(self, response):
         self._response = response
@@ -143,13 +150,13 @@ class ParsedReponse(object):
 
     def __getattr__(self, name):
         return self._response.__getattr__(name)
-    
+
     def __getitem__(self, name):
         return self.body[name]
-    
+
     def assertStatusEqual(self, code, message=None):
         self.t.assertEqual(self.status_code, code, message)
-    
+
     def assertValueEqual(self, value_name, value, message=None):
         self.t.assertEqual(self[value_name], value, message)
 

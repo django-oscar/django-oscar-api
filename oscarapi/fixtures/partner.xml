@@ -5,4 +5,9 @@
         <field type="CharField" name="name">Book partner</field>
         <field to="auth.user" name="users" rel="ManyToManyRel"/>
     </object>
+    <object pk="2" model="partner.partner">
+        <field type="SlugField" name="code">parfume-partner</field>
+        <field type="CharField" name="name">Parfume partner</field>
+        <field to="auth.user" name="users" rel="ManyToManyRel"/>
+    </object>
 </django-objects>
