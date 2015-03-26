@@ -1,6 +1,6 @@
 from rest_framework import status, views, response
 
-from oscarapi.serializers import OrderSerializer, CheckoutSerializer
+from oscarapi.serializers import OrderSerializer, CheckoutSerializer, TotalChargeSerializer
 from oscarapi.views.utils import BasketPermissionMixin
 
 
@@ -22,8 +22,7 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
             "excl_tax": "10.0",
             "tax": "0.6"
         },
-        "shipping_method":
-            "http://127.0.0.1:8000/oscarapi/shippingmethods/1/",
+        "shipping_method": "free-shipping",
         "shipping_address": {
             "country": "http://127.0.0.1:8000/oscarapi/countries/NL/",
             "first_name": "Henk",
@@ -63,3 +62,41 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
             return response.Response(o_ser.data)
 
         return response.Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
+
+
+class TotalView(BasketPermissionMixin, views.APIView):
+    """
+    Prepare an order total for checkout.
+
+    POST(basket, total, shipping_method, shipping_charge,
+         shipping_address,billing_address):
+    {
+        "basket": "http://testserver/oscarapi/baskets/1/",
+        "shipping_charge": {
+            "currency": "EUR",
+            "excl_tax": "10.0",
+            "tax": "0.6"
+        },
+    }
+    returns the order total.
+    """
+    def post(self, request, format=None):
+        # TODO: Make it possible to create orders with options.
+        # at the moment, no options are passed to this method, which means they
+        # are also not created.
+
+        data_basket = self.get_data_basket(request.DATA, format)
+        basket = self.check_basket_permission(request,
+                                              basket_pk=data_basket.pk)
+
+        # by now an error should have been raised if someone was messing
+        # around with the basket, so asume invariant
+        assert(data_basket == basket)
+
+        total_ser = TotalChargeSerializer(data=request.DATA,
+                                          context={'request': request})
+
+        if total_ser.is_valid():
+            return response.Response(total_ser.object)
+
+        return response.Response(total_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)

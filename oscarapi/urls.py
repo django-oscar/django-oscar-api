@@ -31,6 +31,10 @@ urlpatterns = patterns('',
     url(r'^shippingmethods/(?P<pk>[0-9]+)/$', views.ShippingMethodDetail.as_view(), name='shippingmethod-detail'),
     url(r'^countries/$', views.CountryList.as_view(), name='country-list'),
     url(r'^countries/(?P<pk>[A-z]+)/$', views.CountryDetail.as_view(), name='country-detail'),
+    url(r'^shipping/$', views.ShippingView.as_view(), name='api-shipping'),
+    url(r'^total/$', views.TotalView.as_view(), name='api-total'),
+    url(r'^sourcetype/$', views.SourceTypeList.as_view(), name='sourcetype-list'),
+    url(r'^sourcetype/(?P<pk>[0-9]+)/$', views.SourceTypeDetail.as_view(), name='sourcetype-detail'),
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -5,15 +5,20 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 from rest_framework import serializers, exceptions
+from django.utils.translation import ugettext_lazy as _
 
 from oscarapi.basket.operations import prepare_basket
 from oscarapi.utils import (
     OscarHyperlinkedModelSerializer,
-    OscarModelSerializer
+    OscarModelSerializer,
+    GetShippingMixin,
 )
 
 OrderPlacementMixin = get_class('checkout.mixins', 'OrderPlacementMixin')
 ShippingAddress = get_model('order', 'ShippingAddress')
+CheckoutSessionData = get_class(
+    'checkout.utils', 'CheckoutSessionData')
+CheckoutSessionMixin = get_class('checkout.session', 'CheckoutSessionMixin')
 BillingAddress = get_model('order', 'BillingAddress')
 Order = get_model('order', 'Order')
 Basket = get_model('basket', 'Basket')
@@ -107,29 +112,68 @@ class OrderSerializer(OscarModelSerializer):
 # TODO: At the moment, only regular shipping charges are possible.
 # Most likely CheckoutSerializer should also accept WeightBased shipping
 # charges.
-class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
+class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin,
+                         GetShippingMixin):
     basket = serializers.HyperlinkedRelatedField(
         view_name='basket-detail', queryset=Basket.objects)
     total = PriceSerializer(many=False, required=True)
-    shipping_method = serializers.HyperlinkedRelatedField(
-        view_name='shippingmethod-detail', queryset=ShippingMethod.objects,
-        required=True)
-    shipping_charge = PriceSerializer(many=False, required=True)
+    shipping_method_code = serializers.CharField(
+        max_length=128, required=False)
+    shipping_charge = PriceSerializer(many=False, required=False)
     shipping_address = ShippingAddressSerializer(many=False, required=False)
     billing_address = BillingAddressSerializer(many=False, required=False)
+
+    def validate(self, attrs):
+        self.request = self.context['request']
+        basket = prepare_basket(attrs.get('basket'), self.request)
+        if basket.is_empty:
+            raise serializers.ValidationError(_('Basket is empty'))
+        self._set_new_address(basket, attrs.get('shipping_address'))
+        shipping_address = self.get_shipping_address(basket)
+        shipping_method = self.get_shipping_method(
+            basket, shipping_address)
+        if shipping_method is None:
+            shipping_method = self._shipping_method(
+                self.request, basket,
+                attrs.get('shipping_method_code'),
+                shipping_address
+            )
+        billing_address = self.get_billing_address(shipping_address) \
+            if attrs.get('billing_address', None) is None \
+            else attrs.get('billing_address', None)
+
+        if not shipping_method:
+            total = attrs.get('total')
+            shipping_method = attrs.get('shipping_method', None)
+            shipping_charge = attrs.get('shipping_charge', None)
+        else:
+            shipping_charge = shipping_method.calculate(basket)
+            total = self.get_order_totals(
+                basket, shipping_charge=shipping_charge)
+        if shipping_charge.incl_tax != attrs.get('shipping_charge').incl_tax:
+            raise serializers.ValidationError(_('Invalid shipping charge'))
+        if total.incl_tax != attrs.get('total').incl_tax:
+            raise serializers.ValidationError(_('Invalid order total'))
+
+        attrs['shipping_address'] = shipping_address
+        attrs['billing_address'] = billing_address
+        attrs['total'] = total
+        attrs['shipping_charge'] = shipping_charge
+        attrs['shipping_method'] = shipping_method
+        attrs['basket'] = basket
+        return attrs
 
     def restore_object(self, attrs, instance=None):
         if instance is not None:
             return instance
-
         basket = attrs.get('basket')
         order_number = self.generate_order_number(basket)
+
         try:
-            request = self.context['request']
             return self.place_order(
                 order_number=order_number,
-                user=request.user,
-                basket=prepare_basket(basket, request),
+                user=self.request.user,
+                basket=basket,
                 shipping_address=attrs.get('shipping_address'),
                 shipping_method=attrs.get('shipping_method'),
                 shipping_charge=attrs.get('shipping_charge'),
@@ -138,3 +182,22 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
             )
         except ValueError as e:
             raise exceptions.NotAcceptable(e.message)
+
+
+class TotalChargeSerializer(serializers.Serializer, OrderPlacementMixin):
+    basket = serializers.HyperlinkedRelatedField(
+        view_name='basket-detail', queryset=Basket.objects)
+    shipping_charge = PriceSerializer(many=False, required=True)
+
+    def validate(self, attrs):
+        self.request = self.context['request']
+        basket = prepare_basket(attrs.get('basket'), self.request)
+        if basket.is_empty:
+            raise serializers.ValidationError(_('Basket is empty'))
+        total = self.get_order_totals(
+                basket, shipping_charge=attrs.get('shipping_charge'))
+
+        return {
+            'basket_url': self.init_data['basket'],
+            'total': PriceSerializer(total).data
+        }

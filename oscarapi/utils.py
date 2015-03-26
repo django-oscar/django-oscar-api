@@ -3,11 +3,15 @@ import hashlib
 from django.conf import settings
 from django.contrib import auth
 from django.utils.importlib import import_module
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers, exceptions
 from oscar.core.loading import get_class
 import oscar.models.fields
 
 Selector = get_class('partner.strategy', 'Selector')
+Repository = get_class('shipping.repository', 'Repository')
+NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
+CheckoutSessionData = get_class('checkout.utils', 'CheckoutSessionData')
 
 
 def overridable(name, default):
@@ -110,3 +114,45 @@ def get_session(session_id, raise_on_create=False):
             session.save(must_create=True)
 
     return session
+
+
+class GetShippingMixin(object):
+
+    def _shipping_method(self, request, basket, shipping_method_code, shipping_address):
+        repository = Repository()
+
+        if not request.basket.is_shipping_required():
+            # No shipping required - we store a special code to indicate so.
+            self.checkout_session.use_shipping_method(
+                NoShippingRequired().code)
+            return NoShippingRequired()
+
+        if not self.checkout_session.is_shipping_address_set():
+            raise serializers.ValidationError(request, _("Please choose a shipping address"))
+
+        methods = repository.get_shipping_methods(
+                basket=basket,
+                user=request.user,
+                request=request,
+                shipping_addr=shipping_address
+            )
+        if shipping_method_code is not None:
+
+            shipping_methods = (method for method in methods if method.code == shipping_method_code)
+        else:
+            shipping_methods = methods
+        if len(shipping_methods) > 0:
+            method = shipping_methods[0]
+        else:
+            self.checkout_session.use_shipping_method(
+                NoShippingRequired().code)
+            return NoShippingRequired()
+        self.checkout_session.use_shipping_method(method.code)
+        return method
+
+    def _set_new_address(self, basket, address):
+        self.checkout_session = CheckoutSessionData(self.request)
+        address_fields = dict(
+            (k, v) for (k, v) in address.__dict__.items()
+            if not k.startswith('_'))
+        self.checkout_session.ship_to_new_address(address_fields)
