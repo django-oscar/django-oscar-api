@@ -13,14 +13,14 @@ Product = get_model('catalogue', 'Product')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 ProductImage = get_model('catalogue', 'ProductImage')
+Category = get_model('catalogue', 'Category')
 
 
 class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = Product
-        fields = overridable('OSCARAPI_PRODUCT_FIELDS', default=('url',
-                                                           'id',
-                                                           'title'))
+        fields = overridable('OSCARAPI_PRODUCT_FIELDS',
+                             default=('url', 'id', 'title'))
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
@@ -98,3 +98,31 @@ class AddProductSerializer(serializers.Serializer):
             return instance
 
         return attrs['url']
+
+
+class AddProductToWishListSerializer(serializers.Serializer):
+    """
+    Serializes and validates an add to wishlist request.
+    """
+    url = serializers.HyperlinkedRelatedField(
+        view_name='product-detail', queryset=Product.objects,
+        required=True)
+
+    class Meta:
+        model = Product
+        fields = ['url']
+
+    def restore_object(self, attrs, instance=None):
+        if instance is not None:
+            return instance
+
+        return attrs['url']
+
+
+class CategorySerializer(OscarModelSerializer):
+    """
+    Product category serializer
+    """
+
+    class Meta:
+        model = Category
