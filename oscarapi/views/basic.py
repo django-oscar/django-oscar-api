@@ -24,6 +24,7 @@ __all__ = (
     'UserList', 'UserDetail',
     'OptionList', 'OptionDetail',
     'CountryList', 'CountryDetail',
+    'PartnerList', 'PartnerDetail',
 )
 
 Basket = get_model('basket', 'Basket')
@@ -33,6 +34,7 @@ StockRecord = get_model('partner', 'StockRecord')
 Option = get_model('catalogue', 'Option')
 User = auth.get_user_model()
 Country = get_model('address', 'Country')
+Partner = get_model('partner', 'Partner')
 
 
 # TODO: For all API's in this file, the permissions should be checked if they
@@ -139,3 +141,13 @@ class OptionList(generics.ListAPIView):
 class OptionDetail(generics.RetrieveAPIView):
     model = Option
     serializer_class = serializers.OptionSerializer
+
+
+class PartnerList(generics.ListAPIView):
+    model = Partner
+    serializer_class = serializers.PartnerSerializer
+
+
+class PartnerDetail(generics.RetrieveAPIView):
+    model = Partner
+    serializer_class = serializers.PartnerSerializer

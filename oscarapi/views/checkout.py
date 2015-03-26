@@ -1,13 +1,25 @@
 from rest_framework import status, views, response, generics
 
 from oscar.core.loading import get_model
-from oscarapi.serializers import OrderSerializer, CheckoutSerializer
+from oscarapi.serializers import (
+    OrderSerializer,
+    CheckoutSerializer,
+    OrderLineSerializer,
+    OrderLineAttributeSerializer
+)
 from oscarapi.permissions import IsOwner
 from oscarapi.views.utils import BasketPermissionMixin
 
 Order = get_model('order', 'Order')
+OrderLine = get_model('order', 'Line')
+OrderLineAttribute = get_model('order', 'LineAttribute')
 
-__all__ = ('CheckoutView', 'OrderList', 'OrderDetail')
+__all__ = (
+    'CheckoutView',
+    'OrderList', 'OrderDetail',
+    'OrderLineList', 'OrderLineDetail',
+    'OrderLineAttributeDetail'
+)
 
 
 class OrderList(generics.ListAPIView):
@@ -22,6 +34,33 @@ class OrderDetail(generics.RetrieveAPIView):
     model = Order
     serializer_class = OrderSerializer
     permission_classes = (IsOwner,)
+
+class OrderLineList(generics.ListAPIView):
+    queryset = OrderLine.objects
+    serializer_class = OrderLineSerializer
+
+    def get(self, request, pk=None, format=None):
+        if pk is not None:
+            self.queryset = self.queryset.filter(order__id=pk, order__user=request.user)
+        elif not request.user.is_staff:
+            self.permission_denied(request)
+
+        return super(OrderLineList, self).get(request, format)
+
+
+class OrderLineDetail(generics.RetrieveAPIView):
+    queryset = OrderLine.objects
+    serializer_class = OrderLineSerializer
+
+    def get(self, request, pk=None, format=None):
+        if not request.user.is_staff:
+            self.queryset = self.queryset.filter(order__id=pk, order__user=request.user)
+
+        return super(OrderLineDetail, self).get(request, format)
+
+class OrderLineAttributeDetail(generics.RetrieveAPIView):
+    model = OrderLineAttribute
+    serializer_class = OrderLineAttributeSerializer
 
 
 class CheckoutView(BasketPermissionMixin, views.APIView):

@@ -21,6 +21,9 @@ OrderPlacementMixin = get_class('checkout.mixins', 'OrderPlacementMixin')
 ShippingAddress = get_model('order', 'ShippingAddress')
 BillingAddress = get_model('order', 'BillingAddress')
 Order = get_model('order', 'Order')
+OrderLine = get_model('order', 'Line')
+OrderLineAttribute = get_model('order', 'LineAttribute')
+
 Basket = get_model('basket', 'Basket')
 Country = get_model('address', 'Country')
 Repository = get_class('shipping.repository', 'Repository')
@@ -92,7 +95,46 @@ class ShippingMethodSerializer(serializers.Serializer):
         return PriceSerializer(price).data
 
 
+class OrderLineAttributeSerializer(OscarHyperlinkedModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name='order-lineattributes-detail')
+
+    def __init__(self, *args, **kwargs):
+        fields = kwargs.pop('fields', None)
+        super(OrderLineAttributeSerializer, self).__init__(*args, **kwargs)
+        if fields:
+            allowed = set(fields)
+            existing = set(self.fields.keys())
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+    
+    class Meta:
+        model = OrderLineAttribute
+
+
+class OrderLineSerializer(OscarHyperlinkedModelSerializer):
+    "This serializer renames some fields so they match up with the basket"
+
+    url = serializers.HyperlinkedIdentityField(view_name='order-lines-detail')
+    attributes = OrderLineAttributeSerializer(
+        many=True, fields=('url', 'option', 'value'), required=False)
+    price_currency = serializers.DecimalField(decimal_places=2, max_digits=12,
+                                              source='order.currency')
+    price_excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
+                                              source='line_price_excl_tax')
+    price_incl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
+                                              source='line_price_incl_tax')
+
+    class Meta:
+        model = OrderLine
+        fields = overridable('OSCAR_ORDERLINE_FIELD', default=[
+            'attributes', 'url', 'product', 'stockrecord', 'quantity',
+            'price_currency', 'price_excl_tax', 'price_incl_tax', 'order'
+        ])
+
+
 class OrderSerializer(OscarHyperlinkedModelSerializer):
+    lines = serializers.HyperlinkedIdentityField(view_name='order-lines-list')
     shipping_address = InlineShippingAddressSerializer(
         many=False, required=False)
     billing_address = InlineBillingAddressSerializer(

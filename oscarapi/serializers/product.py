@@ -14,6 +14,12 @@ ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 ProductImage = get_model('catalogue', 'ProductImage')
 Option = get_model('catalogue', 'Option')
+Partner = get_model('partner', 'Partner')
+
+
+class PartnerSerializer(OscarModelSerializer):
+    class Meta:
+        model = Partner
 
 
 class OptionSerializer(OscarHyperlinkedModelSerializer):

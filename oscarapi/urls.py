@@ -30,8 +30,13 @@ urlpatterns = patterns('',
     url(r'^checkout/$', views.CheckoutView.as_view(), name='api-checkout'),
     url(r'^orders/$', views.OrderList.as_view(), name='order-list'),
     url(r'^orders/(?P<pk>[0-9]+)/$', views.OrderDetail.as_view(), name='order-detail'),
+    url(r'^orders/(?P<pk>[0-9]+)/lines/$', views.OrderLineList.as_view(), name='order-lines-list'),
+    url(r'^orderlines/(?P<pk>[0-9]+)/$', views.OrderLineDetail.as_view(), name='order-lines-detail'),
+    url(r'^orderlineattributes/(?P<pk>[0-9]+)/$', views.OrderLineAttributeDetail.as_view(), name='order-lineattributes-detail'),
     url(r'^countries/$', views.CountryList.as_view(), name='country-list'),
     url(r'^countries/(?P<pk>[A-z]+)/$', views.CountryDetail.as_view(), name='country-detail'),
+    url(r'^partners/$', views.PartnerList.as_view(), name='partner-list'),
+    url(r'^partners/(?P<pk>[0-9]+)/$', views.PartnerDetail.as_view(), name='partner-detail')
 )
 
 urlpatterns = format_suffix_patterns(urlpatterns)
