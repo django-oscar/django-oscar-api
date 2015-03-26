@@ -9,6 +9,7 @@ from oscarapi import permissions
 __all__ = ('BasketPermissionMixin', 'WishListPermissionMixin')
 
 Basket = get_model('basket', 'Basket')
+WishList = get_model('wishlists', 'WishList')
 
 
 class BasketPermissionMixin(object):

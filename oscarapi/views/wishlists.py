@@ -112,6 +112,8 @@ class AddProductToWishlist(APIView):
         "url": "http://testserver.org/oscarapi/products/209/",
     }
     """
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request, *args, **kwargs):
         add_ser = serializers.AddProductToWishListSerializer(
             data=request.DATA, context={'request': request})
@@ -135,6 +137,7 @@ class AddToBasketFromWishlist(APIView):
         "url": "http://testserver.org/oscarapi/wishlistlines/33/",
     }
     """
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request, *args, **kwargs):
         l_ser = serializers.AddProductFromWishListSerializer(

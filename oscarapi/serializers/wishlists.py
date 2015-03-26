@@ -5,9 +5,6 @@ from rest_framework import serializers
 
 from oscar.core.loading import get_model
 
-from oscarapi.utils import overridable, OscarModelSerializer
-
-
 WishList = get_model('wishlists', 'WishList')
 Line = get_model('wishlists', 'Line')
 
@@ -17,6 +14,7 @@ class WishListSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = WishList
+        fields = ['id', 'lines', 'url', 'owner', 'visibility', 'date_created']
 
 
 class WishListLineSerializer(serializers.HyperlinkedModelSerializer):
