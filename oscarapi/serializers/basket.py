@@ -69,21 +69,37 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
             instance) + ['owner']
 
 
-class LineAttributeSerializer(serializers.HyperlinkedModelSerializer):
-    def __init__(self, *args, **kwargs):
-        fields = kwargs.pop('fields', None)
-        super(LineAttributeSerializer, self).__init__(*args, **kwargs)
-        if fields:
-            allowed = set(fields)
-            existing = set(self.fields.keys())
-            for field_name in existing - allowed:
-                self.fields.pop(field_name)
+class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
 
     class Meta:
         model = LineAttribute
 
 
+class BasketLineSerializer(OscarHyperlinkedModelSerializer):
+    """
+    This serializer computes the prices of this line by using the basket
+    strategy.
+    """
+    attributes = LineAttributeSerializer(
+        many=True, fields=('url', 'option', 'value'), required=False)
+    price_excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
+                                              source='line_price_excl_tax_incl_discounts')
+    price_incl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
+                                              source='line_price_incl_tax_incl_discounts')
+    warning = serializers.CharField(read_only=True, required=False, source='get_warning')
+
+    class Meta:
+        model = Line
+        fields = overridable('OSCAR_BASKETLINE_SERIALIZER', default=[
+            'url', 'product', 'quantity', 'attributes', 'price_currency',
+            'price_excl_tax', 'price_incl_tax', 'warning', 'basket',
+            'stockrecord', 'date_created'
+        ])
+
 class LineSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    This serializer just shows fields stored in the database for this line.
+    """
     attributes = LineAttributeSerializer(
         many=True, fields=('url', 'option', 'value'), required=False)
 

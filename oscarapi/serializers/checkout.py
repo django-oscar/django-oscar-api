@@ -8,7 +8,7 @@ from oscar.core.loading import get_class, get_model
 from rest_framework import serializers, exceptions
 
 from oscarapi.basket.operations import (
-    prepare_basket,
+    assign_basket_strategy,
     get_total_price
 )
 from oscarapi.utils import (
@@ -99,15 +99,6 @@ class OrderLineAttributeSerializer(OscarHyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name='order-lineattributes-detail')
 
-    def __init__(self, *args, **kwargs):
-        fields = kwargs.pop('fields', None)
-        super(OrderLineAttributeSerializer, self).__init__(*args, **kwargs)
-        if fields:
-            allowed = set(fields)
-            existing = set(self.fields.keys())
-            for field_name in existing - allowed:
-                self.fields.pop(field_name)
-    
     class Meta:
         model = OrderLineAttribute
 
@@ -176,7 +167,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     def validate(self, attrs):
         request = self.context['request']
         basket = attrs.get('basket')
-        basket = prepare_basket(basket, request)
+        basket = assign_basket_strategy(basket, request)
         shipping_method = self._shipping_method(
             request, basket,
             attrs.get('shipping_method_code'),

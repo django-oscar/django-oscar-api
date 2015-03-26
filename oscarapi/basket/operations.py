@@ -6,6 +6,7 @@ from oscar.core.prices import Price
 
 __all__ = (
     'apply_offers',
+    'assign_basket_strategy',
     'prepare_basket',
     'get_basket',
     'get_basket_id_from_session',
@@ -29,7 +30,7 @@ def apply_offers(request, basket):
         Applicator().apply(request, basket)
 
 
-def prepare_basket(basket, request):
+def assign_basket_strategy(basket, request):
     # fixes too early import of Selector
     # TODO: check if this is still true, now the basket models nolonger
     #       require this module to be loaded.
@@ -44,6 +45,12 @@ def prepare_basket(basket, request):
             request=request, user=request.user)
 
     apply_offers(request, basket)
+
+    return basket
+
+
+def prepare_basket(basket, request):
+    assign_basket_strategy(basket, request)
     store_basket_in_session(basket, request.session)
     return basket
 

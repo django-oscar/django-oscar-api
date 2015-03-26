@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 
 from .mixin import PutIsPatchMixin
 from oscarapi import serializers, permissions
-from oscarapi.basket.operations import prepare_basket
+from oscarapi.basket.operations import assign_basket_strategy
 
 
 Selector = get_class('partner.strategy', 'Selector')
@@ -57,7 +57,7 @@ class BasketList(generics.ListCreateAPIView):
     def get_queryset(self):
         qs = super(BasketList, self).get_queryset()
         return itertools.imap(
-            functools.partial(prepare_basket, request=self.request), 
+            functools.partial(assign_basket_strategy, request=self.request), 
             qs)
 
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
@@ -67,7 +67,7 @@ class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     
     def get_object(self, queryset=None):
         basket = super(BasketDetail, self).get_object(queryset)
-        return prepare_basket(basket, self.request)
+        return assign_basket_strategy(basket, self.request)
 
 class LineAttributeList(generics.ListCreateAPIView):
     model = LineAttribute

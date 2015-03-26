@@ -33,6 +33,7 @@ def PROTECTED_APIS(r, f):
         ('options', reverse('option-list', request=r, format=f)),
         ('stockrecords', reverse('stockrecord-list', request=r, format=f)),
         ('users', reverse('user-list', request=r, format=f)),
+        ('partners', reverse('partner-list', request=r, format=f)),
     ]
 
 

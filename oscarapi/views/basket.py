@@ -11,7 +11,8 @@ from rest_framework.views import APIView
 from oscarapi import serializers, permissions
 from oscarapi.basket.operations import (
     apply_offers,
-    get_basket
+    get_basket,
+    assign_basket_strategy
 )
 from oscarapi.views.mixin import PutIsPatchMixin
 from oscarapi.views.utils import BasketPermissionMixin
@@ -198,8 +199,10 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
 
     def get(self, request, pk=None, format=None):
         if pk is not None:
-            self.check_basket_permission(request, pk)
-            self.queryset = self.queryset.filter(basket__id=pk)
+            basket = self.check_basket_permission(request, pk)
+            prepped_basket = assign_basket_strategy(basket, request)
+            self.queryset = prepped_basket.lines.all()
+            self.serializer_class = serializers.BasketLineSerializer
         elif not request.user.is_staff:
             self.permission_denied(request)
 
@@ -227,3 +230,16 @@ class LineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     queryset = Line.objects.all()
     serializer_class = serializers.LineSerializer
     permission_classes = (permissions.IsAdminUserOrRequestContainsLine,)
+
+    def get(self, request, pk=None, format=None):
+        line = self.get_object()
+        basket = get_basket(request)
+
+        # if the line is from the current basket, use the serializer that
+        # computes the prices by using the strategy.
+        if line.basket == basket:
+            assign_basket_strategy(line.basket, request)
+            ser = serializers.BasketLineSerializer(instance=line, context={'request': request})
+            return Response(ser.data) 
+
+        return super(LineDetail, self).get(request, pk, format)
