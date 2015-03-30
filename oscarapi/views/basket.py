@@ -27,16 +27,18 @@ Repository = get_class('shipping.repository', 'Repository')
 
 
 class BasketView(APIView):
+    
     """
     Api for retrieving a user's basket.
-
+    
     GET:
     Retrieve your basket.
     """
+    serializer_class = serializers.BasketSerializer
+
     def get(self, request, format=None):
         basket = get_basket(request)
-        ser = serializers.BasketSerializer(basket,
-                                           context={'request': request})
+        ser = self.serializer_class(basket, context={'request': request})
         return Response(ser.data)
 
 
@@ -61,6 +63,8 @@ class AddProductView(APIView):
         }]
     }
     """
+    serializer_class = serializers.BasketSerializer
+
     def validate(self, basket, product, quantity, options):
         availability = basket.strategy.fetch_for_product(
             product).availability
@@ -97,7 +101,7 @@ class AddProductView(APIView):
 
             basket.add_product(product, quantity=quantity, options=options)
             apply_offers(request, basket)
-            ser = serializers.BasketSerializer(
+            ser = self.serializer_class(
                 basket, context={'request': request})
             return Response(ser.data)
 
