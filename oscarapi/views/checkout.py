@@ -95,6 +95,9 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
     }
     returns the order object.
     """
+    order_serializer_class = OrderSerializer
+    serializer_class = CheckoutSerializer
+
     def post(self, request, format=None):
         # TODO: Make it possible to create orders with options.
         # at the moment, no options are passed to this method, which means they
@@ -108,12 +111,12 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
         # around with the basket, so asume invariant
         assert(data_basket == basket)
 
-        c_ser = CheckoutSerializer(data=request.DATA,
+        c_ser = self.serializer_class(data=request.DATA,
                                    context={'request': request})
         if c_ser.is_valid():
             order = c_ser.object
             basket.freeze()
-            o_ser = OrderSerializer(order, context={'request': request})
+            o_ser = self.order_serializer_class(order, context={'request': request})
             return response.Response(o_ser.data)
 
         return response.Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
