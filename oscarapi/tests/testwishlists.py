@@ -26,7 +26,8 @@ class WishListTest(APITest):
         # anonymous
         data = {}
 
-        self.response = self.client.post(url, json.dumps(data), content_type='application/json')
+        self.response = self.client.post(
+            url, json.dumps(data), content_type='application/json')
         self.response.assertStatusEqual(403, "Anonymous users can not use the wishlist api to create wishlists.")
 
         # authenticated
@@ -34,7 +35,7 @@ class WishListTest(APITest):
         data = {'owner': "http://testserver%s" % reverse('user-detail', args=[2])}
 
         self.response = self.client.post(url, json.dumps(data), content_type='application/json')
-        self.response.assertStatusEqual(403, "Authenticated regular users can not use the basket api to create baskets.")
+        self.response.assertStatusEqual(403, "Authenticated regular users can not use the WishList api to create wishlists.")
 
         # admin
         self.login('admin', 'admin')
@@ -46,7 +47,7 @@ class WishListTest(APITest):
         data = {}
         self.response = self.client.post(url, json.dumps(data), content_type='application/json')
         self.response.assertStatusEqual(405, "It shouldn't be possible for a wishlist to be created for an anonymous user.")
-        self.assertEqual(WishList.objects.count(), 0, "0 wishlists should after creating 2 wishlistss.")
+        self.assertEqual(WishList.objects.count(), 0, "0 wishlists should after creating 2 wishlists.")
 
     def test_retrieve_wishlist(self):
         "A user can fetch their own wishlist with the wishlist API and get's the same wishlist every time."
@@ -78,7 +79,7 @@ class WishListTest(APITest):
         self.assertEqual(WishList.objects.count(), 2, "There should be 2 wishlists open after 2 users accessed a wishlist.")
 
     def test_wishlists_read_permissions(self):
-        "A regular or anonymous user should not be able to fetch someone elses basket."
+        "A regular or anonymous user should not be able to fetch someone elses wishlist."
         # anonymous user can retrive a wishlist.
         self.response = self.get('api-wishlist')
         self.response.assertStatusEqual(403)
@@ -88,13 +89,13 @@ class WishListTest(APITest):
         self.assertEqual(str(b.owner), 'nobody')
         self.assertEqual(b.pk, 1)
 
-        # try to acces somebody else's wishlist (hihi).
+        # try to acces somebody else's wishlists.
         url = reverse('wishlist-detail', args=(1,))
         self.response = self.client.get(url)
-        self.response.assertStatusEqual(403, "Script kiddies should fail to collect other users carts.")
+        self.response.assertStatusEqual(403, "It shouldn't be possible for a wishlist detail")
         url = reverse('wishlist-lines-list', args=(1,))
         self.response = self.client.get(url)
-        self.response.assertStatusEqual(403, "Script kiddies should fail to collect other users cart items.")
+        self.response.assertStatusEqual(403, "It shouldn't be possible for a wishlist detail lines")
 
         # now try for authenticated user.
         self.login('nobody', 'nobody')
@@ -102,24 +103,24 @@ class WishListTest(APITest):
         self.response.assertStatusEqual(200)
 
         # try to access the urls in the response.
-        basket_url = self.response['url']
-        basket_lines = self.response['lines']
+        wishlist_url = self.response['url']
+        wishlist_lines = self.response['lines']
 
-        self.response = self.client.get(basket_url)
+        self.response = self.client.get(wishlist_url)
         self.response.assertStatusEqual(200)
 
-        self.response = self.client.get(basket_lines)
+        self.response = self.client.get(wishlist_lines)
         self.response.assertStatusEqual(200)
 
         # try to acces somebody else's wishlist.
         self.login('somebody', 'somebody')
         url = reverse('wishlist-detail', args=(1,))
         self.response = self.client.get(url)
-        self.response.assertStatusEqual(403, "Script kiddies should fail to collect other users carts.")
+        self.response.assertStatusEqual(403, "It shouldn't be possible for a wishlist detail")
 
         url = reverse('wishlist-lines-list', args=(1,))
         self.response = self.client.get(url)
-        self.response.assertStatusEqual(403, "Script kiddies should fail to collect other users cart items.")
+        self.response.assertStatusEqual(403, "It shouldn't be possible for a wishlist detail lines")
 
         # now let's show the power of the admin!
         self.login('admin', 'admin')
@@ -127,16 +128,16 @@ class WishListTest(APITest):
         self.response.assertStatusEqual(200)
 
         # try to access the urls in the response.
-        basket_url = self.response['url']
-        basket_lines = self.response['lines']
+        wishlist_url = self.response['url']
+        wishlist_lines = self.response['lines']
 
-        self.response = self.client.get(basket_url)
+        self.response = self.client.get(wishlist_url)
         self.response.assertStatusEqual(200)
 
-        self.response = self.client.get(basket_lines)
+        self.response = self.client.get(wishlist_lines)
         self.response.assertStatusEqual(200)
 
-        # try to acces somebody else's wishlist (hihi).
+        # try to acces somebody else's wishlist.
         url = reverse('wishlist-detail', args=(1,))
         self.response = self.client.get(url)
         self.response.assertStatusEqual(200, "Staff users can access anything.")

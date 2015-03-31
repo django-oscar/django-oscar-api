@@ -22,6 +22,7 @@ Line = get_model('wishlists', 'Line')
 
 
 def get_wishlist(request):
+    # Get wishlist for user
     try:
         wishlist, _ = WishList.objects.get_or_create(
             owner=request.user, visibility=WishList.PRIVATE)
@@ -84,7 +85,8 @@ class WishListLineList(WishListPermissionMixin, generics.ListCreateAPIView):
         self.check_wishlist_permission(request, wishlist=data_wishlist)
 
         if pk is not None:
-            url_wishlist = self.check_wishlist_permission(request, wishlist_pk=pk)
+            url_wishlist = self.check_wishlist_permission(
+                request, wishlist_pk=pk)
             if url_wishlist != data_wishlist:
                 raise exceptions.NotAcceptable(
                     _('Target wishlist inconsistent %s != %s') % (
@@ -148,7 +150,8 @@ class AddToBasketFromWishlist(APIView):
             product = line.product
             quantity = line.quantity
 
-            availability = basket.strategy.fetch_for_product(product).availability
+            availability = basket.strategy.fetch_for_product(
+                product).availability
 
             # check if product is available at all
             if not availability.is_available_to_buy:
@@ -175,4 +178,5 @@ class AddToBasketFromWishlist(APIView):
                 basket, context={'request': request})
             return Response(ser.data)
 
-        return Response({'reason': l_ser.errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        return Response(
+            {'reason': l_ser.errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
