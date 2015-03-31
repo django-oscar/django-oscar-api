@@ -11,6 +11,10 @@ from oscarapi.basket.operations import (
     assign_basket_strategy,
     get_total_price
 )
+from oscarapi.serializers import (
+    VoucherSerializer,
+    OfferDiscountSerializer
+)
 from oscarapi.utils import (
     OscarHyperlinkedModelSerializer,
     OscarModelSerializer,
@@ -124,13 +128,37 @@ class OrderLineSerializer(OscarHyperlinkedModelSerializer):
         ])
 
 
+class OrderOfferDiscountSerializer(OfferDiscountSerializer):
+    name = serializers.CharField(source='offer_name')
+    discount = serializers.CharField(source='amount')
+
+
+class OrderVoucherOfferSerializer(OrderOfferDiscountSerializer):
+    voucher = VoucherSerializer(required=False)
+
+
 class OrderSerializer(OscarHyperlinkedModelSerializer):
+    """
+    The order serializer tries to have the same kind of structure as the
+    basket. That way the same kind of logic can be used to display the order
+    as the basket in the checkout process.
+    """
     lines = serializers.HyperlinkedIdentityField(view_name='order-lines-list')
     shipping_address = InlineShippingAddressSerializer(
         many=False, required=False)
     billing_address = InlineBillingAddressSerializer(
         many=False, required=False)
     payment_url = serializers.SerializerMethodField('get_payment_url')
+    offer_discounts = serializers.SerializerMethodField('get_offer_discounts')
+    voucher_discounts = serializers.SerializerMethodField('get_voucher_discounts')
+    
+    def get_offer_discounts(self, obj):
+        qs = obj.basket_discounts.filter(offer_id__isnull=False)
+        return OrderOfferDiscountSerializer(qs, many=True).data
+
+    def get_voucher_discounts(self, obj):
+        qs = obj.basket_discounts.filter(voucher_id__isnull=False)
+        return OrderVoucherOfferSerializer(qs, many=True).data
 
     def get_payment_url(self, obj):
         try:
@@ -149,7 +177,8 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
             'user', 'billing_address', 'currency', 'total_incl_tax',
             'total_excl_tax', 'shipping_incl_tax', 'shipping_excl_tax',
             'shipping_address', 'shipping_method', 'shipping_code', 'status',
-            'guest_email', 'date_placed', 'payment_url'))
+            'guest_email', 'date_placed', 'payment_url', 'offer_discounts',
+            'voucher_discounts'))
 
 
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
