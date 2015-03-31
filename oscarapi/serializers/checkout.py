@@ -130,7 +130,7 @@ class OrderLineSerializer(OscarHyperlinkedModelSerializer):
 
 class OrderOfferDiscountSerializer(OfferDiscountSerializer):
     name = serializers.CharField(source='offer_name')
-    discount = serializers.CharField(source='amount')
+    amount = serializers.DecimalField(decimal_places=2, max_digits=12)
 
 
 class OrderVoucherOfferSerializer(OrderOfferDiscountSerializer):

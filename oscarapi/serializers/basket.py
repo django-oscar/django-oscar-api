@@ -27,7 +27,8 @@ class VoucherSerializer(OscarModelSerializer):
 class OfferDiscountSerializer(serializers.Serializer):
     description = serializers.CharField()
     name = serializers.CharField()
-    discount = serializers.DecimalField(decimal_places=2, max_digits=12)
+    amount = serializers.DecimalField(decimal_places=2, max_digits=12,
+                                      source='discount')
 
 
 class VoucherDiscountSerializer(OfferDiscountSerializer):
