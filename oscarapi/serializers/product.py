@@ -72,6 +72,13 @@ class ProductAvailabilitySerializer(OscarStrategySerializer):
     message = serializers.CharField(source="info.availability.message")
 
 
+class RecommmendedProductSerializer(OscarModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='product-detail')
+    class Meta:
+        model = Product
+        fields = ('url',)
+
+
 class ProductSerializer(OscarModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='product-detail')
     stockrecords = serializers.HyperlinkedIdentityField(
@@ -86,6 +93,9 @@ class ProductSerializer(OscarModelSerializer):
     availability = serializers.HyperlinkedIdentityField(
         view_name='product-availability')
     options = OptionSerializer(many=True, required=False)
+
+    recommended_products = RecommmendedProductSerializer(many=True,
+                                                         required=False)
 
     class Meta:
         model = Product
