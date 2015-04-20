@@ -143,6 +143,8 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
     basket. That way the same kind of logic can be used to display the order
     as the basket in the checkout process.
     """
+    owner = serializers.HyperlinkedRelatedField(view_name='user-detail',
+                                                source='user')
     lines = serializers.HyperlinkedIdentityField(view_name='order-lines-list')
     shipping_address = InlineShippingAddressSerializer(
         many=False, required=False)
@@ -174,7 +176,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
         model = Order
         fields = overridable('OSCARAPI_ORDER_FIELD', default=('number',
             'basket', 'url',
-            'user', 'billing_address', 'currency', 'total_incl_tax',
+            'owner', 'billing_address', 'currency', 'total_incl_tax',
             'total_excl_tax', 'shipping_incl_tax', 'shipping_excl_tax',
             'shipping_address', 'shipping_method', 'shipping_code', 'status',
             'guest_email', 'date_placed', 'payment_url', 'offer_discounts',
