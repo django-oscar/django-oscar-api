@@ -205,7 +205,7 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
         if pk is not None:
             basket = self.check_basket_permission(request, pk)
             prepped_basket = assign_basket_strategy(basket, request)
-            self.queryset = prepped_basket.lines.all()
+            self.queryset = prepped_basket.all_lines()
             self.serializer_class = serializers.BasketLineSerializer
         elif not request.user.is_staff:
             self.permission_denied(request)
