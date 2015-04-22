@@ -119,12 +119,20 @@ class OrderLineSerializer(OscarHyperlinkedModelSerializer):
                                               source='line_price_excl_tax')
     price_incl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
                                               source='line_price_incl_tax')
+    price_incl_tax_excl_discounts = serializers.DecimalField(
+        decimal_places=2, max_digits=12,
+        source='line_price_before_discounts_incl_tax')
+    price_excl_tax_excl_discounts = serializers.DecimalField(
+        decimal_places=2, max_digits=12,
+        source='line_price_before_discounts_excl_tax')
 
     class Meta:
         model = OrderLine
         fields = overridable('OSCAR_ORDERLINE_FIELD', default=[
             'attributes', 'url', 'product', 'stockrecord', 'quantity',
-            'price_currency', 'price_excl_tax', 'price_incl_tax', 'order'
+            'price_currency', 'price_excl_tax', 'price_incl_tax',
+            'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
+            'order'
         ])
 
 

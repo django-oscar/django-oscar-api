@@ -87,14 +87,22 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
                                               source='line_price_excl_tax_incl_discounts')
     price_incl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
                                               source='line_price_incl_tax_incl_discounts')
+    price_incl_tax_excl_discounts = serializers.DecimalField(
+        decimal_places=2, max_digits=12,
+        source='line_price_incl_tax')
+    price_excl_tax_excl_discounts = serializers.DecimalField(
+        decimal_places=2, max_digits=12,
+        source='line_price_excl_tax')
+
     warning = serializers.CharField(read_only=True, required=False, source='get_warning')
 
     class Meta:
         model = Line
-        fields = overridable('OSCAR_BASKETLINE_SERIALIZER', default=[
+        fields = overridable('OSCARAPI_BASKETLINE_FIELDS', default=[
             'url', 'product', 'quantity', 'attributes', 'price_currency',
-            'price_excl_tax', 'price_incl_tax', 'warning', 'basket',
-            'stockrecord', 'date_created'
+            'price_excl_tax', 'price_incl_tax',
+            'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
+            'warning', 'basket', 'stockrecord', 'date_created'
         ])
 
 class LineSerializer(serializers.HyperlinkedModelSerializer):
