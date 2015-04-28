@@ -16,10 +16,11 @@ def PUBLIC_APIS(r, f):
                                        format=f)),
         ('basket-add-voucher', reverse('api-basket-add-voucher', request=r,
                                        format=f)),
+        ('basket-shipping-methods', reverse('api-basket-shipping-methods', request=r,
+                                       format=f)),
         ('checkout', reverse('api-checkout', request=r, format=f)),
+        ('orders', reverse('order-list', request=r, format=f)),
         ('products', reverse('product-list', request=r, format=f)),
-        ('shippingmethods', reverse('shippingmethod-list', request=r,
-                                    format=f)),
         ('countries', reverse('country-list', request=r, format=f)),
     ]
 
@@ -32,6 +33,7 @@ def PROTECTED_APIS(r, f):
         ('options', reverse('option-list', request=r, format=f)),
         ('stockrecords', reverse('stockrecord-list', request=r, format=f)),
         ('users', reverse('user-list', request=r, format=f)),
+        ('partners', reverse('partner-list', request=r, format=f)),
     ]
 
 

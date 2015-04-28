@@ -13,6 +13,22 @@ Product = get_model('catalogue', 'Product')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 ProductImage = get_model('catalogue', 'ProductImage')
+Option = get_model('catalogue', 'Option')
+Partner = get_model('partner', 'Partner')
+
+
+class PartnerSerializer(OscarModelSerializer):
+    class Meta:
+        model = Partner
+
+
+class OptionSerializer(OscarHyperlinkedModelSerializer):
+
+    class Meta:
+        model = Option
+        fields = overridable('OSCARAPI_OPTION_FIELDS', default=[
+            'url', 'id', 'name', 'code', 'type'
+        ])
 
 
 class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
@@ -56,6 +72,13 @@ class ProductAvailabilitySerializer(OscarStrategySerializer):
     message = serializers.CharField(source="info.availability.message")
 
 
+class RecommmendedProductSerializer(OscarModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='product-detail')
+    class Meta:
+        model = Product
+        fields = ('url',)
+
+
 class ProductSerializer(OscarModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='product-detail')
     stockrecords = serializers.HyperlinkedIdentityField(
@@ -69,6 +92,10 @@ class ProductSerializer(OscarModelSerializer):
     price = serializers.HyperlinkedIdentityField(view_name='product-price')
     availability = serializers.HyperlinkedIdentityField(
         view_name='product-availability')
+    options = OptionSerializer(many=True, required=False)
+
+    recommended_products = RecommmendedProductSerializer(many=True,
+                                                         required=False)
 
     class Meta:
         model = Product
@@ -80,6 +107,11 @@ class ProductSerializer(OscarModelSerializer):
                      'availability'))
 
 
+class OptionValueSerializer(serializers.Serializer):
+    option = serializers.HyperlinkedRelatedField(view_name='option-detail', queryset=Option.objects)
+    value = serializers.CharField()
+
+
 class AddProductSerializer(serializers.Serializer):
     """
     Serializes and validates an add to basket request.
@@ -88,13 +120,7 @@ class AddProductSerializer(serializers.Serializer):
     url = serializers.HyperlinkedRelatedField(
         view_name='product-detail', queryset=Product.objects,
         required=True)
+    options = OptionValueSerializer(many=True, required=False)
 
     class Meta:
         model = Product
-        fields = ['quantity', 'url']
-
-    def restore_object(self, attrs, instance=None):
-        if instance is not None:
-            return instance
-
-        return attrs['url']

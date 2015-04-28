@@ -22,6 +22,19 @@ class OscarSerializer(object):
         oscar.models.fields.NullCharField: serializers.CharField
     })
 
+    def __init__(self, *args, **kwargs):
+        """
+        Allow the serializer to be initiated with only a subset of the
+        speccified fields
+        """
+        fields = kwargs.pop('fields', None)
+        super(OscarSerializer, self).__init__(*args, **kwargs)
+        if fields:
+            allowed = set(fields)
+            existing = set(self.fields.keys())
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+
     def to_native(self, obj):
         num_fields = len(self.get_fields())
         native = super(OscarSerializer, self).to_native(obj)

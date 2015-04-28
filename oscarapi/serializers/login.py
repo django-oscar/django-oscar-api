@@ -6,6 +6,9 @@ from oscarapi.utils import overridable
 
 User = get_user_model()
 
+def field_length(fieldname):
+    field = next(field for field in User._meta.fields if field.name == fieldname)
+    return field.max_length
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,8 +19,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
 
-    username = serializers.CharField(max_length=30, required=True)
-    password = serializers.CharField(max_length=255, required=True)
+    username = serializers.CharField(max_length=field_length('username'), required=True)
+    password = serializers.CharField(max_length=field_length('password'), required=True)
 
     def validate(self, attrs):
         user = authenticate(username=attrs['username'],

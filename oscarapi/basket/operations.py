@@ -2,9 +2,11 @@
 from django.conf import settings
 from oscar.core.loading import get_model, get_class
 from oscar.core.utils import get_default_currency
+from oscar.core.prices import Price
 
 __all__ = (
     'apply_offers',
+    'assign_basket_strategy',
     'prepare_basket',
     'get_basket',
     'get_basket_id_from_session',
@@ -28,7 +30,7 @@ def apply_offers(request, basket):
         Applicator().apply(request, basket)
 
 
-def prepare_basket(basket, request):
+def assign_basket_strategy(basket, request):
     # fixes too early import of Selector
     # TODO: check if this is still true, now the basket models nolonger
     #       require this module to be loaded.
@@ -43,6 +45,12 @@ def prepare_basket(basket, request):
             request=request, user=request.user)
 
     apply_offers(request, basket)
+
+    return basket
+
+
+def prepare_basket(basket, request):
+    assign_basket_strategy(basket, request)
     store_basket_in_session(basket, request.session)
     return basket
 
@@ -126,3 +134,11 @@ def save_line_with_default_currency(line, *args, **kwargs):
     if not line.price_currency:
         line.price_currency = get_default_currency()
     return line.save(*args, **kwargs)
+
+
+def get_total_price(basket):
+    return Price(
+        getattr(basket,'currency', get_default_currency()),
+        basket.total_excl_tax,
+        incl_tax=basket.total_incl_tax
+    )

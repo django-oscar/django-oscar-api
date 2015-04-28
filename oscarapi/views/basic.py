@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 
 from .mixin import PutIsPatchMixin
 from oscarapi import serializers, permissions
-from oscarapi.basket.operations import prepare_basket
+from oscarapi.basket.operations import assign_basket_strategy
 
 
 Selector = get_class('partner.strategy', 'Selector')
@@ -24,7 +24,7 @@ __all__ = (
     'UserList', 'UserDetail',
     'OptionList', 'OptionDetail',
     'CountryList', 'CountryDetail',
-    'ShippingMethodList', 'ShippingMethodDetail',
+    'PartnerList', 'PartnerDetail',
 )
 
 Basket = get_model('basket', 'Basket')
@@ -33,8 +33,8 @@ Product = get_model('catalogue', 'Product')
 StockRecord = get_model('partner', 'StockRecord')
 Option = get_model('catalogue', 'Option')
 User = auth.get_user_model()
-ShippingMethod = get_model('shipping', 'OrderAndItemCharges')
 Country = get_model('address', 'Country')
+Partner = get_model('partner', 'Partner')
 
 
 # TODO: For all API's in this file, the permissions should be checked if they
@@ -49,16 +49,6 @@ class CountryDetail(generics.RetrieveAPIView):
     model = Country
 
 
-class ShippingMethodList(generics.ListAPIView):
-    serializer_class = serializers.ShippingMethodSerializer
-    model = ShippingMethod
-
-
-class ShippingMethodDetail(generics.RetrieveAPIView):
-    serializer_class = serializers.ShippingMethodSerializer
-    model = ShippingMethod
-
-
 class BasketList(generics.ListCreateAPIView):
     model = Basket
     serializer_class = serializers.BasketSerializer
@@ -67,7 +57,7 @@ class BasketList(generics.ListCreateAPIView):
     def get_queryset(self):
         qs = super(BasketList, self).get_queryset()
         return itertools.imap(
-            functools.partial(prepare_basket, request=self.request), 
+            functools.partial(assign_basket_strategy, request=self.request), 
             qs)
 
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
@@ -77,7 +67,7 @@ class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     
     def get_object(self, queryset=None):
         basket = super(BasketDetail, self).get_object(queryset)
-        return prepare_basket(basket, self.request)
+        return assign_basket_strategy(basket, self.request)
 
 class LineAttributeList(generics.ListCreateAPIView):
     model = LineAttribute
@@ -151,3 +141,13 @@ class OptionList(generics.ListAPIView):
 class OptionDetail(generics.RetrieveAPIView):
     model = Option
     serializer_class = serializers.OptionSerializer
+
+
+class PartnerList(generics.ListAPIView):
+    model = Partner
+    serializer_class = serializers.PartnerSerializer
+
+
+class PartnerDetail(generics.RetrieveAPIView):
+    model = Partner
+    serializer_class = serializers.PartnerSerializer

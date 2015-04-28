@@ -26,16 +26,12 @@ class CheckOutTest(APITest):
 
         request = {
             'basket': basket_url,
-            'total': {
-                'currency': 'EUR',
-                'excl_tax':'100.0',
-                'tax':'21.0'
-            },
-            'shipping_method': "http://127.0.0.1:8000/api/shippingmethods/1/",
+            'total': '50.0',
+            'shipping_method_code': "no-shipping-required",
             'shipping_charge': {
                 'currency': 'EUR',
-                'excl_tax':'10.0',
-                'tax':'0.6'
+                'excl_tax':'0.00',
+                'tax':'0.00'
             },
             "shipping_address": {
                 "country": "http://127.0.0.1:8000/api/countries/NL/",
@@ -57,10 +53,108 @@ class CheckOutTest(APITest):
         response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
         self.assertEqual(response.status_code, 200)
         response = self.post('api-checkout', **request)
-
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
 
+    def test_checkout_implicit_shipping(self):
+        "Test if an order can be placed without specifying shipping method."
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = json.loads(response.content)
+        basket_url = basket.get('url')
+        basket_id = basket.get('id')
+
+        request = {
+            'basket': basket_url,
+            'total': '50.0',
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            }
+        }
+        response = self.post('api-checkout', **request)
+        self.assertEqual(response.status_code, 406)
+        response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.assertEqual(response.status_code, 200)
+        response = self.post('api-checkout', **request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
+
+    def test_checkout_total_error(self):
+        "When sending a wrong total, checkout should raise an error"
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = json.loads(response.content)
+        basket_url = basket.get('url')
+        basket_id = basket.get('id')
+
+        request = {
+            'basket': basket_url,
+            'total': '150.0',
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            }
+        }
+        self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.response.assertStatusEqual(200)
+        self.response = self.post('api-checkout', **request)
+        self.response.assertStatusEqual(406)
+        self.response.assertValueEqual('non_field_errors', ["Total incorrect 150.0 != 50.00"])
+
+    def test_total_is_optional(self):
+        "Total should be an optional value"
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = json.loads(response.content)
+        basket_url = basket.get('url')
+        basket_id = basket.get('id')
+
+        request = {
+            'basket': basket_url,
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            }
+        }
+        self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.response.assertStatusEqual(200)
+        self.response = self.post('api-checkout', **request)
+        self.response.assertStatusEqual(200)
+        
     def test_can_login_with_frozen_user_basket(self):
         "When a user has an unpaid order, he should still be able to log in"
         self.test_checkout()
@@ -70,6 +164,12 @@ class CheckOutTest(APITest):
         self.response = self.post('api-login', username='nobody', password='nobody')
         self.response.assertStatusEqual(200)
         self.login(username='nobody', password='nobody')
+
+    def test_checkout_creates_an_order(self):
+        "After checkout has been done, a user should have gained an order object"
+        self.test_checkout()
+        self.response = self.get('order-list')
+        self.assertEqual(len(self.response), 1, 'An order should have been created.')
 
     @unittest.skip
     def test_checkout_header(self):

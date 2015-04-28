@@ -1,7 +1,7 @@
 import logging
 from rest_framework import serializers
 
-from oscarapi.utils import overridable, OscarModelSerializer
+from oscarapi.utils import overridable, OscarModelSerializer, OscarHyperlinkedModelSerializer
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 
@@ -13,7 +13,6 @@ Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
 LineAttribute = get_model('basket', 'LineAttribute')
 StockRecord = get_model('partner', 'StockRecord')
-Option = get_model('catalogue', 'Option')
 Voucher = get_model('voucher', 'Voucher')
 
 
@@ -28,7 +27,8 @@ class VoucherSerializer(OscarModelSerializer):
 class OfferDiscountSerializer(serializers.Serializer):
     description = serializers.CharField()
     name = serializers.CharField()
-    discount = serializers.DecimalField(decimal_places=2, max_digits=12)
+    amount = serializers.DecimalField(decimal_places=2, max_digits=12,
+                                      source='discount')
 
 
 class VoucherDiscountSerializer(OfferDiscountSerializer):
@@ -70,32 +70,50 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
             instance) + ['owner']
 
 
-class LineAttributeSerializer(serializers.HyperlinkedModelSerializer):
-    def __init__(self, *args, **kwargs):
-        fields = kwargs.pop('fields', None)
-        super(LineAttributeSerializer, self).__init__(*args, **kwargs)
-        if fields:
-            allowed = set(fields)
-            existing = set(self.fields.keys())
-            for field_name in existing - allowed:
-                self.fields.pop(field_name)
+class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
 
     class Meta:
         model = LineAttribute
 
 
+class BasketLineSerializer(OscarHyperlinkedModelSerializer):
+    """
+    This serializer computes the prices of this line by using the basket
+    strategy.
+    """
+    attributes = LineAttributeSerializer(
+        many=True, fields=('url', 'option', 'value'), required=False)
+    price_excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
+                                              source='line_price_excl_tax_incl_discounts')
+    price_incl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
+                                              source='line_price_incl_tax_incl_discounts')
+    price_incl_tax_excl_discounts = serializers.DecimalField(
+        decimal_places=2, max_digits=12,
+        source='line_price_incl_tax')
+    price_excl_tax_excl_discounts = serializers.DecimalField(
+        decimal_places=2, max_digits=12,
+        source='line_price_excl_tax')
+
+    warning = serializers.CharField(read_only=True, required=False, source='get_warning')
+
+    class Meta:
+        model = Line
+        fields = overridable('OSCARAPI_BASKETLINE_FIELDS', default=[
+            'url', 'product', 'quantity', 'attributes', 'price_currency',
+            'price_excl_tax', 'price_incl_tax',
+            'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
+            'warning', 'basket', 'stockrecord', 'date_created'
+        ])
+
 class LineSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    This serializer just shows fields stored in the database for this line.
+    """
     attributes = LineAttributeSerializer(
         many=True, fields=('url', 'option', 'value'), required=False)
 
     class Meta:
         model = Line
-
-
-class OptionSerializer(OscarModelSerializer):
-
-    class Meta:
-        model = Option
 
 
 class StockRecordSerializer(serializers.ModelSerializer):

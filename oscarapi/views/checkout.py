@@ -1,29 +1,83 @@
-from rest_framework import status, views, response
+from rest_framework import status, views, response, generics
 
-from oscarapi.serializers import OrderSerializer, CheckoutSerializer
+from oscar.core.loading import get_model
+from oscarapi.serializers import (
+    OrderSerializer,
+    CheckoutSerializer,
+    OrderLineSerializer,
+    OrderLineAttributeSerializer
+)
+from oscarapi.permissions import IsOwner
 from oscarapi.views.utils import BasketPermissionMixin
+
+Order = get_model('order', 'Order')
+OrderLine = get_model('order', 'Line')
+OrderLineAttribute = get_model('order', 'LineAttribute')
+
+__all__ = (
+    'CheckoutView',
+    'OrderList', 'OrderDetail',
+    'OrderLineList', 'OrderLineDetail',
+    'OrderLineAttributeDetail'
+)
+
+
+class OrderList(generics.ListAPIView):
+    model = Order
+    serializer_class = OrderSerializer
+    permission_classes = (IsOwner,)
+
+    def get_queryset(self):
+        qs = super(OrderList, self).get_queryset()
+        return qs.filter(user=self.request.user)
+class OrderDetail(generics.RetrieveAPIView):
+    model = Order
+    serializer_class = OrderSerializer
+    permission_classes = (IsOwner,)
+
+class OrderLineList(generics.ListAPIView):
+    queryset = OrderLine.objects
+    serializer_class = OrderLineSerializer
+
+    def get(self, request, pk=None, format=None):
+        if pk is not None:
+            self.queryset = self.queryset.filter(order__id=pk, order__user=request.user)
+        elif not request.user.is_staff:
+            self.permission_denied(request)
+
+        return super(OrderLineList, self).get(request, format)
+
+
+class OrderLineDetail(generics.RetrieveAPIView):
+    queryset = OrderLine.objects
+    serializer_class = OrderLineSerializer
+
+    def get(self, request, pk=None, format=None):
+        if not request.user.is_staff:
+            self.queryset = self.queryset.filter(order__id=pk, order__user=request.user)
+
+        return super(OrderLineDetail, self).get(request, format)
+
+class OrderLineAttributeDetail(generics.RetrieveAPIView):
+    model = OrderLineAttribute
+    serializer_class = OrderLineAttributeSerializer
 
 
 class CheckoutView(BasketPermissionMixin, views.APIView):
     """
     Prepare an order for checkout.
 
-    POST(basket, total, shipping_method, shipping_charge,
-         shipping_address,billing_address):
+    POST(basket, shipping_address,
+         [total, shipping_method_code, shipping_charge, billing_address]):
     {
         "basket": "http://testserver/oscarapi/baskets/1/",
-        "total": {
-            "currency": "EUR",
-            "excl_tax": "100.0",
-            "tax": "21.0"
-        },
+        "total": "100.0",
         "shipping_charge": {
             "currency": "EUR",
             "excl_tax": "10.0",
             "tax": "0.6"
         },
-        "shipping_method":
-            "http://127.0.0.1:8000/oscarapi/shippingmethods/1/",
+        "shipping_method_code": "no-shipping-required",
         "shipping_address": {
             "country": "http://127.0.0.1:8000/oscarapi/countries/NL/",
             "first_name": "Henk",
@@ -41,6 +95,9 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
     }
     returns the order object.
     """
+    order_serializer_class = OrderSerializer
+    serializer_class = CheckoutSerializer
+
     def post(self, request, format=None):
         # TODO: Make it possible to create orders with options.
         # at the moment, no options are passed to this method, which means they
@@ -54,12 +111,12 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
         # around with the basket, so asume invariant
         assert(data_basket == basket)
 
-        c_ser = CheckoutSerializer(data=request.DATA,
+        c_ser = self.serializer_class(data=request.DATA,
                                    context={'request': request})
         if c_ser.is_valid():
             order = c_ser.object
             basket.freeze()
-            o_ser = OrderSerializer(order, context={'request': request})
+            o_ser = self.order_serializer_class(order, context={'request': request})
             return response.Response(o_ser.data)
 
         return response.Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
