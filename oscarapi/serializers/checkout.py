@@ -205,6 +205,11 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
 
     def validate(self, attrs):
         request = self.context['request']
+ 
+        if request.user.is_anonymous() and not settings.OSCAR_ALLOW_ANON_CHECKOUT:
+            message = _('Anonymous checkout forbidden')
+            raise serializers.ValidationError(message)
+
         basket = attrs.get('basket')
         basket = assign_basket_strategy(basket, request)
         shipping_method = self._shipping_method(
@@ -232,11 +237,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
                 ))
                 raise serializers.ValidationError(message)
 
-        if request.user.is_anonymous() and not settings.OSCAR_ALLOW_ANON_CHECKOUT:
-            message = _('Anonymous checkout forbidden')
-            raise serializers.ValidationError(message)
-
-        # update attrs with validated data.
+       # update attrs with validated data.
         attrs['total'] = get_total_price(basket)
         attrs['shipping_method'] = shipping_method
         attrs['shipping_charge'] = shipping_charge
