@@ -76,7 +76,8 @@ class RecommmendedProductSerializer(OscarModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='product-detail')
     class Meta:
         model = Product
-        fields = ('url',)
+        fields = overridable('OSCARAPI_RECOMMENDED_PRODUCT_FIELDS',
+                                 default=('url',))
 
 
 class ProductSerializer(OscarModelSerializer):
