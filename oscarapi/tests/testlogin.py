@@ -1,10 +1,16 @@
 import json
+import time
 
 from django.conf import settings
+from django.contrib.sessions.models import Session
 from django.utils.importlib import import_module
+from django.utils import timezone
 
 from oscarapi.tests.utils import APITest
-from oscarapi.utils import session_id_from_parsed_session_uri
+from oscarapi.utils import (
+    session_id_from_parsed_session_uri,
+    get_session
+)
 
 class LoginTest(APITest):
 
@@ -167,3 +173,50 @@ class LoginTest(APITest):
         with self.settings(DEBUG=True, SESSION_SAVE_EVERY_REQUEST=True):
             response = self.get('api-login', session_id='koe', authenticated=True)
             self.assertEqual(response.status_code, 401)
+
+
+class SessionTest(APITest):
+    def test_get_session(self):
+        """
+        Even when a session has expired, get_session should return a session
+        with the requested id
+        """
+        with self.settings(SESSION_ENGINE='django.contrib.sessions.backends.db'):
+            self._run_expired_session_test_for_engine()
+        with self.settings(SESSION_ENGINE='django.contrib.sessions.backends.cache'):
+            self._run_expired_session_test_for_engine()
+        with self.settings(SESSION_ENGINE='django.contrib.sessions.backends.file'):
+            self._run_expired_session_test_for_engine()
+        with self.settings(SESSION_ENGINE='django.contrib.sessions.backends.cached_db'):
+            self._run_expired_session_test_for_engine()
+
+    def _run_expired_session_test_for_engine(self):
+        # establish that get_session will return the same session
+        # when that session key has not yet expired.
+        session = get_session('session1')
+        self.assertEqual(session.session_key, 'session1')
+        session['touched'] = 'writesomething'
+        session.save()
+        session = get_session('session1')
+        self.assertEqual(session.session_key, 'session1')
+        session['touched'] = 'writesomethingelse'
+        session.save()
+        self.assertEqual(session.session_key, 'session1')
+
+        # when the session expires immediately, the same session should
+        # still be returned.
+        with self.settings(SESSION_COOKIE_AGE=-10000):
+            # create a new session
+            session = get_session('session2')
+            self.assertEqual(session.session_key, 'session2')
+            session['touched'] = 'writesomething'
+            session.save()
+            self.assertEqual(session.session_key, 'session2')
+
+            # get a session with the same id, even when it has expired.
+            session = get_session('session2')
+            self.assertEqual(session.session_key, 'session2')
+            session['touched'] = 'writesomethingelse'
+            session.save()
+            self.assertEqual(session.session_key, 'session2')
+

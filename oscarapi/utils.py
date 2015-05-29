@@ -113,6 +113,7 @@ def session_id_from_parsed_session_uri(parsed_session_uri):
 
 
 def get_session(session_id, raise_on_create=False):
+    "get a session with the id specified."
     engine = import_module(settings.SESSION_ENGINE)
     session = engine.SessionStore(session_id)
 
@@ -121,5 +122,15 @@ def get_session(session_id, raise_on_create=False):
             raise exceptions.NotAuthenticated()
         else:
             session.save(must_create=True)
+    else:
+        # if we get an expired session from django,
+        # the session key will change after calling load.
+        # since the whole point of get_session is to retrieve a session
+        # with axactly the key specified, we have to clear the expired
+        # sessions and then get a new session.
+        session.load()
+        if session.session_key != session_id:
+            engine.SessionStore.clear_expired()
+            session = get_session(session_id, raise_on_create)
 
     return session
