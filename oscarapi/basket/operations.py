@@ -26,7 +26,7 @@ Selector = None
 def apply_offers(request, basket):
     "Apply offers and discounts to cart"
     if not basket.is_empty:
-        Applicator().apply(request, basket)
+        Applicator().apply(basket, request)
 
 
 def prepare_basket(basket, request):
