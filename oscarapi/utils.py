@@ -18,10 +18,11 @@ def overridable(name, default):
 
 
 class OscarSerializer(object):
-    field_mapping = dict(
-        serializers.ModelSerializer.serializer_field_mapping, **{
-            oscar.models.fields.NullCharField: serializers.CharField
-        })
+    field_mapping = serializers.ModelSerializer.serializer_field_mapping.copy()
+    null_char_field_mapping = {
+        oscar.models.fields.NullCharField: serializers.CharField}
+
+    field_mapping.update(null_char_field_mapping)
 
     def to_native(self, obj):
         num_fields = len(self.get_fields())
