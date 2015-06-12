@@ -97,6 +97,13 @@ class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveAPIView):
 
 
 class ProductList(generics.ListAPIView):
+    """
+    GET:
+    Return product list
+
+    Filters:
+    ?category_id=<int>
+    """
     model = Product
     serializer_class = serializers.ProductLinkSerializer
     filter_backends = (FilterProductCategoryBackend,)
