@@ -3,7 +3,7 @@ import itertools
 
 from django.contrib import auth
 from oscar.core.loading import get_model, get_class
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from .mixin import PutIsPatchMixin
 from oscarapi import serializers, permissions
 from oscarapi.basket.operations import prepare_basket
+from oscarapi.filters import FilterProductCategoryBackend
 
 
 Selector = get_class('partner.strategy', 'Selector')
@@ -25,6 +26,8 @@ __all__ = (
     'OptionList', 'OptionDetail',
     'CountryList', 'CountryDetail',
     'ShippingMethodList', 'ShippingMethodDetail',
+    'WishListList', 'WishListDetail',
+    'CategoryList', 'CategoryDetail'
 )
 
 Basket = get_model('basket', 'Basket')
@@ -35,6 +38,8 @@ Option = get_model('catalogue', 'Option')
 User = auth.get_user_model()
 ShippingMethod = get_model('shipping', 'OrderAndItemCharges')
 Country = get_model('address', 'Country')
+WishList = get_model('wishlists', 'WishList')
+Category = get_model('catalogue', 'Category')
 
 
 # TODO: For all API's in this file, the permissions should be checked if they
@@ -67,17 +72,19 @@ class BasketList(generics.ListCreateAPIView):
     def get_queryset(self):
         qs = super(BasketList, self).get_queryset()
         return itertools.imap(
-            functools.partial(prepare_basket, request=self.request), 
+            functools.partial(prepare_basket, request=self.request),
             qs)
+
 
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     model = Basket
     serializer_class = serializers.BasketSerializer
     permission_classes = (permissions.IsAdminUserOrRequestContainsBasket,)
-    
+
     def get_object(self, queryset=None):
         basket = super(BasketDetail, self).get_object(queryset)
         return prepare_basket(basket, self.request)
+
 
 class LineAttributeList(generics.ListCreateAPIView):
     model = LineAttribute
@@ -92,6 +99,7 @@ class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveAPIView):
 class ProductList(generics.ListAPIView):
     model = Product
     serializer_class = serializers.ProductLinkSerializer
+    filter_backends = (FilterProductCategoryBackend,)
 
 
 class ProductDetail(generics.RetrieveAPIView):
@@ -151,3 +159,25 @@ class OptionList(generics.ListAPIView):
 class OptionDetail(generics.RetrieveAPIView):
     model = Option
     serializer_class = serializers.OptionSerializer
+
+
+class CategoryList(generics.ListAPIView):
+    serializer_class = serializers.CategorySerializer
+    model = Category
+
+
+class CategoryDetail(generics.RetrieveAPIView):
+    serializer_class = serializers.CategorySerializer
+    model = Category
+
+
+class WishListList(generics.ListAPIView):
+    model = WishList
+    serializer_class = serializers.WishListSerializer
+    permission_classes = (IsAdminUser,)
+
+
+class WishListDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
+    model = WishList
+    serializer_class = serializers.WishListSerializer
+    permission_classes = (permissions.IsAdminUserOrRequestContainsWishList,)

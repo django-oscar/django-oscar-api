@@ -13,8 +13,8 @@ class ProductTest(APITest):
         "Check if we get a list of products with the default attributes"
         self.response = self.get('product-list')
         self.response.assertStatusEqual(200)
-        # we should have two products
-        self.assertEqual(len(self.response.body), 2)
+        # we should have three products
+        self.assertEqual(len(self.response.body), 3)
         # default we have 3 fields
         product = self.response.body[0]
         default_fields = ['id', 'url']
@@ -43,3 +43,18 @@ class ProductTest(APITest):
         self.response = self.get(reverse('product-availability', args=(1,)))
         self.response.assertStatusEqual(200)
         self.assertIn('num_available', self.response.body)
+
+    def test_product_filter(self):
+        "Check if we get a list of products with category_id=2"
+        request = {
+            'category_id': 2
+        }
+        self.response = self.get('product-list', **request)
+        self.response.assertStatusEqual(200)
+        # we should have one product
+        self.assertEqual(len(self.response.body), 1)
+        # default we have 3 fields
+        product = self.response.body[0]
+        default_fields = ['id', 'url']
+        for field in default_fields:
+            self.assertIn(field, product)

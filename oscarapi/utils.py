@@ -144,7 +144,9 @@ class GetShippingMixin(object):
         if len(shipping_methods) > 0:
             method = shipping_methods[0]
         else:
-            raise serializers.ValidationError(_('Not required shipping methods'))
+            self.checkout_session.use_shipping_method(
+                NoShippingRequired().code)
+            return NoShippingRequired()
         self.checkout_session.use_shipping_method(method.code)
         return method
 

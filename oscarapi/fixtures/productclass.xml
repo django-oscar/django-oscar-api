@@ -7,4 +7,11 @@
         <field type="BooleanField" name="track_stock">True</field>
         <field to="catalogue.option" name="options" rel="ManyToManyRel"/>
     </object>
+    <object pk="2" model="catalogue.productclass">
+        <field type="CharField" name="name">Parfume</field>
+        <field type="SlugField" name="slug">parfume</field>
+        <field type="BooleanField" name="requires_shipping">True</field>
+        <field type="BooleanField" name="track_stock">True</field>
+        <field to="catalogue.option" name="options" rel="ManyToManyRel"/>
+    </object>
 </django-objects>

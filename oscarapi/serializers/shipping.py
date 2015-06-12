@@ -15,11 +15,13 @@ Repository = get_class('shipping.repository', 'Repository')
 NoShippingRequired = get_class('shipping.methods', 'NoShippingRequired')
 
 
-class ShippingSerializer(serializers.Serializer, CheckoutSessionMixin, GetShippingMixin):
+class ShippingSerializer(serializers.Serializer, CheckoutSessionMixin,
+                         GetShippingMixin):
     basket = serializers.HyperlinkedRelatedField(
         view_name='basket-detail', queryset=Basket.objects)
     shipping_address = ShippingAddressSerializer(many=False, required=True)
-    shipping_method_code = serializers.CharField(max_length=128, required=False)
+    shipping_method_code = serializers.CharField(
+        max_length=128, required=False)
 
     def validate(self, attrs):
         self.request = self.context['request']
@@ -39,7 +41,8 @@ class ShippingSerializer(serializers.Serializer, CheckoutSessionMixin, GetShippi
         shipping_charge = shipping_method.calculate(basket)
         return {
             'basket_url': self.init_data['basket'],
-            'shipping_address': ShippingAddressSerializer(shipping_address, context={'request': self.request}).data,
+            'shipping_address': ShippingAddressSerializer(
+                shipping_address, context={'request': self.request}).data,
             'shipping_method_code': shipping_method.code,
             'shipping_charge': PriceSerializer(shipping_charge).data
         }

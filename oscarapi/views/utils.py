@@ -6,9 +6,10 @@ from rest_framework.relations import HyperlinkedRelatedField
 from oscarapi import permissions
 
 
-__all__ = ('BasketPermissionMixin',)
+__all__ = ('BasketPermissionMixin', 'WishListPermissionMixin')
 
 Basket = get_model('basket', 'Basket')
+WishList = get_model('wishlists', 'WishList')
 
 
 class BasketPermissionMixin(object):
@@ -40,3 +41,34 @@ class BasketPermissionMixin(object):
             basket = generics.get_object_or_404(Basket.objects, pk=basket_pk)
         self.check_object_permissions(request, basket)
         return basket
+
+
+class WishListPermissionMixin(object):
+    """
+    This mixins adds some methods that can be used to check permissions
+    on a wishlist instance.
+    """
+    # The permission class is mainly used to check Wishlist permission!
+    permission_classes = (permissions.IsAdminUserOrRequestContainsWishList,)
+
+    def get_data_wishlist(self, DATA, format):
+        "Parse wishlist from relation hyperlink"
+        wishlist_parser = HyperlinkedRelatedField(
+            view_name='wishlist-detail',
+            queryset=WishList.objects,
+            format=format
+        )
+        try:
+            wishlist_uri = DATA.get('wishlist')
+            data_wishlist = wishlist_parser.from_native(wishlist_uri)
+        except ValidationError as e:
+            raise exceptions.NotAcceptable(e.messages)
+        else:
+            return data_wishlist
+
+    def check_wishlist_permission(self, request, wishlist_pk=None, wishlist=None):
+        "Check if the user may access this wishlist"
+        if wishlist is None:
+            wishlist = generics.get_object_or_404(WishList.objects, pk=wishlist_pk)
+        self.check_object_permissions(request, wishlist)
+        return wishlist

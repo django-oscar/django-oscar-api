@@ -23,6 +23,13 @@ def PUBLIC_APIS(r, f):
         ('shippingmethods', reverse('shippingmethod-list', request=r,
                                     format=f)),
         ('countries', reverse('country-list', request=r, format=f)),
+        ('payment types', reverse('sourcetype-list', request=r, format=f)),
+        ('category', reverse('category-list', request=r, format=f)),
+        ('wishlist', reverse('api-wishlist', request=r, format=f)),
+        ('wishlist-add-product', reverse('api-wishlist-add-product', request=r,
+                                         format=f)),
+        ('wishlist-add-to-basket', reverse('api-wishlist-add-to-basket', request=r,
+                                           format=f)),
     ]
 
 
