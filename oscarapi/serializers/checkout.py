@@ -9,7 +9,6 @@ from rest_framework import serializers, exceptions
 
 from oscarapi.basket.operations import (
     assign_basket_strategy,
-    get_total_price
 )
 from oscarapi.serializers import (
     VoucherSerializer,
@@ -22,6 +21,8 @@ from oscarapi.utils import (
 )
 
 OrderPlacementMixin = get_class('checkout.mixins', 'OrderPlacementMixin')
+OrderTotalCalculator = get_class('checkout.calculators',
+                                 'OrderTotalCalculator')
 ShippingAddress = get_model('order', 'ShippingAddress')
 BillingAddress = get_model('order', 'BillingAddress')
 Order = get_model('order', 'Order')
@@ -228,17 +229,18 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
             ))
             raise serializers.ValidationError(message)
 
-        total = attrs.get('total')
-        if total is not None:
-            if total != basket.total_incl_tax:
+        posted_total = attrs.get('total')
+        total = OrderTotalCalculator().calculate(basket, shipping_charge)
+        if posted_total is not None:
+            if posted_total != total.incl_tax:
                 message = _('Total incorrect %s != %s' % (
-                    total,
-                    basket.total_incl_tax
+                    posted_total,
+                    total.incl_tax
                 ))
                 raise serializers.ValidationError(message)
 
        # update attrs with validated data.
-        attrs['total'] = get_total_price(basket)
+        attrs['total'] = total
         attrs['shipping_method'] = shipping_method
         attrs['shipping_charge'] = shipping_charge
         attrs['basket'] = basket
