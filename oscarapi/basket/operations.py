@@ -134,11 +134,3 @@ def save_line_with_default_currency(line, *args, **kwargs):
     if not line.price_currency:
         line.price_currency = get_default_currency()
     return line.save(*args, **kwargs)
-
-
-def get_total_price(basket):
-    return Price(
-        getattr(basket,'currency', get_default_currency()),
-        basket.total_excl_tax,
-        incl_tax=basket.total_incl_tax
-    )
