@@ -85,7 +85,7 @@ class LoginTest(APITest):
             response = self.post('api-login', username='admin', password='admin')
 
             self.assertEqual(response.status_code, 405)
-            self.assertEqual(self.client.session['_auth_user_id'], 2)
+            self.assertEqual(int(self.client.session['_auth_user_id']), 2)
             self.assertNotIn('Session-Id', response)
 
             # check we are still authenticated as nobody
