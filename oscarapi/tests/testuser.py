@@ -18,12 +18,12 @@ class UserTest(APITest):
     def test_admin_user(self):
         "Admin user can authenticate with django via the html frontend"
         self.login('admin', 'admin')
-        self.assertEqual(self.client.session['_auth_user_id'], 1)
+        self.assertEqual(int(self.client.session['_auth_user_id']), 1)
 
     def test_non_admin_user(self):
         "Regular user can authenticate with django via the html frontend"
         self.login('nobody', 'nobody')
-        self.assertEqual(self.client.session['_auth_user_id'], 2)
+        self.assertEqual(int(self.client.session['_auth_user_id']), 2)
 
     def test_admin_header(self):
         self.hlogin('admin', 'admin', 'admin')
