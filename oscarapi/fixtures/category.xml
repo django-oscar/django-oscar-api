@@ -8,6 +8,5 @@
         <field type="TextField" name="description"/>
         <field type="FileField" name="image"/>
         <field type="SlugField" name="slug">clothing</field>
-        <field type="CharField" name="full_name">Clothing</field>
     </object>
 </django-objects>
