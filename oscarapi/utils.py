@@ -18,7 +18,7 @@ def overridable(name, default):
 
 
 class OscarSerializer(object):
-    field_mapping = dict(serializers.ModelSerializer.field_mapping, **{
+    field_mapping = dict(serializers.ModelSerializer.serializer_field_mapping, **{
         oscar.models.fields.NullCharField: serializers.CharField
     })
 
