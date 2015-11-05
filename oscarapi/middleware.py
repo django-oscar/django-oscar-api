@@ -14,7 +14,8 @@ from rest_framework import authentication
 
 from oscarapi.basket.operations import (
     request_contains_basket,
-    store_basket_in_session
+    store_basket_in_session,
+    get_basket
 )
 from oscarapi.utils import (
     get_domain,
@@ -211,3 +212,15 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
                     pass
                 else:
                     store_basket_in_session(basket, self.request.session)
+
+    def process_response(self, request, response):
+        if self.is_api_request(request):
+            # at this point we are sure a basket can be found in the session,
+            # because it is enforced in process_request.
+            # We just have to make sure it is stored as a cookie, because it
+            # could have been created by oscarapi.
+            cookie_key = self.get_cookie_key(request)
+            basket = get_basket(request)
+            request.COOKIES[cookie_key] = self.get_basket_hash(basket.id)
+
+        return super(ApiBasketMiddleWare, self).process_response(request, response)
