@@ -86,7 +86,7 @@ class AddProductView(APIView):
 
     def post(self, request, format=None):
         p_ser = serializers.AddProductSerializer(
-            data=request.DATA, context={'request': request})
+            data=request.data, context={'request': request})
         if p_ser.is_valid():
             basket = get_basket(request)
             product = p_ser.validated_data['url']
@@ -122,7 +122,7 @@ def add_voucher(request, format=None):
     Will return 200 and the voucher as json if succesful.
     If unsuccessful, will return 406 with the error.
     """
-    v_ser = serializers.VoucherAddSerializer(data=request.DATA,
+    v_ser = serializers.VoucherAddSerializer(data=request.data,
                                              context={'request': request})
     if v_ser.is_valid():
         basket = get_basket(request)
@@ -213,7 +213,7 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
         return super(LineList, self).get(request, format)
 
     def post(self, request, pk=None, format=None):
-        data_basket = self.get_data_basket(request.DATA, format)
+        data_basket = self.get_data_basket(request.data, format)
         self.check_basket_permission(request, basket=data_basket)
 
         if pk is not None:

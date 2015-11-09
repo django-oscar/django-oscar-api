@@ -1,7 +1,6 @@
 import warnings
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.utils.translation import gettext as _
 from oscar.core import prices
@@ -140,7 +139,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
     as the basket in the checkout process.
     """
     owner = serializers.HyperlinkedRelatedField(view_name='user-detail',
-                                                queryset=get_user_model().objects.all())
+                                                read_only=True, source='user')
     lines = serializers.HyperlinkedIdentityField(view_name='order-lines-list')
     shipping_address = InlineShippingAddressSerializer(
         many=False, required=False)
@@ -172,7 +171,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = Order
         fields = overridable('OSCARAPI_ORDER_FIELD', default=(
-            'number', 'basket', 'url',
+            'number', 'basket', 'url', 'lines',
             'owner', 'billing_address', 'currency', 'total_incl_tax',
             'total_excl_tax', 'shipping_incl_tax', 'shipping_excl_tax',
             'shipping_address', 'shipping_method', 'shipping_code', 'status',

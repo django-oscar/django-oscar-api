@@ -105,7 +105,7 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
         # at the moment, no options are passed to this method, which means they
         # are also not created.
 
-        data_basket = self.get_data_basket(request.DATA, format)
+        data_basket = self.get_data_basket(request.data, format)
         basket = self.check_basket_permission(request,
                                               basket_pk=data_basket.pk)
 
@@ -113,7 +113,7 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
         # around with the basket, so asume invariant
         assert(data_basket == basket)
 
-        c_ser = self.serializer_class(data=request.DATA,
+        c_ser = self.serializer_class(data=request.data,
                                    context={'request': request})
         if c_ser.is_valid():
             order = c_ser.save()
