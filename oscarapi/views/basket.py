@@ -89,9 +89,9 @@ class AddProductView(APIView):
             data=request.DATA, context={'request': request})
         if p_ser.is_valid():
             basket = get_basket(request)
-            product = p_ser.object['url']
-            quantity = p_ser.object['quantity']
-            options = p_ser.object.get('options', [])
+            product = p_ser.validated_data['url']
+            quantity = p_ser.validated_data['quantity']
+            options = p_ser.validated_data.get('options', [])
 
             basket_valid, message = self.validate(basket, product, quantity, options)
             if not basket_valid:

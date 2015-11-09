@@ -1,4 +1,5 @@
 import os
+from django import VERSION
 from oscar import get_core_apps
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
@@ -37,6 +38,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'oscarapi',
 ] + get_core_apps()
+
+if VERSION < (1, 7):
+    INSTALLED_APPS += ['south']
 
 LANGUAGE_CODE = 'en-us'
 
@@ -120,7 +124,7 @@ MIDDLEWARE_CLASSES = (
 REST_FRAMEWORK = {
     'CHARSET': 'utf-8',
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.UnicodeJSONRenderer',
+        'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     )
 }

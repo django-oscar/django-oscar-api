@@ -18,9 +18,10 @@ def overridable(name, default):
 
 
 class OscarSerializer(object):
-    field_mapping = dict(serializers.ModelSerializer.field_mapping, **{
-        oscar.models.fields.NullCharField: serializers.CharField
-    })
+    field_mapping = dict(
+        serializers.ModelSerializer.serializer_field_mapping, **{
+            oscar.models.fields.NullCharField: serializers.CharField
+        })
 
     def __init__(self, *args, **kwargs):
         """
@@ -44,19 +45,6 @@ class OscarSerializer(object):
             return val
 
         return native
-
-
-class OscarStrategySerializer(serializers.Serializer):
-    """Provides easy access to the price and stock information provided by
-        our strategy
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(OscarStrategySerializer, self).__init__(*args, **kwargs)
-        request = self.context.get('request')
-        user = request.user if request is not None else None
-        strategy = Selector().strategy(request=request, user=user)
-        self.object.info = strategy.fetch_for_product(self.object)
 
 
 class OscarModelSerializer(OscarSerializer, serializers.ModelSerializer):

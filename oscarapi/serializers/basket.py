@@ -1,13 +1,14 @@
 import logging
 from rest_framework import serializers
 
-from oscarapi.utils import overridable, OscarModelSerializer, OscarHyperlinkedModelSerializer
+from oscarapi.utils import (
+    overridable,
+    OscarModelSerializer,
+)
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 
-
-logger= logging.getLogger(__name__)
-
+logger = logging.getLogger(__name__)
 
 Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
@@ -124,7 +125,7 @@ class StockRecordSerializer(serializers.ModelSerializer):
 
 class VoucherAddSerializer(serializers.Serializer):
     vouchercode = serializers.CharField(max_length=128, required=True)
-    
+
     def validate(self, attrs):
         request = self.context.get('request')
         try:
@@ -147,12 +148,5 @@ class VoucherAddSerializer(serializers.Serializer):
 
         return attrs
 
-    def restore_object(self, attrs, instance=None):
-        if not instance:
-            code = attrs.get('vouchercode')
-            try:
-                instance = Voucher.objects.get(code=code)
-            except Voucher.DoesNotExist:
-                logger.error('Voucher not found %s' % code)
-        
-        return instance
+    def create(self, validated_data):
+        return Voucher.objects.create(**validated_data)
