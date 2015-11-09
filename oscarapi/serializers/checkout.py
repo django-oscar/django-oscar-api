@@ -100,8 +100,7 @@ class OrderLineSerializer(OscarHyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='order-lines-detail')
     attributes = OrderLineAttributeSerializer(
         many=True, fields=('url', 'option', 'value'), required=False)
-    price_currency = serializers.DecimalField(decimal_places=2, max_digits=12,
-                                              source='order.currency')
+    price_currency = serializers.CharField(source='order.currency', max_length=12)
     price_excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
                                               source='line_price_excl_tax')
     price_incl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
