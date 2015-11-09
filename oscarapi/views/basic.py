@@ -165,11 +165,11 @@ class OptionDetail(generics.RetrieveAPIView):
     serializer_class = serializers.OptionSerializer
 
 
-# class PartnerList(generics.ListAPIView):
-#     model = Partner
-#     serializer_class = serializers.PartnerSerializer
-#
-#
-# class PartnerDetail(generics.RetrieveAPIView):
-#     model = Partner
-#     serializer_class = serializers.PartnerSerializer
+class PartnerList(generics.ListAPIView):
+    model = Partner
+    serializer_class = serializers.PartnerSerializer
+
+
+class PartnerDetail(generics.RetrieveAPIView):
+    model = Partner
+    serializer_class = serializers.PartnerSerializer
