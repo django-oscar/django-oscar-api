@@ -14,3 +14,5 @@ lib/
 *.egg-info/
 *.pyc
 version-django-oscar-commerce-connect.txt
+sandbox/media/
+sandbox/static/

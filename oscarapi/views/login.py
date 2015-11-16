@@ -43,6 +43,7 @@ class LoginView(APIView):
     If more details are needed, use the ``OSCARAPI_PRODUCT_FIELDS`` setting to change
     the fields the ``UserSerializer`` will render.
     """
+    serializer_class = serializers.LoginSerializer
 
     def get(self, request, format=None):
         if settings.DEBUG:

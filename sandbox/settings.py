@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django_nose',
     'rest_framework',
     'oscarapi',
+    'widget_tweaks',
 ] + get_core_apps()
 
 if VERSION < (1, 7):
