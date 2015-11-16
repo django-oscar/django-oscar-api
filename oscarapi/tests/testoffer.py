@@ -35,7 +35,6 @@ class OfferTest(APITest):
     def test_basket_line_discount(self):
         "A discount should be properly applied to the basket line"
         self.test_basket_discount()
-
         self.response = self.get(self.response['lines'])
         self.assertEqual(len(self.response.body), 1)
         line0 = self.response.body[0]
