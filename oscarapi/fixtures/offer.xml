@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object pk="1" model="offer.conditionaloffer">
+        <field type="CharField" name="name">A large trout</field>
+        <field type="SlugField" name="slug">a-large-trout</field>
+        <field type="TextField" name="description"/>
+        <field type="CharField" name="offer_type">Site</field>
+        <field type="CharField" name="status">Open</field>
+        <field to="offer.condition" name="condition" rel="ManyToOneRel">1</field>
+        <field to="offer.benefit" name="benefit" rel="ManyToOneRel">1</field>
+        <field type="IntegerField" name="priority">0</field>
+        <field type="DateTimeField" name="start_datetime">2015-11-16T00:00:00+00:00</field>
+        <field type="DateTimeField" name="end_datetime">2999-11-16T00:00:00+00:00</field>
+        <field type="PositiveIntegerField" name="max_global_applications">
+            <None/>
+        </field>
+        <field type="PositiveIntegerField" name="max_user_applications">
+            <None/>
+        </field>
+        <field type="PositiveIntegerField" name="max_basket_applications">
+            <None/>
+        </field>
+        <field type="DecimalField" name="max_discount">
+            <None/>
+        </field>
+        <field type="DecimalField" name="total_discount">0.00</field>
+        <field type="PositiveIntegerField" name="num_applications">0</field>
+        <field type="PositiveIntegerField" name="num_orders">0</field>
+        <field type="CharField" name="redirect_url"/>
+        <field type="DateTimeField" name="date_created">2015-11-16T11:08:15.653721+00:00</field>
+    </object>
+    <object pk="1" model="offer.benefit">
+        <field to="offer.range" name="range" rel="ManyToOneRel">1</field>
+        <field type="CharField" name="type">Absolute</field>
+        <field type="DecimalField" name="value">8.00</field>
+        <field type="PositiveIntegerField" name="max_affected_items">
+            <None/>
+        </field>
+        <field type="CharField" name="proxy_class"/>
+    </object>
+    <object pk="1" model="offer.condition">
+        <field to="offer.range" name="range" rel="ManyToOneRel">1</field>
+        <field type="CharField" name="type">Count</field>
+        <field type="DecimalField" name="value">1.00</field>
+        <field type="CharField" name="proxy_class"/>
+    </object>
+    <object pk="1" model="offer.range">
+        <field type="CharField" name="name">discount</field>
+        <field type="SlugField" name="slug">discount</field>
+        <field type="TextField" name="description"/>
+        <field type="BooleanField" name="is_public">True</field>
+        <field type="BooleanField" name="includes_all_products">True</field>
+        <field type="CharField" name="proxy_class"/>
+        <field type="DateTimeField" name="date_created">2015-11-16T11:02:02.808251+00:00</field>
+        <field to="catalogue.product" name="excluded_products" rel="ManyToManyRel"/>
+        <field to="catalogue.productclass" name="classes" rel="ManyToManyRel"/>
+        <field to="catalogue.category" name="included_categories" rel="ManyToManyRel"/>
+    </object>
+</django-objects>
