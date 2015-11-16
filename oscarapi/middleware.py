@@ -6,15 +6,27 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponse
 from django.utils.translation import ugettext as _
+
+from oscar.core.loading import get_class
+
 from rest_framework import exceptions
 from rest_framework import authentication
 
+from oscarapi.basket.operations import (
+    request_contains_basket,
+    store_basket_in_session,
+    get_basket
+)
 from oscarapi.utils import (
     get_domain,
     session_id_from_parsed_session_uri,
     get_session
 )
 from oscarapi import models
+
+
+BasketMiddleware = get_class('basket.middleware', 'BasketMiddleware')
+
 
 logger = logging.getLogger(__name__)
 
@@ -171,3 +183,44 @@ class ApiGatewayMiddleWare(IsApiRequest):
             raise PermissionDenied()
 
         return None
+
+
+class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
+    """
+    Use this middleware instead of Oscar's basket middleware if you
+    want to mix the api with and regular oscar views.
+    
+    Oscar uses the session to store baskets for anynymous users, but
+    oscarapi can not do that, because we don't want to put the burden
+    of managing a cookie jar on oscarapi clients that are not websites.
+    """
+    def process_request(self, request):
+        super(BasketMiddleware, self).process_request(request)
+
+        if self.is_api_request(request):
+            # we should make sure that any cookie baskets are turned into
+            # session baskets, since oscarapi uses only baskets from the
+            # session.
+            cookie_key = self.get_cookie_key(request)
+            basket = self.get_cookie_basket(
+                cookie_key,
+                request,
+                Exception("get_cookie_basket doesn't use the manager argument")
+            )
+            if basket is not None:
+                if request_contains_basket(request, basket):
+                    pass
+                else:
+                    store_basket_in_session(basket, self.request.session)
+
+    def process_response(self, request, response):
+        if self.is_api_request(request):
+            # at this point we are sure a basket can be found in the session,
+            # because it is enforced in process_request.
+            # We just have to make sure it is stored as a cookie, because it
+            # could have been created by oscarapi.
+            cookie_key = self.get_cookie_key(request)
+            basket = get_basket(request)
+            request.COOKIES[cookie_key] = self.get_basket_hash(basket.id)
+
+        return super(ApiBasketMiddleWare, self).process_response(request, response)
