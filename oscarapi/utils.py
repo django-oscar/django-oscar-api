@@ -17,11 +17,13 @@ def overridable(name, default):
     return getattr(settings, name, default)
 
 
+field_mapping = serializers.ModelSerializer.serializer_field_mapping
+field_mapping.update({
+    oscar.models.fields.NullCharField: serializers.CharField
+})
+
 class OscarSerializer(object):
-    field_mapping = dict(
-        serializers.ModelSerializer.serializer_field_mapping, **{
-            oscar.models.fields.NullCharField: serializers.CharField
-        })
+    field_mapping = field_mapping
 
     def __init__(self, *args, **kwargs):
         """
