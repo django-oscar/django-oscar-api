@@ -103,10 +103,12 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         many=True, fields=('url', 'option', 'value'), required=False)
     price_excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
                                               source='line_price_excl_tax_incl_discounts')
-    price_incl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
-                                              source='line_price_incl_tax_incl_discounts')
-    price_incl_tax_excl_discounts = serializers.DecimalField(
+    price_incl_tax = TaxIncludedDecimalField(decimal_places=2, max_digits=12,
+                                             excl_tax_field='line_price_excl_tax_incl_discounts',
+                                             source='line_price_incl_tax_incl_discounts')
+    price_incl_tax_excl_discounts = TaxIncludedDecimalField(
         decimal_places=2, max_digits=12,
+        excl_tax_field='line_price_excl_tax',
         source='line_price_incl_tax')
     price_excl_tax_excl_discounts = serializers.DecimalField(
         decimal_places=2, max_digits=12,
@@ -120,7 +122,7 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
             'url', 'product', 'quantity', 'attributes', 'price_currency',
             'price_excl_tax', 'price_incl_tax',
             'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
-            'warning', 'basket', 'stockrecord', 'date_created'
+            'is_tax_known', 'warning', 'basket', 'stockrecord', 'date_created'
         ])
 
 class LineSerializer(serializers.HyperlinkedModelSerializer):
