@@ -211,7 +211,7 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
                 if request_contains_basket(request, basket):
                     pass
                 else:
-                    store_basket_in_session(basket, self.request.session)
+                    store_basket_in_session(basket, request.session)
 
     def process_response(self, request, response):
         if self.is_api_request(request):
