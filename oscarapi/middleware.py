@@ -195,7 +195,7 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
     of managing a cookie jar on oscarapi clients that are not websites.
     """
     def process_request(self, request):
-        super(BasketMiddleware, self).process_request(request)
+        super(ApiBasketMiddleWare, self).process_request(request)
 
         if self.is_api_request(request):
             # we should make sure that any cookie baskets are turned into
