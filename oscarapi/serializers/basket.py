@@ -143,10 +143,11 @@ class VoucherAddSerializer(serializers.Serializer):
             is_available, message = voucher.is_available_to_user(request.user)
             if not is_available:
                 raise serializers.ValidationError(message)
-
         except Voucher.DoesNotExist:
             raise serializers.ValidationError(_('Voucher code unknown'))
 
+        # set instance to the voucher so we can use this in the view
+        self.instance = voucher
         return attrs
 
     def create(self, validated_data):

@@ -40,5 +40,6 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'Staff users can not log in via the rest api')
 
-        self.object = user
+        # set instance to the user so we can use this in the view
+        self.instance = user
         return attrs

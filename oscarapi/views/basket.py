@@ -128,10 +128,7 @@ def add_voucher(request, format=None):
     if v_ser.is_valid():
         basket = get_basket(request)
 
-        # the vouchercode should exist according to the serializers
-        # 'validate' method
-        vouchercode = v_ser.validated_data.get('vouchercode')
-        voucher = Voucher.objects.get(code=vouchercode)
+        voucher = v_ser.instance
         basket.vouchers.add(voucher)
 
         signals.voucher_addition.send(
