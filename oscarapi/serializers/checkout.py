@@ -19,6 +19,8 @@ from oscarapi.utils import (
     OscarModelSerializer,
     overridable
 )
+from oscarapi.serializers.fields import TaxIncludedDecimalField
+
 
 OrderPlacementMixin = get_class('checkout.mixins', 'OrderPlacementMixin')
 OrderTotalCalculator = get_class('checkout.calculators',
@@ -39,9 +41,11 @@ class PriceSerializer(serializers.Serializer):
         max_length=12, default=settings.OSCAR_DEFAULT_CURRENCY, required=False)
     excl_tax = serializers.DecimalField(
         decimal_places=2, max_digits=12, required=True)
-    incl_tax = serializers.DecimalField(
+    incl_tax = TaxIncludedDecimalField(
+        excl_tax_field='excl_tax',
         decimal_places=2, max_digits=12, required=False)
-    tax = serializers.DecimalField(
+    tax = TaxIncludedDecimalField(
+        excl_tax_value='0.00',
         decimal_places=2, max_digits=12, required=False)
 
 

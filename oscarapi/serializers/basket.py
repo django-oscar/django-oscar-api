@@ -6,8 +6,10 @@ from oscarapi.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
 )
+from oscarapi.serializers.fields import TaxIncludedDecimalField
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +46,12 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
         decimal_places=2, max_digits=12, required=False)
     total_excl_tax_excl_discounts = serializers.DecimalField(
         decimal_places=2, max_digits=12, required=False)
-    total_incl_tax = serializers.DecimalField(
-        decimal_places=2, max_digits=12, required=False)
-    total_incl_tax_excl_discounts = serializers.DecimalField(
-        decimal_places=2, max_digits=12, required=False)
-    total_tax = serializers.DecimalField(
-        decimal_places=2, max_digits=12, required=False)
+    total_incl_tax = TaxIncludedDecimalField(
+        excl_tax_field='total_excl_tax', decimal_places=2, max_digits=12, required=False)
+    total_incl_tax_excl_discounts = TaxIncludedDecimalField(
+        excl_tax_field='total_excl_tax_excl_discounts', decimal_places=2, max_digits=12, required=False)
+    total_tax = TaxIncludedDecimalField(
+        excl_tax_value=Decimal('0.00'), decimal_places=2, max_digits=12, required=False)
     currency = serializers.CharField(required=False)
     voucher_discounts = VoucherDiscountSerializer(many=True, required=False)
 
@@ -60,7 +62,7 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
             'url', 'total_excl_tax',
             'total_excl_tax_excl_discounts', 'total_incl_tax',
             'total_incl_tax_excl_discounts', 'total_tax', 'currency',
-            'voucher_discounts', 'offer_discounts'])
+            'voucher_discounts', 'offer_discounts', 'is_tax_known'])
 
     def get_validation_exclusions(self, instance=None):
         """
@@ -87,10 +89,12 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         many=True, fields=('url', 'option', 'value'), required=False)
     price_excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
                                               source='line_price_excl_tax_incl_discounts')
-    price_incl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
-                                              source='line_price_incl_tax_incl_discounts')
-    price_incl_tax_excl_discounts = serializers.DecimalField(
+    price_incl_tax = TaxIncludedDecimalField(decimal_places=2, max_digits=12,
+                                             excl_tax_field='line_price_excl_tax_incl_discounts',
+                                             source='line_price_incl_tax_incl_discounts')
+    price_incl_tax_excl_discounts = TaxIncludedDecimalField(
         decimal_places=2, max_digits=12,
+        excl_tax_field='line_price_excl_tax',
         source='line_price_incl_tax')
     price_excl_tax_excl_discounts = serializers.DecimalField(
         decimal_places=2, max_digits=12,
@@ -104,7 +108,7 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
             'url', 'product', 'quantity', 'attributes', 'price_currency',
             'price_excl_tax', 'price_incl_tax',
             'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
-            'warning', 'basket', 'stockrecord', 'date_created'
+            'is_tax_known', 'warning', 'basket', 'stockrecord', 'date_created'
         ])
 
 class LineSerializer(serializers.HyperlinkedModelSerializer):
