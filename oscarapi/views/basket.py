@@ -24,6 +24,7 @@ __all__ = ('BasketView', 'LineList', 'LineDetail', 'AddProductView',
 Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
 Repository = get_class('shipping.repository', 'Repository')
+Voucher = get_model('voucher', 'Voucher')
 
 
 class BasketView(APIView):
@@ -126,7 +127,11 @@ def add_voucher(request, format=None):
                                              context={'request': request})
     if v_ser.is_valid():
         basket = get_basket(request)
-        voucher = v_ser.object
+
+        # the vouchercode should exist according to the serializers
+        # 'validate' method
+        vouchercode = v_ser.validated_data.get('vouchercode')
+        voucher = Voucher.objects.get(code=vouchercode)
         basket.vouchers.add(voucher)
 
         signals.voucher_addition.send(
