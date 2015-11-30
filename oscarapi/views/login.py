@@ -65,7 +65,7 @@ class LoginView(APIView):
 
             anonymous_basket = operations.get_anonymous_basket(request)
 
-            user = ser.object
+            user = ser.instance
 
             # refuse to login logged in users, to avoid attaching sessions to
             # multiple users at the same time.

@@ -126,7 +126,8 @@ def add_voucher(request, format=None):
                                              context={'request': request})
     if v_ser.is_valid():
         basket = get_basket(request)
-        voucher = v_ser.object
+
+        voucher = v_ser.instance
         basket.vouchers.add(voucher)
 
         signals.voucher_addition.send(
