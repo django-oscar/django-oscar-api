@@ -24,7 +24,6 @@ __all__ = ('BasketView', 'LineList', 'LineDetail', 'AddProductView',
 Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
 Repository = get_class('shipping.repository', 'Repository')
-Voucher = get_model('voucher', 'Voucher')
 
 
 class BasketView(APIView):
