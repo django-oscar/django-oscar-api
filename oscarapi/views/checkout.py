@@ -73,6 +73,7 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
          [total, shipping_method_code, shipping_charge, billing_address]):
     {
         "basket": "http://testserver/oscarapi/baskets/1/",
+        "guest_email": "foo@example.com",
         "total": "100.0",
         "shipping_charge": {
             "currency": "EUR",

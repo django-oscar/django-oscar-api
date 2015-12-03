@@ -182,6 +182,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     basket = serializers.HyperlinkedRelatedField(
         view_name='basket-detail', queryset=Basket.objects)
+    guest_email = serializers.EmailField(allow_blank=True)
     total = serializers.DecimalField(
         decimal_places=2, max_digits=12, required=False)
     shipping_method_code = serializers.CharField(
@@ -252,6 +253,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
                 shipping_charge=validated_data.get('shipping_charge'),
                 billing_address=validated_data.get('billing_address'),
                 order_total=validated_data.get('total'),
+                guest_email=validated_data.get('guest_email')
             )
         except ValueError as e:
             raise exceptions.NotAcceptable(e.message)
