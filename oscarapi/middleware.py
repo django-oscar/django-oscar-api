@@ -214,7 +214,7 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
                     store_basket_in_session(basket, request.session)
 
     def process_response(self, request, response):
-        if self.is_api_request(request):
+        if self.is_api_request(request) and hasattr(request, 'user'):
             # at this point we are sure a basket can be found in the session,
             # because it is enforced in process_request.
             # We just have to make sure it is stored as a cookie, because it
