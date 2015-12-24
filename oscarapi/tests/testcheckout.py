@@ -1,6 +1,5 @@
 import json
 import unittest
-import mock
 
 from oscar.core.loading import get_model
 from oscarapi.tests.utils import APITest
@@ -214,7 +213,7 @@ class CheckOutTest(APITest):
             }
         }
 
-        with mock.patch('django.conf.settings.OSCAR_ALLOW_ANON_CHECKOUT', True, create=True):
+        with self.settings(OSCAR_ALLOW_ANON_CHECKOUT=True):
             response = self.post('api-checkout', **request)
             self.assertEqual(response.status_code, 406)
             response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
