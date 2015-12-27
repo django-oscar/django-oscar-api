@@ -197,19 +197,19 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     def validate(self, attrs):
         request = self.context['request']
 
-        if request.user.is_anonymous() and not settings.OSCAR_ALLOW_ANON_CHECKOUT:
-            message = _('Anonymous checkout forbidden')
-            raise serializers.ValidationError(message)
-
         if request.user.is_anonymous():
-            if 'guest_email' not in attrs:
+            if not settings.OSCAR_ALLOW_ANON_CHECKOUT:
+                message = _('Anonymous checkout forbidden')
+                raise serializers.ValidationError(message)
+
+            if not attrs.get('guest_email'):
                 # Always require the guest email field if the user is anonymous
                 message = _('Guest email is required for anonymous checkouts')
                 raise serializers.ValidationError(message)
         else:
             if 'guest_email' in attrs:
                 # Don't store guest_email field if the user is authenticated
-                attrs['guest_email'] = None
+                del attrs['guest_email']
 
         basket = attrs.get('basket')
         basket = assign_basket_strategy(basket, request)
