@@ -167,7 +167,7 @@ class HeaderSessionMiddleware(SessionMiddleware, IsApiRequest):
 
 class ApiGatewayMiddleWare(IsApiRequest):
     """
-    Protect the api gateway with token.
+    Protect the api gateway with a token.
     """
     def process_request(self, request):
         if self.is_api_request(request):
@@ -189,8 +189,8 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
     """
     Use this middleware instead of Oscar's basket middleware if you
     want to mix the api with and regular oscar views.
-    
-    Oscar uses the session to store baskets for anynymous users, but
+
+    Oscar uses a cookie based session to store baskets for anonymous users, but
     oscarapi can not do that, because we don't want to put the burden
     of managing a cookie jar on oscarapi clients that are not websites.
     """
@@ -223,4 +223,5 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
             basket = get_basket(request)
             request.COOKIES[cookie_key] = self.get_basket_hash(basket.id)
 
-        return super(ApiBasketMiddleWare, self).process_response(request, response)
+        return super(
+            ApiBasketMiddleWare, self).process_response(request, response)
