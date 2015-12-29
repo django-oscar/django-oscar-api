@@ -27,10 +27,9 @@ Repository = get_class('shipping.repository', 'Repository')
 
 
 class BasketView(APIView):
-    
     """
     Api for retrieving a user's basket.
-    
+
     GET:
     Retrieve your basket.
     """
@@ -199,7 +198,6 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
             "price_incl_tax": "121.0"
         }
     """
-    queryset = Line.objects.all()
     serializer_class = serializers.LineSerializer
 
     def get_queryset(self):
@@ -250,7 +248,8 @@ class LineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
         # computes the prices by using the strategy.
         if line.basket == basket:
             assign_basket_strategy(line.basket, request)
-            ser = serializers.BasketLineSerializer(instance=line, context={'request': request})
-            return Response(ser.data) 
+            ser = serializers.BasketLineSerializer(
+                instance=line, context={'request': request})
+            return Response(ser.data)
 
         return super(LineDetail, self).get(request, pk, format)

@@ -23,27 +23,28 @@ __all__ = (
 
 
 class OrderList(generics.ListAPIView):
-    model = Order
     serializer_class = OrderSerializer
     permission_classes = (IsOwner,)
-    queryset = Order.objects
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        qs = Order.objects.all()
+        return qs.filter(user=self.request.user)
 
 
 class OrderDetail(generics.RetrieveAPIView):
-    model = Order
+    queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = (IsOwner,)
 
+
 class OrderLineList(generics.ListAPIView):
-    queryset = OrderLine.objects
+    queryset = OrderLine.objects.all()
     serializer_class = OrderLineSerializer
 
     def get(self, request, pk=None, format=None):
         if pk is not None:
-            self.queryset = self.queryset.filter(order__id=pk, order__user=request.user)
+            self.queryset = self.queryset.filter(
+                order__id=pk, order__user=request.user)
         elif not request.user.is_staff:
             self.permission_denied(request)
 
@@ -51,17 +52,19 @@ class OrderLineList(generics.ListAPIView):
 
 
 class OrderLineDetail(generics.RetrieveAPIView):
-    queryset = OrderLine.objects
+    queryset = OrderLine.objects.all()
     serializer_class = OrderLineSerializer
 
     def get(self, request, pk=None, format=None):
         if not request.user.is_staff:
-            self.queryset = self.queryset.filter(order__id=pk, order__user=request.user)
+            self.queryset = self.queryset.filter(
+                order__id=pk, order__user=request.user)
 
         return super(OrderLineDetail, self).get(request, format)
 
+
 class OrderLineAttributeDetail(generics.RetrieveAPIView):
-    model = OrderLineAttribute
+    queryset = OrderLineAttribute.objects.all()
     serializer_class = OrderLineAttributeSerializer
 
 
@@ -114,12 +117,13 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
         # around with the basket, so asume invariant
         assert(data_basket == basket)
 
-        c_ser = self.serializer_class(data=request.data,
-                                   context={'request': request})
+        c_ser = self.serializer_class(
+            data=request.data, context={'request': request})
         if c_ser.is_valid():
             order = c_ser.save()
             basket.freeze()
-            o_ser = self.order_serializer_class(order, context={'request': request})
+            o_ser = self.order_serializer_class(
+                order, context={'request': request})
             return response.Response(o_ser.data)
 
         return response.Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
