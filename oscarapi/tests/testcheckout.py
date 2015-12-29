@@ -189,7 +189,6 @@ class CheckOutTest(APITest):
 
         request = {
             'basket': basket_url,
-            'guest_email': 'henk@example.com',
             'total': '50.0',
             'shipping_method_code': "no-shipping-required",
             'shipping_charge': {
@@ -218,6 +217,18 @@ class CheckOutTest(APITest):
             self.assertEqual(response.status_code, 406)
             response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
             self.assertEqual(response.status_code, 200)
+
+            # no guest email specified should say 406
+            response = self.post('api-checkout', **request)
+            self.assertEqual(response.status_code, 406)
+
+            # an empty email address should say this as well
+            request['guest_email'] = ''
+            response = self.post('api-checkout', **request)
+            self.assertEqual(response.status_code, 406)
+
+            # Add in guest_email to get a 200
+            request['guest_email'] = 'henk@example.com'
             response = self.post('api-checkout', **request)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.data['guest_email'], 'henk@example.com')
