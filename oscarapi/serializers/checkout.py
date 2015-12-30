@@ -152,7 +152,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
     payment_url = serializers.SerializerMethodField()
     offer_discounts = serializers.SerializerMethodField()
     voucher_discounts = serializers.SerializerMethodField()
-    
+
     def get_offer_discounts(self, obj):
         qs = obj.basket_discounts.filter(offer_id__isnull=False)
         return OrderOfferDiscountSerializer(qs, many=True).data
@@ -186,6 +186,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     basket = serializers.HyperlinkedRelatedField(
         view_name='basket-detail', queryset=Basket.objects)
+    guest_email = serializers.EmailField(allow_blank=True, required=False)
     total = serializers.DecimalField(
         decimal_places=2, max_digits=12, required=False)
     shipping_method_code = serializers.CharField(
@@ -199,10 +200,20 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
 
     def validate(self, attrs):
         request = self.context['request']
- 
-        if request.user.is_anonymous() and not settings.OSCAR_ALLOW_ANON_CHECKOUT:
-            message = _('Anonymous checkout forbidden')
-            raise serializers.ValidationError(message)
+
+        if request.user.is_anonymous():
+            if not settings.OSCAR_ALLOW_ANON_CHECKOUT:
+                message = _('Anonymous checkout forbidden')
+                raise serializers.ValidationError(message)
+
+            if not attrs.get('guest_email'):
+                # Always require the guest email field if the user is anonymous
+                message = _('Guest email is required for anonymous checkouts')
+                raise serializers.ValidationError(message)
+        else:
+            if 'guest_email' in attrs:
+                # Don't store guest_email field if the user is authenticated
+                del attrs['guest_email']
 
         basket = attrs.get('basket')
         basket = assign_basket_strategy(basket, request)
@@ -256,6 +267,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
                 shipping_charge=validated_data.get('shipping_charge'),
                 billing_address=validated_data.get('billing_address'),
                 order_total=validated_data.get('total'),
+                guest_email=validated_data.get('guest_email') or ''
             )
         except ValueError as e:
             raise exceptions.NotAcceptable(e.message)

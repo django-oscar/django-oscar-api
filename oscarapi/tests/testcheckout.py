@@ -14,7 +14,7 @@ class CheckOutTest(APITest):
         'productattributevalue', 'category', 'attributeoptiongroup', 'attributeoption',
         'stockrecord', 'partner', 'orderanditemcharges', 'country'
     ]
-    
+
     def test_checkout(self):
         "Test if an order can be placed as an authenticated user with session based auth."
         self.login(username='nobody', password='nobody')
@@ -26,6 +26,7 @@ class CheckOutTest(APITest):
 
         request = {
             'basket': basket_url,
+            'guest_email': 'henk@example.com',
             'total': '50.0',
             'shipping_method_code': "no-shipping-required",
             'shipping_charge': {
@@ -54,6 +55,7 @@ class CheckOutTest(APITest):
         self.assertEqual(response.status_code, 200)
         response = self.post('api-checkout', **request)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['guest_email'], '', 'Guest email should be blank since user was authenticated')
         self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
 
     def test_checkout_implicit_shipping(self):
@@ -154,7 +156,7 @@ class CheckOutTest(APITest):
         self.response.assertStatusEqual(200)
         self.response = self.post('api-checkout', **request)
         self.response.assertStatusEqual(200)
-        
+
     def test_can_login_with_frozen_user_basket(self):
         "When a user has an unpaid order, he should still be able to log in"
         self.test_checkout()
@@ -176,16 +178,67 @@ class CheckOutTest(APITest):
         "Prove that the user 'nobody' can checkout his cart when authenticating with header session"
         self.fail('Please add implementation')
 
-    @unittest.skip
+
     def test_anonymous_checkout(self):
-        "Can anonymous users check out a cart? If so prove it with a test"
-        self.fail('Please add implementation')
+        "Test if an order can be placed as an anonymous user."
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = json.loads(response.content)
+        basket_url = basket.get('url')
+        basket_id = basket.get('id')
+
+        request = {
+            'basket': basket_url,
+            'total': '50.0',
+            'shipping_method_code': "no-shipping-required",
+            'shipping_charge': {
+                'currency': 'EUR',
+                'excl_tax':'0.00',
+                'tax':'0.00'
+            },
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            }
+        }
+
+        with self.settings(OSCAR_ALLOW_ANON_CHECKOUT=True):
+            response = self.post('api-checkout', **request)
+            self.assertEqual(response.status_code, 406)
+            response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+            self.assertEqual(response.status_code, 200)
+
+            # no guest email specified should say 406
+            response = self.post('api-checkout', **request)
+            self.assertEqual(response.status_code, 406)
+
+            # an empty email address should say this as well
+            request['guest_email'] = ''
+            response = self.post('api-checkout', **request)
+            self.assertEqual(response.status_code, 406)
+
+            # Add in guest_email to get a 200
+            request['guest_email'] = 'henk@example.com'
+            response = self.post('api-checkout', **request)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.data['guest_email'], 'henk@example.com')
+            self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
 
     @unittest.skip
     def test_checkout_permissions(self):
         "Prove that someone can not check out someone elses cart by mistake"
         self.fail('Please add implementation')
-    
+
     @unittest.skip
     def test_cart_immutable_after_checkout(self):
         "Prove that the cart can not be changed with the webservice by users in any way after checkout has been made."
