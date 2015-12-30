@@ -122,7 +122,7 @@ class APITest(TestCase):
     @response.setter
     def response(self, response):
         self._response = ParsedReponse(response, self)
-    
+
 class ParsedReponse(object):
     def __init__(self, response, unittestcase):
         self.response = response
@@ -131,19 +131,19 @@ class ParsedReponse(object):
     @property
     def response(self):
         return self._response
-    
+
     @response.setter
     def response(self, response):
         self._response = response
         self.status_code = response.status_code
         try:
-            self.body = json.loads(response.content)
+            self.body = response.data
         except:
             self.body = None
 
     def __getattr__(self, name):
         return getattr(self._response, name)
-    
+
     def __getitem__(self, name):
         return self.body[name]
 
@@ -152,7 +152,7 @@ class ParsedReponse(object):
 
     def assertStatusEqual(self, code, message=None):
         self.t.assertEqual(self.status_code, code, message)
-    
+
     def assertValueEqual(self, value_name, value, message=None):
         self.t.assertEqual(self[value_name], value, message)
 
