@@ -6,7 +6,6 @@ from django.utils.importlib import import_module
 from rest_framework import serializers, exceptions
 from oscar.core.loading import get_class
 import oscar.models.fields
-import six
 
 Selector = get_class('partner.strategy', 'Selector')
 
@@ -102,12 +101,10 @@ def login_and_upgrade_session(request, user):
 
 
 def session_id_from_parsed_session_uri(parsed_session_uri):
-    session_id_base = "SID:%(type)s:%(realm)s:%(session_id)s" % (
+    session_id_base = u"SID:%(type)s:%(realm)s:%(session_id)s" % (
         parsed_session_uri)
     combined = session_id_base + settings.SECRET_KEY
-    if not isinstance(combined, six.binary_type):
-        combined = combined.encode()
-    return hashlib.sha1(combined).hexdigest()
+    return hashlib.sha1(combined.encode()).hexdigest()
 
 
 def get_session(session_id, raise_on_create=False):
