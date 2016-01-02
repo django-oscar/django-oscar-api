@@ -1,0 +1,11 @@
+[paths]
+source = oscarapi
+
+[run]
+omit = 
+   *oscarapi/migrations*
+   *oscarapi/settings/*
+   *sandbox/*
+   *oscarapi/tests/*
+   *site-packages*
+
