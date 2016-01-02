@@ -10,3 +10,8 @@ sandbox: install
 
 test: install
 	python sandbox/manage.py test oscarapi
+
+coverage: install
+	coverage run sandbox/manage.py test oscarapi
+	coverage report -m
+	coverage xml -i

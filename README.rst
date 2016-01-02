@@ -13,6 +13,11 @@ Continuous integration status:
 .. image:: https://travis-ci.org/django-oscar/django-oscar-api.svg?branch=master
     :target: https://travis-ci.org/django-oscar/django-oscar-api
 
+.. image:: http://codecov.io/github/django-oscar/django-oscar-api/coverage.svg?branch=master 
+    :alt: Coverage
+    :target: http://codecov.io/github/django-oscar/django-oscar-api?branch=master
+
+
 REST API Gateway & resource protection.
 ---------------------------------------
 
