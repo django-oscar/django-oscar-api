@@ -101,9 +101,10 @@ def login_and_upgrade_session(request, user):
 
 
 def session_id_from_parsed_session_uri(parsed_session_uri):
-    session_id_base = "SID:%(type)s:%(realm)s:%(session_id)s" % (
+    session_id_base = u"SID:%(type)s:%(realm)s:%(session_id)s" % (
         parsed_session_uri)
-    return hashlib.sha1(session_id_base + settings.SECRET_KEY).hexdigest()
+    combined = session_id_base + settings.SECRET_KEY
+    return hashlib.sha1(combined.encode()).hexdigest()
 
 
 def get_session(session_id, raise_on_create=False):

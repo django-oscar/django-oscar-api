@@ -20,7 +20,7 @@ class CheckOutTest(APITest):
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
-        basket = json.loads(response.content)
+        basket = response.data
         basket_url = basket.get('url')
         basket_id = basket.get('id')
 
@@ -63,7 +63,7 @@ class CheckOutTest(APITest):
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
-        basket = json.loads(response.content)
+        basket = response.data
         basket_url = basket.get('url')
         basket_id = basket.get('id')
 
@@ -98,7 +98,7 @@ class CheckOutTest(APITest):
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
-        basket = json.loads(response.content)
+        basket = response.data
         basket_url = basket.get('url')
         basket_id = basket.get('id')
 
@@ -131,7 +131,7 @@ class CheckOutTest(APITest):
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
-        basket = json.loads(response.content)
+        basket = response.data
         basket_url = basket.get('url')
         basket_id = basket.get('id')
 
@@ -183,7 +183,7 @@ class CheckOutTest(APITest):
         "Test if an order can be placed as an anonymous user."
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
-        basket = json.loads(response.content)
+        basket = response.data
         basket_url = basket.get('url')
         basket_id = basket.get('id')
 
