@@ -24,12 +24,11 @@ class PartnerSerializer(OscarModelSerializer):
 
 
 class OptionSerializer(OscarHyperlinkedModelSerializer):
-
     class Meta:
         model = Option
-        fields = overridable('OSCARAPI_OPTION_FIELDS', default=[
+        fields = overridable('OSCARAPI_OPTION_FIELDS', default=(
             'url', 'id', 'name', 'code', 'type'
-        ])
+        ))
 
 
 class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
@@ -37,8 +36,8 @@ class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
         model = Product
         fields = overridable(
             'OSCARAPI_PRODUCT_FIELDS', default=(
-                'url', 'id', 'title')
-            )
+                'url', 'id', 'title'
+            ))
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
@@ -71,19 +70,19 @@ class AvailabilitySerializer(serializers.Serializer):
 
 class RecommmendedProductSerializer(OscarModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='product-detail')
+
     class Meta:
         model = Product
-        fields = overridable('OSCARAPI_RECOMMENDED_PRODUCT_FIELDS',
-                                 default=('url',))
+        fields = overridable(
+            'OSCARAPI_RECOMMENDED_PRODUCT_FIELDS', default=('url',))
 
 
 class ProductSerializer(OscarModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='product-detail')
     stockrecords = serializers.HyperlinkedIdentityField(
         view_name='product-stockrecord-list')
-    attributes = ProductAttributeValueSerializer(many=True,
-                                                 required=False,
-                                                 source="attribute_values")
+    attributes = ProductAttributeValueSerializer(
+        many=True, required=False, source="attribute_values")
     categories = serializers.StringRelatedField(many=True, required=False)
     product_class = serializers.StringRelatedField(required=False)
     images = ProductImageSerializer(many=True, required=False)
@@ -91,9 +90,8 @@ class ProductSerializer(OscarModelSerializer):
     availability = serializers.HyperlinkedIdentityField(
         view_name='product-availability')
     options = OptionSerializer(many=True, required=False)
-
-    recommended_products = RecommmendedProductSerializer(many=True,
-                                                         required=False)
+    recommended_products = RecommmendedProductSerializer(
+        many=True, required=False)
 
     class Meta:
         model = Product
@@ -118,8 +116,7 @@ class AddProductSerializer(serializers.Serializer):
     """
     quantity = serializers.IntegerField(required=True)
     url = serializers.HyperlinkedRelatedField(
-        view_name='product-detail', queryset=Product.objects,
-        required=True)
+        view_name='product-detail', queryset=Product.objects, required=True)
     options = OptionValueSerializer(many=True, required=False)
 
     class Meta:

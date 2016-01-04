@@ -23,16 +23,16 @@ Voucher = get_model('voucher', 'Voucher')
 class VoucherSerializer(OscarModelSerializer):
     class Meta:
         model = Voucher
-        fields = overridable('OSCARAPI_VOUCHER_FIELDS', default=[
+        fields = overridable('OSCARAPI_VOUCHER_FIELDS', default=(
             'name', 'code', 'start_datetime', 'end_datetime'
-        ])
+        ))
 
 
 class OfferDiscountSerializer(serializers.Serializer):
     description = serializers.CharField()
     name = serializers.CharField()
-    amount = serializers.DecimalField(decimal_places=2, max_digits=12,
-                                      source='discount')
+    amount = serializers.DecimalField(
+        decimal_places=2, max_digits=12, source='discount')
 
 
 class VoucherDiscountSerializer(OfferDiscountSerializer):
@@ -47,22 +47,25 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
     total_excl_tax_excl_discounts = serializers.DecimalField(
         decimal_places=2, max_digits=12, required=False)
     total_incl_tax = TaxIncludedDecimalField(
-        excl_tax_field='total_excl_tax', decimal_places=2, max_digits=12, required=False)
+        excl_tax_field='total_excl_tax', decimal_places=2,
+        max_digits=12, required=False)
     total_incl_tax_excl_discounts = TaxIncludedDecimalField(
-        excl_tax_field='total_excl_tax_excl_discounts', decimal_places=2, max_digits=12, required=False)
+        excl_tax_field='total_excl_tax_excl_discounts', decimal_places=2,
+        max_digits=12, required=False)
     total_tax = TaxIncludedDecimalField(
-        excl_tax_value=Decimal('0.00'), decimal_places=2, max_digits=12, required=False)
+        excl_tax_value=Decimal('0.00'), decimal_places=2,
+        max_digits=12, required=False)
     currency = serializers.CharField(required=False)
     voucher_discounts = VoucherDiscountSerializer(many=True, required=False)
 
     class Meta:
         model = Basket
-        fields = overridable('OSCARAPI_BASKET_FIELDS', default=[
+        fields = overridable('OSCARAPI_BASKET_FIELDS', default=(
             'id', 'owner', 'status', 'lines',
             'url', 'total_excl_tax',
             'total_excl_tax_excl_discounts', 'total_incl_tax',
             'total_incl_tax_excl_discounts', 'total_tax', 'currency',
-            'voucher_discounts', 'offer_discounts', 'is_tax_known'])
+            'voucher_discounts', 'offer_discounts', 'is_tax_known'))
 
     def get_validation_exclusions(self, instance=None):
         """
@@ -75,7 +78,6 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
-
     class Meta:
         model = LineAttribute
 
@@ -87,11 +89,13 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     """
     attributes = LineAttributeSerializer(
         many=True, fields=('url', 'option', 'value'), required=False)
-    price_excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12,
-                                              source='line_price_excl_tax_incl_discounts')
-    price_incl_tax = TaxIncludedDecimalField(decimal_places=2, max_digits=12,
-                                             excl_tax_field='line_price_excl_tax_incl_discounts',
-                                             source='line_price_incl_tax_incl_discounts')
+    price_excl_tax = serializers.DecimalField(
+        decimal_places=2, max_digits=12,
+        source='line_price_excl_tax_incl_discounts')
+    price_incl_tax = TaxIncludedDecimalField(
+        decimal_places=2, max_digits=12,
+        excl_tax_field='line_price_excl_tax_incl_discounts',
+        source='line_price_incl_tax_incl_discounts')
     price_incl_tax_excl_discounts = TaxIncludedDecimalField(
         decimal_places=2, max_digits=12,
         excl_tax_field='line_price_excl_tax',
@@ -99,17 +103,18 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     price_excl_tax_excl_discounts = serializers.DecimalField(
         decimal_places=2, max_digits=12,
         source='line_price_excl_tax')
-
-    warning = serializers.CharField(read_only=True, required=False, source='get_warning')
+    warning = serializers.CharField(
+        read_only=True, required=False, source='get_warning')
 
     class Meta:
         model = Line
-        fields = overridable('OSCARAPI_BASKETLINE_FIELDS', default=[
+        fields = overridable('OSCARAPI_BASKETLINE_FIELDS', default=(
             'url', 'product', 'quantity', 'attributes', 'price_currency',
             'price_excl_tax', 'price_incl_tax',
             'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
             'is_tax_known', 'warning', 'basket', 'stockrecord', 'date_created'
-        ])
+        ))
+
 
 class LineSerializer(serializers.HyperlinkedModelSerializer):
     """
