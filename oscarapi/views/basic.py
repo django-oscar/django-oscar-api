@@ -75,7 +75,7 @@ class LineAttributeList(generics.ListCreateAPIView):
     serializer_class = serializers.LineAttributeSerializer
 
 
-class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveAPIView):
+class LineAttributeDetail(generics.RetrieveAPIView):
     queryset = LineAttribute.objects.all()
     serializer_class = serializers.LineAttributeSerializer
 
