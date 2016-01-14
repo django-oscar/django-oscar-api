@@ -36,7 +36,8 @@ setup(
     install_requires=[
         'setuptools',
         'django-oscar>=1.1',
-        'djangorestframework>=3.1.0'
+        'djangorestframework>=3.1.0',
+        'django-compressor<2.0'
     ],
     # mark test target to require extras.
     extras_require={
