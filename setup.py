@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
 
-
-__version__ = "0.0.37"
+__version__ = "1.0.0"
 
 
 setup(
@@ -23,7 +22,7 @@ setup(
     keywords='',
     author='Lars van de Kerkhof, Martijn Jacobs',
     author_email='lars@permanentmarkers.nl, martijn@devopsconsulting.nl',
-    url='https://github.com/tangentlabs/django-oscar-api',
+    url='https://github.com/django-oscar/django-oscar-api',
     license='BSD',
     # include all packages in the egg, except the test package.
     packages=find_packages(exclude=['ez_setup', 'examples', '*tests', '*fixtures', 'sandbox']),
@@ -36,10 +35,12 @@ setup(
     install_requires=[
         'setuptools',
         'django-oscar>=1.1',
-        'djangorestframework>=3.1.0'
+        'djangorestframework>=3.1.0',
+        'django-compressor<2.0'
     ],
     # mark test target to require extras.
     extras_require={
-        'test': ['django-nose', 'coverage']
+        'test': ['django-nose', 'coverage'],
+        'docs': ['sphinx', 'sphinx_rtd_theme']
     },
 )

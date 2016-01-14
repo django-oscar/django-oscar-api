@@ -16,3 +16,4 @@ lib/
 version-django-oscar-commerce-connect.txt
 sandbox/media/
 sandbox/static/
+docs/build/
