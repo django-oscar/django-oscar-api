@@ -20,8 +20,8 @@ or just write your own from scratch.
 
 So, to modify some of the functionality in oscarapi, do the following:
 
-1. In your project, create a new django app with ``manage.py startapp mycustomapi``
-2. In your app, create a file named ``app.py`` and in there extend ``oscarapi.app:RESTApiApplication``, like the following example. 
+1. In your project, create a new django app with ``manage.py startapp mycustomapi``.
+2. In your app, create a file named ``app.py`` and in there extend ``oscarapi.app:RESTApiApplication``, like the following example:
 
 
 .. code-block:: python
@@ -38,7 +38,7 @@ So, to modify some of the functionality in oscarapi, do the following:
     If you think that this is not changing anything (yet) then this is correct, see below.
 
 
-3. Include your own app in INSTALLED_APPS instead of ``django-oscar-api``(and add ``django-oscar-api`` to your app's dependencies) and see if this works.
+3. Include your own app in INSTALLED_APPS instead of ``django-oscar-api`` (and add ``django-oscar-api`` to your app's dependencies) and see if this works.
 4. Add a view which you want to change from Oscar API in your ``mycustomapi`` app  and add this to your app's ``urls.py``. In this example we override the ``get_queryset`` method of the ProductList view as we want to filter on locale (which we added to the Product model):
 
 `views.py`

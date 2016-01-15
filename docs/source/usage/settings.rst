@@ -12,7 +12,7 @@ Main settings
 Default: ``True``
 
 Useful in production websites wehere you want to make sure that admin users 
-can't access the API (they can read/write anything which is exposed by the API)
+can't access the API (they can read/write anything which is exposed by the API).
 
 
 Serializer settings

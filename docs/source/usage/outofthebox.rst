@@ -21,7 +21,7 @@ To use the oscarapi application in an oscar ecommerce site without overriding or
 Middleware and mixed usage
 --------------------------
 
-There are some middleware classes shipped with Oscar API which can be useful for your project. For example, we have seen in practise that it can be useful to mix plain Oscar and the API (fill your basket with the API and use plain Oscar views for checkout)
+There are some middleware classes shipped with Oscar API which can be useful for your project. For example, we have seen in practise that it can be useful to mix plain Oscar and the API (fill your basket with the API and use plain Oscar views for checkout).
 
 See the :doc:`/usage/middleware` section for more information.
 
