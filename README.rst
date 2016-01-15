@@ -17,11 +17,18 @@ This package provides a RESTful API for `django-oscar`_.
    :alt: Documentation Status
    :target: http://django-oscar-api.readthedocs.org/
 
+.. image:: https://img.shields.io/pypi/v/django-oscar-api.svg
+   :alt: Latest PyPi release
+   :target: https://pypi.python.org/pypi/django-oscar-api
+
+.. image:: https://img.shields.io/badge/koe-15-brightgreen.svg
+   :alt: How many times koe is in the sourcecode
+   :target: https://github.com/django-oscar/django-oscar-api/blob/master/oscarapi/tests/testlogin.py#L23
 
 Usage
 =====
 
-To use the oscarapi application in an oscar ecommerce site, follow these
+To use the Oscar API application in an Oscar E-commerce site, follow these
 steps:
 
 1. Install the `django-oscar-api` package someway (``pip install django-oscar-api``).
@@ -34,7 +41,7 @@ steps:
         url(r'^api/', include(api.urls)),
     )
 
-See `readthedocs`_ for more information.
+See the Documentation_ for more information.
 
-.. _`readthedocs`: https://django-oscar-api.readthedocs.org
+.. _Documentation: https://django-oscar-api.readthedocs.org
 
