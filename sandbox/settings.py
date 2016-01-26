@@ -1,5 +1,4 @@
 import os
-from django import VERSION
 from oscar import get_core_apps
 from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
@@ -39,9 +38,6 @@ INSTALLED_APPS = [
     'oscarapi',
     'widget_tweaks',
 ] + get_core_apps()
-
-if VERSION < (1, 7):
-    INSTALLED_APPS += ['south']
 
 LANGUAGE_CODE = 'en-us'
 
