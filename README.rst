@@ -45,3 +45,18 @@ See the Documentation_ for more information.
 
 .. _Documentation: https://django-oscar-api.readthedocs.org
 
+Changelog
+=========
+
+1.0.1 (2016-1-29)
+-----------------
+Fixes:
+  * #57 Make sure that we a really compatible with Django 1.9 (against Oscar Dev)
+  * Removed `django-compressor<2.0` as a dependency
+  * Fix for the `LoginSerializer` to make it work with custom username fields
+
+1.0.0 (2016-01-14)
+------------------
+Initial release.
+
+
