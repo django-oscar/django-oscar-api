@@ -32,7 +32,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.flatpages',
     'django.contrib.staticfiles',
-    'compressor',
     'django_nose',
     'rest_framework',
     'oscarapi',
