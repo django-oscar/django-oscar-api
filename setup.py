@@ -14,10 +14,18 @@ setup(
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Framework :: Django',
+        'Framework :: Django :: 1.7',
+        'Framework :: Django :: 1.8',
+        'Framework :: Django :: 1.9',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: Unix',
-        'Programming Language :: Python'
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Topic :: Software Development :: Libraries :: Application Frameworks',
     ],
     keywords='',
     author='Lars van de Kerkhof, Martijn Jacobs',
@@ -36,7 +44,6 @@ setup(
         'setuptools',
         'django-oscar>=1.1',
         'djangorestframework>=3.1.0',
-        'django-compressor<2.0'
     ],
     # mark test target to require extras.
     extras_require={
