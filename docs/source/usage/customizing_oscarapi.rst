@@ -86,3 +86,5 @@ So, to modify some of the functionality in oscarapi, do the following:
             def get_urls(self):
                 urls = super(MyRESTApiApplication, self).get_urls()
                 return urlpatterns + urls
+
+    application = MyRESTApiApplication()
