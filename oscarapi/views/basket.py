@@ -80,7 +80,7 @@ class AddProductView(APIView):
         # check if there is a limit on amount
         allowed, message = basket.is_quantity_allowed(quantity)
         if not allowed:
-            return False, quantity
+            return False, message
         return True, None
 
     def post(self, request, format=None):
