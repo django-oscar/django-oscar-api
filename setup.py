@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 
 setup(
@@ -47,7 +47,7 @@ setup(
     ],
     # mark test target to require extras.
     extras_require={
-        'test': ['django-nose', 'coverage'],
+        'test': ['django-nose', 'coverage', 'mock'],
         'docs': ['sphinx', 'sphinx_rtd_theme']
     },
 )

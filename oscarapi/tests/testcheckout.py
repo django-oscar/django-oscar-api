@@ -1,5 +1,6 @@
-import json
+# -*- coding: utf-8 -*-
 import unittest
+from mock import patch
 
 from oscar.core.loading import get_model
 from oscarapi.tests.utils import APITest
@@ -11,12 +12,12 @@ Basket = get_model('basket', 'Basket')
 class CheckOutTest(APITest):
     fixtures = [
         'product', 'productcategory', 'productattribute', 'productclass',
-        'productattributevalue', 'category', 'attributeoptiongroup', 'attributeoption',
-        'stockrecord', 'partner', 'orderanditemcharges', 'country'
-    ]
+        'productattributevalue', 'category', 'attributeoptiongroup',
+        'attributeoption', 'stockrecord', 'partner', 'orderanditemcharges',
+        'country']
 
     def test_checkout(self):
-        "Test if an order can be placed as an authenticated user with session based auth."
+        """Test if an order can be placed as an authenticated user with session based auth."""
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
@@ -31,8 +32,8 @@ class CheckOutTest(APITest):
             'shipping_method_code': "no-shipping-required",
             'shipping_charge': {
                 'currency': 'EUR',
-                'excl_tax':'0.00',
-                'tax':'0.00'
+                'excl_tax': '0.00',
+                'tax': '0.00'
             },
             "shipping_address": {
                 "country": "http://127.0.0.1:8000/api/countries/NL/",
@@ -51,11 +52,16 @@ class CheckOutTest(APITest):
         }
         response = self.post('api-checkout', **request)
         self.assertEqual(response.status_code, 406)
-        response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        response = self.post(
+            'api-basket-add-product',
+            url="http://testserver/api/products/1/", quantity=5)
         self.assertEqual(response.status_code, 200)
         response = self.post('api-checkout', **request)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['guest_email'], '', 'Guest email should be blank since user was authenticated')
+        self.assertEqual(
+            response.data['guest_email'],
+            '', 
+            'Guest email should be blank since user was authenticated')
         self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
 
     def test_checkout_implicit_shipping(self):
@@ -100,7 +106,6 @@ class CheckOutTest(APITest):
         self.assertTrue(response.status_code, 200)
         basket = response.data
         basket_url = basket.get('url')
-        basket_id = basket.get('id')
 
         request = {
             'basket': basket_url,
@@ -125,6 +130,38 @@ class CheckOutTest(APITest):
         self.response = self.post('api-checkout', **request)
         self.response.assertStatusEqual(406)
         self.response.assertValueEqual('non_field_errors', ["Total incorrect 150.0 != 50.00"])
+
+    def test_utf8_encoding(self):
+        "We should accept utf-8 (non ascii) characters in the address"
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = response.data
+        basket_url = basket.get('url')
+
+        request = {
+            'basket': basket_url,
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Ї ❤ chǼractɇɌȘ",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            }
+        }
+        self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.response.assertStatusEqual(200)
+        self.response = self.post('api-checkout', **request)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(
+            self.response.data['shipping_address']['line1'], u"Ї ❤ chǼractɇɌȘ")
 
     def test_total_is_optional(self):
         "Total should be an optional value"
@@ -177,7 +214,6 @@ class CheckOutTest(APITest):
     def test_checkout_header(self):
         "Prove that the user 'nobody' can checkout his cart when authenticating with header session"
         self.fail('Please add implementation')
-
 
     def test_anonymous_checkout(self):
         "Test if an order can be placed as an anonymous user."
@@ -233,6 +269,12 @@ class CheckOutTest(APITest):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.data['guest_email'], 'henk@example.com')
             self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
+
+    @patch('oscarapi.signals.oscarapi_post_checkout.send')
+    def test_post_checkout_signal_send(self, mock):
+        "The oscarapi_post_checkout signal should be send after checkout"
+        self.test_anonymous_checkout()
+        self.assertTrue(mock.called)
 
     @unittest.skip
     def test_checkout_permissions(self):

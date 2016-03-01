@@ -2,7 +2,6 @@
 from django.conf import settings
 from oscar.core.loading import get_model, get_class
 from oscar.core.utils import get_default_currency
-from oscar.core.prices import Price
 
 __all__ = (
     'apply_offers',
@@ -20,7 +19,7 @@ __all__ = (
 )
 
 Basket = get_model('basket', 'Basket')
-Applicator = get_class('offer.utils', 'Applicator')
+Applicator = get_class('offer.applicator', 'Applicator')
 Selector = None
 
 
