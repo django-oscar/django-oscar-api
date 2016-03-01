@@ -47,7 +47,7 @@ setup(
     ],
     # mark test target to require extras.
     extras_require={
-        'test': ['django-nose', 'coverage'],
+        'test': ['django-nose', 'coverage', 'mock'],
         'docs': ['sphinx', 'sphinx_rtd_theme']
     },
 )

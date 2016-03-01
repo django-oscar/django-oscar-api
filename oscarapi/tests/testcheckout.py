@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
+from mock import patch
 
 from oscar.core.loading import get_model
 from oscarapi.tests.utils import APITest
@@ -268,6 +269,12 @@ class CheckOutTest(APITest):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.data['guest_email'], 'henk@example.com')
             self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
+
+    @patch('oscarapi.signals.oscarapi_post_checkout.send')
+    def test_post_checkout_signal_send(self, mock):
+        "The oscarapi_post_checkout signal should be send after checkout"
+        self.test_anonymous_checkout()
+        self.assertTrue(mock.called)
 
     @unittest.skip
     def test_checkout_permissions(self):

@@ -9,6 +9,7 @@ from oscarapi.serializers import (
 )
 from oscarapi.permissions import IsOwner
 from oscarapi.views.utils import BasketPermissionMixin
+from oscarapi.signals import oscarapi_post_checkout
 
 Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
@@ -124,6 +125,9 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
             basket.freeze()
             o_ser = self.order_serializer_class(
                 order, context={'request': request})
+            oscarapi_post_checkout.send(
+                sender=self, order=order, user=request.user,
+                request=request, response=response)
             return response.Response(o_ser.data)
 
         return response.Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
