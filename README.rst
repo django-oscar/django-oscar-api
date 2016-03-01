@@ -47,8 +47,16 @@ See the Documentation_ for more information.
 
 Changelog
 =========
+1.0.2 (2016-03-01)
+-----------------
+Features:
+  * #58 Send a signal after placing an order so you don't need to customize the CheckoutView for custom post actions (bufke)
 
-1.0.1 (2016-1-29)
+Fixes:
+  * #60 ``is_quantity_allowed`` returned the quantity and not an error message (bootinge)
+  * Updated the docs with forgotten application definition (SamuelSilveira)
+
+1.0.1 (2016-01-29)
 -----------------
 Fixes:
   * #57 Make sure that we are really compatible with Django 1.9 (against Oscar Dev)

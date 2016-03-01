@@ -149,7 +149,6 @@ And we can see that it has been added:
         }
     ]
 
-
 Place an order (checkout)
 -------------------------
 
@@ -261,6 +260,9 @@ When your basket is filled an you want to proceed to checkout you can do a singl
 .. note::
     After you placed an order with the api, the basket is frozen. Oscar API has checks for this in the checkout view and won't let you checkout the same (or any frozen) basket again. At this stage an order is submitted in Oscar and you will have to implement the following steps regarding payment yourself. See the ``payment_url`` field above in the response. You can also use the regular Oscar checkout views if you like, take a look at the :ref:`mixed-usage-label` section.
 
+.. note::
+    In the checkout view of Oscar, the function ``handle_successful_order`` is called after placing an order. This sends the order confirmation message, flushes your session and sends the ``post_checkout`` signal. The Oscar API checkout view is not calling this method by design. If you would like to send a confirmation message (or other stuff you need to do) after placing an order you can subscribe to the ``oscarapi_post_checkout`` signal, see :doc:`/usage/signals`.
+
 .. _login-user-label:
 
 Login the user
@@ -274,6 +276,10 @@ When you don't support anonymous checkouts you will need to login first. Oscar A
         "password": "test"
     }
     response = session.post('http://localhost:8000/api/login/', json=data)
+
+.. note::
+    Custom User models with a different username field are supported. In Oscar API this field will be mapped to the 
+    corresponding username field.
 
 When the authentication was succesful, your will receive a new (authenticated) sessionid, and the anonymous basket has been automatically merged with a (previous stored) basket of this specific user. You can see now that the owner is set in the basket:
 
