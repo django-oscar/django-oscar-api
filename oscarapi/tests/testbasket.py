@@ -937,3 +937,25 @@ class BasketTest(APITest):
             url="http://testserver/api/products/1/",
             quantity=25)
         self.response.assertStatusEqual(406)
+
+    def test_adjust_basket_line_quantity(self):
+        """Test if we can update the quantity of a line"""
+        self.response = self.post(
+            'api-basket-add-product',
+            url="http://testserver/api/products/1/",
+            quantity=5)
+        self.response.assertStatusEqual(200)
+
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
+
+        # Get the basket lines, and update the quantity to 4
+        self.response = self.get(self.response['lines'])
+        basket_line_url = self.response.data[0]['url']
+        self.response = self.put(basket_line_url, quantity=4)
+        self.response.assertStatusEqual(200)
+
+        # see if it's updated
+        self.response = self.get(basket_line_url)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('quantity', 4)

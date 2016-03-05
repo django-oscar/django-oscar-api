@@ -149,6 +149,60 @@ And we can see that it has been added:
         }
     ]
 
+Update or delete basket lines
+-----------------------------
+
+You can use a REST PUT and DELETE to update/delete the basket lines. So let's update the quantity for example:
+
+.. code-block:: python
+
+    # first get our line
+    response = session.get('http://localhost:8000/api/basket/')
+    response = session.get(response.json()['lines'])
+    line_url = response.json()[0]['url']
+
+    # now update the quantity
+    data = {
+        "quantity": 3
+    }
+    response = session.put(line_url, data)
+
+    # and we can see it's been updated
+    print(response.content)
+    {
+        "attributes": [],
+        "basket": "http://localhost:8000/api/baskets/1/",
+        "date_created": "2016-03-05T21:09:52.664388Z",
+        "line_reference": "1_1",
+        "price_currency": "EUR",
+        "price_excl_tax": "10.00",
+        "price_incl_tax": "10.00",
+        "product": "http://localhost:8000/api/products/1/",
+        "quantity": 3,
+        "stockrecord": "http://localhost:8000/api/stockrecords/1/",
+        "url": "http://localhost:8000/api/lines/1/"
+    }
+
+    # and our basket recalculated the total as well:
+     response = session.get('http://localhost:8000/api/basket/')
+     print(response.content.json()["total_incl_tax"])
+     30.00
+
+Now we will delete this line, it will return a 204 when it's successful:
+
+.. code-block:: python
+
+    response = session.delete(line_url)
+    print(response.status_code)
+    204
+
+    # we can verify that the basket is empty now
+    response = session.get('http://localhost:8000/api/basket/')
+    lines_url = response.json()['lines']
+    response = session.get(lines_url)
+    print(response.content)
+    []
+
 Place an order (checkout)
 -------------------------
 
