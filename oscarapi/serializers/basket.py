@@ -121,7 +121,10 @@ class LineSerializer(serializers.HyperlinkedModelSerializer):
     This serializer just shows fields stored in the database for this line.
     """
     attributes = LineAttributeSerializer(
-        many=True, fields=('url', 'option', 'value'), required=False)
+        many=True,
+        fields=('url', 'option', 'value'),
+        required=False,
+        read_only=True)
 
     class Meta:
         model = Line
