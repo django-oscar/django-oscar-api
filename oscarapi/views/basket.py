@@ -62,6 +62,7 @@ class AddProductView(APIView):
         }]
     }
     """
+    add_product_serializer_class = serializers.AddProductSerializer
     serializer_class = serializers.BasketSerializer
 
     def validate(self, basket, product, quantity, options):
@@ -84,7 +85,7 @@ class AddProductView(APIView):
         return True, None
 
     def post(self, request, format=None):
-        p_ser = serializers.AddProductSerializer(
+        p_ser = self.add_product_serializer_class(
             data=request.data, context={'request': request})
         if p_ser.is_valid():
             basket = get_basket(request)
