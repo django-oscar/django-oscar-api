@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 
 setup(
@@ -33,7 +33,8 @@ setup(
     url='https://github.com/django-oscar/django-oscar-api',
     license='BSD',
     # include all packages in the egg, except the test package.
-    packages=find_packages(exclude=['ez_setup', 'examples', '*tests', '*fixtures', 'sandbox']),
+    packages=find_packages(
+        exclude=['ez_setup', 'examples', '*tests', '*fixtures', 'sandbox']),
     # for avoiding conflict have one namespace for all apc related eggs.
     namespace_packages=[],
     # include non python files

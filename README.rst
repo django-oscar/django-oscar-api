@@ -47,8 +47,19 @@ See the Documentation_ for more information.
 
 Changelog
 =========
+
+1.0.3 (2016-03-21)
+------------------
+
+Features:
+  * #35 Changes format of urls of basket lines (lines/1 -> basket/1/lines/1) 
+  * #63 Make AddProductSerializer easily overridable
+
+Fixes:
+  * #63 You can now update basketlines more easily with a PUT, updated documentation for this
+
 1.0.2 (2016-03-01)
------------------
+------------------
 Features:
   * #58 Send a signal after placing an order so you don't need to customize the CheckoutView for custom post actions (bufke)
 
@@ -57,7 +68,7 @@ Fixes:
   * Updated the docs with forgotten application definition (SamuelSilveira)
 
 1.0.1 (2016-01-29)
------------------
+------------------
 Fixes:
   * #57 Make sure that we are really compatible with Django 1.9 (against Oscar Dev)
   * Removed `django-compressor<2.0` as a dependency
