@@ -5,8 +5,10 @@ from oscarapi.utils import (
     overridable,
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
+    DrillDownHyperlinkedIdentityField
 )
 from oscarapi.serializers.fields import TaxIncludedDecimalField
+
 from django.utils.translation import ugettext as _
 from oscar.core.loading import get_model
 from decimal import Decimal
@@ -87,6 +89,10 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     This serializer computes the prices of this line by using the basket
     strategy.
     """
+    url = DrillDownHyperlinkedIdentityField(
+        view_name='basket-line-detail',
+        extra_url_kwargs={'basket_pk': 'basket.id'})
+
     attributes = LineAttributeSerializer(
         many=True, fields=('url', 'option', 'value'), required=False)
     price_excl_tax = serializers.DecimalField(
@@ -106,6 +112,10 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     warning = serializers.CharField(
         read_only=True, required=False, source='get_warning')
 
+    @property
+    def basket_pk(self):
+        return self.kwargs.get('basket_pk')
+
     class Meta:
         model = Line
         fields = overridable('OSCARAPI_BASKETLINE_FIELDS', default=(
@@ -114,6 +124,7 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
             'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
             'is_tax_known', 'warning', 'basket', 'stockrecord', 'date_created'
         ))
+
 
 
 class LineSerializer(serializers.HyperlinkedModelSerializer):
