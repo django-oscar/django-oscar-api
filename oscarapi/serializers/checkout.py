@@ -218,6 +218,10 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
 
         basket = attrs.get('basket')
         basket = assign_basket_strategy(basket, request)
+        if basket.num_items <= 0:
+            message = _('Cannot checkout with empty basket')
+            raise serializers.ValidationError(message)
+
         shipping_method = self._shipping_method(
             request, basket,
             attrs.get('shipping_method_code'),
