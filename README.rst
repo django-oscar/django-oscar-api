@@ -48,6 +48,16 @@ See the Documentation_ for more information.
 Changelog
 =========
 
+1.0.4 (2016-04-04)
+------------------
+
+Features:
+  * #65 Add Docker configuration for testing convenience (crgwbr) 
+
+Fixes:
+  * #66 Raise a ValidationError (instead of a 500 server error)  when you try to checkout with an empty basket (crgwbr)
+  * #67 Fixes an AssertionError in the LineList view (missing queryset attribute)
+
 1.0.3 (2016-03-21)
 ------------------
 
