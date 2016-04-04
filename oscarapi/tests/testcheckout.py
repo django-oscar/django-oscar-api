@@ -60,7 +60,7 @@ class CheckOutTest(APITest):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.data['guest_email'],
-            '', 
+            '',
             'Guest email should be blank since user was authenticated')
         self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
 
@@ -162,6 +162,41 @@ class CheckOutTest(APITest):
         self.response.assertStatusEqual(200)
         self.assertEqual(
             self.response.data['shipping_address']['line1'], u"Ї ❤ chǼractɇɌȘ")
+
+    def test_checkout_empty_basket(self):
+        "When basket is empty, checkout should raise an error"
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = response.data
+
+        response = self.get(basket['lines'])
+        self.assertTrue(response.status_code, 200)
+        lines = response.data
+
+        self.assertEqual(lines, [])
+
+        request = {
+            'basket': basket.get('url'),
+            'total': '0.00',
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            }
+        }
+        self.response = self.post('api-checkout', **request)
+        self.response.assertStatusEqual(406)
+        self.response.assertValueEqual('non_field_errors', ['Cannot checkout with empty basket'])
 
     def test_total_is_optional(self):
         "Total should be an optional value"
