@@ -196,6 +196,7 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
         }
     """
     serializer_class = serializers.LineSerializer
+    queryset = Line.objects.all()
 
     def get_queryset(self):
         pk = self.kwargs.get('pk')
