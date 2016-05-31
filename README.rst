@@ -15,7 +15,7 @@ This package provides a RESTful API for `django-oscar`_.
 
 .. image:: https://readthedocs.org/projects/django-oscar-api/badge/
    :alt: Documentation Status
-   :target: http://django-oscar-api.readthedocs.org/
+   :target: https://django-oscar-api.readthedocs.io/
 
 .. image:: https://img.shields.io/pypi/v/django-oscar-api.svg
    :alt: Latest PyPi release
@@ -43,7 +43,7 @@ steps:
 
 See the Documentation_ for more information.
 
-.. _Documentation: https://django-oscar-api.readthedocs.org
+.. _Documentation: https://django-oscar-api.readthedocs.io
 
 Changelog
 =========

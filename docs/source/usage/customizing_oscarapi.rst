@@ -7,7 +7,7 @@ By using the `django-rest-framework`_ life has become easy, at least for customi
 .. note::
     In oscar you can `fork an app`_ to easily customize only the things you want to change.
 
-.. _`fork an app`: http://django-oscar.readthedocs.org/en/releases-1.1/topics/fork_app.html
+.. _`fork an app`: https://django-oscar.readthedocs.io/en/releases-1.1/topics/fork_app.html
 .. _`django-rest-framework`: http://www.django-rest-framework.org
 
 Oscar API is using the basics of this so you can see Oscar API as one of the apps you customized just like in Oscar. Each Oscar app (or forked app) has a ``app.py`` which manages the url's to your custom views. 
