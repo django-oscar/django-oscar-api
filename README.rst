@@ -48,6 +48,12 @@ See the Documentation_ for more information.
 Changelog
 =========
 
+1.0.5 (2016-07-13)
+------------------
+
+Fixes:
+  * #70 Change process_response to have acorrect  API created basket cookie added to the response (albertojacini)
+
 1.0.4 (2016-04-04)
 ------------------
 
