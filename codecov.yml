@@ -1,0 +1,21 @@
+overage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+  status:
+    project:
+      default:
+        target: auto
+        if_no_uploads: error
+
+    patch:
+      default:
+        threshold: 10%
+
+    changes: true
+
+
+comment:
+  layout: "header, diff, changes, suggestions"
+  behavior: default
