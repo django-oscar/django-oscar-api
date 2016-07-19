@@ -55,3 +55,17 @@ class VoucherTest(APITest):
         # see if the discount of 5.00 from the voucher was applied
         self.response = self.get('api-basket')
         self.response.assertValueEqual('total_incl_tax', '15.00')
+
+    def test_lowercase_voucher(self):
+        """Lowercase vouchers should be working as well"""
+        # first add two products to our basket
+        self.response = self.post(
+            'api-basket-add-product',
+            url="http://testserver/api/products/1/",
+            quantity=2)
+        self.response.assertStatusEqual(200)
+
+        self.response = self.post(
+            'api-basket-add-voucher',
+            vouchercode='testvoucher')
+        self.response.assertStatusEqual(200)

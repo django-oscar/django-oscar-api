@@ -126,7 +126,6 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         ))
 
 
-
 class LineSerializer(serializers.HyperlinkedModelSerializer):
     """
     This serializer just shows fields stored in the database for this line.
@@ -151,6 +150,9 @@ class VoucherAddSerializer(serializers.Serializer):
     vouchercode = serializers.CharField(max_length=128, required=True)
 
     def validate(self, attrs):
+        # oscar expects this always to be uppercase.
+        attrs['vouchercode'] = attrs['vouchercode'].upper()
+
         request = self.context.get('request')
         try:
             voucher = Voucher.objects.get(code=attrs.get('vouchercode'))

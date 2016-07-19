@@ -1,21 +1,9 @@
-overage:
-  precision: 2
-  round: down
-  range: "70...100"
-
+coverage:
   status:
+    patch: false
+    changes: false
     project:
       default:
-        target: auto
-        if_no_uploads: error
+        target: '80'
 
-    patch:
-      default:
-        threshold: 10%
-
-    changes: true
-
-
-comment:
-  layout: "header, diff, changes, suggestions"
-  behavior: default
+comment: false

@@ -15,7 +15,7 @@ from oscarapi.views.mixin import PutIsPatchMixin
 from oscarapi.views.utils import BasketPermissionMixin
 
 __all__ = ('BasketView', 'LineList', 'LineDetail', 'AddProductView',
-           'BasketLineDetail', 'add_voucher', 'shipping_methods')
+           'BasketLineDetail', 'AddVoucherView', 'shipping_methods')
 
 Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
@@ -106,8 +106,7 @@ class AddProductView(APIView):
             {'reason': p_ser.errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
-@api_view(('POST',))
-def add_voucher(request, format=None):
+class AddVoucherView(APIView):
     """
     Add a voucher to the basket.
 
@@ -119,36 +118,41 @@ def add_voucher(request, format=None):
     Will return 200 and the voucher as json if succesful.
     If unsuccessful, will return 406 with the error.
     """
-    v_ser = serializers.VoucherAddSerializer(data=request.data,
-                                             context={'request': request})
-    if v_ser.is_valid():
-        basket = operations.get_basket(request)
-        voucher = v_ser.instance
-        basket.vouchers.add(voucher)
+    add_voucher_serializer_class = serializers.VoucherAddSerializer
+    serializer_class = serializers.VoucherSerializer
 
-        signals.voucher_addition.send(
-            sender=None, basket=basket, voucher=voucher)
+    def post(self, request, format=None):
+        v_ser = self.add_voucher_serializer_class(
+            data=request.data, context={'request': request})
+        if v_ser.is_valid():
+            basket = operations.get_basket(request)
 
-        # Recalculate discounts to see if the voucher gives any
-        operations.apply_offers(request, basket)
-        discounts_after = basket.offer_applications
+            voucher = v_ser.instance
+            basket.vouchers.add(voucher)
 
-        # Look for discounts from this new voucher
-        for discount in discounts_after:
-            if discount['voucher'] and discount['voucher'] == voucher:
-                break
-        else:
-            basket.vouchers.remove(voucher)
-            return Response(
-                {'reason': _(
-                    "Your basket does not qualify for a voucher discount")},
-                status=status.HTTP_406_NOT_ACCEPTABLE)
+            signals.voucher_addition.send(
+                sender=None, basket=basket, voucher=voucher)
 
-        ser = serializers.VoucherSerializer(
-            voucher, context={'request': request})
-        return Response(ser.data)
+            # Recalculate discounts to see if the voucher gives any
+            operations.apply_offers(request, basket)
+            discounts_after = basket.offer_applications
 
-    return Response(v_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
+            # Look for discounts from this new voucher
+            for discount in discounts_after:
+                if discount['voucher'] and discount['voucher'] == voucher:
+                    break
+            else:
+                basket.vouchers.remove(voucher)
+                return Response(
+                    {'reason': _(
+                        "Your basket does not qualify for a voucher discount")},  # noqa
+                    status=status.HTTP_406_NOT_ACCEPTABLE)
+
+            ser = self.serializer_class(
+                voucher, context={'request': request})
+            return Response(ser.data)
+
+        return Response(v_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 @api_view(('GET',))
