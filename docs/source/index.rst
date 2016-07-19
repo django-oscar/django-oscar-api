@@ -15,7 +15,7 @@ Requirements:
 -------------
 Currently Oscar API is compatbile with:
 
-- Django 1.7: Oscar 1.1, python 2.7
+- Django 1.7: Oscar 1.1, python 2.7 with djangorestframework < 3.4.0
 - Django 1.8: Oscar 1.1, python 2.7 / 3.5
 - Django 1.9  Oscar 1.2, python 2.7 / 3.5
 
