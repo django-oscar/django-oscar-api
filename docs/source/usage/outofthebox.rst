@@ -5,7 +5,7 @@ Use Oscar API out-of-the-box
 To use the oscarapi application in an oscar ecommerce site without overriding or customizing the default views and serializers just follow these steps:
 
 1. Install it (see :ref:`django-oscar-api-installation`)
-2. Add ``oscarapi`` to your INSTALLED_APPS section in ``settings.py``
+2. Add ``rest_framework`` and ``oscarapi`` to your INSTALLED_APPS section in ``settings.py``
 3. Add the application's urls to your own app's `url.py`:
 
 .. code-block:: python
