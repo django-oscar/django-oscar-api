@@ -48,6 +48,15 @@ See the Documentation_ for more information.
 Changelog
 =========
 
+1.0.6 (2016-07-27)
+------------------
+Features:
+  * Make `add_voucher` a class based view so we can easily override the serializer
+
+Fixes:
+  * Oscar expects 'vouchercode' to be uppercase
+  * #74 Python 3 does not have `itertools.imap`, we use `six.moves.map` now (crgwbr)
+
 1.0.5 (2016-07-13)
 ------------------
 
