@@ -30,7 +30,7 @@ class BasketTest(APITest):
         empty = Basket.objects.all()
         self.assertFalse(empty.exists(), "There should be no baskets yet.")
 
-        # anonymous        
+        # anonymous
         data = {}
 
         self.response = self.client.post(url, json.dumps(data), content_type='application/json')
@@ -50,6 +50,10 @@ class BasketTest(APITest):
         self.response = self.client.post(url, json.dumps(data), content_type='application/json')
         self.response.assertStatusEqual(201, "It should be possible for a basket to be created, for a specific user.")
         self.response.assertObjectIdEqual('owner', 1)
+
+        # When we created a basket, it should be listed in the basket-list view
+        self.response = self.client.get(url, content_type='application/json')
+        self.assertEqual(len(self.response.data), 1)
 
         data = {}
         self.response = self.client.post(url, json.dumps(data), content_type='application/json')

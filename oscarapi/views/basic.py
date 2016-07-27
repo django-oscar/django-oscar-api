@@ -1,5 +1,6 @@
 import functools
 import itertools
+from six.moves import map
 
 from django.contrib import auth
 from oscar.core.loading import get_model, get_class
@@ -55,7 +56,7 @@ class BasketList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = super(BasketList, self).get_queryset()
-        return itertools.imap(
+        return map(
             functools.partial(assign_basket_strategy, request=self.request),
             qs)
 
