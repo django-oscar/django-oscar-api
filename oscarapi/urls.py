@@ -1,14 +1,15 @@
-from django.conf.urls import patterns, url
+import django
+from django.conf.urls import url
 from rest_framework.urlpatterns import format_suffix_patterns
 from oscarapi import views
 
-urlpatterns = patterns('',
-    url(r'^$', 'oscarapi.views.api_root', name='api-root'),
+urlpatterns = [
+    url(r'^$', views.api_root, name='api-root'),
     url(r'^login/$', views.LoginView.as_view(), name='api-login'),
     url(r'^basket/$', views.BasketView.as_view(), name='api-basket'),
     url(r'^basket/add-product/$', views.AddProductView.as_view(), name='api-basket-add-product'),
     url(r'^basket/add-voucher/$', views.AddVoucherView.as_view(), name='api-basket-add-voucher'),
-    url(r'^basket/shipping-methods/$', 'oscarapi.views.shipping_methods', name='api-basket-shipping-methods'),
+    url(r'^basket/shipping-methods/$', views.shipping_methods, name='api-basket-shipping-methods'),
     url(r'^baskets/$', views.BasketList.as_view(), name='basket-list'),
     url(r'^baskets/(?P<pk>[0-9]+)/$', views.BasketDetail.as_view(), name='basket-detail'),
     url(r'^baskets/(?P<pk>[0-9]+)/lines/$', views.LineList.as_view(), name='basket-lines-list'),
@@ -38,6 +39,11 @@ urlpatterns = patterns('',
     url(r'^countries/(?P<pk>[A-z]+)/$', views.CountryDetail.as_view(), name='country-detail'),
     url(r'^partners/$', views.PartnerList.as_view(), name='partner-list'),
     url(r'^partners/(?P<pk>[0-9]+)/$', views.PartnerDetail.as_view(), name='partner-detail')
-)
+]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
+
+if django.VERSION[:2] < (1, 8):
+    from django.conf.urls import patterns
+
+    urlpatterns = patterns('', *urlpatterns)
