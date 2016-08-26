@@ -48,6 +48,12 @@ See the Documentation_ for more information.
 Changelog
 =========
 
+1.0.7 (2016-08-26)
+------------------
+Fixes:
+  * #77 Use configured LoginSerializer instead of the hardcoded one (whyscream)
+  * Cleaned up urls.py to be compatible with django 1.10 (SalahAdDin)
+
 1.0.6 (2016-07-27)
 ------------------
 Features:
