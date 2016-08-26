@@ -129,7 +129,7 @@ class CheckOutTest(APITest):
         self.response.assertStatusEqual(200)
         self.response = self.post('api-checkout', **request)
         self.response.assertStatusEqual(406)
-        self.response.assertValueEqual('non_field_errors', ["Total incorrect 150.0 != 50.00"])
+        self.assertTrue("Total incorrect" in self.response['non_field_errors'][0])
 
     def test_utf8_encoding(self):
         "We should accept utf-8 (non ascii) characters in the address"
