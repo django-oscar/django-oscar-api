@@ -60,7 +60,7 @@ class LoginView(APIView):
         anonymous_basket.delete()
 
     def post(self, request, format=None):
-        ser = serializers.LoginSerializer(data=request.data)
+        ser = serializer_class(data=request.data)
         if ser.is_valid():
 
             anonymous_basket = operations.get_anonymous_basket(request)
