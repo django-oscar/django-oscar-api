@@ -92,9 +92,9 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     url = DrillDownHyperlinkedIdentityField(
         view_name='basket-line-detail',
         extra_url_kwargs={'basket_pk': 'basket.id'})
-
     attributes = LineAttributeSerializer(
-        many=True, fields=('url', 'option', 'value'), required=False)
+        many=True, fields=('url', 'option', 'value'),
+        required=False, read_only=True)
     price_excl_tax = serializers.DecimalField(
         decimal_places=2, max_digits=12,
         source='line_price_excl_tax_incl_discounts')
