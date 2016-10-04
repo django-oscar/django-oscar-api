@@ -48,6 +48,11 @@ See the Documentation_ for more information.
 Changelog
 =========
 
+1.0.8 (2016-10-04)
+------------------
+Fixes:
+  * #78 PUT on BasketLineSerializer was raising a 500 error due to incorrect LineAttributeSerializer definition
+
 1.0.7 (2016-08-26)
 ------------------
 Fixes:
