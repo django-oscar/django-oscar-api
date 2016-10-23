@@ -82,6 +82,7 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
 class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = LineAttribute
+        fields = '__all__'
 
 
 class BasketLineSerializer(OscarHyperlinkedModelSerializer):
@@ -138,6 +139,7 @@ class LineSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Line
+        fields = '__all__'
 
 
 class StockRecordSerializer(serializers.ModelSerializer):
