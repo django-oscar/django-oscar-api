@@ -48,6 +48,14 @@ See the Documentation_ for more information.
 Changelog
 =========
 
+1.0.9 (2016-10-24)
+------------------
+Fixes:
+  * RestFramework will nolonger complain about "Creating a ModelSerializer
+    without either the 'fields' attribute or the 'exclude' attribute has been
+    deprecated since 3.3.0, and is now disallowed. Add an explicit
+    fields = '__all__' to the LineAttributeSerializer serializer."
+
 1.0.8 (2016-10-04)
 ------------------
 Fixes:
