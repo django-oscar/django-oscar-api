@@ -85,7 +85,7 @@ class LoginView(APIView):
 
             operations.store_basket_in_session(basket, request.session)
 
-            return Response()
+            return Response("")
 
         return Response(ser.errors, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -106,4 +106,4 @@ class LoginView(APIView):
         request.session.delete()
         request.session = None
 
-        return Response()
+        return Response("")
