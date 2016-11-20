@@ -41,7 +41,7 @@
     <object pk="1" model="offer.condition">
         <field to="offer.range" name="range" rel="ManyToOneRel">1</field>
         <field type="CharField" name="type">Count</field>
-        <field type="DecimalField" name="value">1.00</field>
+        <field type="DecimalField" name="value">2.00</field>
         <field type="CharField" name="proxy_class"/>
     </object>
     <object pk="1" model="offer.range">
