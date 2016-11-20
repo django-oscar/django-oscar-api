@@ -1,6 +1,8 @@
 import logging
 from rest_framework import serializers
 
+from oscarapi.basket import operations
+
 from oscarapi.utils import (
     overridable,
     OscarModelSerializer,
@@ -125,6 +127,20 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
             'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
             'is_tax_known', 'warning', 'basket', 'stockrecord', 'date_created'
         ))
+
+    def to_representation(self, obj):
+        # This override is needed to reflect offer discounts or strategy
+        # related prices immediately in the response
+        operations.assign_basket_strategy(obj.basket, self.context['request'])
+
+        # Oscar stores the calculated discount in line._discount_incl_tax or
+        # line._discount_excl_tax when offers are applied. So by just
+        # retrieving the line from the db you will loose this values, that's
+        # why we need to get the line from the in-memory resultset here
+        lines = (x for x in obj.basket.all_lines() if x.id == obj.id)
+        line = next(lines, None)
+
+        return super(BasketLineSerializer, self).to_representation(line)
 
 
 class LineSerializer(serializers.HyperlinkedModelSerializer):

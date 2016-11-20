@@ -271,6 +271,6 @@ class BasketLineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
         basket = get_object_or_404(operations.editable_baskets(), pk=basket_pk)
         prepped_basket = operations.prepare_basket(basket, self.request)
         if operations.request_contains_basket(self.request, prepped_basket):
-            return prepped_basket.lines
+            return prepped_basket.all_lines()
         else:
             return self.queryset.none()

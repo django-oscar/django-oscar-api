@@ -1,6 +1,6 @@
 "This module contains operation on baskets and lines"
 from django.conf import settings
-from oscar.core.loading import get_model, get_class
+from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
 
 __all__ = (
@@ -25,6 +25,7 @@ Selector = None
 
 def apply_offers(request, basket):
     "Apply offers and discounts to cart"
+    basket.reset_offer_applications()
     if not basket.is_empty:
         Applicator().apply(basket, request.user, request)
 
@@ -69,8 +70,10 @@ def get_basket(request, prepare=True):
 def get_basket_id_from_session(request):
     return request.session.get(settings.OSCAR_BASKET_COOKIE_OPEN)
 
+
 def editable_baskets():
     return Basket.objects.filter(status__in=["Open", "Saved"])
+
 
 def get_anonymous_basket(request):
     "Get basket from session."
@@ -125,7 +128,6 @@ def request_contains_line(request, line):
     basket = get_basket(request, prepare=False)
     if basket and basket.pk == line.basket.pk:
         return request_contains_basket(request, basket)
-    
     return False
 
 
