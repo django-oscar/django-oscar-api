@@ -23,7 +23,6 @@ So, to modify some of the functionality in oscarapi, do the following:
 1. In your project, create a new django app with ``manage.py startapp mycustomapi``.
 2. In your app, create a file named ``app.py`` and in there extend ``oscarapi.app:RESTApiApplication``, like the following example:
 
-
 .. code-block:: python
 
     from oscarapi.app import RESTApiApplication
@@ -34,57 +33,39 @@ So, to modify some of the functionality in oscarapi, do the following:
                 urls = super(MyRESTApiApplication, self).get_urls()
                 return urls
 
+    application = MyRESTApiApplication()
+
+3. Make sure you use this application instead of the app shipped with oscarapi in your `urls.py`:
+
+.. literalinclude:: ../../../demosite/mycustomapi/urls.py
+
 .. note::
     If you think that this is not changing anything (yet) then this is correct, see below.
 
+4. Include your own app in INSTALLED_APPS instead of ``django-oscar-api`` (and add ``django-oscar-api`` to your app's dependencies) and see if this works.
+5. Add a serializer and a view for the parts you want to change. In this example, we will override the ``ProductList`` view so we can specify a different ``ProductLinkSerializer`` which includes images as well:
 
-3. Include your own app in INSTALLED_APPS instead of ``django-oscar-api`` (and add ``django-oscar-api`` to your app's dependencies) and see if this works.
-4. Add a view which you want to change from Oscar API in your ``mycustomapi`` app  and add this to your app's ``urls.py``. In this example we override the ``get_queryset`` method of the ProductList view as we want to filter on locale (which we added to the Product model):
+`serializers.py`
+
+.. literalinclude:: ../../../demosite/mycustomapi/serializers.py
 
 `views.py`
 
-.. code-block:: python
+.. literalinclude:: ../../../demosite/mycustomapi/views.py
 
-    from django.utils.translation import get_language
-    from oscarapi.views import basic
+6. Adjust your ``app.py`` with your custom urls:
 
+.. literalinclude:: ../../../demosite/mycustomapi/app.py
 
-    class ProductList(basic.ProductList):
-        def get_queryset(self):
-            language = get_language()
+7. Your ``urls.py`` still looks the same, as we have configured the override in ``app.py``:
 
-            return super(ProductList, self).get_queryset().filter(
-                locale=to_locale(language))
-
-`urls.py`
-
-.. code-block:: python
-
-    from django.conf.urls import patterns, url
-    from rest_framework.urlpatterns import format_suffix_patterns
-    from myproject.mycustomapi import views
-
-    urlpatterns = patterns(
-        '',
-        url(r'^products/$', views.ProductList.as_view(),
-            name='product-list'),
-   )
-
-    urlpatterns = format_suffix_patterns(urlpatterns)
+.. literalinclude:: ../../../demosite/mycustomapi/urls.py
 
 
-5. Adjust your ``mycustomapi.app:MyRESTApiApplication`` with your custom urls:
+The complete example above is available in the `Github repository of Oscar API`_ if you want to try it out.
 
-.. code-block:: python
+.. _`Github repository of Oscar API`: https://github.com/django-oscar/django-oscar-api/demosite/
+ 
 
-    from oscarapi.app import RESTApiApplication
 
-    from myproject.mycustomapi.urls import urlpatterns
 
-        class MyRESTApiApplication(RESTApiApplication):
-
-            def get_urls(self):
-                urls = super(MyRESTApiApplication, self).get_urls()
-                return urlpatterns + urls
-
-    application = MyRESTApiApplication()

@@ -9,7 +9,7 @@ __version__ = "0.0.1"
 setup(
     name='oscarapi-demosite',
     version=__version__,
-    description="OscarAPI Demosite",
+    description="Oscar API Demosite",
     long_description=__doc__,
     classifiers=[],
     keywords='',
