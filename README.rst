@@ -48,6 +48,15 @@ See the Documentation_ for more information.
 Changelog
 =========
 
+1.0.10 (2016-12-08)
+------------------
+Fixes:
+  * #82 Recalculate offers when updating lines or receiving them individually
+  * Make sure that the `post` and `delete` methods of the LoginView return valid (json) responses
+
+Features:
+  * Updated the documentation and added a demosite to explain how to override a view/serializer
+
 1.0.9 (2016-10-24)
 ------------------
 Fixes:
