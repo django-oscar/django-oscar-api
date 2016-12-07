@@ -64,7 +64,7 @@ So, to modify some of the functionality in oscarapi, do the following:
 
 The complete example above is available in the `Github repository of Oscar API`_ if you want to try it out.
 
-.. _`Github repository of Oscar API`: https://github.com/django-oscar/django-oscar-api/demosite/
+.. _`Github repository of Oscar API`: https://github.com/django-oscar/django-oscar-api/tree/master/demosite/
  
 
 
