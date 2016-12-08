@@ -49,10 +49,11 @@ Changelog
 =========
 
 1.0.10 (2016-12-08)
-------------------
+-------------------
 Fixes:
   * #82 Recalculate offers when updating lines or receiving them individually
   * Make sure that the `post` and `delete` methods of the LoginView return valid (json) responses
+  * #86 Add missing Meta.fields attribute to work the default first level of api endpoints. (jklapuch)
 
 Features:
   * Updated the documentation and added a demosite to explain how to override a view/serializer
