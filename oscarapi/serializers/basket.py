@@ -162,6 +162,7 @@ class StockRecordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StockRecord
+        fields = '__all__'
 
 
 class VoucherAddSerializer(serializers.Serializer):
