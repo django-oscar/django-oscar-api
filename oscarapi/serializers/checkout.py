@@ -52,6 +52,7 @@ class PriceSerializer(serializers.Serializer):
 class CountrySerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = Country
+        fields = '__all__'
 
 
 class ShippingAddressSerializer(OscarHyperlinkedModelSerializer):
@@ -72,6 +73,7 @@ class InlineShippingAddressSerializer(OscarModelSerializer):
 class BillingAddressSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = BillingAddress
+        fields = '__all__'
 
 
 class InlineBillingAddressSerializer(OscarModelSerializer):

@@ -21,6 +21,7 @@ Partner = get_model('partner', 'Partner')
 class PartnerSerializer(OscarModelSerializer):
     class Meta:
         model = Partner
+        fields = '__all__'
 
 
 class OptionSerializer(OscarHyperlinkedModelSerializer):
@@ -60,6 +61,7 @@ class ProductAttributeSerializer(OscarModelSerializer):
 class ProductImageSerializer(OscarModelSerializer):
     class Meta:
         model = ProductImage
+        fields = '__all__'
 
 
 class AvailabilitySerializer(serializers.Serializer):
