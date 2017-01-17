@@ -99,6 +99,91 @@ class CheckOutTest(APITest):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
 
+    def test_checkout_billing_address(self):
+        "Test if an order can be placed with a billing address"
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = response.data
+        basket_url = basket.get('url')
+
+        request = {
+            'basket': basket_url,
+            'total': '50.0',
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            },
+            "billing_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Jos",
+                "last_name": "Henken",
+                "line1": "Stationstraat 4",
+                "line2": "",
+                "line3": "",
+                "line4": "Hengelo",
+                "notes": "",
+                "phone_number": "+31 26 370 1111",
+                "postcode": "1234AA",
+                "state": "Gelderland",
+                "title": "Mr"
+            }
+        }
+        self.post(
+            'api-basket-add-product',
+            url="http://testserver/api/products/1/", quantity=5)
+        response = self.post('api-checkout', **request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_checkout_wrong_billing_address(self):
+        "Test if an order can be placed with a billing address"
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = response.data
+        basket_url = basket.get('url')
+
+        request = {
+            'basket': basket_url,
+            'total': '50.0',
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            },
+            "billing_address": {
+                "country": "This is wrong"
+            }
+        }
+        self.post(
+            'api-basket-add-product',
+            url="http://testserver/api/products/1/", quantity=5)
+        response = self.post('api-checkout', **request)
+        # It should complain about the billing address
+        self.assertEqual(response.status_code, 406)
+        self.assertEqual(
+            response.data['billing_address']['country'][0],
+            "Invalid hyperlink - No URL match.")
+
     def test_checkout_total_error(self):
         "When sending a wrong total, checkout should raise an error"
         self.login(username='nobody', password='nobody')
