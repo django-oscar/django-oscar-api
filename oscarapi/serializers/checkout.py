@@ -82,6 +82,7 @@ class InlineBillingAddressSerializer(OscarModelSerializer):
 
     class Meta:
         model = BillingAddress
+        fields = '__all__'
 
 
 class ShippingMethodSerializer(serializers.Serializer):
@@ -266,8 +267,16 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
             basket = validated_data.get('basket')
             order_number = self.generate_order_number(basket)
             request = self.context['request']
+
             shipping_address = ShippingAddress(
                 **validated_data['shipping_address'])
+
+            if 'billing_address' in validated_data:
+                billing_address = BillingAddress(
+                    **validated_data['billing_address'])
+            else:
+                billing_address = None
+
             return self.place_order(
                 order_number=order_number,
                 user=request.user,
@@ -275,7 +284,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
                 shipping_address=shipping_address,
                 shipping_method=validated_data.get('shipping_method'),
                 shipping_charge=validated_data.get('shipping_charge'),
-                billing_address=validated_data.get('billing_address'),
+                billing_address=billing_address,
                 order_total=validated_data.get('total'),
                 guest_email=validated_data.get('guest_email') or ''
             )
