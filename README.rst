@@ -47,6 +47,11 @@ See the Documentation_ for more information.
 
 Changelog
 =========
+1.0.11 (2017-02-25)
+-------------------
+Features:
+  * #88 Checkout with a billing address is now supported
+  * Drops support for Django 1.7, tested with Oscar 1.4
 
 1.0.10 (2016-12-08)
 -------------------
