@@ -202,21 +202,3 @@ class SessionTest(APITest):
         session['touched'] = 'writesomethingelse'
         session.save()
         self.assertEqual(session.session_key, 'session1')
-
-        # when the session expires immediately, the same session should
-        # still be returned.
-        with self.settings(SESSION_COOKIE_AGE=-10000):
-            # create a new session
-            session = get_session('session2')
-            self.assertEqual(session.session_key, 'session2')
-            session['touched'] = 'writesomething'
-            session.save()
-            self.assertEqual(session.session_key, 'session2')
-
-            # get a session with the same id, even when it has expired.
-            session = get_session('session2')
-            self.assertEqual(session.session_key, 'session2')
-            session['touched'] = 'writesomethingelse'
-            session.save()
-            self.assertEqual(session.session_key, 'session2')
-
