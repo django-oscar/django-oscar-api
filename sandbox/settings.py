@@ -134,26 +134,30 @@ SITE_ID = 1
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-TEMPLATE_DEBUG = True
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, 'templates'),
-    OSCAR_MAIN_TEMPLATE_DIR,
-)
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.request',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.core.context_processors.tz',
-    'django.contrib.messages.context_processors.messages',
-    'oscar.apps.search.context_processors.search_form',
-    'oscar.apps.promotions.context_processors.promotions',
-    'oscar.apps.checkout.context_processors.checkout',
-    'oscar.apps.customer.notifications.context_processors.notifications',
-    'oscar.core.context_processors.metadata',
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+            OSCAR_MAIN_TEMPLATE_DIR
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.core.context_processors.i18n',
+                'django.contrib.messages.context_processors.messages',
+                'oscar.apps.search.context_processors.search_form',
+                'oscar.apps.promotions.context_processors.promotions',
+                'oscar.apps.checkout.context_processors.checkout',
+                'oscar.apps.customer.notifications.context_processors.notifications',
+                'oscar.core.context_processors.metadata',
+            ],
+        },
+    },
+]
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
