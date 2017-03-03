@@ -1,16 +1,10 @@
-import json
-import time
+from importlib import import_module
 
 from django.conf import settings
-from django.contrib.sessions.models import Session
-from importlib import import_module
-from django.utils import timezone
 
 from oscarapi.tests.utils import APITest
-from oscarapi.utils import (
-    session_id_from_parsed_session_uri,
-    get_session
-)
+from oscarapi.utils import get_session, session_id_from_parsed_session_uri
+
 
 class LoginTest(APITest):
 
@@ -202,3 +196,22 @@ class SessionTest(APITest):
         session['touched'] = 'writesomethingelse'
         session.save()
         self.assertEqual(session.session_key, 'session1')
+
+        # when the session expires immediately, the same session should
+        # still be returned.
+        # create a new session
+        session = get_session('session2')
+        self.assertEqual(session.session_key, 'session2')
+        session['touched'] = 'writesomething'
+        session.save()
+        self.assertEqual(session.session_key, 'session2')
+
+        # expire the session manually
+        session.set_expiry(-100000)
+
+        # get a session with the same id, even when it has expired.
+        session = get_session('session2')
+        self.assertEqual(session.session_key, 'session2')
+        session['touched'] = 'writesomethingelse'
+        session.save()
+        self.assertEqual(session.session_key, 'session2')
