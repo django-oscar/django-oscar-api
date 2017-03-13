@@ -9,7 +9,7 @@ Features:
   * Drops support for Django 1.7, tested with Oscar 1.4
 
 Fixes:
-* Updated requirements: `djangorestframework>=3.3`
+  * Updated requirements: `djangorestframework>=3.3`
 
 1.0.10 (2016-12-08)
 -------------------
