@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = "1.0.11"
+__version__ = "1.1.0"
 
 
 setup(
@@ -45,7 +45,7 @@ setup(
     install_requires=[
         'setuptools',
         'django-oscar>=1.1',
-        'djangorestframework>=3.1.0',
+        'djangorestframework>=3.3',
         'six'
     ],
     # mark test target to require extras.
