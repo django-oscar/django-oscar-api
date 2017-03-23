@@ -11,10 +11,10 @@ To use the oscarapi application in an oscar ecommerce site without overriding or
 .. code-block:: python
 
     from oscarapi.app import application as api
-    urlpatterns = patterns('',
+    urlpatterns = [
         # ... all the things you allready got
         url(r'^api/', include(api.urls)),
-    )
+    ]
 
 .. _mixed-usage-label:
 
