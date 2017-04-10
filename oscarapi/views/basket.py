@@ -165,7 +165,7 @@ def shipping_methods(request, format=None):
     """
     basket = operations.get_basket(request)
     shiping_methods = Repository().get_shipping_methods(
-        basket=request.basket, user=request.user,
+        basket=basket, user=request.user,
         request=request)
     ser = serializers.ShippingMethodSerializer(
         shiping_methods, many=True, context={'basket': basket})
