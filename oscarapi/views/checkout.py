@@ -5,7 +5,8 @@ from oscarapi.serializers import (
     OrderSerializer,
     CheckoutSerializer,
     OrderLineSerializer,
-    OrderLineAttributeSerializer
+    OrderLineAttributeSerializer,
+    UserAddressSerializer,
 )
 from oscarapi.permissions import IsOwner
 from oscarapi.views.utils import BasketPermissionMixin
@@ -15,11 +16,15 @@ Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
 OrderLineAttribute = get_model('order', 'LineAttribute')
 
+UserAddress = get_model('address', 'UserAddress')
+
 __all__ = (
     'CheckoutView',
     'OrderList', 'OrderDetail',
     'OrderLineList', 'OrderLineDetail',
-    'OrderLineAttributeDetail'
+    'OrderLineAttributeDetail',
+    'UserAddressList',
+    'UserAddressDetail'
 )
 
 
@@ -131,3 +136,19 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
             return response.Response(o_ser.data)
 
         return response.Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
+
+
+class UserAddressList(generics.ListCreateAPIView):
+    serializer_class = UserAddressSerializer
+    permission_classes = (IsOwner,)
+
+    def get_queryset(self):
+        return UserAddress.objects.filter(user=self.request.user)
+
+
+class UserAddressDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = UserAddressSerializer
+    permission_classes = (IsOwner,)
+
+    def get_queryset(self):
+        return UserAddress.objects.filter(user=self.request.user)

@@ -55,6 +55,7 @@ Checkout serializers
 
 .. autoclass:: oscarapi.serializers.checkout.OrderSerializer
 .. autoclass:: oscarapi.serializers.checkout.OrderLineSerializer
+.. autoclass:: oscarapi.serializers.checkout.UserAddressSerializer
 
 Login serializers
 -----------------

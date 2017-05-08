@@ -38,7 +38,9 @@ urlpatterns = [
     url(r'^countries/$', views.CountryList.as_view(), name='country-list'),
     url(r'^countries/(?P<pk>[A-z]+)/$', views.CountryDetail.as_view(), name='country-detail'),
     url(r'^partners/$', views.PartnerList.as_view(), name='partner-list'),
-    url(r'^partners/(?P<pk>[0-9]+)/$', views.PartnerDetail.as_view(), name='partner-detail')
+    url(r'^partners/(?P<pk>[0-9]+)/$', views.PartnerDetail.as_view(), name='partner-detail'),
+    url(r'^useraddresses/$', views.UserAddressList.as_view(), name='useraddress-list'),
+    url(r'^useraddresses/(?P<pk>[0-9]+)/$', views.UserAddressDetail.as_view(), name='useraddress-detail')
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

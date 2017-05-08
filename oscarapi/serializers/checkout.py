@@ -35,6 +35,8 @@ Basket = get_model('basket', 'Basket')
 Country = get_model('address', 'Country')
 Repository = get_class('shipping.repository', 'Repository')
 
+UserAddress = get_model('address', 'UserAddress')
+
 
 class PriceSerializer(serializers.Serializer):
     currency = serializers.CharField(
@@ -316,3 +318,17 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
             return shipping_method
 
         return default
+
+
+class UserAddressSerializer(OscarModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='useraddress-detail')
+    country = serializers.HyperlinkedRelatedField(
+        view_name='country-detail', queryset=Country.objects)
+
+    class Meta:
+        model = UserAddress
+        fields = overridable('OSCARAPI_USERADDRESS_FIELDS', (
+            'id', 'title', 'first_name', 'last_name', 'line1', 'line2',
+            'line3', 'line4', 'state', 'postcode', 'search_text',
+            'phone_number', 'notes', 'is_default_for_shipping',
+            'is_default_for_billing', 'country', 'url'))
