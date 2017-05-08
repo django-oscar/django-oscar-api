@@ -14,10 +14,12 @@ def field_length(fieldname):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='user-detail')
+
     class Meta:
         model = User
         fields = overridable('OSCARAPI_USER_FIELDS', (
-            User.USERNAME_FIELD, 'id', 'date_joined',))
+            User.USERNAME_FIELD, 'id', 'date_joined', 'url'))
 
 
 class LoginSerializer(serializers.Serializer):
