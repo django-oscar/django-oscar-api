@@ -325,6 +325,11 @@ class UserAddressSerializer(OscarModelSerializer):
     country = serializers.HyperlinkedRelatedField(
         view_name='country-detail', queryset=Country.objects)
 
+    def create(self, validated_data):
+        request = self.context['request']
+        validated_data['user'] = request.user
+        return super(UserAddressSerializer, self).create(validated_data)
+
     class Meta:
         model = UserAddress
         fields = overridable('OSCARAPI_USERADDRESS_FIELDS', (
@@ -332,3 +337,4 @@ class UserAddressSerializer(OscarModelSerializer):
             'line3', 'line4', 'state', 'postcode', 'search_text',
             'phone_number', 'notes', 'is_default_for_shipping',
             'is_default_for_billing', 'country', 'url'))
+
