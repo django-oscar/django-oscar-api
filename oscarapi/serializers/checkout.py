@@ -35,6 +35,8 @@ Basket = get_model('basket', 'Basket')
 Country = get_model('address', 'Country')
 Repository = get_class('shipping.repository', 'Repository')
 
+UserAddress = get_model('address', 'UserAddress')
+
 
 class PriceSerializer(serializers.Serializer):
     currency = serializers.CharField(
@@ -316,3 +318,30 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
             return shipping_method
 
         return default
+
+
+class UserAddressSerializer(OscarModelSerializer):
+    url = serializers.HyperlinkedIdentityField(view_name='useraddress-detail')
+    country = serializers.HyperlinkedRelatedField(
+        view_name='country-detail', queryset=Country.objects)
+
+    def create(self, validated_data):
+        request = self.context['request']
+        validated_data['user'] = request.user
+        return super(UserAddressSerializer, self).create(validated_data)
+
+    def update(self, instance, validated_data):
+        # to be sure that we cannot change the owner of an address. If you
+        # want this, please override the serializer
+        request = self.context['request']
+        validated_data['user'] = request.user
+        return super(
+            UserAddressSerializer, self).update(instance, validated_data)
+
+    class Meta:
+        model = UserAddress
+        fields = overridable('OSCARAPI_USERADDRESS_FIELDS', (
+            'id', 'title', 'first_name', 'last_name', 'line1', 'line2',
+            'line3', 'line4', 'state', 'postcode', 'search_text',
+            'phone_number', 'notes', 'is_default_for_shipping',
+            'is_default_for_billing', 'country', 'url'))
