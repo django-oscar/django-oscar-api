@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from django.core.urlresolvers import reverse
 
 from oscarapi.tests.utils import APITest
@@ -59,6 +61,7 @@ class UserAddressTest(APITest):
         self.assertEqual(self.response.status_code, 403)
 
     def test_useraddress_update_and_delete(self):
+        "Regular users can update and delete their own addresses"
         self.login('nobody', 'nobody')
 
         url = reverse('useraddress-list')
@@ -81,7 +84,7 @@ class UserAddressTest(APITest):
             self.response.data['notes'], "Please deliver after 5pm")
 
         # now update the last name
-        updated_address = ADDRESS
+        updated_address = deepcopy(ADDRESS)
         updated_address['last_name'] = 'Van Henken'
         self.response = self.put(url, **updated_address)
         self.assertEqual(self.response.status_code, 200)
@@ -103,3 +106,55 @@ class UserAddressTest(APITest):
         self.response = self.client.get(url, content_type='application/json')
         self.assertEqual(self.response.status_code, 200)
         self.assertEqual(len(self.response.data), 0)
+
+    def test_address_security(self):
+        "Make sure we can't access adresses of other users"
+        # first login as the first user
+        self.login('nobody', 'nobody')
+
+        nobodys_address = deepcopy(ADDRESS)
+        nobodys_address['last_name'] = 'Nobody'
+        url = reverse('useraddress-list')
+        self.response = self.post(url, **nobodys_address)
+
+        # save the address url
+        nobodys_address_url = self.response.data['url']
+
+        # and logout
+        self.client.logout()
+
+        # and now as the other one
+        self.login('somebody', 'somebody')
+        url = reverse('useraddress-list')
+        somebodys_address = deepcopy(ADDRESS)
+        somebodys_address['last_name'] = 'Somebody'
+        self.response = self.post(url, **somebodys_address)
+
+        # save the address url
+        somebodys_address_url = self.response.data['url']
+
+        # 'somebody' should not be able to access the address
+        # created by 'nobody'
+        self.response = self.client.get(
+            nobodys_address_url, content_type='application/json')
+        self.assertEqual(self.response.status_code, 404)
+
+        # and we can't delete it either
+        self.response = self.client.delete(
+            url, content_type='application/json')
+        self.assertEqual(self.response.status_code, 405)
+
+        # logout and login again with nobody
+        self.client.logout()
+        self.login('nobody', 'nobody')
+
+        # 'nobody' should not be able to access the address
+        # created by 'somebody'
+        self.response = self.client.get(
+            somebodys_address_url, content_type='application/json')
+        self.assertEqual(self.response.status_code, 404)
+
+        # and we can't update it either
+        somebodys_address['last_name'] = 'Hacked by nobody'
+        self.response = self.put(somebodys_address_url, **somebodys_address)
+        self.assertEqual(self.response.status_code, 404)
