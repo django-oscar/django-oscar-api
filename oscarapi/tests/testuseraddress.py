@@ -85,8 +85,6 @@ class UserAddressTest(APITest):
         # now we create the same address and this is not possible
         self.response = self.post(url, **ADDRESS)
         self.assertEqual(self.response.status_code, 406)
-        self.assertTrue(
-            'UNIQUE constraint failed' in self.response.data['detail'])
 
     def test_useraddress_update_and_delete(self):
         "Regular users can update and delete their own addresses"
