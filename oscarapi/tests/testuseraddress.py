@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
+from django.db.transaction import atomic
 
 from oscarapi.tests.utils import APITest
 
@@ -62,6 +63,28 @@ class UserAddressTest(APITest):
         self.client.logout()
         self.response = self.client.get(url, content_type='application/json')
         self.assertEqual(self.response.status_code, 403)
+
+    # atomic is needed because of the teardown of this testcase
+    @atomic
+    def test_useraddress_duplicate(self):
+        "Duplicate addresses raise an integrityerror, let's catch this"
+        self.login('nobody', 'nobody')
+
+        url = reverse('useraddress-list')
+        self.response = self.client.get(url, content_type='application/json')
+
+        # let's create one
+        self.response = self.post(url, **ADDRESS)
+        self.assertEqual(self.response.status_code, 201)
+
+        # And now there should be one
+        self.response = self.client.get(url, content_type='application/json')
+        self.assertEqual(self.response.status_code, 200)
+        self.assertEqual(len(self.response.data), 1)
+
+        # now we create the same address and this is not possible
+        self.response = self.post(url, **ADDRESS)
+        self.assertEqual(self.response.status_code, 406)
 
     def test_useraddress_update_and_delete(self):
         "Regular users can update and delete their own addresses"
