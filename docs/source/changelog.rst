@@ -2,6 +2,17 @@
 Changelog
 =========
 
+1.1.1 (2017-05-09)
+-------------------
+Features:
+  * #97 Now it's possible to manage your address book (user addresses)
+
+Fixes:
+  * #95 basket/shipping-methods could use another basket (aleksandrpanteleymonov)
+  * Fixed sandbox settings to work with Django 1.10
+  * Updated docs to use new urlpatterns format
+
+
 1.1.0 (2017-03-13)
 -------------------
 Features:
