@@ -294,7 +294,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
                 guest_email=validated_data.get('guest_email') or ''
             )
         except ValueError as e:
-            raise exceptions.NotAcceptable(e.message)
+            raise exceptions.NotAcceptable(str(e))
 
     def _shipping_method(self, request, basket,
                          shipping_method_code, shipping_address):
@@ -334,7 +334,7 @@ class UserAddressSerializer(OscarModelSerializer):
         try:
             return super(UserAddressSerializer, self).create(validated_data)
         except IntegrityError as e:
-            raise exceptions.NotAcceptable(e.message)
+            raise exceptions.NotAcceptable(str(e))
 
     def update(self, instance, validated_data):
         # to be sure that we cannot change the owner of an address. If you
@@ -345,7 +345,7 @@ class UserAddressSerializer(OscarModelSerializer):
             return super(
                 UserAddressSerializer, self).update(instance, validated_data)
         except IntegrityError as e:
-            raise exceptions.NotAcceptable(e.message)
+            raise exceptions.NotAcceptable(str(e))
 
     class Meta:
         model = UserAddress
