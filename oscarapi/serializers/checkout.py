@@ -330,6 +330,14 @@ class UserAddressSerializer(OscarModelSerializer):
         validated_data['user'] = request.user
         return super(UserAddressSerializer, self).create(validated_data)
 
+    def update(self, instance, validated_data):
+        # to be sure that we cannot change the owner of an address. If you
+        # want this, please override the serializer
+        request = self.context['request']
+        validated_data['user'] = request.user
+        return super(
+            UserAddressSerializer, self).update(instance, validated_data)
+
     class Meta:
         model = UserAddress
         fields = overridable('OSCARAPI_USERADDRESS_FIELDS', (
@@ -337,4 +345,3 @@ class UserAddressSerializer(OscarModelSerializer):
             'line3', 'line4', 'state', 'postcode', 'search_text',
             'phone_number', 'notes', 'is_default_for_shipping',
             'is_default_for_billing', 'country', 'url'))
-
