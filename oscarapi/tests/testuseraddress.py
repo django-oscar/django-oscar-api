@@ -1,8 +1,11 @@
 from copy import deepcopy
 
+from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 
 from oscarapi.tests.utils import APITest
+
+User = get_user_model()
 
 ADDRESS = {
     "title": "Mr",
@@ -158,3 +161,26 @@ class UserAddressTest(APITest):
         somebodys_address['last_name'] = 'Hacked by nobody'
         self.response = self.put(somebodys_address_url, **somebodys_address)
         self.assertEqual(self.response.status_code, 404)
+
+        # now try to change the owner of my own address to 'somebody'
+        self.response = self.client.get(nobodys_address_url)
+        nobody_address = self.response.data
+        nobody_address['last_name'] = 'Hacked by somebody'
+        nobody_address['user'] = User.objects.get(username='somebody').id
+        self.response = self.put(nobodys_address_url, **nobody_address)
+
+        # oscarapi won't choke because it will just ignore the user param
+        self.assertEqual(self.response.status_code, 200)
+        self.response = self.client.get(nobodys_address_url)
+
+        # so in the end we only updated our own address
+        self.assertEqual(self.response.data['last_name'], 'Hacked by somebody')
+
+        # to be sure: somebody has only one address
+        self.client.logout()
+        self.login('somebody', 'somebody')
+
+        url = reverse('useraddress-list')
+        self.response = self.client.get(url, content_type='application/json')
+        self.assertEqual(self.response.status_code, 200)
+        self.assertEqual(len(self.response.data), 1)
