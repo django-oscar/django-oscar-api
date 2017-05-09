@@ -1,11 +1,14 @@
 import warnings
 
+from django.db import IntegrityError
+from rest_framework.response import Response
+
 from django.conf import settings
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.utils.translation import gettext as _
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
-from rest_framework import serializers, exceptions
+from rest_framework import exceptions, serializers
 
 from oscarapi.basket.operations import (
     assign_basket_strategy,
@@ -328,15 +331,21 @@ class UserAddressSerializer(OscarModelSerializer):
     def create(self, validated_data):
         request = self.context['request']
         validated_data['user'] = request.user
-        return super(UserAddressSerializer, self).create(validated_data)
+        try:
+            return super(UserAddressSerializer, self).create(validated_data)
+        except IntegrityError as e:
+            raise exceptions.NotAcceptable(e.message)
 
     def update(self, instance, validated_data):
         # to be sure that we cannot change the owner of an address. If you
         # want this, please override the serializer
         request = self.context['request']
         validated_data['user'] = request.user
-        return super(
-            UserAddressSerializer, self).update(instance, validated_data)
+        try:
+            return super(
+                UserAddressSerializer, self).update(instance, validated_data)
+        except IntegrityError as e:
+            raise exceptions.NotAcceptable(e.message)
 
     class Meta:
         model = UserAddress
