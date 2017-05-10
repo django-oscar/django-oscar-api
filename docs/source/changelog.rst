@@ -2,7 +2,7 @@
 Changelog
 =========
 
-1.1.2 (2017-05-09)
+1.1.2 (2017-05-10)
 -------------------
 Fixes:
   * #98 Fix user address integrity error
