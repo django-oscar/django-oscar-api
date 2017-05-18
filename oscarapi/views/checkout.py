@@ -1,16 +1,13 @@
-from rest_framework import status, views, response, generics
-
 from oscar.core.loading import get_model
-from oscarapi.serializers import (
-    OrderSerializer,
-    CheckoutSerializer,
-    OrderLineSerializer,
-    OrderLineAttributeSerializer,
-    UserAddressSerializer,
-)
+from oscarapi.basket.operations import request_contains_basket
 from oscarapi.permissions import IsOwner
-from oscarapi.views.utils import BasketPermissionMixin
+from oscarapi.serializers import (
+    CheckoutSerializer, OrderLineAttributeSerializer, OrderLineSerializer,
+    OrderSerializer, UserAddressSerializer
+)
 from oscarapi.signals import oscarapi_post_checkout
+from oscarapi.views.utils import parse_basket_from_hyperlink
+from rest_framework import generics, response, status, views
 
 Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
@@ -74,7 +71,7 @@ class OrderLineAttributeDetail(generics.RetrieveAPIView):
     serializer_class = OrderLineAttributeSerializer
 
 
-class CheckoutView(BasketPermissionMixin, views.APIView):
+class CheckoutView(views.APIView):
     """
     Prepare an order for checkout.
 
@@ -115,16 +112,15 @@ class CheckoutView(BasketPermissionMixin, views.APIView):
         # at the moment, no options are passed to this method, which means they
         # are also not created.
 
-        data_basket = self.get_data_basket(request.data, format)
-        basket = self.check_basket_permission(request,
-                                              basket_pk=data_basket.pk)
+        basket = parse_basket_from_hyperlink(request.data, format)
 
-        # by now an error should have been raised if someone was messing
-        # around with the basket, so asume invariant
-        assert(data_basket == basket)
+        if not request_contains_basket(request, basket):
+            return response.Response(
+                "Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
 
         c_ser = self.serializer_class(
             data=request.data, context={'request': request})
+
         if c_ser.is_valid():
             order = c_ser.save()
             basket.freeze()

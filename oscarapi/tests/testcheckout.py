@@ -349,8 +349,8 @@ class CheckOutTest(APITest):
             'shipping_method_code': "no-shipping-required",
             'shipping_charge': {
                 'currency': 'EUR',
-                'excl_tax':'0.00',
-                'tax':'0.00'
+                'excl_tax': '0.00',
+                'tax': '0.00'
             },
             "shipping_address": {
                 "country": "http://127.0.0.1:8000/api/countries/NL/",
@@ -396,10 +396,59 @@ class CheckOutTest(APITest):
         self.test_anonymous_checkout()
         self.assertTrue(mock.called)
 
-    @unittest.skip
     def test_checkout_permissions(self):
         "Prove that someone can not check out someone elses cart by mistake"
-        self.fail('Please add implementation')
+
+        # first login as nobody
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+
+        # store this basket because somebody is going to checkout with this
+        basket = response.data
+        nobody_basket_url = basket.get('url')
+
+        response = self.post(
+            'api-basket-add-product',
+            url="http://testserver/api/products/1/", quantity=5)
+
+        self.client.logout()
+
+        # now login as smomebody and fill another basket
+        self.login(username='somebody', password='somebody')
+        response = self.post(
+            'api-basket-add-product',
+            url="http://testserver/api/products/1/", quantity=5)
+
+        # so let's checkout with nobody's basket WHAHAAAHAHA!
+        request = {
+            'basket': nobody_basket_url,
+            'total': '50.0',
+            'shipping_method_code': "no-shipping-required",
+            'shipping_charge': {
+                'currency': 'EUR',
+                'excl_tax': '0.00',
+                'tax': '0.00'
+            },
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            }
+        }
+
+        # Oh, this is indeed not possible
+        response = self.post('api-checkout', **request)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data, "Unauthorized")
 
     @unittest.skip
     def test_cart_immutable_after_checkout(self):
