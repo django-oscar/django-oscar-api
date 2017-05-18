@@ -445,12 +445,10 @@ class CheckOutTest(APITest):
             }
         }
 
-        # Oh no, this is indeed not possible
+        # Oh, this is indeed not possible
         response = self.post('api-checkout', **request)
-        self.assertEqual(response.status_code, 403)
-        self.assertEqual(
-            response.data['detail'],
-            'You do not have permission to perform this action.')
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.data, "Unauthorized")
 
     @unittest.skip
     def test_cart_immutable_after_checkout(self):
