@@ -317,6 +317,13 @@ When your basket is filled an you want to proceed to checkout you can do a singl
 .. note::
     In the checkout view of Oscar, the function ``handle_successful_order`` is called after placing an order. This sends the order confirmation message, flushes your session and sends the ``post_checkout`` signal. The Oscar API checkout view is not calling this method by design. If you would like to send a confirmation message (or other stuff you need to do) after placing an order you can subscribe to the ``oscarapi_post_checkout`` signal, see :doc:`/usage/signals`.
 
+.. note::
+    An extension on top of django-oscar-api providing a more flexible checkout API with a pluggable payment methods
+    is written by Craig Weber, see `django oscar api checkout`_
+
+.. _`django oscar api checkout`: https://gitlab.com/thelabnyc/django-oscar-api-checkout
+
+
 .. _login-user-label:
 
 Login the user
