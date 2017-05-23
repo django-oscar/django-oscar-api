@@ -2,6 +2,14 @@
 Changelog
 =========
 
+1.1.3 (2017-05-23)
+-------------------
+Features:
+  * Updated documentation to mention the django-oscar-api-checkout plugin
+
+Fixes:
+  * #100 The checkout view should not use the wrong mixin to check the basket ownership
+
 1.1.2 (2017-05-10)
 -------------------
 Fixes:
