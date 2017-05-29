@@ -109,11 +109,12 @@ def store_basket_in_session(basket, session):
 
 
 def request_contains_basket(request, basket):
-    if basket.can_be_edited:
-        if request.user.is_authenticated():
-            return request.user == basket.owner
+    if isinstance(basket, Basket):
+        if basket.can_be_edited:
+            if request.user.is_authenticated():
+                return request.user == basket.owner
 
-        return get_basket_id_from_session(request) == basket.pk
+            return get_basket_id_from_session(request) == basket.pk
 
     return False
 
