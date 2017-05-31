@@ -54,6 +54,10 @@ class LoginView(APIView):
 
         raise MethodNotAllowed('GET')
 
+    def merge_baskets(self, anonymous_basket, basket):
+        "Hook to enforce rules when merging baskets."
+        basket.merge(anonymous_basket)
+
     def post(self, request, format=None):
         ser = serializers.LoginSerializer(data=request.data)
         if ser.is_valid():
@@ -76,7 +80,7 @@ class LoginView(APIView):
             # merge anonymous basket with authenticated basket.
             basket = operations.get_user_basket(user)
             if anonymous_basket is not None:
-                basket.merge(anonymous_basket)
+                self.merge_baskets(anonymous_basket, basket)
 
             operations.store_basket_in_session(basket, request.session)
 
