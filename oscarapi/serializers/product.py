@@ -47,7 +47,7 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
 
     class Meta:
         model = ProductAttributeValue
-        fields = overridable('OSCARAPI_PRODUCT_ATTRIBUTE_VALUE_FIELDS', default=(('name', 'value',))
+        fields = overridable('OSCARAPI_PRODUCT_ATTRIBUTE_VALUE_FIELDS', default=(('name', 'value',)))
 
 
 class ProductAttributeSerializer(OscarModelSerializer):
