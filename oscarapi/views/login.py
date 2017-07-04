@@ -57,7 +57,6 @@ class LoginView(APIView):
     def merge_baskets(self, anonymous_basket, basket):
         "Hook to enforce rules when merging baskets."
         basket.merge(anonymous_basket)
-        anonymous_basket.delete()
 
     def post(self, request, format=None):
         ser = self.serializer_class(data=request.data)
