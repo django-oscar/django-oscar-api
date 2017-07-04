@@ -5,11 +5,11 @@ Changelog
 1.1.4 (2017-07-04)
 -------------------
 Features:
-  * #102 Let the ProductAttribute and ProductAttributeValue serializer fields be overridable by settings (yazanhorani)
-  * #101 Don't delete anonymous basket which are merged after login, leave them in the database with the status `MERGED` (aleksandrpanteleymonov)
+  * #102 Let the `ProductAttribute` and `ProductAttributeValue` serializer fields be overridable in the settings (yazanhorani)
+  * #101 Don't delete anonymous basket which are merged after login, leave them in the database with the status ``MERGED`` (aleksandrpanteleymonov)
 
 Notes:
-  Before this release, anonymous baskets where merged in the `LoginView` and after being merged, deleted. This behaviour is now removed, so anonymous baskets remain in the database and have the status MERGED (This is more in the direction of how Oscar is working). You can change this behaviour by overriding the `merge_baskets` method / hook in the `LoginView`, or you should add a cron job to cleanup old baskets with the status MERGED from the database.
+  Before this release, anonymous baskets where merged in the ``LoginView`` and after being merged, deleted. This behaviour is now removed, so anonymous baskets remain in the database and have the status ``MERGED`` (This is more in the direction of how Oscar is working). You can change this behaviour by overriding the ``merge_baskets`` method / hook in the ``LoginView``, or you should add a cron job to cleanup old baskets with the status ``MERGED`` from the database.
 
 
 1.1.3 (2017-05-23)
