@@ -38,8 +38,14 @@ class ProductTest(APITest):
         self.response.assertStatusEqual(200)
         self.assertIn('excl_tax', self.response.body)
 
+        self.response = self.get(reverse('product-price', args=(999999,)))
+        self.response.assertStatusEqual(404)
+
     def test_product_availability(self):
         "See if we get the availability information"
         self.response = self.get(reverse('product-availability', args=(1,)))
         self.response.assertStatusEqual(200)
         self.assertIn('num_available', self.response.body)
+
+        self.response = self.get(reverse('product-availability', args=(999999,)))
+        self.response.assertStatusEqual(404)
