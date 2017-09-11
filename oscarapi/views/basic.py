@@ -92,9 +92,10 @@ class ProductDetail(generics.RetrieveAPIView):
 
 
 class ProductPrice(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
 
     def get(self, request, pk=None, format=None):
-        product = Product.objects.get(id=pk)
+        product = self.get_object()
         strategy = Selector().strategy(request=request, user=request.user)
         ser = serializers.PriceSerializer(
             strategy.fetch_for_product(product).price,
@@ -103,9 +104,10 @@ class ProductPrice(generics.RetrieveAPIView):
 
 
 class ProductAvailability(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
 
     def get(self, request, pk=None, format=None):
-        product = Product.objects.get(id=pk)
+        product = self.get_object()
         strategy = Selector().strategy(request=request, user=request.user)
         ser = serializers.AvailabilitySerializer(
             strategy.fetch_for_product(product).availability,
