@@ -31,14 +31,14 @@ Usage
 To use the Oscar API application in an Oscar E-commerce site, follow these
 steps:
 
-1. Install the `django-oscar-api` package someway (``pip install django-oscar-api``).
+1. Install the `django-oscar-api` package (``pip install django-oscar-api``).
 2. Add oscarapi to INSTALLED_APPS.
 3. Add the application's urls to your urlconf::
     
     from oscarapi.app import application as api
 
     urlpatterns = (
-        # all the things you allready got
+        # all the things you already have
         url(r'^api/', include(api.urls)),
     )
 
