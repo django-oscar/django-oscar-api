@@ -1,6 +1,10 @@
 =========
 Changelog
 =========
+1.1.5 (2017-09-12)
+-------------------
+Fixes:
+  * #105 `ProductPrice` and `ProductAvailability` views resuled in server error if the matching product is not found (taaviteska)
 
 1.1.4 (2017-07-04)
 -------------------
