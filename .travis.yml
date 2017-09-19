@@ -23,6 +23,9 @@ env:
     - DJANGO=Django==1.9.13 OSCAR=django-oscar==1.4
     - DJANGO=Django==1.10.7 OSCAR=django-oscar==1.3
     - DJANGO=Django==1.10.7 OSCAR=django-oscar==1.4
+    - DJANGO=Django==1.11.5 OSCAR=django-oscar==1.3
+    - DJANGO=Django==1.11.5 OSCAR=django-oscar==1.4
+    - DJANGO=Django==1.11.5 OSCAR=django-oscar==1.5
 matrix:
     exclude:
         - python: "3.6"
