@@ -19,6 +19,7 @@ Currently Oscar API is compatbile with python 2.7 / 3.5 / 3.6 and the following 
 - Django 1.10:  Osccar 1.4 and 1.5 (requires `djangorestframework>=3.4`)
 - Django 1.11:  Osccar 1.5 (requires `djangorestframework>=3.4`)
 
+
 See `Travis`_ for the current tested platforms.
 
 .. _`travis`: https://travis-ci.org/django-oscar/django-oscar-api
@@ -37,6 +38,16 @@ Please see the installation instructions of `Oscar`_ to install Oscar and how to
     $ pip install django-oscar-api
 
 Or you could add ``django-oscar-api`` to your project dependencies.
+
+.. warning::
+
+    Due to wrong dependency specifications in `django-oscar` (`django-haystack` 1.6.1 depends on `Django<1.11`), and
+    of `django-haystack` (The django requirements are not correct) you will need to install Oscar API like this
+    if you would like to use Django 1.11 with Oscar 1.5:
+
+    .. code-block:: bash
+
+        $ pip install django-oscar-api[django_1_11]
 
 .. note::
 
