@@ -28,7 +28,7 @@ before_install:
 
 install:
     - pip install $OSCAR
-    - if [ ${DJANGO} == "Django==1.11.5" ]; then $pip install $DJANGO -e .[django_1_11]; else pip install $DJANGO -e .; fi
+    - if [ ${DJANGO} == "Django==1.11.5" ]; then pip install $DJANGO -e .[django_1_11]; else pip install $DJANGO -e .; fi
     - make install
 
 script:
