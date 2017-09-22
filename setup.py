@@ -44,7 +44,7 @@ setup(
     # specify dependencies
     install_requires=[
         'setuptools',
-        'django-oscar>=1.1,<1.5',
+        'django-oscar>=1.1',
         'djangorestframework>=3.3',
         'six'
     ],
