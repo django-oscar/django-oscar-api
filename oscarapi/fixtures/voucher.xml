@@ -55,7 +55,7 @@
     <field type="PositiveIntegerField" name="num_basket_additions">0</field>
     <field type="PositiveIntegerField" name="num_orders">0</field>
     <field type="DecimalField" name="total_discount">0.00</field>
-    <field type="DateField" name="date_created">2015-11-28</field>
+    <field type="DateTimeField" name="date_created">2015-11-28T00:00:00+00:00</field>
     <field to="offer.conditionaloffer" name="offers" rel="ManyToManyRel"><object pk="2"></object></field>
   </object>
 </django-objects>
