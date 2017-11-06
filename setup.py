@@ -15,8 +15,8 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Django',
         'Framework :: Django :: 1.8',
-        'Framework :: Django :: 1.9',
         'Framework :: Django :: 1.10',
+        'Framework :: Django :: 1.11',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: Unix',
@@ -44,13 +44,14 @@ setup(
     # specify dependencies
     install_requires=[
         'setuptools',
-        'django-oscar>=1.1,<1.5',
+        'django-oscar>=1.2.2',
         'djangorestframework>=3.3',
         'six'
     ],
     # mark test target to require extras.
     extras_require={
         'test': ['django-nose', 'coverage', 'mock'],
-        'docs': ['sphinx', 'sphinx_rtd_theme']
+        'docs': ['django-haystack<=2.7.0.dev0', 'sphinx', 'sphinx_rtd_theme'],
+        'django_1_11': ['django-haystack<=2.7.0.dev0']
     },
 )
