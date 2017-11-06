@@ -31,6 +31,6 @@ release_testpypi: clean_release
 	python setup.py sdist
 	twine upload --repository pypitest dist/*
 
-release:
+release: clean_release
 	python setup.py sdist
 	twine upload --repository pypi dist/*
