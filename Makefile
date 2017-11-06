@@ -1,8 +1,12 @@
 .PHONY: test install sandbox
 
+clean:
+	find . -name '*.pyc' -delete
+	find . -name '__pycache__' -delete
+	find . -name '*.egg-info' -delete
+
 install:
-	pip install -e .
-	pip install django-oscar-api[test]
+	pip install -e .[dev]
 	pip install django-oscar-api[docs]
 
 sandbox: install
@@ -19,3 +23,14 @@ coverage:
 
 docs: install
 	cd docs && make clean && make html
+
+clean_release: clean
+	if [ -d "dist" ]; then rm dist/*; fi
+
+release_testpypi: clean_release
+	python setup.py sdist
+	twine upload --repository pypitest dist/*
+
+release:
+	python setup.py sdist
+	twine upload --repository pypi dist/*
