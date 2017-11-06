@@ -21,14 +21,14 @@ env:
     - DJANGO=Django==1.8.18 OSCAR=django-oscar==1.5
     - DJANGO=Django==1.10.8 OSCAR=django-oscar==1.4
     - DJANGO=Django==1.10.8 OSCAR=django-oscar==1.5
-    - DJANGO=Django==1.11.5 OSCAR=django-oscar==1.5
+    - DJANGO=Django==1.11.7 OSCAR=django-oscar==1.5
 
 before_install:
     - pip install codecov
 
 install:
     - pip install $OSCAR
-    - if [ ${DJANGO} == "Django==1.11.5" ]; then pip install $DJANGO -e .[django_1_11]; else pip install $DJANGO -e .; fi
+    - if [ ${DJANGO} == "Django==1.11.7" ]; then pip install $DJANGO -e .[django_1_11]; else pip install $DJANGO -e .; fi
     - make install
 
 script:
