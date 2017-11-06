@@ -1,6 +1,11 @@
 =========
 Changelog
 =========
+1.2.0 (2017-11-06)
+-------------------
+Features:
+  * #109 Added support for Django 1.11 and Oscar 1.5. See the installation documentation for instructions. (whyscream)
+
 1.1.5 (2017-09-12)
 -------------------
 Fixes:
