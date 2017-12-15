@@ -273,8 +273,11 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
             order_number = self.generate_order_number(basket)
             request = self.context['request']
 
-            shipping_address = ShippingAddress(
-                **validated_data['shipping_address'])
+            if 'shipping_address' in validated_data:
+                shipping_address = ShippingAddress(
+                    **validated_data['shipping_address'])
+            else:
+                shipping_address = None
 
             if 'billing_address' in validated_data:
                 billing_address = BillingAddress(
