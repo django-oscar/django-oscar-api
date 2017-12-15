@@ -18,10 +18,10 @@ env:
     - DJANGO=Django==1.8.18 OSCAR=django-oscar==1.2.2
     - DJANGO=Django==1.8.18 OSCAR=django-oscar==1.3
     - DJANGO=Django==1.8.18 OSCAR=django-oscar==1.4
-    - DJANGO=Django==1.8.18 OSCAR=django-oscar==1.5
+    - DJANGO=Django==1.8.18 OSCAR=django-oscar==1.5.1
     - DJANGO=Django==1.10.8 OSCAR=django-oscar==1.4
-    - DJANGO=Django==1.10.8 OSCAR=django-oscar==1.5
-    - DJANGO=Django==1.11.7 OSCAR=django-oscar==1.5
+    - DJANGO=Django==1.10.8 OSCAR=django-oscar==1.5.1
+    - DJANGO=Django==1.11.8 OSCAR=django-oscar==1.5.1
 
 before_install:
     - pip install codecov
@@ -30,8 +30,6 @@ install:
     - pip install $OSCAR
     # django rest framework 3.7+ is not compatible with django 1.8
     - if [ ${DJANGO} == "Django==1.8.18" ]; then pip install "djangorestframework<3.7"; fi
-    # because there are some dependency issues with oscar and haystack
-    - if [ ${DJANGO} == "Django==1.11.7" ]; then pip install $DJANGO -e .[django_1_11]; else pip install $DJANGO -e .; fi
     - make install
 
 script:
