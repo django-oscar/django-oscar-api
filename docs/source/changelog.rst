@@ -1,6 +1,14 @@
 =========
 Changelog
 =========
+1.2.1 (2017-12-15)
+-------------------
+Fixes:
+  * Shipping address is not required during checkout
+
+Features:
+  * Tested with Oscar 1.5.1, updated dependencies
+
 1.2.0 (2017-11-06)
 -------------------
 Features:
