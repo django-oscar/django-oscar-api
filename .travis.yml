@@ -28,7 +28,7 @@ before_install:
 
 install:
     - pip install $OSCAR
-    # django rest framework 3.7+ is not compatible with django 1.8
+    # django rest framework 3.7+ and django-tables2 1.17+ are not compatible with django 1.8
     - if [ ${DJANGO} == "Django==1.8.18" ]; then pip install "djangorestframework<3.7"; pip install "django-tables2<1.17.0"; fi
     - make install
 
