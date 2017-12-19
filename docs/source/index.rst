@@ -52,13 +52,13 @@ Or you could add ``django-oscar-api`` to your project dependencies.
 
 .. warning::
 
-    Due to wrong dependency specifications in `django-oscar` (`django-haystack` 1.6.1 depends on `Django<1.11`), and of `django-haystack` (The django requirements are not correct) you will need to install Oscar API like this if you would like to use Django 1.11 with Oscar 1.5.0:
-
+    If you want to install Django Oscar API with Oscar 1.5.0, you'll need to use the following command:
+    
     .. code-block:: bash
 
         $ pip install django-oscar-api[django_1_11]
 
-    This is fixed in Oscar 1.5.1
+    This is because of wrong dependency specifications in version 1.5.0. This is fixed in Oscar 1.5.1
 
 .. note::
 
