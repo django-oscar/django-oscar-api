@@ -43,7 +43,7 @@ So, to modify some of the functionality in oscarapi, do the following:
     If you think that this is not changing anything (yet) then this is correct, see below.
 
 4. Include your own app in INSTALLED_APPS instead of ``django-oscar-api`` (and add ``django-oscar-api`` to your app's dependencies) and see if this works.
-5. Add a serializer and a view for the parts you want to change. In this example, we will override the ``ProductList`` view so we can specify a different ``ProductLinkSerializer`` which includes images as well:
+5. Add a serializer and a view for the parts you want to change. In this example, we will override the ``ProductList`` view so we can specify a different ``ProductLinkSerializer`` which includes images and the price as well:
 
 `serializers.py`
 
