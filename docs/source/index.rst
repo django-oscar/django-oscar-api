@@ -1,4 +1,4 @@
-.. Django Osar API documentation master file, created by
+.. Django Oscar API documentation master file, created by
    sphinx-quickstart on Wed Dec 23 16:04:47 2015.
 
 ================
