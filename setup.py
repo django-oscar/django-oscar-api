@@ -44,14 +44,13 @@ setup(
     # specify dependencies
     install_requires=[
         'setuptools',
-        'django-oscar>=1.2.2',
+        'django-oscar>=1.5.1',
         'djangorestframework>=3.3',
         'six'
     ],
     # mark test target to require extras.
     extras_require={
         'dev': ['django-nose', 'coverage', 'mock', 'twine'],
-        'docs': ['django-haystack<=2.7.0.dev0', 'sphinx', 'sphinx_rtd_theme'],
-        'django_1_11': ['django-haystack<=2.7.0.dev0']
+        'docs': ['sphinx', 'sphinx_rtd_theme'],
     },
 )
