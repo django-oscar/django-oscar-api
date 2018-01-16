@@ -18,8 +18,6 @@ Selector = get_class('partner.strategy', 'Selector')
 __all__ = (
     'BasketList', 'BasketDetail',
     'LineAttributeList', 'LineAttributeDetail',
-    'ProductList', 'ProductDetail',
-    'ProductPrice', 'ProductAvailability',
     'StockRecordList', 'StockRecordDetail',
     'UserList', 'UserDetail',
     'OptionList', 'OptionDetail',
@@ -79,40 +77,6 @@ class LineAttributeList(generics.ListCreateAPIView):
 class LineAttributeDetail(generics.RetrieveAPIView):
     queryset = LineAttribute.objects.all()
     serializer_class = serializers.LineAttributeSerializer
-
-
-class ProductList(generics.ListAPIView):
-    queryset = Product.objects.all()
-    serializer_class = serializers.ProductLinkSerializer
-
-
-class ProductDetail(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
-    serializer_class = serializers.ProductSerializer
-
-
-class ProductPrice(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
-
-    def get(self, request, pk=None, format=None):
-        product = self.get_object()
-        strategy = Selector().strategy(request=request, user=request.user)
-        ser = serializers.PriceSerializer(
-            strategy.fetch_for_product(product).price,
-            context={'request': request})
-        return Response(ser.data)
-
-
-class ProductAvailability(generics.RetrieveAPIView):
-    queryset = Product.objects.all()
-
-    def get(self, request, pk=None, format=None):
-        product = self.get_object()
-        strategy = Selector().strategy(request=request, user=request.user)
-        ser = serializers.AvailabilitySerializer(
-            strategy.fetch_for_product(product).availability,
-            context={'request': request})
-        return Response(ser.data)
 
 
 class StockRecordList(generics.ListAPIView):
