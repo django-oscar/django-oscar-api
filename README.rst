@@ -21,7 +21,7 @@ This package provides a RESTful API for `django-oscar`_.
    :alt: Latest PyPi release
    :target: https://pypi.python.org/pypi/django-oscar-api
 
-.. image:: https://img.shields.io/badge/koe-15-brightgreen.svg
+.. image:: https://img.shields.io/badge/koe-18-brightgreen.svg
    :alt: How many times koe is in the sourcecode
    :target: https://github.com/django-oscar/django-oscar-api/blob/master/oscarapi/tests/testlogin.py#L23
 
