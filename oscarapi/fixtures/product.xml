@@ -2,13 +2,13 @@
 <django-objects version="1.0">
     <object pk="1" model="catalogue.product">
         <field type="CharField" name="structure">parent</field>
-        <field type="CharField" name="upc"/>
+        <field type="CharField" name="upc">1234</field>
         <field to="catalogue.product" name="parent" rel="ManyToOneRel">
             <None/>
         </field>
         <field type="CharField" name="title">Oscar T-shirt</field>
         <field type="SlugField" name="slug">oscar-t-shirt</field>
-        <field type="TextField" name="description"/>
+        <field type="TextField" name="description">Hank</field>
         <field to="catalogue.productclass" name="product_class" rel="ManyToOneRel">1</field>
         <field type="FloatField" name="rating">
             <None/>
@@ -20,7 +20,7 @@
     </object>
     <object pk="2" model="catalogue.product">
         <field type="CharField" name="structure">child</field>
-        <field type="CharField" name="upc"/>
+        <field type="CharField" name="upc">child-1234</field>
         <field to="catalogue.product" name="parent" rel="ManyToOneRel">1</field>
         <field type="CharField" name="title"/>
         <field type="SlugField" name="slug">oscar-t-shirt</field>

@@ -34,15 +34,6 @@ class OptionSerializer(OscarHyperlinkedModelSerializer):
         ))
 
 
-class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
-    class Meta:
-        model = Product
-        fields = overridable(
-            'OSCARAPI_PRODUCT_FIELDS', default=(
-                'url', 'id', 'title'
-            ))
-
-
 class ProductAttributeValueSerializer(OscarModelSerializer):
     name = serializers.StringRelatedField(source="attribute")
     value = serializers.SerializerMethodField()
@@ -123,6 +114,13 @@ class _ProductSerializer(OscarModelSerializer):
     recommended_products = RecommmendedProductSerializer(
         many=True, required=False)
 
+    def get_field_names(self, declared_fields, info):
+        """
+        Override get_field_names to make sure that we are not getting errors
+        for not including declared fields.
+        """
+        return super(_ProductSerializer, self).get_field_names({}, info)
+
     class Meta:
         model = Product
 
@@ -133,13 +131,6 @@ class ChildProductserializer(_ProductSerializer):
     # the below fields can be filled from the parent product if enabled.
     images = ProductImageSerializer(many=True, required=False, source='parent.images')
     description = serializers.CharField(source='parent.description')
-
-    def get_field_names(self, declared_fields, info):
-        """
-        Override get_field_names to make sure that we are not getting errors
-        for not including declared fields.
-        """
-        return super(ChildProductserializer, self).get_field_names({}, info)
 
     class Meta(_ProductSerializer.Meta):
         fields = overridable(
@@ -167,6 +158,14 @@ class ProductSerializer(_ProductSerializer):
                 'attributes', 'categories', 'product_class',
                 'stockrecords', 'images', 'price', 'availability', 'options',
                 'children'))
+
+
+class ProductLinkSerializer(ProductSerializer):
+    class Meta(_ProductSerializer.Meta):
+        fields = overridable(
+            'OSCARAPI_PRODUCT_FIELDS', default=(
+                'url', 'id', 'title'
+            ))
 
 
 class OptionValueSerializer(serializers.Serializer):

@@ -23,6 +23,27 @@ class ProductTest(APITest):
         for field in default_fields:
             self.assertIn(field, product)
 
+    def test_product_list_filter(self):
+        standalone_products_url = "%s?structure=standalone" % reverse('product-list')
+        self.response = self.get(standalone_products_url)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response.body), 2)
+
+        parent_products_url = "%s?structure=parent" % reverse('product-list')
+        self.response = self.get(parent_products_url)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response.body), 1)
+
+        child_products_url = "%s?structure=child" % reverse('product-list')
+        self.response = self.get(child_products_url)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response.body), 1)
+
+        koe_products_url = "%s?structure=koe" % reverse('product-list')
+        self.response = self.get(koe_products_url)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response.body), 0)
+
     def test_product_detail(self):
         "Check product details"
         self.response = self.get(reverse('product-detail', args=(1,)))
