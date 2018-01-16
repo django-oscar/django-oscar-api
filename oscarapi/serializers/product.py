@@ -99,7 +99,7 @@ class RecommmendedProductSerializer(OscarModelSerializer):
             'OSCARAPI_RECOMMENDED_PRODUCT_FIELDS', default=('url',))
 
 
-class _ProductSerializer(OscarModelSerializer):
+class BaseProductSerializer(OscarModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name='product-detail')
     stockrecords = serializers.HyperlinkedIdentityField(
         view_name='product-stockrecord-list')
@@ -119,20 +119,20 @@ class _ProductSerializer(OscarModelSerializer):
         Override get_field_names to make sure that we are not getting errors
         for not including declared fields.
         """
-        return super(_ProductSerializer, self).get_field_names({}, info)
+        return super(BaseProductSerializer, self).get_field_names({}, info)
 
     class Meta:
         model = Product
 
 
-class ChildProductserializer(_ProductSerializer):
+class ChildProductserializer(BaseProductSerializer):
     parent = serializers.HyperlinkedRelatedField(
         view_name='product-detail', queryset=Product.objects)
     # the below fields can be filled from the parent product if enabled.
     images = ProductImageSerializer(many=True, required=False, source='parent.images')
     description = serializers.CharField(source='parent.description')
 
-    class Meta(_ProductSerializer.Meta):
+    class Meta(BaseProductSerializer.Meta):
         fields = overridable(
             'OSCARAPI_CHILDPRODUCTDETAIL_FIELDS',
             default=(
@@ -145,15 +145,15 @@ class ChildProductserializer(_ProductSerializer):
                 'stockrecords', 'price', 'availability', 'options'))
 
 
-class ProductSerializer(_ProductSerializer):
+class ProductSerializer(BaseProductSerializer):
     images = ProductImageSerializer(many=True, required=False)
     children = ChildProductserializer(many=True, required=False)
 
-    class Meta(_ProductSerializer.Meta):
+    class Meta(BaseProductSerializer.Meta):
         fields = overridable(
             'OSCARAPI_PRODUCTDETAIL_FIELDS',
             default=(
-                'url', 'id', 'title', 'description',
+                'url', 'id', 'title', 'description', 'structure',
                 'date_created', 'date_updated', 'recommended_products',
                 'attributes', 'categories', 'product_class',
                 'stockrecords', 'images', 'price', 'availability', 'options',
@@ -161,7 +161,7 @@ class ProductSerializer(_ProductSerializer):
 
 
 class ProductLinkSerializer(ProductSerializer):
-    class Meta(_ProductSerializer.Meta):
+    class Meta(BaseProductSerializer.Meta):
         fields = overridable(
             'OSCARAPI_PRODUCT_FIELDS', default=(
                 'url', 'id', 'title'
