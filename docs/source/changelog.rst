@@ -6,6 +6,7 @@ Changelog
 Features:
   * Better support for the different ProductAttribute types in the serializer (including Entity when you implement a `.json()` method on your model)
   * Added a filter to the ProductList view so you can query standalone/parent/child products (for example http://127.0.0.1:8000/api/products/?structure=standalone)
+  * The Product list and Product detail views use the same serializer now
 
 Fixes:
   * Added app_label to the `ApiKey` model so you don't need to have `oscarapi` in INSTALLED_APPS when using oscarapi middleware classes (when you don't need oscarapi specific models).
