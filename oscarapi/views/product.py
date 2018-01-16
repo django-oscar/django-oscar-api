@@ -1,6 +1,7 @@
-from oscar.core.loading import get_model, get_class
 from rest_framework import generics
 from rest_framework.response import Response
+
+from oscar.core.loading import get_class, get_model
 
 from oscarapi import serializers
 
@@ -23,11 +24,11 @@ class ProductList(generics.ListAPIView):
         """
         Allow filtering on structure so standalone and parent products can
         be selected separately, eg::
-        
+
             http://127.0.0.1:8000/api/products/?structure=standalone
-        
+
         or::
-        
+
             http://127.0.0.1:8000/api/products/?structure=parent
         """
         qs = super(ProductList, self).get_queryset()
@@ -65,5 +66,3 @@ class ProductAvailability(generics.RetrieveAPIView):
             strategy.fetch_for_product(product).availability,
             context={'request': request})
         return Response(ser.data)
-
-
