@@ -35,8 +35,8 @@ class OptionSerializer(OscarHyperlinkedModelSerializer):
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
-    name = serializers.StringRelatedField(source="attribute.name")
-    code = serializers.StringRelatedField(source="attribute.code")
+    name = serializers.CharField(source="attribute.name")
+    code = serializers.CharField(source="attribute.code")
     value = serializers.SerializerMethodField()
 
     def get_value(self, obj):
