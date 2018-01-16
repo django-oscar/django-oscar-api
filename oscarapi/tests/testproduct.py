@@ -15,8 +15,8 @@ class ProductTest(APITest):
         "Check if we get a list of products with the default attributes"
         self.response = self.get('product-list')
         self.response.assertStatusEqual(200)
-        # we should have two products
-        self.assertEqual(len(self.response.body), 3)
+        # we should have four products
+        self.assertEqual(len(self.response.body), 4)
         # default we have 3 fields
         product = self.response.body[0]
         default_fields = ['id', 'url']
@@ -34,15 +34,23 @@ class ProductTest(APITest):
             self.assertIn(field, self.response.body)
         self.response.assertValueEqual('title', "Oscar T-shirt")
 
-    def test_product_attributes(self):
-        self.response = self.get(reverse('product-detail', args=(3,)))
+    def test_product_attribute_entity(self):
+        "Entity attribute tyoe should be supported by means of json method"
+        self.response = self.get(reverse('product-detail', args=(4,)))
         self.response.assertStatusEqual(200)
 
-        default_fields = ['stockrecords', 'description', 'title', 'url',
-                          'date_updated', 'recommended_products', 'attributes',
-                          'date_created', 'id', 'price', 'availability']
-        for field in default_fields:
-            self.assertIn(field, self.response.body)
+        self.response.assertValueEqual('title', "Entity product")
+
+        attributes = self.response.json()['attributes']
+        attributes_by_name = {a['name']:a['value'] for a in attributes}
+
+        self.assertIsInstance(attributes_by_name['entity'], string_types)
+        self.assertEqual(attributes_by_name['entity'], "<User: admin> has no json method, can not convert to json")
+
+    def test_product_attributes(self):
+        "All oscar attribute types should be supported except entity"
+        self.response = self.get(reverse('product-detail', args=(3,)))
+        self.response.assertStatusEqual(200)
 
         self.response.assertValueEqual('title', "lots of attributes")
 

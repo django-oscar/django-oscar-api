@@ -14,4 +14,11 @@
         <field name="track_stock" type="BooleanField">True</field>
         <field name="options" rel="ManyToManyRel" to="catalogue.option"></field>
     </object>
+    <object model="catalogue.productclass" pk="3">
+        <field name="name" type="CharField">EntityProduct</field>
+        <field name="slug" type="SlugField">entityproduct</field>
+        <field name="requires_shipping" type="BooleanField">True</field>
+        <field name="track_stock" type="BooleanField">True</field>
+        <field name="options" rel="ManyToManyRel" to="catalogue.option"></field>
+    </object>
 </django-objects>

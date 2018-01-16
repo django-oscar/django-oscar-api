@@ -218,4 +218,21 @@
         <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
         <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
     </object>
+    <object model="catalogue.productattributevalue" pk="13">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">13</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">4</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><natural>auth</natural><natural>user</natural></field>
+        <field name="entity_object_id" type="PositiveIntegerField">1</field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
 </django-objects>

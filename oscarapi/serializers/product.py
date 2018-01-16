@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils.translation import ugettext as _
 
 from oscarapi.utils import (
     OscarModelSerializer,
@@ -56,6 +57,17 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
             return obj.value.url
         elif obj_type == ProductAttribute.IMAGE:
             return obj.value.url
+        elif obj_type == ProductAttribute.ENTITY:
+            if hasattr(obj.value, 'json'):
+                return obj.value.json()
+            else:
+                return _(
+                    "%(entity)s has no json method, can not convert to json"  % {
+                        'entity': repr(obj.value)
+                    }
+                )
+
+        # return the value as stored on ProductAttributeValue in the correct type
         return obj.value
 
     class Meta:

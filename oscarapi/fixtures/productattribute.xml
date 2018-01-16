@@ -96,4 +96,12 @@
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
         <field name="required" type="BooleanField">False</field>
     </object>
+    <object model="catalogue.productattribute" pk="13">
+        <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">3</field>
+        <field name="name" type="CharField">entity</field>
+        <field name="code" type="SlugField">entity</field>
+        <field name="type" type="CharField">entity</field>
+        <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
+        <field name="required" type="BooleanField">False</field>
+    </object>
 </django-objects>
