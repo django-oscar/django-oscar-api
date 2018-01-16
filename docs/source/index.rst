@@ -13,16 +13,16 @@ This package provides a RESTful API for `django-oscar`_, it's based on `django-r
 
 Requirements:
 -------------
-Currently Oscar API is compatbile with python 2.7 / 3.5 / 3.6 and the following django versions:
+This version of Oscar API is compatbile with python 2.7 / 3.5 / 3.6 and the following django versions:
 
 Django 1.8:
 ~~~~~~~~~~~
-- Oscar 1.2.2 / 1.3 / 1.4 and 1.5.1
+- Oscar 1.5.1
 - requires `djangorestframework<3.7`, and `django-tables2<1.17.0`
 
 Django 1.10:
 ~~~~~~~~~~~~
-- Osccar 1.4 and 1.5.1
+- Osccar 1.5.1
 - requires `djangorestframework>=3.4`
 
 Django 1.11:
@@ -49,16 +49,6 @@ Please see the installation instructions of `Oscar`_ to install Oscar and how to
     $ pip install django-oscar-api
 
 Or you could add ``django-oscar-api`` to your project dependencies.
-
-.. warning::
-
-    If you want to install Django Oscar API with Oscar 1.5.0, you'll need to use the following command:
-    
-    .. code-block:: bash
-
-        $ pip install django-oscar-api[django_1_11]
-
-    This is because of wrong dependency specifications in version 1.5.0. This is fixed in Oscar 1.5.1
 
 .. note::
 

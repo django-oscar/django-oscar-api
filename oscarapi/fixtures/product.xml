@@ -36,4 +36,32 @@
         <field type="BooleanField" name="is_discountable">True</field>
         <field to="catalogue.option" name="product_options" rel="ManyToManyRel"/>
     </object>
+    <object model="catalogue.product" pk="3">
+        <field name="structure" type="CharField">standalone</field>
+        <field name="upc" type="CharField">attrtypestest</field>
+        <field name="parent" rel="ManyToOneRel" to="catalogue.product"><None></None></field>
+        <field name="title" type="CharField">lots of attributes</field>
+        <field name="slug" type="SlugField">lots-of-attributes</field>
+        <field name="description" type="TextField">&lt;p&gt;It is a test for the attributes&lt;/p&gt;</field>
+        <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">2</field>
+        <field name="rating" type="FloatField"><None></None></field>
+        <field name="date_created" type="DateTimeField">2018-01-15T14:20:56.580321+00:00</field>
+        <field name="date_updated" type="DateTimeField">2018-01-15T14:22:13.099126+00:00</field>
+        <field name="is_discountable" type="BooleanField">True</field>
+        <field name="product_options" rel="ManyToManyRel" to="catalogue.option"></field>
+    </object>
+    <object model="catalogue.product" pk="4">
+        <field name="structure" type="CharField">standalone</field>
+        <field name="upc" type="CharField">entity</field>
+        <field name="parent" rel="ManyToOneRel" to="catalogue.product"><None></None></field>
+        <field name="title" type="CharField">Entity product</field>
+        <field name="slug" type="SlugField">entity-product</field>
+        <field name="description" type="TextField">&lt;p&gt;An entity&lt;/p&gt;</field>
+        <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">3</field>
+        <field name="rating" type="FloatField"><None></None></field>
+        <field name="date_created" type="DateTimeField">2018-01-16T08:51:30.405895+00:00</field>
+        <field name="date_updated" type="DateTimeField">2018-01-16T08:51:30.405937+00:00</field>
+        <field name="is_discountable" type="BooleanField">True</field>
+        <field name="product_options" rel="ManyToManyRel" to="catalogue.option"></field>
+    </object>
 </django-objects>

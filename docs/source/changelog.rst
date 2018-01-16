@@ -1,6 +1,14 @@
 =========
 Changelog
 =========
+1.3.0 (2018-01-16)
+------------------
+Features:
+  * Better support for the different ProductAttribute types in the serializer (including Entity when you implement a `.json()` method on your model)
+
+Notes:
+  Dropped support for Oscar versions < 1.5(as we support new features which are available since oscar 1.5)
+
 1.2.1 (2017-12-15)
 -------------------
 Fixes:

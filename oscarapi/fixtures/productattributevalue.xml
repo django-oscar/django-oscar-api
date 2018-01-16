@@ -31,4 +31,208 @@
             <None/>
         </field>
     </object>
+    <object model="catalogue.productattributevalue" pk="2">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">4</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">3</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField">True</field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><None></None></field>
+        <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
+    <object model="catalogue.productattributevalue" pk="3">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">7</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">3</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField">2018-01-02</field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><None></None></field>
+        <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
+    <object model="catalogue.productattributevalue" pk="4">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">8</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">3</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField">2018-01-02T10:45:00+00:00</field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><None></None></field>
+        <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
+    <object model="catalogue.productattributevalue" pk="5">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">11</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">3</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField">images/products/2018/01/sony-xa50ES.pdf</field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><None></None></field>
+        <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
+    <object model="catalogue.productattributevalue" pk="6">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">5</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">3</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField">3.2</field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><None></None></field>
+        <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
+    <object model="catalogue.productattributevalue" pk="7">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">6</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">3</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField">&lt;p&gt;I &lt;strong&gt;am&lt;/strong&gt; a test&lt;/p&gt;</field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><None></None></field>
+        <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
+    <object model="catalogue.productattributevalue" pk="8">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">12</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">3</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField">images/products/2018/01/IMG_3777.JPG</field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><None></None></field>
+        <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
+    <object model="catalogue.productattributevalue" pk="9">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">3</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">3</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField">7</field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><None></None></field>
+        <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
+    <object model="catalogue.productattributevalue" pk="10">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">10</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">3</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><None></None></field>
+        <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"><object pk="1"></object><object pk="2"></object></field>
+    </object>
+    <object model="catalogue.productattributevalue" pk="11">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">9</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">3</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption">1</field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><None></None></field>
+        <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
+    <object model="catalogue.productattributevalue" pk="12">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">2</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">3</field>
+        <field name="value_text" type="TextField">I am some kind of text</field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><None></None></field>
+        <field name="entity_object_id" type="PositiveIntegerField"><None></None></field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
+    <object model="catalogue.productattributevalue" pk="13">
+        <field name="attribute" rel="ManyToOneRel" to="catalogue.productattribute">13</field>
+        <field name="product" rel="ManyToOneRel" to="catalogue.product">4</field>
+        <field name="value_text" type="TextField"><None></None></field>
+        <field name="value_integer" type="IntegerField"><None></None></field>
+        <field name="value_boolean" type="NullBooleanField"><None></None></field>
+        <field name="value_float" type="FloatField"><None></None></field>
+        <field name="value_richtext" type="TextField"><None></None></field>
+        <field name="value_date" type="DateField"><None></None></field>
+        <field name="value_datetime" type="DateTimeField"><None></None></field>
+        <field name="value_option" rel="ManyToOneRel" to="catalogue.attributeoption"><None></None></field>
+        <field name="value_file" type="FileField"></field>
+        <field name="value_image" type="FileField"></field>
+        <field name="entity_content_type" rel="ManyToOneRel" to="contenttypes.contenttype"><natural>auth</natural><natural>user</natural></field>
+        <field name="entity_object_id" type="PositiveIntegerField">1</field>
+        <field name="value_multi_option" rel="ManyToManyRel" to="catalogue.attributeoption"></field>
+    </object>
 </django-objects>

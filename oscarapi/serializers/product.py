@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils.translation import ugettext as _
 
 from oscarapi.utils import (
     OscarModelSerializer,
@@ -13,6 +14,7 @@ ProductClass = get_model('catalogue', 'ProductClass')
 ProductCategory = get_model('catalogue', 'ProductCategory')
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
+AttributeOption = get_model('catalogue', 'AttributeOption')
 ProductImage = get_model('catalogue', 'ProductImage')
 Option = get_model('catalogue', 'Option')
 Partner = get_model('partner', 'Partner')
@@ -43,7 +45,30 @@ class ProductLinkSerializer(OscarHyperlinkedModelSerializer):
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
     name = serializers.StringRelatedField(source="attribute")
-    value = serializers.StringRelatedField()
+    value = serializers.SerializerMethodField()
+
+    def get_value(self, obj):
+        obj_type = obj.attribute.type
+        if obj_type == ProductAttribute.OPTION:
+            return obj.value.option
+        elif obj_type == ProductAttribute.MULTI_OPTION:
+            return obj.value.values_list('option', flat=True)
+        elif obj_type == ProductAttribute.FILE:
+            return obj.value.url
+        elif obj_type == ProductAttribute.IMAGE:
+            return obj.value.url
+        elif obj_type == ProductAttribute.ENTITY:
+            if hasattr(obj.value, 'json'):
+                return obj.value.json()
+            else:
+                return _(
+                    "%(entity)s has no json method, can not convert to json"  % {
+                        'entity': repr(obj.value)
+                    }
+                )
+
+        # return the value as stored on ProductAttributeValue in the correct type
+        return obj.value
 
     class Meta:
         model = ProductAttributeValue

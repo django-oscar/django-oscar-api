@@ -4,4 +4,8 @@
         <field to="catalogue.attributeoptiongroup" name="group" rel="ManyToOneRel">1</field>
         <field type="CharField" name="option">Small</field>
     </object>
+    <object pk="2" model="catalogue.attributeoption">
+        <field to="catalogue.attributeoptiongroup" name="group" rel="ManyToOneRel">1</field>
+        <field type="CharField" name="option">Large</field>
+    </object>
 </django-objects>
