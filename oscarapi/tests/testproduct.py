@@ -1,7 +1,21 @@
+import mock
 from six import string_types
 
-from oscarapi.tests.utils import APITest
 from django.core.urlresolvers import reverse
+
+from oscarapi.tests.utils import APITest
+from oscarapi.serializers.product import ProductLinkSerializer
+
+
+class ProductListDetailSerializer(ProductLinkSerializer):
+    "subclass of ProductLinkSerializer to demonstrate showing details in listview"
+    class Meta(ProductLinkSerializer.Meta):
+        fields = (
+            'url', 'id', 'title', 'structure', 'description', 'date_created',
+            'date_updated', 'recommended_products', 'attributes',
+            'categories', 'product_class', 'stockrecords', 'images',
+            'price', 'availability', 'options', 'children'
+        )
 
 
 class ProductTest(APITest):
@@ -23,15 +37,86 @@ class ProductTest(APITest):
         for field in default_fields:
             self.assertIn(field, product)
 
+    def test_product_list_filter(self):
+        standalone_products_url = "%s?structure=standalone" % reverse('product-list')
+        self.response = self.get(standalone_products_url)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response.body), 2)
+
+        parent_products_url = "%s?structure=parent" % reverse('product-list')
+        self.response = self.get(parent_products_url)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response.body), 1)
+
+        child_products_url = "%s?structure=child" % reverse('product-list')
+        self.response = self.get(child_products_url)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response.body), 1)
+
+        koe_products_url = "%s?structure=koe" % reverse('product-list')
+        self.response = self.get(koe_products_url)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response.body), 0)
+
+    @mock.patch('oscarapi.views.product.ProductList.get_serializer_class')
+    def test_productlist_detail(self, get_serializer_class):
+        "The product list should be able to render the same information as the detail page"
+        # setup mocks
+        get_serializer_class.return_value = ProductListDetailSerializer
+
+        # define fields to check
+        product_detail_fields = (
+            'url', 'id', 'title', 'structure', 'description', 'date_created',
+            'date_updated', 'recommended_products', 'attributes',
+            'categories', 'product_class', 'stockrecords', 'images',
+            'price', 'availability', 'options', 'children'
+        )
+
+        # fetch data
+        parent_products_url = "%s?structure=parent" % reverse('product-list')
+        self.response = self.get(parent_products_url)
+
+        # make assertions
+        get_serializer_class.assert_called_once_with()
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response.body), 1)
+
+        # load product data
+        products = self.response.json()
+        product_with_children = products[0]
+
+        self.assertEqual(product_with_children['structure'], 'parent',
+            "since we filtered on structure=parent the list should contain items with structure=parent"
+        )
+        # verify all the fields are rendered in the list view
+        for field in product_detail_fields:
+            self.assertIn(field, product_with_children)
+
+        children = product_with_children['children']
+        self.assertEqual(len(children), 1, "There should be 1 child")
+        child = children[0]
+        
+        self.assertEqual(child['structure'], 'child',
+            "the child should have structure=child"
+        )
+        self.assertNotEqual(product_with_children['id'], child['id'])
+        self.assertNotEqual(product_with_children['structure'], child['structure'])
+        self.assertNotIn('description', child, "child should not have a description by default")
+        self.assertNotIn('images', child, "child should not have images by default")
+
     def test_product_detail(self):
         "Check product details"
         self.response = self.get(reverse('product-detail', args=(1,)))
         self.response.assertStatusEqual(200)
-        default_fields = ['stockrecords', 'description', 'title', 'url',
-                          'date_updated', 'recommended_products', 'attributes',
-                          'date_created', 'id', 'price', 'availability']
+        default_fields = (
+            'url', 'id', 'title', 'structure', 'description', 'date_created',
+            'date_updated', 'recommended_products', 'attributes',
+            'categories', 'product_class', 'stockrecords', 'images',
+            'price', 'availability', 'options', 'children'
+        )
         for field in default_fields:
             self.assertIn(field, self.response.body)
+
         self.response.assertValueEqual('title', "Oscar T-shirt")
 
     def test_product_attribute_entity(self):
