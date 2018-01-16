@@ -5,10 +5,12 @@ Changelog
 ------------------
 Features:
   * Better support for the different ProductAttribute types in the serializer (including Entity when you implement a `.json()` method on your model)
+
+Fixes:
   * Added app_label to the `ApiKey` model so you don't need to have `oscarapi` in INSTALLED_APPS when using oscarapi's middleware classes.
 
 Notes:
-  Dropped support for Oscar versions < 1.5(as we support new features which are available since oscar 1.5)
+  Dropped support for Oscar versions < 1.5 (as we support new features which are available since oscar 1.5)
 
 1.2.1 (2017-12-15)
 -------------------
