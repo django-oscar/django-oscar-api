@@ -164,7 +164,7 @@ class ProductLinkSerializer(ProductSerializer):
     class Meta(BaseProductSerializer.Meta):
         fields = overridable(
             'OSCARAPI_PRODUCT_FIELDS', default=(
-                'url', 'id', 'title'
+                'url', 'id', 'upc', 'title'
             ))
 
 
