@@ -1,7 +1,7 @@
-from oscarapi.views import basic
+from oscarapi.views import product
 
 from .serializers import MyProductLinkSerializer
 
 
-class ProductList(basic.ProductList):
+class ProductList(product.ProductList):
     serializer_class = MyProductLinkSerializer
