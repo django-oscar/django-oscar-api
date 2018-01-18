@@ -136,7 +136,7 @@ class ChildProductserializer(BaseProductSerializer):
         fields = overridable(
             'OSCARAPI_CHILDPRODUCTDETAIL_FIELDS',
             default=(
-                'url', 'id', 'title', 'structure',
+                'url', 'upc', 'id', 'title', 'structure',
                 # 'parent', 'description', 'images', are not included by default, but
                 # easily enabled by overriding OSCARAPI_CHILDPRODUCTDETAIL_FIELDS
                 # in your settings file 
@@ -153,7 +153,7 @@ class ProductSerializer(BaseProductSerializer):
         fields = overridable(
             'OSCARAPI_PRODUCTDETAIL_FIELDS',
             default=(
-                'url', 'id', 'title', 'description', 'structure',
+                'url', 'upc', 'id', 'title', 'description', 'structure',
                 'date_created', 'date_updated', 'recommended_products',
                 'attributes', 'categories', 'product_class',
                 'stockrecords', 'images', 'price', 'availability', 'options',
@@ -164,7 +164,7 @@ class ProductLinkSerializer(ProductSerializer):
     class Meta(BaseProductSerializer.Meta):
         fields = overridable(
             'OSCARAPI_PRODUCT_FIELDS', default=(
-                'url', 'id', 'title'
+                'url', 'id', 'upc', 'title'
             ))
 
 
