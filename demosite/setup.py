@@ -23,7 +23,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'django-oscar-api',
-        'django>=1.9, <1.10',
-        'django-oscar>=1.3'
+        'django>=1.8, <2.0',
+        'django-oscar>=1.5.1'
     ],
 )
