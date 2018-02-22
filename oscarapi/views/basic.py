@@ -77,6 +77,7 @@ class LineAttributeList(generics.ListCreateAPIView):
 class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
     queryset = LineAttribute.objects.all()
     serializer_class = serializers.LineAttributeSerializer
+    permission_classes = (permissions.IsAdminUserOrRequestContainsLineAttribute,)  # noqa
 
 
 class StockRecordList(generics.ListAPIView):

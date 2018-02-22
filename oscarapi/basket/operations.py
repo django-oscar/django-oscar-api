@@ -131,6 +131,13 @@ def request_contains_line(request, line):
     return False
 
 
+def request_contains_lineattribute(request, lineattribute):
+    basket = get_basket(request, prepare=False)
+    if basket and basket.pk == lineattribute.line.basket.pk:
+        return request_contains_basket(request, basket)
+    return False
+
+
 def save_line_with_default_currency(line, *args, **kwargs):
     if not line.price_currency:
         line.price_currency = get_default_currency()
