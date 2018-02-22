@@ -6,7 +6,7 @@ RUN mkdir /code
 WORKDIR /code
 
 # Install Django
-RUN pip install Django==1.9.1
+RUN pip install "Django<2.0"
 
 # Add source
 ADD . /code/
