@@ -16,7 +16,7 @@ class BasketTest(APITest):
     fixtures = [
         'product', 'productcategory', 'productattribute', 'productclass',
         'productattributevalue', 'category', 'attributeoptiongroup', 'attributeoption',
-        'stockrecord', 'partner'
+        'stockrecord', 'partner', 'option'
     ]
 
     def test_basket_api_create(self):
@@ -978,3 +978,38 @@ class BasketTest(APITest):
         self.response = self.get(basket_line_url)
         self.response.assertStatusEqual(200)
         self.response.assertValueEqual('quantity', 4)
+
+    def test_add_put_product_option(self):
+        """Test if we can add and update the options of a line"""
+
+        # first select the first option available (which is color)
+        self.response = self.get('http://localhost:8000/api/options/')
+        option_url = self.response.json()[0]['url']
+
+        # add the option to the basket line, but without a value
+        self.response = self.post(
+            'api-basket-add-product',
+            url="http://testserver/api/products/1/",
+            quantity=1,
+            options=[{
+                "option": option_url, "value": "red"
+            }]
+        )
+        self.response.assertStatusEqual(200)
+
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
+
+        # Get the basket line, and see our option is there
+        basket_line_url = self.get(self.response['lines']).data[0]['url']
+        self.response = self.get(basket_line_url)
+        attribute = self.response.json()['attributes'][0]
+        self.assertEqual(attribute['value'], 'red')
+
+        # now update it to blue
+        self.response = self.put(attribute['url'], value='blue')
+        self.response.assertStatusEqual(200)
+
+        self.response = self.get(basket_line_url)
+        attribute = self.response.json()['attributes'][0]
+        self.assertEqual(attribute['value'], 'blue')
