@@ -1,8 +1,8 @@
-from oscarapi.basket.operations import (
-    request_contains_basket, request_contains_line,
-    request_contains_lineattribute
-)
 from rest_framework.permissions import BasePermission, IsAuthenticated
+
+from oscarapi.basket.operations import (
+    request_contains_related_basket, request_contains_basket
+)
 
 
 class HasUser(BasePermission):
@@ -20,23 +20,13 @@ class IsAdminUserOrRequestContainsBasket(HasUser):
         return request_contains_basket(request, obj) or request.user.is_staff
 
 
-class IsAdminUserOrRequestContainsLine(BasePermission):
+class IsAdminUserOrRequestContainsRelatedBasket(BasePermission):
     """
     Permission class that checks if a request contains the basket this line
-    belongs to.
+    or lineattribute belongs to.
     """
     def has_object_permission(self, request, view, obj):
-        return request_contains_line(request, obj) or request.user.is_staff
-
-
-class IsAdminUserOrRequestContainsLineAttribute(BasePermission):
-    """
-    Permission class that checks if a request contains the basket this
-    lineattribute belongs to.
-    """
-    def has_object_permission(self, request, view, obj):
-        return request_contains_lineattribute(
-            request, obj) or request.user.is_staff
+        return request_contains_related_basket(request, obj) or request.user.is_staff
 
 
 class IsOwner(IsAuthenticated):

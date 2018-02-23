@@ -286,7 +286,7 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
 class LineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     queryset = Line.objects.all()
     serializer_class = serializers.LineSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestContainsLine,)
+    permission_classes = (permissions.IsAdminUserOrRequestContainsRelatedBasket, )
 
     def get(self, request, pk=None, format=None):
         line = self.get_object()
@@ -306,7 +306,7 @@ class LineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
 class BasketLineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     queryset = Line.objects.all()
     serializer_class = serializers.BasketLineSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestContainsLine,)
+    permission_classes = (permissions.IsAdminUserOrRequestContainsRelatedBasket, )
 
     def get_queryset(self):
         basket_pk = self.kwargs.get('basket_pk')

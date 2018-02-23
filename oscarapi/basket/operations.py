@@ -19,6 +19,8 @@ __all__ = (
 )
 
 Basket = get_model('basket', 'Basket')
+Line = get_model('basket', 'Line')
+LineAttribute = get_model('basket', 'LineAttribute')
 Applicator = get_class('offer.applicator', 'Applicator')
 Selector = None
 
@@ -124,17 +126,17 @@ def flush_and_delete_basket(basket, using=None):
     basket.delete(using)
 
 
-def request_contains_line(request, line):
+def request_contains_related_basket(request, obj):
     basket = get_basket(request, prepare=False)
-    if basket and basket.pk == line.basket.pk:
-        return request_contains_basket(request, basket)
-    return False
 
+    if isinstance(obj, Line):
+        if basket and basket.pk == obj.basket.pk:
+            return request_contains_basket(request, basket)
 
-def request_contains_lineattribute(request, lineattribute):
-    basket = get_basket(request, prepare=False)
-    if basket and basket.pk == lineattribute.line.basket.pk:
-        return request_contains_basket(request, basket)
+    elif isinstance(obj, LineAttribute):
+        if basket and basket.pk == obj.line.basket.pk:
+            return request_contains_basket(request, basket)
+
     return False
 
 
