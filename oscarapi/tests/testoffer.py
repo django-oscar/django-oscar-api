@@ -1,6 +1,6 @@
 import json
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from oscar.core.loading import get_model
 

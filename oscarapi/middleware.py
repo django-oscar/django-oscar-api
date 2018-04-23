@@ -4,7 +4,7 @@ import re
 from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http.response import HttpResponse
 from django.utils.translation import ugettext as _
 
