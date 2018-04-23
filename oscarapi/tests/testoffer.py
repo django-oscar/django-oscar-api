@@ -17,11 +17,6 @@ class OfferTest(APITest):
         'attributeoption', 'stockrecord', 'partner', 'offer'
     ]
 
-    def setUp(self):
-        # make sure we have this disabled for most of the tests
-        settings.OSCAR_MAX_BASKET_QUANTITY_THRESHOLD = None
-        super(OfferTest, self).setUp()
-
     def test_basket_discount(self):
         "A discount should be properly applied to the basket total"
         self.response = self.post(

@@ -19,11 +19,6 @@ class BasketTest(APITest):
         'stockrecord', 'partner'
     ]
 
-    def setUp(self):
-        # make sure we have this disabled for most of the tests
-        settings.OSCAR_MAX_BASKET_QUANTITY_THRESHOLD = None
-        super(BasketTest, self).setUp()
-
     def test_basket_api_create(self):
         "The basket api create command should work with regular cookie based login"
         url = reverse('basket-list')
