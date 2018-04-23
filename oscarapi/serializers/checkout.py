@@ -213,7 +213,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     def validate(self, attrs):
         request = self.context['request']
 
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             if not settings.OSCAR_ALLOW_ANON_CHECKOUT:
                 message = _('Anonymous checkout forbidden')
                 raise serializers.ValidationError(message)

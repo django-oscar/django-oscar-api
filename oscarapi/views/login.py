@@ -47,7 +47,7 @@ class LoginView(APIView):
 
     def get(self, request, format=None):
         if settings.DEBUG:
-            if request.user.is_authenticated():
+            if request.user.is_authenticated:
                 ser = serializers.UserSerializer(request.user, many=False)
                 return Response(ser.data)
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -68,7 +68,7 @@ class LoginView(APIView):
 
             # refuse to login logged in users, to avoid attaching sessions to
             # multiple users at the same time.
-            if request.user.is_authenticated():
+            if request.user.is_authenticated:
                 return Response(
                     {'detail': 'Session is in use, log out first'},
                     status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -96,7 +96,7 @@ class LoginView(APIView):
         because there is no way to reach it otherwise.
         """
         request = request._request
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             basket = operations.get_anonymous_basket(request)
             if basket:
                 operations.flush_and_delete_basket(basket)

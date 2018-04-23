@@ -57,7 +57,7 @@ def prepare_basket(basket, request):
 
 def get_basket(request, prepare=True):
     "Get basket from the request."
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         basket = get_user_basket(request.user)
     else:
         basket = get_anonymous_basket(request)
@@ -110,7 +110,7 @@ def store_basket_in_session(basket, session):
 
 def request_contains_basket(request, basket):
     if basket.can_be_edited:
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             return request.user == basket.owner
 
         return get_basket_id_from_session(request) == basket.pk
