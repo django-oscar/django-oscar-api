@@ -15,9 +15,8 @@ python:
     - '3.6'
 
 env:
-    - DJANGO=Django==1.8.18 OSCAR=django-oscar==1.5.1
-    - DJANGO=Django==1.10.8 OSCAR=django-oscar==1.5.1
-    - DJANGO=Django==1.11.9 OSCAR=django-oscar==1.5.1
+    - DJANGO=Django==1.8.19 OSCAR=django-oscar==1.5.3
+    - DJANGO=Django==1.11.12 OSCAR=django-oscar==1.5.3
 
 before_install:
     - pip install codecov
