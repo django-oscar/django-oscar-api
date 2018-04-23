@@ -1,6 +1,7 @@
-import django
 from django.conf.urls import url
+
 from rest_framework.urlpatterns import format_suffix_patterns
+
 from oscarapi import views
 
 urlpatterns = [
@@ -44,8 +45,3 @@ urlpatterns = [
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)
-
-if django.VERSION[:2] < (1, 8):
-    from django.conf.urls import patterns
-
-    urlpatterns = patterns('', *urlpatterns)

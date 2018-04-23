@@ -6,7 +6,7 @@ from oscar.app import application as oscar
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^api/', include(api.urls)),
-    url(r'', include(oscar.urls)),
+    url(r'^api/', api.urls),
+    url(r'', oscar.urls),
 
 ]

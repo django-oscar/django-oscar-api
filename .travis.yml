@@ -2,29 +2,28 @@
 # http://docs.travis-ci.com/user/workers/container-based-infrastructure/
 sudo: false
 
-# Cache pip downloads
-cache:
-    directories:
-      - $HOME/.pip-cache/
-
 language: python
 
 python:
-    - '2.7.14'
-    - '3.5'
-    - '3.6'
+    - 2.7
+    - 3.5
+    - 3.6
 
 env:
-    - DJANGO=Django==1.8.19 OSCAR=django-oscar==1.5.3
     - DJANGO=Django==1.11.12 OSCAR=django-oscar==1.5.3
+    - DJANGO=Django==2.0.4 OSCAR=django-oscar==1.6rc1
+
+matrix:
+  exclude:
+    - python: 2.7
+      env: DJANGO=Django==2.0.4 OSCAR=django-oscar==1.6rc1
 
 before_install:
     - pip install codecov
 
 install:
     - pip install $OSCAR
-    # django rest framework 3.7+ and django-tables2 1.17+ are not compatible with django 1.8
-    - if [ ${DJANGO} == "Django==1.8.18" ]; then pip install "djangorestframework<3.7"; pip install "django-tables2<1.17.0"; fi
+    - if [ ${DJANGO} == "Django==2.0.4" ]; then pip install "djangorestframework>=3.7"; fi
     - make install
 
 script:
