@@ -101,6 +101,20 @@ class CheckoutView(views.APIView):
             "state": "Gerendrecht",
             "title": "Mr"
         }
+        "billing_address": {
+            "country": country_url,
+            "first_name": "Jos",
+            "last_name": "Henken",
+            "line1": "Boerderijstraat 19",
+            "line2": "",
+            "line3": "",
+            "line4": "Zwammerdam",
+            "notes": "",
+            "phone_number": "+31 27 112 9800",
+            "postcode": "6666LL",
+            "state": "Gerendrecht",
+            "title": "Mr"
+         }
     }
     returns the order object.
     """

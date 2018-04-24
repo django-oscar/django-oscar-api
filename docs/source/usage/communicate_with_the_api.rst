@@ -264,6 +264,22 @@ When your basket is filled an you want to proceed to checkout you can do a singl
         }
     }
 
+    # you can specify a different billing address if you want to
+    data['billing_address'] = {
+        "country": country_url,
+        "first_name": "Jos",
+        "last_name": "Henken",
+        "line1": "Boerderijstraat 19",
+        "line2": "",
+        "line3": "",
+        "line4": "Zwammerdam",
+        "notes": "",
+        "phone_number": "+31 27 112 9800",
+        "postcode": "6666LL",
+        "state": "Gerendrecht",
+        "title": "Mr"
+     }
+
     # now we can place the order
     response = session.post('http://localhost:8000/api/checkout/', json=data)
 
