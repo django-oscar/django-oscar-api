@@ -6,8 +6,7 @@ clean:
 	find . -name '*.egg-info' -delete
 
 install:
-	pip install -e .[dev]
-	pip install django-oscar-api[docs]
+	pip install -e .[dev,docs]
 
 sandbox: install
 	python sandbox/manage.py migrate
