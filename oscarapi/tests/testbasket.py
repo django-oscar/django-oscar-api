@@ -821,7 +821,7 @@ class BasketTest(APITest):
         self.login('nobody', 'nobody')
         self.response = self.get('api-basket')
         self.response.assertStatusEqual(200)
-        
+
         self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
         self.response = self.get(self.response['lines'])
         line0 = self.response.body[0]
@@ -858,6 +858,7 @@ class BasketTest(APITest):
         
         self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5, session_id='nobody', authenticated=True)
         self.response = self.get(self.response['lines'], session_id='nobody', authenticated=True)
+
         line0 = self.response.body[0]
         line0url = line0['url']
 
@@ -928,12 +929,12 @@ class BasketTest(APITest):
         """Test if an anonymous user cannot add more than two products to his
             basket when amount of baskets is limited
         """
-        settings.OSCAR_MAX_BASKET_QUANTITY_THRESHOLD = 2
-        self.response = self.post(
-            'api-basket-add-product',
-            url="http://testserver/api/products/1/",
-            quantity=3)
-        self.response.assertStatusEqual(406)
+        with self.settings(OSCAR_MAX_BASKET_QUANTITY_THRESHOLD=2):
+            self.response = self.post(
+                'api-basket-add-product',
+                url="http://testserver/api/products/1/",
+                quantity=3)
+            self.response.assertStatusEqual(406)
 
     def test_total_prices_anonymous(self):
         "Test if the prices calcualted by the basket are ok"
