@@ -8,4 +8,5 @@ omit =
    *sandbox/*
    *oscarapi/tests/*
    *site-packages*
+   *demosite/*
 
