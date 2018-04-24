@@ -1,6 +1,20 @@
 =========
 Changelog
 =========
+
+1.3.1 (2018-04-24)
+------------------
+Features:
+  * #118 Added ``code`` field in the ``ProductAttributeValueSerializer``.
+  * #119 Default add ``upc`` to the ``ProductSerializer``
+
+Fixes:
+  * Added app_label to the `ApiKey` model so you don't need to have `oscarapi` in INSTALLED_APPS when using oscarapi middleware classes (when you don't need oscarapi specific models).
+
+Notes:
+  Dropped support for Django 1.10.x.
+
+
 1.3.0 (2018-01-16)
 ------------------
 Features:
