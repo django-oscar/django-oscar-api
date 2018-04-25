@@ -22,8 +22,9 @@ class BasketTest(APITest):
     def test_basket_api_create(self):
         "The basket api create command should work with regular cookie based login"
         url = reverse('basket-list')
-        empty = Basket.objects.all()
-        self.assertFalse(empty.exists(), "There should be no baskets yet.")
+        baskets = Basket.objects.all()
+
+        self.assertFalse(baskets.exists(), "There should be no baskets yet.")
 
         # anonymous
         data = {}
@@ -48,6 +49,7 @@ class BasketTest(APITest):
 
         # When we created a basket, it should be listed in the basket-list view
         self.response = self.client.get(url, content_type='application/json')
+
         self.assertEqual(len(self.response.data), 1)
 
         data = {}

@@ -171,6 +171,7 @@ class ApiGatewayMiddleWare(MiddlewareMixin, IsApiRequest):
     """
     Protect the api gateway with a token.
     """
+
     def process_request(self, request):
         if self.is_api_request(request):
             key = authentication.get_authorization_header(request)
@@ -191,6 +192,10 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
     """
     Use this middleware instead of Oscar's basket middleware if you
     want to mix the api with regular oscar views.
+
+    Note that this middleware only works with MIDDLEWARE (Django > 1.10)
+    as MIDDLEWARE_CLASSES is deprecated and Oscar drops the MiddlewareMixin
+    compatibility in BasketMiddleware since version 1.6
 
     Oscar uses a cookie based session to store baskets for anonymous users, but
     oscarapi can not do that, because we don't want to put the burden

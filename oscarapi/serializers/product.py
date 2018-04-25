@@ -54,7 +54,7 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
                 return obj.value.json()
             else:
                 return _(
-                    "%(entity)s has no json method, can not convert to json"  % {
+                    "%(entity)s has no json method, can not convert to json" % {
                         'entity': repr(obj.value)
                     }
                 )
@@ -140,7 +140,7 @@ class ChildProductserializer(BaseProductSerializer):
                 'url', 'upc', 'id', 'title', 'structure',
                 # 'parent', 'description', 'images', are not included by default, but
                 # easily enabled by overriding OSCARAPI_CHILDPRODUCTDETAIL_FIELDS
-                # in your settings file 
+                # in your settings file
                 'date_created', 'date_updated', 'recommended_products',
                 'attributes', 'categories', 'product_class',
                 'stockrecords', 'price', 'availability', 'options'))
