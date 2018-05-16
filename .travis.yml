@@ -10,20 +10,20 @@ python:
     - 3.6
 
 env:
-    - DJANGO=Django==1.11.12 OSCAR=django-oscar==1.5.3
-    - DJANGO=Django==2.0.4 OSCAR=django-oscar==1.6rc1
+    - DJANGO=Django==1.11.13 OSCAR=django-oscar==1.5.4
+    - DJANGO=Django==2.0.5 OSCAR=django-oscar==1.6rc2
 
 matrix:
   exclude:
     - python: 2.7
-      env: DJANGO=Django==2.0.4 OSCAR=django-oscar==1.6rc1
+      env: DJANGO=Django==2.0.5 OSCAR=django-oscar==1.6rc2
 
 before_install:
     - pip install codecov
 
 install:
     - pip install $OSCAR
-    - if [ ${DJANGO} == "Django==2.0.4" ]; then pip install "djangorestframework>=3.7"; fi
+    - if [ ${DJANGO} == "Django==2.0.5" ]; then pip install "djangorestframework>=3.7"; fi
     - make install
 
 script:
