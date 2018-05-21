@@ -16,7 +16,7 @@ test:
 	python sandbox/manage.py test oscarapi --settings=sandbox.settings.nomigrations
 
 coverage:
-	coverage run sandbox/manage.py test oscarapi
+	coverage run sandbox/manage.py test oscarapi --settings=sandbox.settings.nomigrations
 	coverage report -m
 	coverage xml -i
 

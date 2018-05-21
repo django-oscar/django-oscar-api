@@ -163,6 +163,7 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 NOSE_ARGS = [
     '-v',
+    '--with-doctest',
 ]
 
 TIME_ZONE = 'UTC'
