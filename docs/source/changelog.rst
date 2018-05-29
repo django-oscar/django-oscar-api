@@ -3,6 +3,7 @@ Changelog
 =========
 
 1.4.0 (2018-05-29)
+------------------
 Features:
  - #124 Drops support for Django 1.8, added support for Django 2.0, added support for Oscar 1.6
 
