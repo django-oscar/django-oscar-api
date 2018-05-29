@@ -4,7 +4,7 @@ from importlib import import_module
 
 from django.conf import settings
 from django.contrib import auth
-from django.core.urlresolvers import NoReverseMatch
+from django.urls import NoReverseMatch
 
 from rest_framework import serializers, exceptions, relations
 from rest_framework.reverse import reverse

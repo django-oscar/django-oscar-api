@@ -68,6 +68,7 @@ Product serializers
 .. autoclass:: oscarapi.serializers.product.OptionSerializer
 .. autoclass:: oscarapi.serializers.product.ProductLinkSerializer
 .. autoclass:: oscarapi.serializers.product.RecommmendedProductSerializer
+.. autoclass:: oscarapi.serializers.product.ChildProductSerializer
 .. autoclass:: oscarapi.serializers.product.ProductSerializer
 .. autoclass:: oscarapi.serializers.product.ProductAttributeSerializer
 .. autoclass:: oscarapi.serializers.product.ProductAttributeValueSerializer

@@ -1,8 +1,8 @@
 from django.conf.urls import url
 
-from mycustomapi import views
-
 from oscarapi.app import RESTApiApplication
+
+from . import views
 
 
 class MyRESTApiApplication(RESTApiApplication):
@@ -13,5 +13,6 @@ class MyRESTApiApplication(RESTApiApplication):
             views.ProductList.as_view(), name='product-list')]
 
         return urls + super(MyRESTApiApplication, self).get_urls()
+
 
 application = MyRESTApiApplication()

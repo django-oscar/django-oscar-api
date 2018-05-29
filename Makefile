@@ -6,18 +6,17 @@ clean:
 	find . -name '*.egg-info' -delete
 
 install:
-	pip install -e .[dev]
-	pip install django-oscar-api[docs]
+	pip install -e .[dev,docs]
 
 sandbox: install
 	python sandbox/manage.py migrate
 	python sandbox/manage.py loaddata product productcategory productattribute productclass productattributevalue category attributeoptiongroup attributeoption stockrecord partner voucher country
 
 test: 
-	python sandbox/manage.py test oscarapi
+	python sandbox/manage.py test oscarapi --settings=sandbox.settings.nomigrations
 
 coverage:
-	coverage run sandbox/manage.py test oscarapi
+	coverage run sandbox/manage.py test oscarapi --settings=sandbox.settings.nomigrations
 	coverage report -m
 	coverage xml -i
 

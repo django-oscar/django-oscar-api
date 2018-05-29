@@ -39,7 +39,7 @@ steps:
 
     urlpatterns = (
         # all the things you already have
-        url(r'^api/', include(api.urls)),
+        url(r'^api/', api.urls),
     )
 
 See the Documentation_ for more information and the Changelog_ for release notes.

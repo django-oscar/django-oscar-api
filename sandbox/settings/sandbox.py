@@ -106,7 +106,7 @@ LOGGING = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'oscarapi.middleware.HeaderSessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -160,6 +160,11 @@ TEMPLATES = [
 ]
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+    '-v',
+    '--with-doctest',
+]
 
 TIME_ZONE = 'UTC'
 

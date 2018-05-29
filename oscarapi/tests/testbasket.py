@@ -2,7 +2,7 @@ import json
 import re
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from oscar.core.loading import get_model
 
@@ -19,16 +19,12 @@ class BasketTest(APITest):
         'stockrecord', 'partner'
     ]
 
-    def setUp(self):
-        # make sure we have this disabled for most of the tests
-        settings.OSCAR_MAX_BASKET_QUANTITY_THRESHOLD = None
-        super(BasketTest, self).setUp()
-
     def test_basket_api_create(self):
         "The basket api create command should work with regular cookie based login"
         url = reverse('basket-list')
-        empty = Basket.objects.all()
-        self.assertFalse(empty.exists(), "There should be no baskets yet.")
+        baskets = Basket.objects.all()
+
+        self.assertFalse(baskets.exists(), "There should be no baskets yet.")
 
         # anonymous
         data = {}
@@ -53,6 +49,7 @@ class BasketTest(APITest):
 
         # When we created a basket, it should be listed in the basket-list view
         self.response = self.client.get(url, content_type='application/json')
+
         self.assertEqual(len(self.response.data), 1)
 
         data = {}
@@ -826,7 +823,7 @@ class BasketTest(APITest):
         self.login('nobody', 'nobody')
         self.response = self.get('api-basket')
         self.response.assertStatusEqual(200)
-        
+
         self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
         self.response = self.get(self.response['lines'])
         line0 = self.response.body[0]
@@ -863,6 +860,7 @@ class BasketTest(APITest):
         
         self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5, session_id='nobody', authenticated=True)
         self.response = self.get(self.response['lines'], session_id='nobody', authenticated=True)
+
         line0 = self.response.body[0]
         line0url = line0['url']
 
@@ -933,12 +931,12 @@ class BasketTest(APITest):
         """Test if an anonymous user cannot add more than two products to his
             basket when amount of baskets is limited
         """
-        settings.OSCAR_MAX_BASKET_QUANTITY_THRESHOLD = 2
-        self.response = self.post(
-            'api-basket-add-product',
-            url="http://testserver/api/products/1/",
-            quantity=3)
-        self.response.assertStatusEqual(406)
+        with self.settings(OSCAR_MAX_BASKET_QUANTITY_THRESHOLD=2):
+            self.response = self.post(
+                'api-basket-add-product',
+                url="http://testserver/api/products/1/",
+                quantity=3)
+            self.response.assertStatusEqual(406)
 
     def test_total_prices_anonymous(self):
         "Test if the prices calcualted by the basket are ok"

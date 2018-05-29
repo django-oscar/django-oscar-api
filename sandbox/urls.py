@@ -5,7 +5,7 @@ from oscarapi.app import application as api
 
 urlpatterns = [
     url(r'^i18n/', include('django.conf.urls.i18n')),
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^api/', include(api.urls)),
-    url(r'', include(application.urls)),
+    url(r'^admin/', admin.site.urls),
+    url(r'^api/', api.urls),
+    url(r'', application.urls),
 ]

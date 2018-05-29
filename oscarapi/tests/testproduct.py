@@ -1,7 +1,7 @@
 import mock
 from six import string_types
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from oscarapi.tests.utils import APITest
 from oscarapi.serializers.product import ProductLinkSerializer

@@ -13,7 +13,7 @@ To use the oscarapi application in an oscar ecommerce site without overriding or
     from oscarapi.app import application as api
     urlpatterns = [
         # ... all the things you allready got
-        url(r'^api/', include(api.urls)),
+        url(r'^api/', api.urls),
     ]
 
 .. _mixed-usage-label:

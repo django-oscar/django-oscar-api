@@ -330,7 +330,7 @@ class CheckOutTest(APITest):
         self.response = self.get('order-list')
         self.assertEqual(len(self.response), 1, 'An order should have been created.')
 
-    @unittest.skip
+    @unittest.skip('Please add implementation')
     def test_checkout_header(self):
         "Prove that the user 'nobody' can checkout his cart when authenticating with header session"
         self.fail('Please add implementation')
@@ -450,12 +450,12 @@ class CheckOutTest(APITest):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data, "Unauthorized")
 
-    @unittest.skip
+    @unittest.skip('Please add implementation')
     def test_cart_immutable_after_checkout(self):
         "Prove that the cart can not be changed with the webservice by users in any way after checkout has been made."
         self.fail("It might be that admin users can actually still modify a checked out cart (frozen)")
 
-    @unittest.skip
+    @unittest.skip('Please add implementation')
     def test_client_can_not_falsify_picing(self):
         "Prove that the total and shippingcharge variable sent along with a checkout request, can not be manipulated"
         self.fail('checkout variable can not be used to buy products for prices they are not available at.')

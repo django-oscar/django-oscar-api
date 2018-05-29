@@ -4,7 +4,7 @@ from django.db import IntegrityError
 from rest_framework.response import Response
 
 from django.conf import settings
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.urls import reverse, NoReverseMatch
 from django.utils.translation import gettext as _
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
@@ -213,7 +213,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     def validate(self, attrs):
         request = self.context['request']
 
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             if not settings.OSCAR_ALLOW_ANON_CHECKOUT:
                 message = _('Anonymous checkout forbidden')
                 raise serializers.ValidationError(message)

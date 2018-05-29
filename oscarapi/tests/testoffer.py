@@ -1,6 +1,6 @@
 import json
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from oscar.core.loading import get_model
 
@@ -16,11 +16,6 @@ class OfferTest(APITest):
         'productattributevalue', 'category', 'attributeoptiongroup', 
         'attributeoption', 'stockrecord', 'partner', 'offer'
     ]
-
-    def setUp(self):
-        # make sure we have this disabled for most of the tests
-        settings.OSCAR_MAX_BASKET_QUANTITY_THRESHOLD = None
-        super(OfferTest, self).setUp()
 
     def test_basket_discount(self):
         "A discount should be properly applied to the basket total"

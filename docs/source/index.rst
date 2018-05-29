@@ -15,16 +15,16 @@ Requirements:
 -------------
 This version of Oscar API is compatbile with python 2.7 / 3.5 / 3.6 and the following django versions:
 
-Django 1.8:
-~~~~~~~~~~~
-- Oscar 1.5.3
-- requires `djangorestframework<3.7`, and `django-tables2<1.17.0`
-
 Django 1.11:
 ~~~~~~~~~~~~
-- Osccar 1.5.3 
+- Osccar 1.5.3 / 1.6
 - requires `djangorestframework>=3.4`
 
+Django 2.0:
+~~~~~~~~~~~
+- Oscar 1.6
+- requires `djangorestframework>=3.7`
+- requires python 3.x
 
 See `Travis`_ for the current tested platforms.
 
