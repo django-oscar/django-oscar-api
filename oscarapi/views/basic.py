@@ -54,9 +54,9 @@ class BasketList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = super(BasketList, self).get_queryset()
-        return map(
+        return list(map(
             functools.partial(assign_basket_strategy, request=self.request),
-            qs)
+            qs))
 
 
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
