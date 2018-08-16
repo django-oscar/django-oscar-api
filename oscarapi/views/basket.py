@@ -157,6 +157,29 @@ class AddVoucherView(APIView):
 
 
 class ShippingMethodView(APIView):
+    """
+    GET:
+    Retrieve shipping methods available to the user, basket, request combination
+    
+    POST(shipping_address):
+    {
+        "country": "http://127.0.0.1:8000/oscarapi/countries/NL/",
+        "first_name": "Henk",
+        "last_name": "Van den Heuvel",
+        "line1": "Roemerlaan 44",
+        "line2": "",
+        "line3": "",
+        "line4": "Kroekingen",
+        "notes": "Niet STUK MAKEN OK!!!!",
+        "phone_number": "+31 26 370 4887",
+        "postcode": "7777KK",
+        "state": "Gerendrecht",
+        "title": "Mr"
+    }
+
+    Post a shipping_address if your shipping methods are dependent on the
+    address. 
+    """
     serializer_class = serializers.ShippingAddressSerializer
 
     def _get(self, request, shipping_address=None, format=None):
