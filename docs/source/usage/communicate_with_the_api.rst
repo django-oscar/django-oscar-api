@@ -337,7 +337,7 @@ When your basket is filled an you want to proceed to checkout you can do a singl
     An extension on top of django-oscar-api providing a more flexible checkout API with a pluggable payment methods
     is written by Craig Weber, see `django oscar api checkout`_
 
-.. _`django oscar api checkout`: https://gitlab.com/thelabnyc/django-oscar-api-checkout
+.. _`django oscar api checkout`: https://gitlab.com/thelabnyc/django-oscar/django-oscar-api-checkout
 
 
 .. _login-user-label:
