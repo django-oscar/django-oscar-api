@@ -93,7 +93,14 @@ class InlineBillingAddressSerializer(OscarModelSerializer):
 class ShippingMethodSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=128)
     name = serializers.CharField(max_length=128)
+    description = serializers.CharField()
     price = serializers.SerializerMethodField('calculate_price')
+    is_discounted =  serializers.BooleanField()
+    discount = serializers.SerializerMethodField('calculate_discount')
+
+    def calculate_discount(self, obj):
+        basket = self.context.get('basket')
+        return obj.discount(basket)
 
     def calculate_price(self, obj):
         price = obj.calculate(self.context.get('basket'))
