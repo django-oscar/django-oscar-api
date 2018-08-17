@@ -20,8 +20,8 @@ Django 1.11:
 - Osccar 1.5.3 / 1.6
 - requires `djangorestframework>=3.4`
 
-Django 2.0:
-~~~~~~~~~~~
+Django 2.0 and 2.1:
+~~~~~~~~~~~~~~~~~~~
 - Oscar 1.6
 - requires `djangorestframework>=3.7`
 - requires python 3.x
