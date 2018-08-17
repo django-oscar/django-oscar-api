@@ -479,6 +479,9 @@ class CheckOutTest(APITest):
         self.assertDictEqual(self.response[0], {
             'code': 'no-shipping-required',
             'name': 'No shipping required',
+            'description': "",
+            'is_discounted': False,
+            'discount': 0,
             'price': {
                 'currency': None,
                 'excl_tax': '0.00',
@@ -497,6 +500,9 @@ class CheckOutTest(APITest):
         self.assertDictEqual(self.response[0], {
             'code': 'free-shipping',
             'name': 'Free shipping',
+            'description': "",
+            'is_discounted': False,
+            'discount': 0,
             'price': {
                 'currency': 'EUR',
                 'excl_tax': '0.00',
