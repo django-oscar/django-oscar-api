@@ -2,10 +2,19 @@
 Changelog
 =========
 
+1.4.1 (2018-08-17)
+------------------
+Features:
+  * #128 Improved shipping method API: It's now possible to check shipping options when shipping address is known
+
+Fixes:
+  * #127 Fix for Python 3 compatibility (fquinner)
+
+
 1.4.0 (2018-05-29)
 ------------------
 Features:
- - #124 Drops support for Django 1.8, added support for Django 2.0, added support for Oscar 1.6
+ * #124 Drops support for Django 1.8, added support for Django 2.0, added support for Oscar 1.6
 
 Notes:
   Dropped support for Django < 1.11
