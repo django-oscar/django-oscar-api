@@ -450,6 +450,62 @@ class CheckOutTest(APITest):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data, "Unauthorized")
 
+    def test_shipping_methods(self):
+        """Test if shipping methods can be fetched for baskets."""
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = response.data
+        basket_url = basket.get('url')
+        basket_id = basket.get('id')
+
+        request =  {
+            "country": "http://127.0.0.1:8000/api/countries/NL/",
+            "first_name": "Henk",
+            "last_name": "Van den Heuvel",
+            "line1": "Roemerlaan 44",
+            "line2": "",
+            "line3": "",
+            "line4": "Kroekingen",
+            "notes": "Niet STUK MAKEN OK!!!!",
+            "phone_number": "+31 26 370 4887",
+            "postcode": "7777KK",
+            "state": "Gerendrecht",
+            "title": "Mr"
+        }
+        self.response = self.post('api-basket-shipping-methods', **request)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response), 1)
+        self.assertDictEqual(self.response[0], {
+            'code': 'no-shipping-required',
+            'name': 'No shipping required',
+            'price': {
+                'currency': None,
+                'excl_tax': '0.00',
+                'incl_tax': '0.00',
+                'tax': '0.00'
+            }
+        })
+        response = self.post(
+            'api-basket-add-product',
+            url="http://testserver/api/products/1/", quantity=5)
+        self.assertEqual(response.status_code, 200)
+
+        self.response = self.post('api-basket-shipping-methods', **request)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response), 1)
+        self.assertDictEqual(self.response[0], {
+            'code': 'free-shipping',
+            'name': 'Free shipping',
+            'price': {
+                'currency': 'EUR',
+                'excl_tax': '0.00',
+                'incl_tax': '0.00',
+                'tax': '0.00'
+            }
+        })
+
+
     @unittest.skip('Please add implementation')
     def test_cart_immutable_after_checkout(self):
         "Prove that the cart can not be changed with the webservice by users in any way after checkout has been made."

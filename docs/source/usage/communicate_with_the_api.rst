@@ -206,7 +206,12 @@ Now we will delete this line, it will return a 204 when it's successful:
 Place an order (checkout)
 -------------------------
 
-When your basket is filled an you want to proceed to checkout you can do a single call with all information needed. Note that we are doing an anonymous checkout here, so we need to set the `guest_email` field. (Make sure that ``OSCAR_ALLOW_ANON_CHECKOUT`` is set to ``True`` in your ``settings.py``). If you don't support anonymous checkouts you will have to login the user first (see login example below).
+When your basket is filled an you want to proceed to checkout you can do a
+single call with all information needed. Note that we are doing an anonymous
+checkout here, so we need to set the `guest_email` field. (Make sure that
+``OSCAR_ALLOW_ANON_CHECKOUT`` is set to ``True`` in your ``settings.py``).
+If you don't support anonymous checkouts you will have to login the user first
+(see login example below).
 
 .. code-block:: python
 
@@ -236,12 +241,32 @@ When your basket is filled an you want to proceed to checkout you can do a singl
     # we need the country url in the shipping address
     country_url = countries[0]['url']
 
+    # we need to check the available shipping options
+    response = session.get('http://localhost:8000/api/basket/shipping-methods/')
+    shipping_methods = response.json()
+    print(shipping_methods)
+    [
+        {
+            "code": "free-shipping",
+            "name": "Free shipping",
+            "price": {
+                "currency": "EUR",
+                "excl_tax": "0.00",
+                "incl_tax": "0.00",
+                "tax": "0.00"
+            }
+        }
+    ]
+
+    # pick one
+    shipping_method = shipping_methods[0]
+
     # let's fill out the request data
     data = {
         "basket": basket_data['url'],
         "guest_email": guest_email,
         "total": basket_data['total_incl_tax'],
-        "shipping_method_code": "no-shipping-required",
+        "shipping_method_code": shipping_method['code'],
         # the shipping charge is optional, but we leave it here for example purposes
         "shipping_charge": {
             "currency": basket_data['currency'],
@@ -329,6 +354,28 @@ When your basket is filled an you want to proceed to checkout you can do a singl
 
 .. note::
     After you placed an order with the api, the basket is frozen. Oscar API has checks for this in the checkout view and won't let you checkout the same (or any frozen) basket again. At this stage an order is submitted in Oscar and you will have to implement the following steps regarding payment yourself. See the ``payment_url`` field above in the response. You can also use the regular Oscar checkout views if you like, take a look at the :ref:`mixed-usage-label` section.
+
+.. note::
+    If your shipping methods depend in any way on the shipping address, you can
+    also POST to the shipping_method api. Just post the shipping details in
+    the same format as accepted by the checkout api::
+    
+      {
+          "country": "http://localhost:8000/api/countries/NL/",
+          "first_name": "Henk",
+          "id": 3,
+          "last_name": "Van den Heuvel",
+          "line1": "Roemerlaan 44",
+          "line2": "",
+          "line3": "",
+          "line4": "Kroekingen",
+          "notes": "",
+          "phone_number": "+31 26 370 4887",
+          "postcode": "7777KK",
+          "search_text": "Henk Van den Heuvel Roemerlaan 44 Kroekingen Gerendrecht 7777KK Kingdom of the Netherlands",
+          "state": "Gerendrecht",
+          "title": "Mr"
+      }
 
 .. note::
     In the checkout view of Oscar, the function ``handle_successful_order`` is called after placing an order. This sends the order confirmation message, flushes your session and sends the ``post_checkout`` signal. The Oscar API checkout view is not calling this method by design. If you would like to send a confirmation message (or other stuff you need to do) after placing an order you can subscribe to the ``oscarapi_post_checkout`` signal, see :doc:`/usage/signals`.

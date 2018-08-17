@@ -15,11 +15,12 @@ from oscarapi.views.mixin import PutIsPatchMixin
 from oscarapi.views.utils import BasketPermissionMixin
 
 __all__ = ('BasketView', 'LineList', 'LineDetail', 'AddProductView',
-           'BasketLineDetail', 'AddVoucherView', 'shipping_methods')
+           'BasketLineDetail', 'AddVoucherView', 'ShippingMethodView')
 
 Basket = get_model('basket', 'Basket')
 Line = get_model('basket', 'Line')
 Repository = get_class('shipping.repository', 'Repository')
+ShippingAddress = get_model('order', 'ShippingAddress')
 
 
 class BasketView(APIView):
@@ -155,22 +156,62 @@ class AddVoucherView(APIView):
         return Response(v_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
-@api_view(('GET',))
-def shipping_methods(request, format=None):
+class ShippingMethodView(APIView):
     """
-    Get the available shipping methods and their cost for this order.
-
     GET:
-    A list of shipping method details and the prices.
-    """
-    basket = operations.get_basket(request)
-    shiping_methods = Repository().get_shipping_methods(
-        basket=basket, user=request.user,
-        request=request)
-    ser = serializers.ShippingMethodSerializer(
-        shiping_methods, many=True, context={'basket': basket})
-    return Response(ser.data)
+    Retrieve shipping methods available to the user, basket, request combination
+    
+    POST(shipping_address):
+    {
+        "country": "http://127.0.0.1:8000/oscarapi/countries/NL/",
+        "first_name": "Henk",
+        "last_name": "Van den Heuvel",
+        "line1": "Roemerlaan 44",
+        "line2": "",
+        "line3": "",
+        "line4": "Kroekingen",
+        "notes": "Niet STUK MAKEN OK!!!!",
+        "phone_number": "+31 26 370 4887",
+        "postcode": "7777KK",
+        "state": "Gerendrecht",
+        "title": "Mr"
+    }
 
+    Post a shipping_address if your shipping methods are dependent on the
+    address. 
+    """
+    serializer_class = serializers.ShippingAddressSerializer
+
+    def _get(self, request, shipping_address=None, format=None):
+        basket = operations.get_basket(request)
+        shiping_methods = Repository().get_shipping_methods(
+            basket=basket, user=request.user, shipping_addr=shipping_address,
+            request=request)
+        ser = serializers.ShippingMethodSerializer(
+            shiping_methods, many=True, context={'basket': basket})
+        return Response(ser.data)
+
+    def get(self, request, format=None):
+        """
+        Get the available shipping methods and their cost for this order.
+
+        GET:
+        A list of shipping method details and the prices.
+        """
+        return self._get(request, format=format)
+
+    def post(self, request, format=None):
+        s_ser = self.serializer_class(
+            data=request.data, context={'request': request})
+        if s_ser.is_valid():
+            shipping_address = ShippingAddress(**s_ser.validated_data)
+            return self._get(
+                request,
+                format=format,
+                shipping_address=shipping_address
+            )
+
+        return Response(s_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE) 
 
 class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
     """
