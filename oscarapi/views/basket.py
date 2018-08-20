@@ -181,13 +181,14 @@ class ShippingMethodView(APIView):
     address. 
     """
     serializer_class = serializers.ShippingAddressSerializer
+    shipping_method_serializer_class = serializers.ShippingMethodSerializer
 
     def _get(self, request, shipping_address=None, format=None):
         basket = operations.get_basket(request)
         shiping_methods = Repository().get_shipping_methods(
             basket=basket, user=request.user, shipping_addr=shipping_address,
             request=request)
-        ser = serializers.ShippingMethodSerializer(
+        ser = self.shipping_method_serializer_class(
             shiping_methods, many=True, context={'basket': basket})
         return Response(ser.data)
 
