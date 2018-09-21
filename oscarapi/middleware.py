@@ -11,6 +11,7 @@ from django.utils.translation import ugettext as _
 
 from oscar.core.loading import get_class
 
+from rest_framework import HTTP_HEADER_ENCODING
 from rest_framework import exceptions
 from rest_framework import authentication
 
@@ -175,6 +176,7 @@ class ApiGatewayMiddleWare(MiddlewareMixin, IsApiRequest):
     def process_request(self, request):
         if self.is_api_request(request):
             key = authentication.get_authorization_header(request)
+            key = key.decode(HTTP_HEADER_ENCODING)
             if models.ApiKey.objects.filter(key=key).exists():
                 return None
 
