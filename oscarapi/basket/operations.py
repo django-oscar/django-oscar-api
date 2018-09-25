@@ -1,5 +1,6 @@
 "This module contains operation on baskets and lines"
 from django.conf import settings
+
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
 
@@ -14,7 +15,7 @@ __all__ = (
     'store_basket_in_session',
     'request_contains_basket',
     'flush_and_delete_basket',
-    'request_contains_line',
+    'request_contains_related_basket',
     'save_line_with_default_currency',
 )
 
