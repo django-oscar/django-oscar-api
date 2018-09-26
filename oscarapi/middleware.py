@@ -38,46 +38,7 @@ HTTP_SESSION_ID_REGEX = re.compile(
 
 
 def parse_session_id(request):
-    """
-    Parse a session id from the request.
-
-    >>> class request:
-    ...      META = {'HTTP_SESSION_ID': None}
-    >>>
-    >>> request.META['HTTP_SESSION_ID'] = 'SID:ANON:example.com:987171879'
-    >>> sorted(parse_session_id(request).items())
-    [('realm', 'example.com'), ('session_id', '987171879'), ('type', 'ANON')]
-    >>>
-    >>> request.META['HTTP_SESSION_ID'] = 'SID:AUTH:example.com:987171879'
-    >>> sorted(parse_session_id(request).items())
-    [('realm', 'example.com'), ('session_id', '987171879'), ('type', 'AUTH')]
-    >>>
-    >>> request.META['HTTP_SESSION_ID'] = 'SID:ANON:example.com:987171879-16EF'
-    >>> sorted(parse_session_id(request).items())
-    [('realm', 'example.com'), ('session_id', '987171879'), ('type', 'ANON')]
-    >>>
-    >>> request.META['HTTP_SESSION_ID'] = 'SID:ANON:example.com:98717-16EF:100'
-    >>> sorted(parse_session_id(request).items())
-    [('realm', 'example.com'), ('session_id', '98717'), ('type', 'ANON')]
-    >>>
-    >>> request.META['HTTP_SESSION_ID'] = 'SID:ANON::987171879'
-    >>> sorted(parse_session_id(request).items())
-    [('realm', ''), ('session_id', '987171879'), ('type', 'ANON')]
-    >>>
-    >>> request.META['HTTP_SESSION_ID'] = 'SID:ANON:example.com:923-thread1'
-    >>> sorted(parse_session_id(request).items())
-    [('realm', 'example.com'), ('session_id', '923-thread1'), ('type', 'ANON')]
-    >>>
-    >>> request.META['HTTP_SESSION_ID'] = 'SID:BULLSHIT:example.com:987171879'
-    >>> parse_session_id(request)
-    
-    >>> request.META['HTTP_SESSION_ID'] = 'ENTIREGABRBAGE'
-    >>> parse_session_id(request)
-    
-    >>> request.META['HTTP_SESSION_ID'] = 'SID:ANON:987171879'
-    >>> parse_session_id(request)
-    
-    """
+    """Parse a session id from the request"""
     unparsed_session_id = request.META.get('HTTP_SESSION_ID', None)
     if unparsed_session_id is not None:
         parsed_session_id = HTTP_SESSION_ID_REGEX.match(unparsed_session_id)
