@@ -1,8 +1,6 @@
 import json
 from re import match
 
-from django.conf import settings
-from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.urls import reverse, NoReverseMatch
 from django.http import SimpleCookie
@@ -123,6 +121,7 @@ class APITest(TestCase):
     def response(self, response):
         self._response = ParsedReponse(response, self)
 
+
 class ParsedReponse(object):
     def __init__(self, response, unittestcase):
         self.response = response
@@ -138,7 +137,7 @@ class ParsedReponse(object):
         self.status_code = response.status_code
         try:
             self.body = response.data
-        except:
+        except Exception as e:
             self.body = None
 
     def __getattr__(self, name):
