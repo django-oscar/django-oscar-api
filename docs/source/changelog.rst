@@ -2,6 +2,11 @@
 Changelog
 =========
 
+1.5.1 (2018-10-01)
+------------------
+Fixes:
+  * #134 Fixed issue in post checkout signal: Make sure we send the response instance, and not the DRF module
+
 1.5.0 (2018-10-01)
 ------------------
 Features:
