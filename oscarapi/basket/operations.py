@@ -1,5 +1,6 @@
 "This module contains operation on baskets and lines"
 from django.conf import settings
+
 from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
 
@@ -12,13 +13,14 @@ __all__ = (
     'get_anonymous_basket',
     'get_user_basket',
     'store_basket_in_session',
-    'request_contains_basket',
     'flush_and_delete_basket',
-    'request_contains_line',
+    'request_allows_access_to',
     'save_line_with_default_currency',
 )
 
 Basket = get_model('basket', 'Basket')
+Line = get_model('basket', 'Line')
+LineAttribute = get_model('basket', 'LineAttribute')
 Applicator = get_class('offer.applicator', 'Applicator')
 Selector = None
 
@@ -108,7 +110,7 @@ def store_basket_in_session(basket, session):
     session.save()
 
 
-def request_contains_basket(request, basket):
+def request_allows_access_to_basket(request, basket):
     if basket.can_be_edited:
         if request.user.is_authenticated:
             return request.user == basket.owner
@@ -124,10 +126,20 @@ def flush_and_delete_basket(basket, using=None):
     basket.delete(using)
 
 
-def request_contains_line(request, line):
+def request_allows_access_to(request, obj):
+    if isinstance(obj, Basket):
+        return request_allows_access_to_basket(request, obj)
+
     basket = get_basket(request, prepare=False)
-    if basket and basket.pk == line.basket.pk:
-        return request_contains_basket(request, basket)
+
+    if isinstance(obj, Line):
+        if basket and basket.pk == obj.basket.pk:
+            return request_allows_access_to_basket(request, basket)
+
+    elif isinstance(obj, LineAttribute):
+        if basket and basket.pk == obj.line.basket.pk:
+            return request_allows_access_to_basket(request, basket)
+
     return False
 
 

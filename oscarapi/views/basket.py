@@ -160,7 +160,7 @@ class ShippingMethodView(APIView):
     """
     GET:
     Retrieve shipping methods available to the user, basket, request combination
-    
+
     POST(shipping_address):
     {
         "country": "http://127.0.0.1:8000/oscarapi/countries/NL/",
@@ -178,7 +178,7 @@ class ShippingMethodView(APIView):
     }
 
     Post a shipping_address if your shipping methods are dependent on the
-    address. 
+    address.
     """
     serializer_class = serializers.ShippingAddressSerializer
     shipping_method_serializer_class = serializers.ShippingMethodSerializer
@@ -212,7 +212,8 @@ class ShippingMethodView(APIView):
                 shipping_address=shipping_address
             )
 
-        return Response(s_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE) 
+        return Response(s_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
+
 
 class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
     """
@@ -286,7 +287,7 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
 class LineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     queryset = Line.objects.all()
     serializer_class = serializers.LineSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestContainsLine,)
+    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo, )
 
     def get(self, request, pk=None, format=None):
         line = self.get_object()
@@ -306,13 +307,13 @@ class LineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
 class BasketLineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     queryset = Line.objects.all()
     serializer_class = serializers.BasketLineSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestContainsLine,)
+    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo, )
 
     def get_queryset(self):
         basket_pk = self.kwargs.get('basket_pk')
         basket = get_object_or_404(operations.editable_baskets(), pk=basket_pk)
         prepped_basket = operations.prepare_basket(basket, self.request)
-        if operations.request_contains_basket(self.request, prepped_basket):
+        if operations.request_allows_access_to_basket(self.request, prepped_basket):
             return prepped_basket.all_lines()
         else:
             return self.queryset.none()

@@ -1,5 +1,5 @@
 from oscar.core.loading import get_model
-from oscarapi.basket.operations import request_contains_basket
+from oscarapi.basket.operations import request_allows_access_to_basket
 from oscarapi.permissions import IsOwner
 from oscarapi.serializers import (
     CheckoutSerializer, OrderLineAttributeSerializer, OrderLineSerializer,
@@ -128,7 +128,7 @@ class CheckoutView(views.APIView):
 
         basket = parse_basket_from_hyperlink(request.data, format)
 
-        if not request_contains_basket(request, basket):
+        if not request_allows_access_to_basket(request, basket):
             return response.Response(
                 "Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
 

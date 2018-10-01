@@ -10,7 +10,7 @@ install:
 
 sandbox: install
 	python sandbox/manage.py migrate
-	python sandbox/manage.py loaddata product productcategory productattribute productclass productattributevalue category attributeoptiongroup attributeoption stockrecord partner voucher country
+	python sandbox/manage.py loaddata product productcategory productattribute productclass productattributevalue category option attributeoptiongroup attributeoption stockrecord partner voucher country
 
 test: 
 	python sandbox/manage.py test oscarapi --settings=sandbox.settings.nomigrations

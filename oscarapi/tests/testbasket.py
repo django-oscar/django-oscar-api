@@ -16,7 +16,7 @@ class BasketTest(APITest):
     fixtures = [
         'product', 'productcategory', 'productattribute', 'productclass',
         'productattributevalue', 'category', 'attributeoptiongroup', 'attributeoption',
-        'stockrecord', 'partner'
+        'stockrecord', 'partner', 'option'
     ]
 
     def test_basket_api_create(self):
@@ -76,7 +76,7 @@ class BasketTest(APITest):
             self.response.assertObjectIdEqual('owner', 1)
 
         self.assertEqual(Basket.objects.count(), 3, "There should be 2 baskets from loging in and 1 is created with the api.")
-            
+
     def test_retrieve_basket(self):
         "A user can fetch their own basket with the basket API and get's the same basket every time."
         # anonymous
@@ -88,7 +88,7 @@ class BasketTest(APITest):
         self.response = self.get('api-basket')
         self.response.assertStatusEqual(200)
         self.response.assertValueEqual('id', basket_id)
-        
+
         # authenticated
         self.login('nobody', 'nobody')
         self.response = self.get('api-basket')
@@ -125,7 +125,7 @@ class BasketTest(APITest):
         self.response = self.get('api-basket', session_id='anonymous')
         self.response.assertStatusEqual(200)
         self.response.assertValueEqual('id', basket_id)
-        
+
         # authenticated
         self.hlogin('nobody', 'nobody', session_id='nobody')
         self.response = self.get('api-basket', session_id='nobody', authenticated=True)
@@ -339,13 +339,13 @@ class BasketTest(APITest):
 
         # write a line to the basket
         line_data = {
-            "basket": basket_url, 
-            "line_reference": "234_345", 
-            "product": "http://testserver/api/products/1/", 
-            "stockrecord": "http://testserver/api/stockrecords/1/", 
-            "quantity": 3, 
-            "price_currency": "EUR", 
-            "price_excl_tax": "100.0", 
+            "basket": basket_url,
+            "line_reference": "234_345",
+            "product": "http://testserver/api/products/1/",
+            "stockrecord": "http://testserver/api/stockrecords/1/",
+            "quantity": 3,
+            "price_currency": "EUR",
+            "price_excl_tax": "100.0",
             "price_incl_tax": "121.0",
         }
         line_url = reverse('basket-lines-list', args=(basket_id,))
@@ -366,7 +366,7 @@ class BasketTest(APITest):
         self.assertEqual(str(b.owner), 'nobody')
         self.assertEqual(Basket.objects.count(), 2)
         nobody_basket_id = b.pk
-        
+
         # try to access the urls in the response.
         basket_id = self.response['id']
         basket_url = self.response['url']
@@ -389,16 +389,16 @@ class BasketTest(APITest):
         # try to delete someone else's basket
         self.response = self.delete(url)
         self.response.assertStatusEqual(403)
-        
+
         # try adding lines to someone elses basket
         line_data = {
-            "basket": "http://testserver/api/baskets/%s/" % nobody_basket_id, 
-            "line_reference": "234_345", 
-            "product": "http://testserver/api/products/1/", 
-            "stockrecord": "http://testserver/api/stockrecords/1/", 
-            "quantity": 3, 
-            "price_currency": "EUR", 
-            "price_excl_tax": "100.0", 
+            "basket": "http://testserver/api/baskets/%s/" % nobody_basket_id,
+            "line_reference": "234_345",
+            "product": "http://testserver/api/products/1/",
+            "stockrecord": "http://testserver/api/stockrecords/1/",
+            "quantity": 3,
+            "price_currency": "EUR",
+            "price_excl_tax": "100.0",
             "price_incl_tax": "121.0"
         }
         url = reverse('basket-lines-list', args=(basket_id,))
@@ -436,13 +436,13 @@ class BasketTest(APITest):
 
         # write a line to the basket
         line_data = {
-            "basket": basket_url, 
-            "line_reference": "234_345", 
-            "product": "http://testserver/api/products/1/", 
-            "stockrecord": "http://testserver/api/stockrecords/1/", 
-            "quantity": 3, 
-            "price_currency": "EUR", 
-            "price_excl_tax": "100.0", 
+            "basket": basket_url,
+            "line_reference": "234_345",
+            "product": "http://testserver/api/products/1/",
+            "stockrecord": "http://testserver/api/stockrecords/1/",
+            "quantity": 3,
+            "price_currency": "EUR",
+            "price_excl_tax": "100.0",
             "price_incl_tax": "121.0",
         }
         line_url = reverse('basket-lines-list', args=(basket_id,))
@@ -533,13 +533,13 @@ class BasketTest(APITest):
 
         # write a line to the basket
         line_data = {
-            "basket": basket_url, 
-            "line_reference": "234_345", 
-            "product": "http://testserver/api/products/1/", 
-            "stockrecord": "http://testserver/api/stockrecords/1/", 
-            "quantity": 3, 
-            "price_currency": "EUR", 
-            "price_excl_tax": "100.0", 
+            "basket": basket_url,
+            "line_reference": "234_345",
+            "product": "http://testserver/api/products/1/",
+            "stockrecord": "http://testserver/api/stockrecords/1/",
+            "quantity": 3,
+            "price_currency": "EUR",
+            "price_excl_tax": "100.0",
             "price_incl_tax": "121.0",
         }
         line_url = reverse('basket-lines-list', args=(basket_id,))
@@ -805,7 +805,6 @@ class BasketTest(APITest):
         self.assertEqual(line0['product'], "http://testserver/api/products/1/")
         self.assertEqual(line0['quantity'], 5)
 
-
     def test_add_product_authenticated(self):
         "Test if an authenticated user can add a product to his basket"
         self.login('nobody', 'nobody')
@@ -838,7 +837,7 @@ class BasketTest(APITest):
         self.login('somebody', 'somebody')
         self.response = self.get(line0url)
         self.response.assertStatusEqual(404)
-        
+
         # admin can cheat, but he uses a different url
         line0id = re.search('(?P<id>\d+)/$', line0url).group('id')
         admin_line0url = reverse('line-detail', args=(line0id,))
@@ -857,7 +856,7 @@ class BasketTest(APITest):
         self.hlogin('nobody', 'nobody', session_id='nobody')
         self.response = self.get('api-basket', session_id='nobody', authenticated=True)
         self.response.assertStatusEqual(200)
-        
+
         self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5, session_id='nobody', authenticated=True)
         self.response = self.get(self.response['lines'], session_id='nobody', authenticated=True)
 
@@ -978,3 +977,45 @@ class BasketTest(APITest):
         self.response = self.get(basket_line_url)
         self.response.assertStatusEqual(200)
         self.response.assertValueEqual('quantity', 4)
+
+    def test_add_put_product_option(self):
+        """Test if we can add and update the options of a line"""
+
+        # first select the first option available (which is color)
+        self.response = self.get('http://localhost:8000/api/options/')
+        option_url = self.response.json()[0]['url']
+
+        # add the option to the basket line
+        self.response = self.post(
+            'api-basket-add-product',
+            url="http://testserver/api/products/1/",
+            quantity=1,
+            options=[{
+                "option": option_url, "value": "red"
+            }]
+        )
+        self.response.assertStatusEqual(200)
+
+        # Get the basket line, and see our option is there
+        self.response = self.get('api-basket')
+        basket_line_url = self.get(self.response['lines']).data[0]['url']
+        self.response = self.get(basket_line_url)
+        attribute = self.response.json()['attributes'][0]
+        self.assertEqual(attribute['value'], 'red')
+
+        # now update it to blue
+        self.response = self.put(attribute['url'], value='blue')
+        self.response.assertStatusEqual(200)
+
+        # check that it's updated
+        self.response = self.get(basket_line_url)
+        attribute = self.response.json()['attributes'][0]
+        self.assertEqual(attribute['value'], 'blue')
+        return attribute
+
+    def test_product_option_write_permissions_authenticated(self):
+        """Another user wants to update my color, but we don't allow that"""
+        attribute = self.test_add_put_product_option()
+        self.hlogin('somebody', 'somebody', session_id='somebody')
+        self.response = self.put(attribute['url'], value='Hack HAHAHAHA')
+        self.response.assertStatusEqual(403, "Other users cannot update my line attributes")

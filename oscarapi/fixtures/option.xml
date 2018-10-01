@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+    <object model="catalogue.option" pk="1">
+        <field name="name" type="CharField">Color</field>
+        <field name="code" type="SlugField">color</field>
+        <field name="type" type="CharField">Required</field>
+    </object>
+</django-objects>

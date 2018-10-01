@@ -61,7 +61,7 @@ class BasketList(generics.ListCreateAPIView):
 
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = serializers.BasketSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestContainsBasket,)
+    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)
     queryset = Basket.objects.all()
 
     def get_object(self):
@@ -74,9 +74,10 @@ class LineAttributeList(generics.ListCreateAPIView):
     serializer_class = serializers.LineAttributeSerializer
 
 
-class LineAttributeDetail(generics.RetrieveAPIView):
+class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
     queryset = LineAttribute.objects.all()
     serializer_class = serializers.LineAttributeSerializer
+    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)  # noqa
 
 
 class StockRecordList(generics.ListAPIView):
