@@ -111,13 +111,35 @@ You can fetch the detail of each product by following it's url:
         "url": "http://localhost:8000/api/products/1/"
     }
 
+We want the blue version, so let's check the product options:
+
+.. code-block:: python
+
+    response = session.get('http://localhost:8000/api/options/')
+
+    print(response.content)
+    [
+        {
+            "url": "http://localhost:8000/api/options/1/",
+            "id": 1,
+            "name": "Color",
+            "code": "color",
+            "type": "Required"
+        }
+    ]
+
+    option_url = self.response.json()[0]['url']
+
 Ok, now we want to add this to our basket:
 
 .. code-block:: python
 
     data = {
         "url": products[1]['url'],
-        "quantity": 1
+        "quantity": 1,
+        options = [{
+            "option": option_url, "value": "blue"
+        }]
     }
 
     response = session.post('http://localhost:8000/api/basket/add-product/', json=data)
@@ -132,7 +154,13 @@ And we can see that it has been added:
     print(response.content)
     [
         {
-            "attributes": [],
+            "attributes": [
+                {
+                    'option': 'http://localhost:8000/api/options/1/',
+                    'url': 'http://localhost:8000/api/lineattributes/1/',
+                    'value': 'blue'
+                }
+            ],
             "basket": "http://localhost:8000/api/baskets/1/",
             "date_created": "2015-12-30T17:05:05.041698Z",
             "is_tax_known": true,
@@ -170,7 +198,13 @@ You can use a REST PUT and DELETE to update/delete the basket lines. So let's up
     # and we can see it's been updated
     print(response.content)
     {
-        "attributes": [],
+        "attributes": [
+            {
+                'option': 'http://localhost:8000/api/options/1/',
+                'url': 'http://localhost:8000/api/lineattributes/1/',
+                'value': 'blue'
+            }
+        ],
         "basket": "http://localhost:8000/api/baskets/1/",
         "date_created": "2016-03-05T21:09:52.664388Z",
         "line_reference": "1_1",
@@ -187,6 +221,19 @@ You can use a REST PUT and DELETE to update/delete the basket lines. So let's up
      response = session.get('http://localhost:8000/api/basket/')
      print(response.content.json()["total_incl_tax"])
      30.00
+
+You can also update the color to red if you like:
+
+.. code-block:: python
+
+    line_attribute_url = response.content.json()['attributes'][0]['url']
+
+    data = {
+        "value": "red"
+    }
+
+    session.put(line_attribute_url, data)
+
 
 Now we will delete this line, it will return a 204 when it's successful:
 
@@ -236,7 +283,7 @@ If you don't support anonymous checkouts you will have to login the user first
             "printable_name": "Netherlands",
             "url": "http://127.0.0.1:8000/api/countries/NL/"
         }
-    ]    
+    ]
 
     # we need the country url in the shipping address
     country_url = countries[0]['url']
@@ -321,7 +368,7 @@ If you don't support anonymous checkouts you will have to login the user first
         "number": "10001",
         "offer_discounts": [],
         "owner": null,
-        # the payment view is something you will have to implement yourself, 
+        # the payment view is something you will have to implement yourself,
         # see the note below
         "payment_url": "You need to implement a view named 'api-payment' which redirects to the payment provider and sets up the callbacks.",
         "shipping_address": {
@@ -350,7 +397,7 @@ If you don't support anonymous checkouts you will have to login the user first
         # you can fetch the order details by getting this url
         "url": "http://localhost:8000/api/orders/1/",
         "voucher_discounts": []
-    }    
+    }
 
 .. note::
     After you placed an order with the api, the basket is frozen. Oscar API has checks for this in the checkout view and won't let you checkout the same (or any frozen) basket again. At this stage an order is submitted in Oscar and you will have to implement the following steps regarding payment yourself. See the ``payment_url`` field above in the response. You can also use the regular Oscar checkout views if you like, take a look at the :ref:`mixed-usage-label` section.
@@ -359,7 +406,7 @@ If you don't support anonymous checkouts you will have to login the user first
     If your shipping methods depend in any way on the shipping address, you can
     also POST to the shipping_method api. Just post the shipping details in
     the same format as accepted by the checkout api::
-    
+
       {
           "country": "http://localhost:8000/api/countries/NL/",
           "first_name": "Henk",
@@ -402,7 +449,7 @@ When you don't support anonymous checkouts you will need to login first. Oscar A
     response = session.post('http://localhost:8000/api/login/', json=data)
 
 .. note::
-    Custom User models with a different username field are supported. In Oscar API this field will be mapped to the 
+    Custom User models with a different username field are supported. In Oscar API this field will be mapped to the
     corresponding username field.
 
 When the authentication was succesful, your will receive a new (authenticated) sessionid, and the anonymous basket has been automatically merged with a (previous stored) basket of this specific user. You can see now that the owner is set in the basket:
