@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = "1.4.1"
+__version__ = "1.5.0"
 
 
 setup(
@@ -26,6 +26,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Software Development :: Libraries :: Application Frameworks',
     ],
     keywords='',

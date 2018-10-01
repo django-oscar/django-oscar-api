@@ -2,6 +2,20 @@
 Changelog
 =========
 
+1.5.0 (2018-10-01)
+------------------
+Features:
+  * #134 It's now possible to update basket line attribute options (eg color)
+  * #135 Tested with Python 3.7
+
+Fixes:
+  * #133 Fix for Python 3 compatibility in the Api Gateway Middleware (akutsuacts)
+
+Notes:
+  Dropped the ``IsAdminUserOrRequestContainsBasket`` and ``IsAdminUserOrRequestContainsLine`` permissions, they are
+  replaced with the ``IsAdminUserOrRequestAllowsAccessTo`` permission. Please check your customised views if
+  you have overridden the ``permissions`` attribute or added your own custom permissions.
+
 1.4.1 (2018-08-17)
 ------------------
 Features:
@@ -148,13 +162,13 @@ Fixes:
 ------------------
 
 Fixes:
-  * #70 Change process_response to have acorrect  API created basket cookie added to the response (albertojacini)
+  * #70 Change process_response to have a correct API created basket cookie added to the response (albertojacini)
 
 1.0.4 (2016-04-04)
 ------------------
 
 Features:
-  * #65 Add Docker configuration for testing convenience (crgwbr) 
+  * #65 Add Docker configuration for testing convenience (crgwbr)
 
 Fixes:
   * #66 Raise a ValidationError (instead of a 500 server error)  when you try to checkout with an empty basket (crgwbr)
@@ -164,7 +178,7 @@ Fixes:
 ------------------
 
 Features:
-  * #35 Changes format of urls of basket lines (lines/1 -> basket/1/lines/1) 
+  * #35 Changes format of urls of basket lines (lines/1 -> basket/1/lines/1)
   * #63 Make AddProductSerializer easily overridable
 
 Fixes:
