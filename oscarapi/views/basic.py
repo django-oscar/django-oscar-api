@@ -1,17 +1,19 @@
 import functools
-import itertools
-from six.moves import map
 
 from django.contrib import auth
-from oscar.core.loading import get_model, get_class
+
+from oscar.core.loading import get_class, get_model
+
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
-from rest_framework.response import Response
 
-from .mixin import PutIsPatchMixin
-from oscarapi import serializers, permissions
+from six.moves import map
+
+from oscarapi import permissions, serializers
 from oscarapi.basket.operations import assign_basket_strategy
 
+
+from .mixin import PutIsPatchMixin
 
 Selector = get_class('partner.strategy', 'Selector')
 
