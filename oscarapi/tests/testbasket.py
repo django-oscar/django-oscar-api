@@ -805,7 +805,6 @@ class BasketTest(APITest):
         self.assertEqual(line0['product'], "http://testserver/api/products/1/")
         self.assertEqual(line0['quantity'], 5)
 
-
     def test_add_product_authenticated(self):
         "Test if an authenticated user can add a product to his basket"
         self.login('nobody', 'nobody')
@@ -1012,9 +1011,11 @@ class BasketTest(APITest):
         self.response = self.get(basket_line_url)
         attribute = self.response.json()['attributes'][0]
         self.assertEqual(attribute['value'], 'blue')
+        return attribute
 
-        # now another user wants to update my color, but we don't allow that
-        # of course
+    def test_product_option_write_permissions_authenticated(self):
+        """Another user wants to update my color, but we don't allow that"""
+        attribute = self.test_add_put_product_option()
         self.hlogin('somebody', 'somebody', session_id='somebody')
         self.response = self.put(attribute['url'], value='Hack HAHAHAHA')
         self.response.assertStatusEqual(403, "Other users cannot update my line attributes")
