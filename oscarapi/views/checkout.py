@@ -1,4 +1,7 @@
 from oscar.core.loading import get_model
+
+from rest_framework import generics, response, status, views
+
 from oscarapi.basket.operations import request_allows_access_to_basket
 from oscarapi.permissions import IsOwner
 from oscarapi.serializers import (
@@ -7,7 +10,6 @@ from oscarapi.serializers import (
 )
 from oscarapi.signals import oscarapi_post_checkout
 from oscarapi.views.utils import parse_basket_from_hyperlink
-from rest_framework import generics, response, status, views
 
 Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
@@ -140,10 +142,13 @@ class CheckoutView(views.APIView):
             basket.freeze()
             o_ser = self.order_serializer_class(
                 order, context={'request': request})
+
+            resp = response.Response(o_ser.data)
+
             oscarapi_post_checkout.send(
                 sender=self, order=order, user=request.user,
-                request=request, response=response)
-            return response.Response(o_ser.data)
+                request=request, response=resp)
+            return resp
 
         return response.Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
 

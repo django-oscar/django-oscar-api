@@ -3,6 +3,8 @@ import unittest
 from mock import patch
 
 from oscar.core.loading import get_model
+
+from rest_framework.response import Response
 from oscarapi.tests.utils import APITest
 
 
@@ -395,6 +397,8 @@ class CheckOutTest(APITest):
         "The oscarapi_post_checkout signal should be send after checkout"
         self.test_anonymous_checkout()
         self.assertTrue(mock.called)
+        # make sure it's a django Response instance and not the DRF module
+        self.assertTrue(isinstance(mock.call_args[1]['response'], Response))
 
     def test_checkout_permissions(self):
         "Prove that someone can not check out someone elses cart by mistake"
