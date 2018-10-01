@@ -16,7 +16,7 @@ from rest_framework import exceptions
 from rest_framework import authentication
 
 from oscarapi.basket.operations import (
-    request_contains_basket,
+    request_allows_access_to_basket,
     store_basket_in_session,
     get_basket
 )
@@ -177,8 +177,11 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
                 request,
                 Exception("get_cookie_basket doesn't use the manager argument")
             )
+
             if basket is not None:
-                if request_contains_basket(request, basket):
+                # when a basket exists and we are already allowed to access
+                # this basket
+                if request_allows_access_to_basket(request, basket):
                     pass
                 else:
                     store_basket_in_session(basket, request.session)

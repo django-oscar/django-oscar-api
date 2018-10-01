@@ -34,7 +34,7 @@ class BasketPermissionMixin(object):
     on a basket instance.
     """
     # The permission class is mainly used to check Basket permission!
-    permission_classes = (permissions.IsAdminUserOrRequestContainsBasket,)
+    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)
 
     def get_data_basket(self, DATA, format):  # noqa
         return parse_basket_from_hyperlink(DATA, format)
