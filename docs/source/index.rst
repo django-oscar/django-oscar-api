@@ -13,18 +13,18 @@ This package provides a RESTful API for `django-oscar`_, it's based on `django-r
 
 Requirements:
 -------------
-This version of Oscar API is compatbile with python 2.7 / 3.5 / 3.6 and the following django versions:
+This version of Oscar API is compatbile with python 2.7 / 3.5 / 3.6 / 3.7 and the following django versions:
 
 Django 1.11:
 ~~~~~~~~~~~~
-- Osccar 1.5.3 / 1.6
+- Osccar 1.5.3 / 1.6.x
 - requires `djangorestframework>=3.4`
 
 Django 2.0 and 2.1:
 ~~~~~~~~~~~~~~~~~~~
-- Oscar 1.6
+- Oscar 1.6.x
 - requires `djangorestframework>=3.7`
-- requires python 3.x
+- requires python >=3.5
 
 See `Travis`_ for the current tested platforms.
 
