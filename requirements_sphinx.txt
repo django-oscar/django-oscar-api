@@ -1,5 +1,4 @@
-django-oscar==1.5.3
+django-oscar==1.6.4
 djangorestframework>=3.7.0
 django-nose
-django-haystack>=2.7.0.dev
-Django>=1.11,<2.0
+Django>=2.1.2
