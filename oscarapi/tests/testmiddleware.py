@@ -2,7 +2,7 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.test import RequestFactory, TestCase
 
-from oscarapi.middleware import ApiGatewayMiddleWare, parse_session_id
+from oscarapi.middleware import ApiGatewayMiddleWare, HeaderSessionMiddleware, parse_session_id
 from oscarapi.models import ApiKey
 
 
@@ -82,3 +82,19 @@ class ApiGatewayMiddleWareTest(TestCase):
 
         dummy_request.META['HTTP_SESSION_ID'] = 'SID:ANON:987171879'
         self.assertIsNone(parse_session_id(dummy_request))
+
+
+class HeaderSessionMiddlewareTest(TestCase):
+    rf = RequestFactory()
+
+    def test_process_request(self):
+        basket_url = reverse('api-basket')
+
+        # invalid cookie realm
+        request = self.rf.get(basket_url, HTTP_SESSION_ID='SID:ANON:example.com:987171879')
+        response = HeaderSessionMiddleware().process_request(request)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(
+            response.content, 
+            b'{"reason": "Can not accept cookie with realm example.com on realm testserver"}'
+        )
