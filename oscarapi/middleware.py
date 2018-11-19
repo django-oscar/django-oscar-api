@@ -84,7 +84,7 @@ class HeaderSessionMiddleware(SessionMiddleware, IsApiRequest):
                 if parsed_session_uri is not None:
                     domain = get_domain(request)
                     if parsed_session_uri['realm'] != domain:
-                        raise exceptions.NotAcceptable(
+                        raise exceptions.PermissionDenied(
                             _('Can not accept cookie with realm %s on realm %s') % (
                                 parsed_session_uri['realm'],
                                 domain
