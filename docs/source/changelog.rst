@@ -2,6 +2,11 @@
 Changelog
 =========
 
+1.5.2 (2018-11-22)
+------------------
+Fixed:
+  * #140 Changed wrong exception type in HeaderSessionMiddleware from NotAcceptable to PermissionDenied (whyscream)
+
 1.5.1 (2018-10-01)
 ------------------
 Fixes:
