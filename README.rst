@@ -9,7 +9,7 @@ This package provides a RESTful API for `django-oscar`_.
 .. image:: https://travis-ci.org/django-oscar/django-oscar-api.svg?branch=master
     :target: https://travis-ci.org/django-oscar/django-oscar-api
 
-.. image:: http://codecov.io/github/django-oscar/django-oscar-api/coverage.svg?branch=master 
+.. image:: https://codecov.io/github/django-oscar/django-oscar-api/coverage.svg?branch=master 
     :alt: Coverage
     :target: http://codecov.io/github/django-oscar/django-oscar-api?branch=master
 
