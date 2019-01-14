@@ -1,6 +1,5 @@
 include *.rst
 include LICENSE
-include Makefile
-recursive-include oscarapi *.py
-recursive-include oscarapi *.xml
-recursive-include sandbox *.py
+graft oscarapi 
+prune sandbox
+global-exclude *.py[cod] __pycache__ *.sqlite3
