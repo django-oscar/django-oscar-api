@@ -1,8 +1,6 @@
-# Use the newer container-based infrastructure
-# http://docs.travis-ci.com/user/workers/container-based-infrastructure/
-sudo: false
-
 language: python
+
+dist: xenial
 
 matrix:
   include:
@@ -19,9 +17,10 @@ matrix:
     - { python: "3.6", env: "DJANGO='Django>=2.0,<2.1' OSCAR='django-oscar>1.6,<1.7'" }
     - { python: "3.6", env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>1.6,<1.7'" }
 
-    # see https://github.com/travis-ci/travis-ci/issues/9815
-    - { python: "3.7", env: "DJANGO='Django>=2.0,<2.1' OSCAR='django-oscar>1.6,<1.7'", dist: xenial, sudo: true }
-    - { python: "3.7", env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>1.6,<1.7'", dist: xenial, sudo: true }
+    - { python: "3.7", env: "DJANGO='Django>=1.11.17,<2.0' OSCAR='django-oscar>1.5,<1.6'" }
+    - { python: "3.7", env: "DJANGO='Django>=1.11.17,<2.0' OSCAR='django-oscar>1.6,<1.7'" }
+    - { python: "3.7", env: "DJANGO='Django>=2.0,<2.1' OSCAR='django-oscar>1.6,<1.7'"}
+    - { python: "3.7", env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>1.6,<1.7'"}
 
 before_install:
     - pip install codecov
