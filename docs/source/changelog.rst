@@ -1,6 +1,13 @@
 =========
 Changelog
 =========
+1.5.3 (2019-02-19)
+------------------
+Fixed:
+  * #144 Don't distribute the sandbox package
+
+Features:
+  * Also released a a universal wheel now.
 
 1.5.2 (2018-11-22)
 ------------------
