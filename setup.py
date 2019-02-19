@@ -34,11 +34,8 @@ setup(
     author_email='lars@permanentmarkers.nl, martijn@devopsconsulting.nl',
     url='https://github.com/django-oscar/django-oscar-api',
     license='BSD',
-    # include all packages in the egg, except the test package.
     packages=find_packages(
-        exclude=['ez_setup', 'examples', '*tests', '*fixtures', 'sandbox']),
-    # for avoiding conflict have one namespace for all apc related eggs.
-    namespace_packages=[],
+        exclude=['*tests', '*fixtures*', '*sandbox*']),
     # include non python files
     include_package_data=True,
     zip_safe=False,
@@ -51,7 +48,7 @@ setup(
     ],
     # mark test target to require extras.
     extras_require={
-        'dev': ['coverage', 'mock', 'twine'],
+        'dev': ['coverage', 'mock', 'twine', 'wheel'],
         'docs': ['sphinx', 'sphinx_rtd_theme'],
     },
 )
