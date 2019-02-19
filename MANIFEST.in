@@ -1,5 +1,6 @@
-include *.rst
+global-exclude *.*
+
 include LICENSE
-graft oscarapi 
-prune sandbox
-global-exclude *.py[cod] __pycache__ *.sqlite3
+include README.rst
+graft oscarapi
+prune oscarapi/tests
