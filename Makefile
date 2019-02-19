@@ -1,9 +1,11 @@
-.PHONY: test install sandbox
+.PHONY: clean install sandbox test coverage docs build_release, publish_release_testpypi publish_release
 
 clean:
 	find . -name '*.pyc' -delete
 	find . -name '__pycache__' -delete
-	find . -name '*.egg-info' -delete
+	rm -Rf *.egg-info
+	rm -Rf dist/
+	rm -Rf build/
 
 install:
 	pip install -e .[dev,docs]
@@ -24,13 +26,11 @@ docs: install
 	pip install "Django>=1.11.0,<2.0"
 	cd docs && make clean && make html
 
-clean_release: clean
-	if [ -d "dist" ]; then rm dist/*; fi
+build_release: clean
+	python setup.py sdist bdist_wheel
 
-release_testpypi: clean_release
-	python setup.py sdist
-	twine upload --repository pypitest dist/*
+publish_release_testpypi: build_release
+	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
-release: clean_release
-	python setup.py sdist
-	twine upload --repository pypi dist/*
+publish_release: build_release
+	twine upload dist/*
