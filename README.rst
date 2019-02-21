@@ -48,7 +48,7 @@ steps:
 
     urlpatterns = (
         # all the things you already have
-        path('api/', api.urls),
+        path('those-crazy-homunculi/', api.urls),
     )
 
 4. Apply migrations::
