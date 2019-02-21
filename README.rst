@@ -37,7 +37,7 @@ steps:
 
     urlpatterns = (
         # all the things you already have
-        url(r'^api/', api.urls),
+        url(r'^oscarapi/', api.urls),
     )
 
    or with the newer Django 2.x way::
@@ -48,7 +48,7 @@ steps:
 
     urlpatterns = (
         # all the things you already have
-        path('api/', api.urls),
+        path('oscarapi/', api.urls),
     )
 
 4. Apply migrations::

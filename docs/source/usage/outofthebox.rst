@@ -14,7 +14,7 @@ To use the oscarapi application in an oscar ecommerce site without overriding or
 
     urlpatterns = (
         # all the things you already have
-        url(r'^api/', api.urls),
+        url(r'^oscarapi/', api.urls),
     )
 
    or with the newer Django 2.x way::
@@ -25,13 +25,15 @@ To use the oscarapi application in an oscar ecommerce site without overriding or
 
     urlpatterns = (
         # all the things you already have
-        path('api/', api.urls),
+        path('oscarapi/', api.urls),
     )
 
 4. Apply migrations::
 
     python manage.py migrate
 
+.. note::
+    It's recommended to have a dedicated root mountpoint for oscarapi which is not used by other applications. This to avoid creating a lot of unused baskets by the `ApiBasketMiddleWare`.
 
 .. _mixed-usage-label:
 
