@@ -1,6 +1,11 @@
 =========
 Changelog
 =========
+1.5.4 (2019-03-05)
+------------------
+Fixed:
+  * #151 Keep the ``tests/utils.py`` file in the distribution
+
 1.5.3 (2019-02-19)
 ------------------
 Fixed:
