@@ -35,7 +35,7 @@ setup(
     url='https://github.com/django-oscar/django-oscar-api',
     license='BSD',
     packages=find_packages(
-        exclude=['*tests', '*fixtures*', '*sandbox*']),
+        exclude=['*tests.unit', '*fixtures*', '*sandbox*']),
     # include non python files
     include_package_data=True,
     zip_safe=False,

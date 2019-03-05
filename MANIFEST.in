@@ -3,4 +3,4 @@ global-exclude *.*
 include LICENSE
 include README.rst
 graft oscarapi
-prune oscarapi/tests
+prune oscarapi/tests/unit
