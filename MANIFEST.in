@@ -4,3 +4,4 @@ include LICENSE
 include README.rst
 graft oscarapi
 prune oscarapi/tests/unit
+prune oscarapi/fixtures
