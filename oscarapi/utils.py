@@ -76,7 +76,7 @@ class DrillDownHyperlinkedIdentityField(relations.HyperlinkedIdentityField):
         try:
             self.extra_url_kwargs = kwargs.pop('extra_url_kwargs')
         except KeyError:
-            msg = "DrillDownHyperlinkedIdentityField requires 'extra_url_args' argument"
+            msg = "DrillDownHyperlinkedIdentityField requires 'extra_url_kwargs' argument"
             raise ValueError(msg)
 
         super(DrillDownHyperlinkedIdentityField, self).__init__(*args, **kwargs)
