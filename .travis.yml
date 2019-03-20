@@ -28,8 +28,8 @@ before_install:
 install:
     - pip install $OSCAR $DJANGO
     - if ! [ ${DJANGO} == "Django>=1.11,<2.0" ]; then pip install "djangorestframework>=3.7"; fi
-    - pip freeze
     - make install
+    - pip freeze
 
 script:
     - make coverage
