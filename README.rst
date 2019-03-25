@@ -29,27 +29,31 @@ steps:
 
 1. Install the `django-oscar-api` package (``pip install django-oscar-api``).
 2. Add oscarapi to INSTALLED_APPS.
-3. Add the application's urls to your urlconf::
+3. Add the application's urls to your urlconf
 
-    from django.conf.urls import url
+   .. code-block:: python
 
-    from oscarapi.app import application as api
+      from django.conf.urls import url
 
-    urlpatterns = (
-        # all the things you already have
-        url(r'^oscarapi/', api.urls),
-    )
+      from oscarapi.app import application as api
 
-   or with the newer Django 2.x way::
+      urlpatterns = (
+          # all the things you already have
+          url(r'^oscarapi/', api.urls),
+      )
 
-    from django.urls import path
+   or with the newer Django 2.x way
 
-    from oscarapi.app import application as api
+   .. code-block:: python
 
-    urlpatterns = (
-        # all the things you already have
-        path('oscarapi/', api.urls),
-    )
+      from django.urls import path
+
+      from oscarapi.app import application as api
+
+      urlpatterns = (
+          # all the things you already have
+          path('oscarapi/', api.urls),
+      )
 
 4. Apply migrations::
 
