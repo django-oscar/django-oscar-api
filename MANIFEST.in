@@ -2,6 +2,7 @@ global-exclude *.*
 
 include LICENSE
 include README.rst
+include setup.py
 graft oscarapi
 prune oscarapi/tests/unit
 prune oscarapi/fixtures
