@@ -1,7 +1,6 @@
 from setuptools import find_packages, setup
 
-__version__ = "1.6.2"
-
+__version__ = "2.0.dev0"
 
 setup(
     # package name in pypi
@@ -44,7 +43,6 @@ setup(
         'setuptools',
         'django-oscar>=2.0.dev0',
         'djangorestframework>=3.9',  # first version to support Django 2.2
-        'six'
     ],
     # mark test target to require extras.
     extras_require={
