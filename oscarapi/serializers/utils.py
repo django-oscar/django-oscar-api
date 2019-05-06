@@ -1,0 +1,115 @@
+import operator
+
+from django.urls import NoReverseMatch
+
+from rest_framework import serializers, relations
+from rest_framework.reverse import reverse
+
+import oscar.models.fields
+
+
+def expand_field_mapping(extra_fields):
+    # This doesn't make a copy
+    field_mapping = serializers.ModelSerializer.serializer_field_mapping
+    field_mapping.update(extra_fields)
+    return field_mapping
+
+
+class OscarSerializer(object):
+    field_mapping = expand_field_mapping({
+        oscar.models.fields.NullCharField: serializers.CharField
+    })
+
+    def __init__(self, *args, **kwargs):
+        """
+        Allow the serializer to be initiated with only a subset of the
+        speccified fields
+        """
+        fields = kwargs.pop('fields', None)
+        super(OscarSerializer, self).__init__(*args, **kwargs)
+        if fields:
+            allowed = set(fields)
+            existing = set(self.fields.keys())
+            for field_name in existing - allowed:
+                self.fields.pop(field_name)
+
+    def to_native(self, obj):
+        num_fields = len(self.get_fields())
+        native = super(OscarSerializer, self).to_native(obj)
+
+        if num_fields == 1:
+            _, val = next(native.iteritems())
+            return val
+
+        return native
+
+
+class OscarModelSerializer(OscarSerializer, serializers.ModelSerializer):
+    """
+    Correctly map oscar fields to serializer fields.
+    """
+
+
+class OscarHyperlinkedModelSerializer(
+        OscarSerializer, serializers.HyperlinkedModelSerializer):
+    """
+    Correctly map oscar fields to serializer fields.
+    """
+
+
+class DrillDownHyperlinkedIdentityField(relations.HyperlinkedIdentityField):
+    def __init__(self, *args, **kwargs):
+        try:
+            self.extra_url_kwargs = kwargs.pop('extra_url_kwargs')
+        except KeyError:
+            msg = "DrillDownHyperlinkedIdentityField requires 'extra_url_args' argument"
+            raise ValueError(msg)
+
+        super(DrillDownHyperlinkedIdentityField, self).__init__(*args, **kwargs)
+
+    def get_extra_url_kwargs(self, obj):
+        return {
+            key: operator.attrgetter(path)(obj)
+                for key, path in self.extra_url_kwargs.items()
+        }
+
+    def get_url(self, obj, view_name, request, format):
+        """
+        Given an object, return the URL that hyperlinks to the object.
+
+        May raise a `NoReverseMatch` if the `view_name` and `lookup_field`
+        attributes are not configured to correctly match the URL conf.
+        """
+        lookup_field = getattr(obj, self.lookup_field, None)
+        kwargs = {self.lookup_field: lookup_field}
+        kwargs.update(self.get_extra_url_kwargs(obj))
+        # Handle unsaved object case
+        if lookup_field is None:
+            return None
+
+        try:
+            return reverse(view_name, kwargs=kwargs, request=request, format=format)
+        except NoReverseMatch:
+            pass
+
+        if self.pk_url_kwarg != 'pk':
+            # Only try pk lookup if it has been explicitly set.
+            # Otherwise, the default `lookup_field = 'pk'` has us covered.
+            kwargs = {self.pk_url_kwarg: obj.pk}
+            kwargs.update(self.get_extra_url_kwargs(obj))
+            try:
+                return reverse(view_name, kwargs=kwargs, request=request, format=format)
+            except NoReverseMatch:
+                pass
+
+        slug = getattr(obj, self.slug_field, None)
+        if slug:
+            # Only use slug lookup if a slug field exists on the model
+            kwargs = {self.slug_url_kwarg: slug}
+            kwargs.update(self.get_extra_url_kwargs(obj))
+            try:
+                return reverse(view_name, kwargs=kwargs, request=request, format=format)
+            except NoReverseMatch:
+                pass
+
+        raise NoReverseMatch()

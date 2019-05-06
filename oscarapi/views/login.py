@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from oscarapi import serializers
-from oscarapi.utils import login_and_upgrade_session
+from oscarapi.utils.session import login_and_upgrade_session
 from oscarapi.basket import operations
 from oscar.core.loading import get_model
 
