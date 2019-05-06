@@ -20,8 +20,9 @@ from oscarapi.basket.operations import (
     store_basket_in_session,
     get_basket
 )
-from oscarapi.utils import (
-    get_domain,
+
+from oscarapi.utils.request import get_domain
+from oscarapi.utils.session import (
     session_id_from_parsed_session_uri,
     get_session
 )

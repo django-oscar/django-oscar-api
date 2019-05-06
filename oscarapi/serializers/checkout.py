@@ -17,10 +17,10 @@ from oscarapi.serializers import (
     VoucherSerializer,
     OfferDiscountSerializer
 )
-from oscarapi.utils import (
+from oscarapi.utils.settings import overridable
+from oscarapi.serializers.utils import (
     OscarHyperlinkedModelSerializer,
     OscarModelSerializer,
-    overridable
 )
 from oscarapi.serializers.fields import TaxIncludedDecimalField
 

@@ -3,8 +3,8 @@ from rest_framework import serializers
 
 from oscarapi.basket import operations
 
-from oscarapi.utils import (
-    overridable,
+from oscarapi.utils.settings import overridable
+from oscarapi.serializers.utils import(
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
     DrillDownHyperlinkedIdentityField

@@ -3,7 +3,7 @@ from importlib import import_module
 from django.conf import settings
 
 from oscarapi.tests.utils import APITest
-from oscarapi.utils import get_session, session_id_from_parsed_session_uri
+from oscarapi.utils.session import get_session, session_id_from_parsed_session_uri
 
 
 class LoginTest(APITest):
