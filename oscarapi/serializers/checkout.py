@@ -10,12 +10,9 @@ from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 from rest_framework import exceptions, serializers
 
+from oscarapi.utils.loading import get_api_classes
 from oscarapi.basket.operations import (
     assign_basket_strategy,
-)
-from oscarapi.serializers import (
-    VoucherSerializer,
-    OfferDiscountSerializer
 )
 from oscarapi.utils.settings import overridable
 from oscarapi.serializers.utils import (
@@ -39,6 +36,13 @@ Country = get_model('address', 'Country')
 Repository = get_class('shipping.repository', 'Repository')
 
 UserAddress = get_model('address', 'UserAddress')
+
+VoucherSerializer, OfferDiscountSerializer = get_api_classes(
+    "serializers.basket", [
+        "VoucherSerializer",
+        "OfferDiscountSerializer"
+    ]
+)
 
 
 class PriceSerializer(serializers.Serializer):
