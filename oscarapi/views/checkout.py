@@ -4,18 +4,29 @@ from rest_framework import generics, response, status, views
 
 from oscarapi.basket.operations import request_allows_access_to_basket
 from oscarapi.permissions import IsOwner
-from oscarapi.serializers import (
-    CheckoutSerializer, OrderLineAttributeSerializer, OrderLineSerializer,
-    OrderSerializer, UserAddressSerializer
-)
+from oscarapi.utils.loading import get_api_classes
 from oscarapi.signals import oscarapi_post_checkout
 from oscarapi.views.utils import parse_basket_from_hyperlink
 
 Order = get_model('order', 'Order')
 OrderLine = get_model('order', 'Line')
 OrderLineAttribute = get_model('order', 'LineAttribute')
-
 UserAddress = get_model('address', 'UserAddress')
+(
+    CheckoutSerializer,
+    OrderLineAttributeSerializer,
+    OrderLineSerializer,
+    OrderSerializer,
+    UserAddressSerializer
+) = get_api_classes(
+    "serializers.checkout", [
+        "CheckoutSerializer",
+        "OrderLineAttributeSerializer",
+        "OrderLineSerializer",
+        "OrderSerializer",
+        "UserAddressSerializer"
+    ]
+)
 
 __all__ = (
     'CheckoutView',
