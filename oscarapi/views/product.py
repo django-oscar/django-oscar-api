@@ -3,10 +3,23 @@ from rest_framework.response import Response
 
 from oscar.core.loading import get_class, get_model
 
-from oscarapi import serializers
+from oscarapi.utils.loading import get_api_classes, get_api_class
 
 
 Selector = get_class('partner.strategy', 'Selector')
+(
+    ProductLinkSerializer,
+    ProductSerializer,
+    AvailabilitySerializer
+) = get_api_classes(
+    "serializers.product", [
+        "ProductLinkSerializer",
+        "ProductSerializer",
+        "AvailabilitySerializer"
+    ]
+)
+
+PriceSerializer = get_api_class("serializers.checkout", "PriceSerializer")
 
 __all__ = (
     'ProductList', 'ProductDetail',
@@ -18,7 +31,7 @@ Product = get_model('catalogue', 'Product')
 
 class ProductList(generics.ListAPIView):
     queryset = Product.objects.all()
-    serializer_class = serializers.ProductLinkSerializer
+    serializer_class = ProductLinkSerializer
 
     def get_queryset(self):
         """
@@ -41,7 +54,7 @@ class ProductList(generics.ListAPIView):
 
 class ProductDetail(generics.RetrieveAPIView):
     queryset = Product.objects.all()
-    serializer_class = serializers.ProductSerializer
+    serializer_class = ProductSerializer
 
 
 class ProductPrice(generics.RetrieveAPIView):
@@ -50,7 +63,7 @@ class ProductPrice(generics.RetrieveAPIView):
     def get(self, request, pk=None, format=None):
         product = self.get_object()
         strategy = Selector().strategy(request=request, user=request.user)
-        ser = serializers.PriceSerializer(
+        ser = PriceSerializer(
             strategy.fetch_for_product(product).price,
             context={'request': request})
         return Response(ser.data)
@@ -62,7 +75,7 @@ class ProductAvailability(generics.RetrieveAPIView):
     def get(self, request, pk=None, format=None):
         product = self.get_object()
         strategy = Selector().strategy(request=request, user=request.user)
-        ser = serializers.AvailabilitySerializer(
+        ser = AvailabilitySerializer(
             strategy.fetch_for_product(product).availability,
             context={'request': request})
         return Response(ser.data)
