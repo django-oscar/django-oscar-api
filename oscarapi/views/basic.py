@@ -35,11 +35,9 @@ User = auth.get_user_model()
 Country = get_model('address', 'Country')
 Partner = get_model('partner', 'Partner')
 
-print(get_class)
 Selector = get_class('partner.strategy', 'Selector')
 UserSerializer = get_api_class("serializers.login", "UserSerializer")
 CountrySerializer = get_api_class("serializers.checkout", "CountrySerializer")
-print(CountrySerializer)
 BasketSerializer, LineAttributeSerializer, StockRecordSerializer = get_api_classes(
     "serializers.basket", [
         "BasketSerializer",
