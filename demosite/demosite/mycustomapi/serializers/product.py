@@ -4,11 +4,10 @@ from rest_framework import serializers
 
 from oscarapi.serializers import checkout, product
 
-
 Selector = get_class('partner.strategy', 'Selector')
 
 
-class MyProductLinkSerializer(product.ProductLinkSerializer):
+class ProductLinkSerializer(product.ProductLinkSerializer):
     images = product.ProductImageSerializer(many=True, required=False)
     price = serializers.SerializerMethodField()
 

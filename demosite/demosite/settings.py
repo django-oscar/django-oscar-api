@@ -32,9 +32,12 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'mycustomapi',
+    'demosite',
+    'oscarapi',
     'widget_tweaks',
 ] + get_core_apps()
+
+OSCARAPI_OVERRIDE_MODULE = "demosite.mycustomapi"
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -47,7 +50,7 @@ MIDDLEWARE = [
     'oscar.apps.basket.middleware.BasketMiddleware',
 ]
 
-ROOT_URLCONF = 'mycustomapi.urls'
+ROOT_URLCONF = 'demosite.urls'
 
 TEMPLATES = [
     {
@@ -74,7 +77,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'mycustomapi.wsgi.application'
+WSGI_APPLICATION = 'demosite.wsgi.application'
 
 
 # Database
@@ -120,7 +123,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-WSGI_APPLICATION = 'mycustomapi.wsgi.application'
+WSGI_APPLICATION = 'demosite.wsgi.application'
 
 
 # Static files (CSS, JavaScript, Images)
