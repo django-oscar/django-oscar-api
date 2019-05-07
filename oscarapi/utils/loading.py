@@ -4,19 +4,25 @@ from oscar.core.loading import (
     _import_module,
 )
 
-OSCARAPI_OVERRIDE_MODULE = getattr(settings, "OSCARAPI_OVERRIDE_MODULE", None)
+OSCARAPI_OVERRIDE_MODULES = getattr(settings, "OSCARAPI_OVERRIDE_MODULES", [])
 
 
 def oscarapi_class_loader(module_label, classnames, module_prefix="oscarapi"):
     """Oscarapi uses a bit simpler method of overrides"""
     default_module_name = "%s.%s" % (module_prefix, module_label)
     default_module = _import_module(default_module_name, classnames)
-    if OSCARAPI_OVERRIDE_MODULE is None:
-        return _pluck_classes([default_module], classnames)
-    else:
-        override_module_name = "%s.%s" % (OSCARAPI_OVERRIDE_MODULE, module_label)
+    class_search_modules = []
+
+    # load all modules to search for classes in
+    for module_name in OSCARAPI_OVERRIDE_MODULES:  # could be empty
+        override_module_name = "%s.%s" % (module_name, module_label)
         override_module = _import_module(override_module_name, classnames)
-        return _pluck_classes([override_module, default_module], classnames)
+        if override_module is not None:
+            class_search_modules.append(override_module)
+
+    # add the module from the standard oscarapi package
+    class_search_modules.append(default_module)
+    return _pluck_classes(class_search_modules, classnames)
 
 
 def get_api_classes(module_label, classnames):

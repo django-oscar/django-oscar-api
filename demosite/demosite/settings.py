@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
 ] + get_core_apps()
 
-OSCARAPI_OVERRIDE_MODULE = "demosite.mycustomapi"
+OSCARAPI_OVERRIDE_MODULES = ["demosite.mycustomapi"]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
