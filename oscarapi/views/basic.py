@@ -2,7 +2,7 @@ import functools
 
 from django.contrib import auth
 
-from oscar.core.loading import get_class, get_model
+from oscar.core.loading import get_class, get_classes, get_model
 
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
@@ -11,11 +11,10 @@ from six.moves import map
 
 from oscarapi import permissions, serializers
 from oscarapi.basket.operations import assign_basket_strategy
-
+from oscarapi.utils.loading import get_api_classes, get_api_class
 
 from .mixin import PutIsPatchMixin
 
-Selector = get_class('partner.strategy', 'Selector')
 
 __all__ = (
     'BasketList', 'BasketDetail',
@@ -36,21 +35,36 @@ User = auth.get_user_model()
 Country = get_model('address', 'Country')
 Partner = get_model('partner', 'Partner')
 
+print(get_class)
+Selector = get_class('partner.strategy', 'Selector')
+UserSerializer = get_api_class("serializers.login", "UserSerializer")
+CountrySerializer = get_api_class("serializers.checkout", "CountrySerializer")
+print(CountrySerializer)
+BasketSerializer, LineAttributeSerializer, StockRecordSerializer = get_api_classes(
+    "serializers.basket", [
+        "BasketSerializer",
+        "LineAttributeSerializer",
+        "StockRecordSerializer"
+    ],
+)
+OptionSerializer, PartnerSerializer = get_api_classes(
+    "serializers.product", ["OptionSerializer", "PartnerSerializer"]
+)
 
 # TODO: For all API's in this file, the permissions should be checked if they
 # are sensible.
 class CountryList(generics.ListAPIView):
-    serializer_class = serializers.CountrySerializer
+    serializer_class = CountrySerializer
     queryset = Country.objects.all()
 
 
 class CountryDetail(generics.RetrieveAPIView):
-    serializer_class = serializers.CountrySerializer
+    serializer_class = CountrySerializer
     queryset = Country.objects.all()
 
 
 class BasketList(generics.ListCreateAPIView):
-    serializer_class = serializers.BasketSerializer
+    serializer_class = BasketSerializer
     queryset = Basket.objects.all()
     permission_classes = (IsAdminUser,)
 
@@ -62,7 +76,7 @@ class BasketList(generics.ListCreateAPIView):
 
 
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = serializers.BasketSerializer
+    serializer_class = BasketSerializer
     permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)
     queryset = Basket.objects.all()
 
@@ -73,17 +87,17 @@ class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
 
 class LineAttributeList(generics.ListCreateAPIView):
     queryset = LineAttribute.objects.all()
-    serializer_class = serializers.LineAttributeSerializer
+    serializer_class = LineAttributeSerializer
 
 
 class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
     queryset = LineAttribute.objects.all()
-    serializer_class = serializers.LineAttributeSerializer
+    serializer_class = LineAttributeSerializer
     permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)  # noqa
 
 
 class StockRecordList(generics.ListAPIView):
-    serializer_class = serializers.StockRecordSerializer
+    serializer_class = StockRecordSerializer
     queryset = StockRecord.objects.all()
 
     def get(self, request, pk=None, *args, **kwargs):
@@ -95,36 +109,36 @@ class StockRecordList(generics.ListAPIView):
 
 class StockRecordDetail(generics.RetrieveAPIView):
     queryset = StockRecord.objects.all()
-    serializer_class = serializers.StockRecordSerializer
+    serializer_class = StockRecordSerializer
 
 
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
-    serializer_class = serializers.UserSerializer
+    serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
 
 
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
-    serializer_class = serializers.UserSerializer
+    serializer_class = UserSerializer
     permission_classes = (IsAdminUser,)
 
 
 class OptionList(generics.ListAPIView):
     queryset = Option.objects.all()
-    serializer_class = serializers.OptionSerializer
+    serializer_class = OptionSerializer
 
 
 class OptionDetail(generics.RetrieveAPIView):
     queryset = Option.objects.all()
-    serializer_class = serializers.OptionSerializer
+    serializer_class = OptionSerializer
 
 
 class PartnerList(generics.ListAPIView):
     queryset = Partner.objects.all()
-    serializer_class = serializers.PartnerSerializer
+    serializer_class = PartnerSerializer
 
 
 class PartnerDetail(generics.RetrieveAPIView):
     queryset = Partner.objects.all()
-    serializer_class = serializers.PartnerSerializer
+    serializer_class = PartnerSerializer
