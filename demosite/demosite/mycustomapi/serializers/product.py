@@ -7,8 +7,9 @@ from oscarapi.serializers import checkout, product
 
 Selector = get_class('partner.strategy', 'Selector')
 
+print("RETEN")
 
-class MyProductLinkSerializer(product.ProductLinkSerializer):
+class ProductLinkSerializer(product.ProductLinkSerializer):
     images = product.ProductImageSerializer(many=True, required=False)
     price = serializers.SerializerMethodField()
 
