@@ -4,15 +4,22 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from oscarapi import serializers
 from oscarapi.utils.session import login_and_upgrade_session
+from oscarapi.utils.loading import get_api_classes
 from oscarapi.basket import operations
 from oscar.core.loading import get_model
 
+LoginSerializer, UserSerializer = get_api_classes(
+    "serializers.login", [
+        "LoginSerializer",
+        "UserSerializer"
+    ]
+)
+
+Basket = get_model('basket', 'Basket')
 
 __all__ = ('LoginView',)
 
-Basket = get_model('basket', 'Basket')
 
 
 class LoginView(APIView):
@@ -43,12 +50,12 @@ class LoginView(APIView):
     If more details are needed, use the ``OSCARAPI_USER_FIELDS`` setting to change
     the fields the ``UserSerializer`` will render.
     """
-    serializer_class = serializers.LoginSerializer
+    serializer_class = LoginSerializer
 
     def get(self, request, format=None):
         if settings.DEBUG:
             if request.user.is_authenticated:
-                ser = serializers.UserSerializer(request.user, many=False)
+                ser = UserSerializer(request.user, many=False)
                 return Response(ser.data)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
