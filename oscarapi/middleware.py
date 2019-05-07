@@ -4,7 +4,6 @@ import re
 from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import PermissionDenied
-from django.urls import reverse
 from django.http.response import HttpResponse
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import ugettext as _
@@ -21,6 +20,7 @@ from oscarapi.basket.operations import (
     get_basket
 )
 
+from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.request import get_domain
 from oscarapi.utils.session import (
     session_id_from_parsed_session_uri,
@@ -30,7 +30,7 @@ from oscarapi import models
 
 
 BasketMiddleware = get_class('basket.middleware', 'BasketMiddleware')
-
+IsApiRequest = get_api_class("utils.request", "IsApiRequest")
 
 logger = logging.getLogger(__name__)
 
@@ -54,14 +54,6 @@ def start_or_resume(session_id, session_type):
         return get_session(session_id, raise_on_create=False)
 
     return get_session(session_id, raise_on_create=True)
-
-
-class IsApiRequest(object):
-    @staticmethod
-    def is_api_request(request):
-        path = request.path.lower()
-        api_root = reverse('api-root').lower()
-        return path.startswith(api_root)
 
 
 class HeaderSessionMiddleware(SessionMiddleware, IsApiRequest):

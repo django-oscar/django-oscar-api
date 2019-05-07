@@ -1,3 +1,6 @@
+from django.urls import reverse
+
+
 def get_domain(request):
     """
     Get the domain name parsed from a hostname:port string
@@ -7,3 +10,10 @@ def get_domain(request):
     """
     return request.get_host().split(':')[0]
 
+
+class IsApiRequest(object):
+    @staticmethod
+    def is_api_request(request):
+        path = request.path.lower()
+        api_root = reverse('api-root').lower()
+        return path.startswith(api_root)
