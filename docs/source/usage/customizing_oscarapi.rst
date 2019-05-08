@@ -2,70 +2,68 @@
 Customizing Oscar API
 ============================
 
-By using the `django-rest-framework`_ life has become easy, at least for customizing the Oscar API. Oscar API exists of a collection of views and serializers which can be overriden by following the steps below.
+Oscarapi has a similar method of customization that you are used to from oscar.
+That means you can override oscarapi's serializers and views in your own app,
+with surgical precision.
 
-.. note::
-    In oscar you can `fork an app`_ to easily customize only the things you want to change.
+Does it work the same way as oscar?
+-----------------------------------
 
-.. _`fork an app`: https://django-oscar.readthedocs.io/en/releases-1.1/topics/fork_app.html
-.. _`django-rest-framework`: http://www.django-rest-framework.org
+The only difference between how overriding works in oscar and in oscarapi is
+that you have to make explicit where you will put your overriding classes.
+The reason for this is that oscarapi is not divided in separate apps, which
+would be rather useless, because there are no models anywhere in oscarapi so
+none of the mechanisms of django apps are used. Instead, oscarapi is only one
+app and you must keep it in ``INSTALLED_APPS`` at all times. So you don't
+replace it with your own app like you do with oscar. You also so not have to
+_fork_ the app, like you are doing in oscar.
 
-Oscar API is using the basics of this so you can see Oscar API as one of the apps you customized just like in Oscar. Each Oscar app (or forked app) has a ``app.py`` which manages the url's to your custom views. 
+Configuration
+-------------
 
-In Oscar API the entry point of this is ``oscarapi.app:RESTApiApplication``.
+The only thing you have to do, is tell oscarapi where it should look for
+overrides. You can do this using the ``OSCARAPI_OVERRIDE_MODULES`` setting::
 
-In your own app, you can extend this class, and override some of the urls to
-direct them to your own views. You can subclass any of the views in oscarapi,
-or just write your own from scratch.
+    OSCARAPI_OVERRIDE_MODULES = ["myapp.api_extensions"]
 
-So, to modify some of the functionality in oscarapi, do the following:
+If you must, you can also have oscarapi look in multiple places for overrides::
 
-1. In your project, create a new django app with ``manage.py startapp mycustomapi``.
-2. In your app, create a file named ``app.py`` and in there extend ``oscarapi.app:RESTApiApplication``, like the following example:
+    OSCARAPI_OVERRIDE_MODULES = ["myapp.api_extensions", "my_reusableapp.api_extensions"]
 
-.. code-block:: python
+It is *NOT NEEDED* to put the extension packages in ``INSTALLED_APPS``. You
+can do it, but it is not required for the overrides to be found.
 
-    from oscarapi.app import RESTApiApplication
+Example
+-------
 
-        class MyRESTApiApplication(RESTApiApplication):
+So what would that look like? As long as you keep the same package structure in
+your overrides as oscarapi, your overrides will be found::
 
-            def get_urls(self):
-                urls = super(MyRESTApiApplication, self).get_urls()
-                return urls
+    ├── demosite
+    │   ├── __init__.py
+    │   ├── app.py
+    │   ├── conf.py
+    │   ├── mycustomapi
+    │   │   ├── __init__.py
+    │   │   └── serializers
+    │   │       ├── __init__.py
+    │   │       ├── checkout.py
+    │   │       └── product.py
 
-    application = MyRESTApiApplication()
+In this case the demosite app has a package called mycustomapi and in it are
+overrides for the product and the checkout serializers. The ``OSCARAPI_OVERRIDE_MODULES``
+setting would look like this::
 
-3. Make sure you use this application instead of the app shipped with oscarapi in your `urls.py`:
+    OSCARAPI_OVERRIDE_MODULES = ["demosite.mycustomapi"]
 
-.. literalinclude:: ../../../demosite/mycustomapi/urls.py
+Let's see what happens in the checkout serializer file
+``demosite.mycustomapi.serializers.checkout``::
 
-.. note::
-    If you think that this is not changing anything (yet) then this is correct, see below.
+.. literalinclude:: ../../../demosite/mycustomapi/serializers/checkout.py
 
-4. Include your own app in INSTALLED_APPS instead of ``django-oscar-api`` (and add ``django-oscar-api`` to your app's dependencies) and see if this works.
-5. Add a serializer and a view for the parts you want to change. In this example, we will override the ``ProductList`` view so we can specify a different ``ProductLinkSerializer`` which includes images and the price as well:
-
-`serializers.py`
-
-.. literalinclude:: ../../../demosite/mycustomapi/serializers.py
-
-`views.py`
-
-.. literalinclude:: ../../../demosite/mycustomapi/views.py
-
-6. Adjust your ``app.py`` with your custom urls:
-
-.. literalinclude:: ../../../demosite/mycustomapi/app.py
-
-7. Your ``urls.py`` still looks the same, as we have configured the override in ``app.py``:
-
-.. literalinclude:: ../../../demosite/mycustomapi/urls.py
-
+So this override would add a field to the json of a country called
+``proof_of_functionality``, and the content would always be "HELLOW WORLD"
 
 The complete example above is available in the `Github repository of Oscar API`_ if you want to try it out.
 
 .. _`Github repository of Oscar API`: https://github.com/django-oscar/django-oscar-api/tree/master/demosite/
- 
-
-
-
