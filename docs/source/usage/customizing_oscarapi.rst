@@ -67,3 +67,18 @@ So this override would add a field to the json of a country called
 The complete example above is available in the `Github repository of Oscar API`_ if you want to try it out.
 
 .. _`Github repository of Oscar API`: https://github.com/django-oscar/django-oscar-api/tree/master/demosite/
+
+Missing overrides
+-----------------
+
+Not *EVERY* single thing is made overridable in oscarapi. In general, all the
+serializers and all the views are made overridable. If you need to know if
+a certain class in a certain file is overridable, you can check the file.
+
+If the object is loaded with ``get_api_class`` you can override it in your
+oscarapi extension. If it is loaded with ``get_class`` or ``get_model`` it is
+an object from oscar and you should override it by
+`forking the app <https://django-oscar.readthedocs.io/en/latest/topics/class_loading_explained.html>`_.
+
+If you find that something is not overridable by ``get_api_class`` and you
+think it should be, feel free to send us a pull request with an explanation.
