@@ -1,13 +1,14 @@
 from rest_framework import serializers
 from django.utils.translation import ugettext as _
+from django.core.exceptions import ObjectDoesNotExist
 
 from oscarapi.utils.settings import overridable
+from oscarapi.serializers import fields as oscarapi_fields
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
-    OscarHyperlinkedModelSerializer
+    OscarHyperlinkedModelSerializer,
 )
 from oscar.core.loading import get_model
-
 
 Product = get_model('catalogue', 'Product')
 ProductClass = get_model('catalogue', 'ProductClass')
@@ -35,38 +36,66 @@ class OptionSerializer(OscarHyperlinkedModelSerializer):
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
-    name = serializers.CharField(source="attribute.name")
+    # we declare the product as write_only since this serializer is meant to be
+    # used nested inside a product serializer.
+    product = serializers.PrimaryKeyRelatedField(
+        many=False, write_only=True, queryset=Product.objects)
+
+    name = serializers.CharField(source="attribute.name", required=False)
     code = serializers.CharField(source="attribute.code")
-    value = serializers.SerializerMethodField()
+    value = oscarapi_fields.AttributeValueField()  # handles different attribute value types
 
-    def get_value(self, obj):
-        obj_type = obj.attribute.type
-        if obj_type == ProductAttribute.OPTION:
-            return obj.value.option
-        elif obj_type == ProductAttribute.MULTI_OPTION:
-            return obj.value.values_list('option', flat=True)
-        elif obj_type == ProductAttribute.FILE:
-            return obj.value.url
-        elif obj_type == ProductAttribute.IMAGE:
-            return obj.value.url
-        elif obj_type == ProductAttribute.ENTITY:
-            if hasattr(obj.value, 'json'):
-                return obj.value.json()
-            else:
-                return _(
-                    "%(entity)s has no json method, can not convert to json" % {
-                        'entity': repr(obj.value)
-                    }
+    def validate(self, data):
+        """
+        Because we flatten the attribute in the json, we must reconstruct the
+        attribute during validation (cleaning). 
+        """
+        validated_data = super(ProductAttributeValueSerializer, self).validate(data)
+        validated_data["attribute"] = self.validate_attribute(
+            validated_data["attribute"], validated_data["product"])
+
+        return validated_data
+
+    def validate_attribute(self, attribute, product):
+        "reconstruct attribute from the attribute data"
+        product_class = product.get_product_class()
+
+        try:
+            attributes = self.Meta.model.attribute.get_queryset()
+            return attributes.get(
+                code=attribute["code"],
+                product_class=product_class
+            )
+        except ObjectDoesNotExist:
+            error_dict = dict(attribute, product=product)
+            raise serializers.ValidationError(
+                "No attribute %(name)s with code=%(code)s on %(product)s, "
+                "please define it in the product_class first." % error_dict
+            )
+
+    def save(self, **kwargs):
+        """
+        Since there is a unique contraint, sometimes we want to update instead
+        of creating a new object (because an integrity error would occur due
+        to the constraint on attribute and product). If instance is set, the
+        update method will be used instead of the create method.
+        """
+        if self.instance is None:
+            try:  # check if the constraint would be violated and if so set instance
+                self.instance = self.Meta.model.objects.get(
+                    attribute=self.validated_data["attribute"],
+                    product=self.validated_data["product"]
                 )
+            except ObjectDoesNotExist:  # it is safe to create new object
+                pass
 
-        # return the value as stored on ProductAttributeValue in the correct type
-        return obj.value
+        return super().save(**kwargs)
 
     class Meta:
         model = ProductAttributeValue
         fields = overridable(
             'OSCARAPI_PRODUCT_ATTRIBUTE_VALUE_FIELDS',
-            default=('name', 'value', 'code'))
+            default=('name', 'value', 'code', 'product'))
 
 
 class ProductAttributeSerializer(OscarModelSerializer):
