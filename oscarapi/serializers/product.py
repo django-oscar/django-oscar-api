@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist
-
+from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.settings import overridable
 from oscarapi.serializers import fields as oscarapi_fields
 from oscarapi.serializers.utils import (
@@ -11,14 +10,15 @@ from oscarapi.serializers.utils import (
 from oscar.core.loading import get_model
 
 Product = get_model('catalogue', 'Product')
-ProductClass = get_model('catalogue', 'ProductClass')
-ProductCategory = get_model('catalogue', 'ProductCategory')
-ProductAttribute = get_model('catalogue', 'ProductAttribute')
 ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
-AttributeOption = get_model('catalogue', 'AttributeOption')
 ProductImage = get_model('catalogue', 'ProductImage')
 Option = get_model('catalogue', 'Option')
 Partner = get_model('partner', 'Partner')
+AttributeValueField = get_api_class("serializers.fields", "AttributeValueField")
+# ProductClass = get_model('catalogue', 'ProductClass')
+# ProductCategory = get_model('catalogue', 'ProductCategory')
+# ProductAttribute = get_model('catalogue', 'ProductAttribute')
+# AttributeOption = get_model('catalogue', 'AttributeOption')
 
 
 class PartnerSerializer(OscarModelSerializer):
@@ -36,6 +36,9 @@ class OptionSerializer(OscarHyperlinkedModelSerializer):
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
+    # this field is declared here because it can only be used in combination
+    # with this serializer
+
     # we declare the product as write_only since this serializer is meant to be
     # used nested inside a product serializer.
     product = serializers.PrimaryKeyRelatedField(
@@ -43,7 +46,7 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
 
     name = serializers.CharField(source="attribute.name", required=False)
     code = serializers.CharField(source="attribute.code")
-    value = oscarapi_fields.AttributeValueField()  # handles different attribute value types
+    value = AttributeValueField()  # handles different attribute value types
 
     def validate(self, data):
         """
@@ -80,32 +83,27 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
         to the constraint on attribute and product). If instance is set, the
         update method will be used instead of the create method.
         """
-        if self.instance is None:
-            try:  # check if the constraint would be violated and if so set instance
-                self.instance = self.Meta.model.objects.get(
-                    attribute=self.validated_data["attribute"],
-                    product=self.validated_data["product"]
-                )
-            except ObjectDoesNotExist:  # it is safe to create new object
-                pass
-
-        return super().save(**kwargs)
+        value = self.validated_data["value"]
+        product = self.validated_data["product"]
+        attribute = self.validated_data["attribute"]
+        attribute.save_value(product, value)
+        return product.attribute_values.get(attribute=attribute)
+        # if self.instance is None:
+        #     try:  # check if the constraint would be violated and if so set instance
+        #         self.instance = self.Meta.model.objects.get(
+        #             attribute=self.validated_data["attribute"],
+        #             product=self.validated_data["product"]
+        #         )
+        #     except ObjectDoesNotExist:  # it is safe to create new object
+        #         pass
+        #
+        # return super().save(**kwargs)
 
     class Meta:
         model = ProductAttributeValue
         fields = overridable(
             'OSCARAPI_PRODUCT_ATTRIBUTE_VALUE_FIELDS',
             default=('name', 'value', 'code', 'product'))
-
-
-class ProductAttributeSerializer(OscarModelSerializer):
-    productattributevalue_set = ProductAttributeValueSerializer(many=True)
-
-    class Meta:
-        model = ProductAttribute
-        fields = overridable(
-            'OSCARAPI_PRODUCT_ATTRIBUTE_FIELDS',
-            default=('name', 'productattributevalue_set'))
 
 
 class ProductImageSerializer(OscarModelSerializer):

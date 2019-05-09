@@ -5,8 +5,14 @@ def get_domain(request):
     """
     Get the domain name parsed from a hostname:port string
     
-    >>> get_domain("example.com:5984")
-    "example.com"
+    >>> class FakeRequest(object):
+    ...     def __init__(self, url):
+    ...         self.url = url
+    ...     def get_host(self):
+    ...         return self.url
+    >>> req = FakeRequest("example.com:5984")
+    >>> get_domain(req)
+    'example.com'
     """
     return request.get_host().split(':')[0]
 

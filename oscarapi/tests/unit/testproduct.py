@@ -1,14 +1,18 @@
 import mock
 import  decimal
-
+import datetime
 from six import string_types
 
 from django.urls import reverse
 from django.test import TestCase
+from django.utils.timezone import make_aware
 
+from oscar.core.loading import get_model
 from oscarapi.tests.utils import APITest
 from oscarapi.serializers.product import ProductLinkSerializer, ProductAttributeValueSerializer
 from oscarapi.serializers.basket import StockRecordSerializer
+
+Product = get_model("catalogue", "Product")
 
 
 class ProductListDetailSerializer(ProductLinkSerializer):
@@ -194,6 +198,10 @@ class ProductSerializerTest(TestCase):
         'attributeoption', 'stockrecord', 'partner'
     ]
 
+    def assertErrorStartsWith(self, ser, name, errorstring):
+        self.assertTrue(ser.errors[name][0].startswith(errorstring),
+            "Error does not start with %s" % errorstring)
+
     def test_stockrecord_save(self):
         ser = StockRecordSerializer(data={
             "product": 1,
@@ -219,7 +227,6 @@ class ProductSerializerTest(TestCase):
         self.assertEqual(obj.low_stock_threshold, 4)
         self.assertEqual(obj.num_allocated, None)
 
-
     def test_productattributevalueserializer_error(self):
         ser = ProductAttributeValueSerializer(data={
             "name": "zult",
@@ -235,12 +242,459 @@ class ProductSerializerTest(TestCase):
             "it in the product_class first."
         ])
 
-    def test_productattributevalueserializer(self):
+    def test_productattributevalueserializer_option(self):
+        p = Product.objects.get(pk=1)
+        self.assertEqual(str(p.attr.size), "Small")
         ser = ProductAttributeValueSerializer(data={
             "name": "Size",
             "code": "size",
-            "value": "Small",
+            "value": "Large",
             "product": 1
         })
         self.assertTrue(ser.is_valid(), str(ser.errors))
         obj = ser.save()
+        self.assertEqual(str(obj.value), "Large")
+
+        p.attr.initiate_attributes()
+        self.assertEqual(str(p.attr.size), "Large")
+
+    def test_productattributevalueserializer_option_error(self):
+        p = Product.objects.get(pk=1)
+        self.assertEqual(str(p.attr.size), "Small")
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Size",
+            "code": "size",
+            "value": "LUL",
+            "product": 1
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate")
+        self.assertDictEqual(ser.errors, {"value": ["Option LUL does not exist."]})
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Size",
+            "code": "size",
+            "value": None,
+            "product": 1
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate")
+        self.assertDictEqual(ser.errors, {"value": ["This field is required."]})
+
+    def test_productattributevalueserializer_text(self):
+        p = Product.objects.get(pk=3)
+        self.assertEqual(p.attr.text, "I am some kind of text")
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Text",
+            "code": "text",
+            "value": "Donec placerat. Nullam nibh dolor.",
+            "product": 3
+        })
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
+        self.assertEqual(obj.value, "Donec placerat. Nullam nibh dolor.")
+
+        p.attr.initiate_attributes()
+        self.assertEqual(p.attr.text, "Donec placerat. Nullam nibh dolor.")
+
+    def test_productattributevalueserializer_text_error(self):
+        p = Product.objects.get(pk=3)
+        self.assertEqual(p.attr.text, "I am some kind of text")
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Text",
+            "code": "text",
+            "value": 4,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should fail")
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Text",
+            "code": "text",
+            "value": None,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should fail")
+        self.assertDictEqual(ser.errors, {"value": ["This field is required."]})
+
+    def test_productattributevalueserializer_integer(self):
+        p = Product.objects.get(pk=3)
+        self.assertEqual(p.attr.integer, 7)
+        
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Integer",
+            "code": "integer",
+            "value": 4,
+            "product": 3
+        })
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
+        self.assertEqual(obj.value, 4)
+
+        p.attr.initiate_attributes()
+        self.assertEqual(p.attr.integer, 4)
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Integer",
+            "code": "integer",
+            "value": "34",
+            "product": 3
+        })
+        self.assertTrue(ser.is_valid(), "Even if the type is wrong, it should still validate because its an integer")
+        obj = ser.save()
+        self.assertEqual(obj.value, 34)
+
+    def test_productattributevalueserializer_integer_error(self):
+        p = Product.objects.get(pk=3)
+        self.assertEqual(p.attr.integer, 7)
+        
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Integer",
+            "code": "integer",
+            "value": "zult",
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate")
+        self.assertDictEqual(ser.errors, {"value": ["Must be an integer"]})
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Integer",
+            "code": "integer",
+            "value": None,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate")
+        self.assertDictEqual(ser.errors, {"value": ["This field is required."]})
+
+    def test_productattributevalueserializer_boolean(self):
+        p = Product.objects.get(pk=3)
+        self.assertEqual(p.attr.boolean, True)
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Boolean",
+            "code": "boolean",
+            "value": False,
+            "product": 3
+        })
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
+        self.assertEqual(obj.value, False)
+
+        p.attr.initiate_attributes()
+        self.assertEqual(p.attr.boolean, False)
+
+    def test_productattributevalueserializer_boolean_error(self):
+        p = Product.objects.get(pk=3)
+        self.assertEqual(p.attr.boolean, True)
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Boolean",
+            "code": "boolean",
+            "value": object,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate, an object is not a boolean")
+        self.assertDictEqual(ser.errors, {"value": ["Must be a boolean"]})
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Boolean",
+            "code": "boolean",
+            "value": None,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate, empty is not allowed")
+        self.assertDictEqual(ser.errors, {"value": ["This field is required."]})
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Boolean",
+            "code": "boolean",
+            "value": 0,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate, an object is not a boolean")
+        self.assertDictEqual(ser.errors, {"value": ["Must be a boolean"]})
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Boolean",
+            "code": "boolean",
+            "value": "",
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate, an object is not a boolean")
+        self.assertDictEqual(ser.errors, {"value": ["Must be a boolean"]})
+
+    def test_productattributevalueserializer_float(self):
+        p = Product.objects.get(pk=3)
+        self.assertEqual(p.attr.float, 3.2)
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Float",
+            "code": "float",
+            "value": 7.78,
+            "product": 3
+        })
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
+        self.assertEqual(obj.value, 7.78)
+
+        p.attr.initiate_attributes()
+        self.assertEqual(p.attr.float, 7.78)
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Float",
+            "code": "float",
+            "value": 7,
+            "product": 3
+        })
+        self.assertTrue(ser.is_valid(), "If the value is an int it should still work")
+        obj = ser.save()
+        self.assertEqual(obj.value, 7)
+
+        p.attr.initiate_attributes()
+        self.assertEqual(p.attr.float, 7)
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Float",
+            "code": "float",
+            "value": "7.78",
+            "product": 3
+        })
+        self.assertTrue(ser.is_valid(), "If a string is a float it should still work")
+        obj = ser.save()
+        self.assertEqual(obj.value, 7.78)
+
+        p.attr.initiate_attributes()
+        self.assertEqual(p.attr.float, 7.78)
+
+    def test_productattributevalueserializer_float_error(self):
+        p = Product.objects.get(pk=3)
+        self.assertEqual(p.attr.float, 3.2)
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Float",
+            "code": "float",
+            "value": {},
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not be valid, a dict is not a float")
+        self.assertErrorStartsWith(ser, "value", "Wrong type, float() argument must be a string or a number")
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Float",
+            "code": "float",
+            "value": object,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not be valid, a dict is not a float")
+        self.assertErrorStartsWith(ser, "value", "Wrong type, float() argument must be a string or a number")
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Float",
+            "code": "float",
+            "value": "kak",
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not be valid, a dict is not a float")
+        self.assertDictEqual(ser.errors, {"value": ["Must be a float"]})
+
+
+    def test_productattributevalueserializer_html(self):
+        p = Product.objects.get(pk=3)
+        self.assertEqual(p.attr.html, "<p>I <strong>am</strong> a test</p>")
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Html",
+            "code": "html",
+            "value": "<p>koe</p>",
+            "product": 3
+        })
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
+        self.assertEqual(obj.value, "<p>koe</p>")
+
+        p.attr.initiate_attributes()
+        self.assertEqual(p.attr.html, "<p>koe</p>")
+
+    def test_productattributevalueserializer_html_error(self):
+        p = Product.objects.get(pk=3)
+        self.assertEqual(p.attr.text, "I am some kind of text")
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Html",
+            "code": "html",
+            "value": 4,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should fail")
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Html",
+            "code": "html",
+            "value": None,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should fail")
+        self.assertDictEqual(ser.errors, {"value": ["This field is required."]})
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Html",
+            "code": "html",
+            "value": object,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should fail")
+
+    def test_productattributevalueserializer_date(self):
+        p = Product.objects.get(pk=3)
+        start_date = datetime.date(2018, 1, 2)
+        self.assertEqual(p.attr.date, start_date)
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Date",
+            "code": "date",
+            "value": "2030-03-03",
+            "product": 3
+        })
+        new_date = datetime.date(2030, 3, 3)
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
+        self.assertEqual(obj.value, new_date)
+
+        p.attr.initiate_attributes()
+        self.assertEqual(p.attr.date, new_date)
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Date",
+            "code": "date",
+            "value": datetime.date(2016, 4, 12),
+            "product": 3
+        })
+        new_date = datetime.date(2016, 4, 12)
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
+        self.assertEqual(obj.value, new_date)
+
+        p.attr.initiate_attributes()
+        self.assertEqual(p.attr.date, new_date)
+
+    def test_productattributevalueserializer_date_error(self):
+        p = Product.objects.get(pk=3)
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Date",
+            "code": "date",
+            "value": "2030",
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate")
+        self.assertErrorStartsWith(ser, "value", "Date has wrong format. Use one of these formats instead:")
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Date",
+            "code": "date",
+            "value": "zult",
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate")
+        self.assertErrorStartsWith(ser, "value", "Date has wrong format. Use one of these formats instead:")
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Date",
+            "code": "date",
+            "value": None,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate")
+        self.assertDictEqual(ser.errors, {"value": ["This field is required."]})
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Date",
+            "code": "date",
+            "value": {},
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate")
+        self.assertErrorStartsWith(ser, "value", "Date has wrong format. Use one of these formats instead:")
+
+    def test_productattributevalueserializer_datetime(self):
+        p = Product.objects.get(pk=3)
+        start_date = make_aware(datetime.datetime(2018, 1, 2, 10, 45))
+        self.assertEqual(p.attr.datetime, start_date)
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Datetime",
+            "code": "datetime",
+            "value": "2030-03-03T01:12",
+            "product": 3
+        })
+        new_date = make_aware(datetime.datetime(2030, 3, 3, 1, 12))
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
+        self.assertEqual(obj.value, new_date)
+
+        p.attr.initiate_attributes()
+        self.assertEqual(p.attr.datetime, new_date)
+
+    def test_productattributevalueserializer_datetime_error(self):
+        p = Product.objects.get(pk=3)
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Datetime",
+            "code": "datetime",
+            "value": "2030-03-03LOL01:12",
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), str(ser.errors))
+        self.assertErrorStartsWith(ser, "value", "Datetime has wrong format. Use one of these formats instead:")
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Datetime",
+            "code": "datetime",
+            "value": None,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), str(ser.errors))
+        self.assertDictEqual(ser.errors, {"value": ["This field is required."]})
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Datetime",
+            "code": "datetime",
+            "value": list,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), str(ser.errors))
+        self.assertErrorStartsWith(ser, "value", "Datetime has wrong format. Use one of these formats instead:")
+
+    def test_productattributevalueserializer_multioption(self):
+        p = Product.objects.get(pk=3)
+        self.assertEqual([str(o) for o in p.attr.multioption], ["Small", "Large"])
+        
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Multioption",
+            "code": "multioption",
+            "value": ["Large"],
+            "product": 3
+        })
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
+        self.assertEqual([str(o) for o in obj.value], ["Large"])
+
+        p.attr.initiate_attributes()
+        self.assertEqual([str(o) for o in p.attr.multioption], ["Large"])
+
+    def test_productattributevalueserializer_multioption_error(self):
+        p = Product.objects.get(pk=3)
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Multioption",
+            "code": "multioption",
+            "value": [],
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate")
+        self.assertDictEqual(ser.errors, {"value": ["This field is required."]})
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Multioption",
+            "code": "multioption",
+            "value": None,
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate")
+        self.assertDictEqual(ser.errors, {"value": ["This field is required."]})
+
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Multioption",
+            "code": "multioption",
+            "value": ["Large", "kip", "geit"],
+            "product": 3
+        })
+        self.assertFalse(ser.is_valid(), "This should not validate")
+        self.assertDictEqual(ser.errors, {"value": ["Option geit,kip does not exist."]})
