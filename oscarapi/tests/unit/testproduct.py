@@ -1,10 +1,14 @@
 import mock
+import  decimal
+
 from six import string_types
 
 from django.urls import reverse
+from django.test import TestCase
 
 from oscarapi.tests.utils import APITest
-from oscarapi.serializers.product import ProductLinkSerializer
+from oscarapi.serializers.product import ProductLinkSerializer, ProductAttributeValueSerializer
+from oscarapi.serializers.basket import StockRecordSerializer
 
 
 class ProductListDetailSerializer(ProductLinkSerializer):
@@ -181,3 +185,62 @@ class ProductTest(APITest):
 
         self.response = self.get(reverse('product-availability', args=(999999,)))
         self.response.assertStatusEqual(404)
+
+
+class ProductSerializerTest(TestCase):
+    fixtures = [
+        'product', 'productcategory', 'productattribute', 'productclass',
+        'productattributevalue', 'category', 'attributeoptiongroup',
+        'attributeoption', 'stockrecord', 'partner'
+    ]
+
+    def test_stockrecord_save(self):
+        ser = StockRecordSerializer(data={
+            "product": 1,
+            "partner": 1,
+            "partner_sku": "henk",
+            "price_currency": "EUR",
+            "price_excl_tax": 20,
+            "price_retail": 36,
+            "cost_price": 11,
+            "num_in_stock": 34,
+            "low_stock_threshold": 4
+        })
+        self.assertTrue(ser.is_valid(), "There where errors %s" % ser.errors)
+
+        obj = ser.save()
+        self.assertEqual(obj.product.get_title(), "Oscar T-shirt")
+        self.assertEqual(obj.partner.name, "Book partner")
+        self.assertEqual(obj.price_currency, "EUR")
+        self.assertEqual(obj.price_excl_tax, decimal.Decimal("20.00"))
+        self.assertEqual(obj.price_retail, decimal.Decimal("36.00"))
+        self.assertEqual(obj.cost_price, decimal.Decimal("11.00"))
+        self.assertEqual(obj.num_in_stock, 34)
+        self.assertEqual(obj.low_stock_threshold, 4)
+        self.assertEqual(obj.num_allocated, None)
+
+
+    def test_productattributevalueserializer_error(self):
+        ser = ProductAttributeValueSerializer(data={
+            "name": "zult",
+            "code": "zult",
+            "value": "hoolahoop",
+            "product": 1
+        })
+        
+        self.assertFalse(ser.is_valid(),
+            "There should be an error because there is no attribute named zult") 
+        self.assertEqual(ser.errors["non_field_errors"], [
+            "No attribute zult with code=zult on Oscar T-shirt, please define "
+            "it in the product_class first."
+        ])
+
+    def test_productattributevalueserializer(self):
+        ser = ProductAttributeValueSerializer(data={
+            "name": "Size",
+            "code": "size",
+            "value": "Small",
+            "product": 1
+        })
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
