@@ -126,17 +126,17 @@ urlpatterns = [
     url(r'^countries/$', CountryList.as_view(), name='country-list'),
     url(r'^countries/(?P<pk>[A-z]+)/$', CountryDetail.as_view(), name='country-detail'),
     url(r'^partners/(?P<pk>[0-9]+)/$', PartnerDetail.as_view(), name='partner-detail'),
+    url(r'^useraddresses/$', UserAddressList.as_view(), name='useraddress-list'),
     url(r'^useraddresses/(?P<pk>[0-9]+)/$', UserAddressDetail.as_view(), name='useraddress-detail')
 ]
 
 admin_urlpatterns = [
-    url(r'^admin/baskets/$', BasketList.as_view(), name='basket-list'),
-    url(r'^admin/lines/$', LineList.as_view(), name='line-list'),
-    url(r'^admin/lineattributes/$', LineAttributeList.as_view(), name='lineattribute-list'),
-    url(r'^admin/stockrecords/$', StockRecordList.as_view(), name='stockrecord-list'),
-    url(r'^admin/users/$', UserList.as_view(), name='user-list'),
-    url(r'^admin/partners/$', PartnerList.as_view(), name='partner-list'),
-    url(r'^admin/useraddresses/$', UserAddressList.as_view(), name='useraddress-list'),
+    url(r'^admin/baskets/$', BasketList.as_view(), name='admin-basket-list'),
+    url(r'^admin/lines/$', LineList.as_view(), name='admin-line-list'),
+    url(r'^admin/lineattributes/$', LineAttributeList.as_view(), name='admin-lineattribute-list'),
+    url(r'^admin/stockrecords/$', StockRecordList.as_view(), name='admin-stockrecord-list'),
+    url(r'^admin/users/$', UserList.as_view(), name='admin-user-list'),
+    url(r'^admin/partners/$', PartnerList.as_view(), name='admin-partner-list'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns + admin_urlpatterns)
