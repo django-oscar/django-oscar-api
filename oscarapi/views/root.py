@@ -23,18 +23,18 @@ def PUBLIC_APIS(r, f):
         ('options', reverse('option-list', request=r, format=f)),
         ('products', reverse('product-list', request=r, format=f)),
         ('countries', reverse('country-list', request=r, format=f)),
+        ('useraddresses', reverse('useraddress-list', request=r, format=f)),
     ]
 
 
 def PROTECTED_APIS(r, f):
     return [
-        ('baskets', reverse('basket-list', request=r, format=f)),
-        ('lines', reverse('line-list', request=r, format=f)),
-        ('lineattributes', reverse('lineattribute-list', request=r, format=f)),
-        ('stockrecords', reverse('stockrecord-list', request=r, format=f)),
-        ('users', reverse('user-list', request=r, format=f)),
-        ('partners', reverse('partner-list', request=r, format=f)),
-        ('useraddresses', reverse('useraddress-list', request=r, format=f)),
+        ('baskets', reverse('admin-basket-list', request=r, format=f)),
+        ('lines', reverse('admin-line-list', request=r, format=f)),
+        ('lineattributes', reverse('admin-lineattribute-list', request=r, format=f)),
+        ('stockrecords', reverse('admin-stockrecord-list', request=r, format=f)),
+        ('users', reverse('admin-user-list', request=r, format=f)),
+        ('partners', reverse('admin-partner-list', request=r, format=f)),
     ]
 
 
