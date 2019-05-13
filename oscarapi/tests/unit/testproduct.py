@@ -9,10 +9,12 @@ from django.utils.timezone import make_aware
 
 from oscar.core.loading import get_model
 from oscarapi.tests.utils import APITest
+from oscarapi.serializers.fields import CategoryField
 from oscarapi.serializers.product import ProductLinkSerializer, ProductAttributeValueSerializer
 from oscarapi.serializers.basket import StockRecordSerializer
 
 Product = get_model("catalogue", "Product")
+Category = get_model("catalogue", "Category")
 
 
 class ProductListDetailSerializer(ProductLinkSerializer):
@@ -202,6 +204,8 @@ class ProductSerializerTest(TestCase):
         self.assertTrue(ser.errors[name][0].startswith(errorstring),
             "Error does not start with %s" % errorstring)
 
+
+class StockRecordSerializerTest(ProductSerializerTest):
     def test_stockrecord_save(self):
         ser = StockRecordSerializer(data={
             "product": 1,
@@ -227,6 +231,8 @@ class ProductSerializerTest(TestCase):
         self.assertEqual(obj.low_stock_threshold, 4)
         self.assertEqual(obj.num_allocated, None)
 
+
+class ProductAttributeValueSerializerTest(ProductSerializerTest):
     def test_productattributevalueserializer_error(self):
         ser = ProductAttributeValueSerializer(data={
             "name": "zult",
@@ -698,3 +704,25 @@ class ProductSerializerTest(TestCase):
         })
         self.assertFalse(ser.is_valid(), "This should not validate")
         self.assertDictEqual(ser.errors, {"value": ["Option geit,kip does not exist."]})
+
+
+class CategoryFieldTest(ProductSerializerTest):
+    def test_write(self):
+        self.assertEqual(Category.objects.count(), 1)
+        ser = CategoryField(many=True, required=False)
+        data=[
+            "Henk > is > een > keel",
+            "En > klaas > is > er > ook > een"
+        ]
+        validated_data = ser.run_validation(data)
+        self.assertEqual(len(validated_data), 2)
+        first, second = validated_data
+        self.assertEqual(first.full_slug, "henk/is/een/keel")
+        self.assertEqual(second.full_slug, "en/klaas/is/er/ook/een")
+        self.assertEqual(Category.objects.count(), 11)
+
+    def test_read(self):
+        self.test_write()
+        ser = CategoryField(many=True, required=False)
+        val = ser.to_representation(Category.objects.filter(pk__in=[7, 4]))
+        self.assertListEqual(val, ["Henk > is > een", "En > klaas"])

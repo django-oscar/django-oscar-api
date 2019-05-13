@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from django.core.exceptions import ObjectDoesNotExist
-from oscarapi.utils.loading import get_api_class
+from oscarapi.utils.loading import get_api_classes
 from oscarapi.utils.settings import overridable
-from oscarapi.serializers import fields as oscarapi_fields
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
@@ -14,7 +13,11 @@ ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 ProductImage = get_model('catalogue', 'ProductImage')
 Option = get_model('catalogue', 'Option')
 Partner = get_model('partner', 'Partner')
-AttributeValueField = get_api_class("serializers.fields", "AttributeValueField")
+AttributeValueField, CategoryField = get_api_classes(
+    "serializers.fields",
+    ["AttributeValueField", "CategoryField"]
+)
+
 # ProductClass = get_model('catalogue', 'ProductClass')
 # ProductCategory = get_model('catalogue', 'ProductCategory')
 # ProductAttribute = get_model('catalogue', 'ProductAttribute')
@@ -133,7 +136,7 @@ class BaseProductSerializer(OscarModelSerializer):
         view_name='product-stockrecord-list')
     attributes = ProductAttributeValueSerializer(
         many=True, required=False, source="attribute_values")
-    categories = serializers.StringRelatedField(many=True, required=False)
+    categories = CategoryField(many=True, required=False)
     product_class = serializers.StringRelatedField(required=False)
     price = serializers.HyperlinkedIdentityField(view_name='product-price')
     availability = serializers.HyperlinkedIdentityField(

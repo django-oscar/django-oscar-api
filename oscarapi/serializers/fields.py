@@ -9,14 +9,15 @@ from rest_framework import serializers, relations
 from rest_framework.reverse import reverse
 from rest_framework.fields import get_attribute
 
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
 
 from .utils import wrap_in_dict
 
 logger = logging.getLogger(__name__)
 ProductAttribute = get_model('catalogue', 'ProductAttribute')
+Category = get_model("catalogue", "Category")
+create_from_breadcrumbs = get_class("catalogue.categories", "create_from_breadcrumbs")
 attribute_details = operator.itemgetter("product", "code", "value")
-
 
 class TaxIncludedDecimalField(serializers.DecimalField):
     def __init__(self, excl_tax_field=None, excl_tax_value=None,
@@ -188,3 +189,15 @@ class AttributeValueField(serializers.Field):
 
         # return the value as stored on ProductAttributeValue in the correct type
         return obj.value
+
+
+class CategoryField(serializers.RelatedField):
+    def __init__(self, **kwargs):
+        kwargs["queryset"] = Category.objects
+        super(CategoryField, self).__init__(**kwargs)
+
+    def to_internal_value(self, data):
+        return create_from_breadcrumbs(data)
+
+    def to_representation(self, obj):
+        return obj.full_name
