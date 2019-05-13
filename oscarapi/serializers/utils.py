@@ -1,4 +1,3 @@
-from functools import wraps
 from rest_framework import serializers
 import oscar.models.fields
 
@@ -40,29 +39,3 @@ class OscarHyperlinkedModelSerializer(
     """
     Correctly map oscar fields to serializer fields.
     """
-
-
-class wrap_in_dict(object):
-    """
-    Wraps the return value in a dict
-    
-    >>> func = wrap_in_dict("henk")(str)
-    >>> func(1)
-    {'henk': '1'}
-    >>> class Calc:
-    ...     @wrap_in_dict("lmao")
-    ...     def hoela(self, ugh):
-    ...         return ugh + 1
-    >>> calc = Calc()
-    >>> calc.hoela(17)
-    {'lmao': 18}
-    """
-    def __init__(self, key):
-        self.key = key
-
-    def __call__(self, func):
-        @wraps(func)
-        def _wrapped_in_dict(*args, **kwargs):
-            return {self.key: func(*args, **kwargs)}
-
-        return _wrapped_in_dict

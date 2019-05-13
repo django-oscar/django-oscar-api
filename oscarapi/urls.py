@@ -95,6 +95,7 @@ LoginView = get_api_class("views.login", "LoginView")
     ]
 )
 
+ProductAdminList, ProductAdminDetail = get_api_classes("views.admin.product", ["ProductAdminList", "ProductAdminDetail"])
 
 urlpatterns = [
     url(r'^$', api_root, name='api-root'),
@@ -137,6 +138,8 @@ admin_urlpatterns = [
     url(r'^admin/stockrecords/$', StockRecordList.as_view(), name='admin-stockrecord-list'),
     url(r'^admin/users/$', UserList.as_view(), name='admin-user-list'),
     url(r'^admin/partners/$', PartnerList.as_view(), name='admin-partner-list'),
+    url(r'^admin/products/$', ProductAdminList.as_view(), name='admin-product-list'),
+    url(r'^admin/products/(?P<pk>[0-9]+)/$', ProductAdminDetail.as_view(), name='admin-product-detail'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns + admin_urlpatterns)
