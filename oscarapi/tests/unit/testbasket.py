@@ -21,7 +21,7 @@ class BasketTest(APITest):
 
     def test_basket_api_create(self):
         "The basket api create command should work with regular cookie based login"
-        url = reverse('basket-list')
+        url = reverse('admin-basket-list')
         baskets = Basket.objects.all()
 
         self.assertFalse(baskets.exists(), "There should be no baskets yet.")
@@ -63,13 +63,13 @@ class BasketTest(APITest):
         self.assertFalse(empty.exists(), "There should be no baskets yet.")
 
         if self.hlogin('nobody', 'nobody', session_id='nobody'):
-            self.response = self.post('basket-list', session_id='nobody', authenticated=True,
+            self.response = self.post('admin-basket-list', session_id='nobody', authenticated=True,
                 owner="http://testserver%s" % reverse('user-detail', args=[2])
             )
             self.response.assertStatusEqual(403, "Authenticated regular users can not use the basket api to create baskets.")
 
         if self.hlogin('admin', 'admin', session_id='admin'):
-            self.response = self.post('basket-list', session_id='admin', authenticated=True,
+            self.response = self.post('admin-basket-list', session_id='admin', authenticated=True,
                 owner="http://testserver%s" % reverse('user-detail', args=[1])
             )
             self.response.assertStatusEqual(201, "It should be possible for a basket to be created, for a specific user.")
