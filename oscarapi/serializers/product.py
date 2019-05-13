@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.core.exceptions import ObjectDoesNotExist
-from oscarapi.utils.loading import get_api_classes
+from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.settings import overridable
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
@@ -13,12 +13,13 @@ ProductAttributeValue = get_model('catalogue', 'ProductAttributeValue')
 ProductImage = get_model('catalogue', 'ProductImage')
 Option = get_model('catalogue', 'Option')
 Partner = get_model('partner', 'Partner')
+ProductClass = get_model('catalogue', 'ProductClass')
 AttributeValueField, CategoryField = get_api_classes(
     "serializers.fields",
     ["AttributeValueField", "CategoryField"]
 )
+StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
 
-# ProductClass = get_model('catalogue', 'ProductClass')
 # ProductCategory = get_model('catalogue', 'ProductCategory')
 # ProductAttribute = get_model('catalogue', 'ProductAttribute')
 # AttributeOption = get_model('catalogue', 'AttributeOption')
@@ -91,16 +92,6 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
         attribute = self.validated_data["attribute"]
         attribute.save_value(product, value)
         return product.attribute_values.get(attribute=attribute)
-        # if self.instance is None:
-        #     try:  # check if the constraint would be violated and if so set instance
-        #         self.instance = self.Meta.model.objects.get(
-        #             attribute=self.validated_data["attribute"],
-        #             product=self.validated_data["product"]
-        #         )
-        #     except ObjectDoesNotExist:  # it is safe to create new object
-        #         pass
-        #
-        # return super().save(**kwargs)
 
     class Meta:
         model = ProductAttributeValue
@@ -110,6 +101,8 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
 
 
 class ProductImageSerializer(OscarModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(write_only=True, queryset=Product.objects)
+
     class Meta:
         model = ProductImage
         fields = '__all__'
@@ -131,39 +124,45 @@ class RecommmendedProductSerializer(OscarModelSerializer):
 
 
 class BaseProductSerializer(OscarModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name='product-detail')
-    stockrecords = serializers.HyperlinkedIdentityField(
-        view_name='product-stockrecord-list')
+    "Base class shared by admin and public serializer"
     attributes = ProductAttributeValueSerializer(
         many=True, required=False, source="attribute_values")
     categories = CategoryField(many=True, required=False)
-    product_class = serializers.StringRelatedField(required=False)
-    price = serializers.HyperlinkedIdentityField(view_name='product-price')
-    availability = serializers.HyperlinkedIdentityField(
-        view_name='product-availability')
+    product_class = serializers.SlugRelatedField(slug_field="slug", queryset=ProductClass.objects)
     options = OptionSerializer(many=True, required=False)
-    recommended_products = RecommmendedProductSerializer(
-        many=True, required=False)
+    recommended_products = serializers.HyperlinkedRelatedField(
+        view_name='product-detail', many=True, required=False,
+        queryset=Product.objects.filter(structure__in=[Product.PARENT, Product.STANDALONE])
+    )
+
+    class Meta:
+        model = Product
+
+
+class PublicProductSerializer(BaseProductSerializer):
+    "Serializer base class used for public products api"
+    url = serializers.HyperlinkedIdentityField(view_name='product-detail')
+    price = serializers.HyperlinkedIdentityField(view_name='product-price', read_only=True)
+    availability = serializers.HyperlinkedIdentityField(
+        view_name='product-availability', read_only=True)
 
     def get_field_names(self, declared_fields, info):
         """
         Override get_field_names to make sure that we are not getting errors
         for not including declared fields.
         """
-        return super(BaseProductSerializer, self).get_field_names({}, info)
-
-    class Meta:
-        model = Product
+        return super(PublicProductSerializer, self).get_field_names({}, info)
 
 
-class ChildProductserializer(BaseProductSerializer):
+class ChildProductserializer(PublicProductSerializer):
+    "Serializer for child products"
     parent = serializers.HyperlinkedRelatedField(
-        view_name='product-detail', queryset=Product.objects)
+        view_name='product-detail', queryset=Product.objects.filter(structure=Product.PARENT))
     # the below fields can be filled from the parent product if enabled.
     images = ProductImageSerializer(many=True, required=False, source='parent.images')
     description = serializers.CharField(source='parent.description')
 
-    class Meta(BaseProductSerializer.Meta):
+    class Meta(PublicProductSerializer.Meta):
         fields = overridable(
             'OSCARAPI_CHILDPRODUCTDETAIL_FIELDS',
             default=(
@@ -176,11 +175,17 @@ class ChildProductserializer(BaseProductSerializer):
                 'stockrecords', 'price', 'availability', 'options'))
 
 
-class ProductSerializer(BaseProductSerializer):
+class ProductSerializer(PublicProductSerializer):
+    "Serializer for public api with strategy fields added for price and availability"
+    url = serializers.HyperlinkedIdentityField(view_name='product-detail')
+    price = serializers.HyperlinkedIdentityField(view_name='product-price', read_only=True)
+    availability = serializers.HyperlinkedIdentityField(
+        view_name='product-availability', read_only=True)
+
     images = ProductImageSerializer(many=True, required=False)
     children = ChildProductserializer(many=True, required=False)
 
-    class Meta(BaseProductSerializer.Meta):
+    class Meta(PublicProductSerializer.Meta):
         fields = overridable(
             'OSCARAPI_PRODUCTDETAIL_FIELDS',
             default=(
@@ -192,7 +197,13 @@ class ProductSerializer(BaseProductSerializer):
 
 
 class ProductLinkSerializer(ProductSerializer):
-    class Meta(BaseProductSerializer.Meta):
+    """
+    Summary serializer for list view, listing all products.
+    
+    This serializer can be easily made to show any field on ``ProductSerializer``,
+    just add fields to the ``OSCARAPI_PRODUCT_FIELDS`` setting.
+    """
+    class Meta(PublicProductSerializer.Meta):
         fields = overridable(
             'OSCARAPI_PRODUCT_FIELDS', default=(
                 'url', 'id', 'upc', 'title'
