@@ -12,6 +12,7 @@ from oscarapi.tests.utils import APITest
 from oscarapi.serializers.fields import CategoryField
 from oscarapi.serializers.product import ProductLinkSerializer, ProductAttributeValueSerializer
 from oscarapi.serializers.basket import StockRecordSerializer
+from oscarapi.serializers.admin.product import AdminProductSerializer
 
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
@@ -193,7 +194,7 @@ class ProductTest(APITest):
         self.response.assertStatusEqual(404)
 
 
-class ProductSerializerTest(TestCase):
+class _ProductSerializerTest(TestCase):
     fixtures = [
         'product', 'productcategory', 'productattribute', 'productclass',
         'productattributevalue', 'category', 'attributeoptiongroup',
@@ -205,7 +206,7 @@ class ProductSerializerTest(TestCase):
             "Error does not start with %s" % errorstring)
 
 
-class StockRecordSerializerTest(ProductSerializerTest):
+class StockRecordSerializerTest(_ProductSerializerTest):
     def test_stockrecord_save(self):
         ser = StockRecordSerializer(data={
             "product": 1,
@@ -232,7 +233,7 @@ class StockRecordSerializerTest(ProductSerializerTest):
         self.assertEqual(obj.num_allocated, None)
 
 
-class ProductAttributeValueSerializerTest(ProductSerializerTest):
+class ProductAttributeValueSerializerTest(_ProductSerializerTest):
     def test_productattributevalueserializer_error(self):
         ser = ProductAttributeValueSerializer(data={
             "name": "zult",
@@ -243,9 +244,9 @@ class ProductAttributeValueSerializerTest(ProductSerializerTest):
         
         self.assertFalse(ser.is_valid(),
             "There should be an error because there is no attribute named zult") 
-        self.assertEqual(ser.errors["non_field_errors"], [
-            "No attribute zult with code=zult on Oscar T-shirt, please define "
-            "it in the product_class first."
+        self.assertEqual(ser.errors["value"], [
+            "No attribute exist named zult with code=zult, please define it in "
+            "the product_class first."
         ])
 
     def test_productattributevalueserializer_option(self):
@@ -706,7 +707,7 @@ class ProductAttributeValueSerializerTest(ProductSerializerTest):
         self.assertDictEqual(ser.errors, {"value": ["Option geit,kip does not exist."]})
 
 
-class CategoryFieldTest(ProductSerializerTest):
+class CategoryFieldTest(_ProductSerializerTest):
     def test_write(self):
         self.assertEqual(Category.objects.count(), 1)
         ser = CategoryField(many=True, required=False)
@@ -726,3 +727,109 @@ class CategoryFieldTest(ProductSerializerTest):
         ser = CategoryField(many=True, required=False)
         val = ser.to_representation(Category.objects.filter(pk__in=[7, 4]))
         self.assertListEqual(val, ["Henk > is > een", "En > klaas"])
+
+
+class AdminProductSerializerTest(_ProductSerializerTest):
+    def test_create_product(self):
+        ser = AdminProductSerializer(data={
+            "product_class": "testtype",
+            "slug": "new-product",
+        })
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.pk, 5)
+        self.assertEqual(obj.product_class.slug, "testtype")
+        self.assertEqual(obj.slug, "new-product")
+
+    def test_modify_product(self):
+        product = Product.objects.get(pk=3)
+        self.assertEqual(product.upc, "attrtypestest")
+        self.assertEqual(product.description, "<p>It is a test for the attributes</p>")
+
+        ser = AdminProductSerializer(data={
+            "id": 3,
+            "product_class": "testtype",
+            "slug": "lots-of-attributes",
+            "description": "Henk",
+        }, instance=product)
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.upc, "attrtypestest")
+        self.assertEqual(obj.description, "Henk")
+
+    def test_modify_product_error(self):
+        product = Product.objects.get(pk=3)
+        self.assertEqual(product.upc, "attrtypestest")
+        self.assertEqual(product.description, "<p>It is a test for the attributes</p>")
+
+        ser = AdminProductSerializer(data={
+            "id": 3,
+            "product_class": "testtype",
+            "slug": "lots-of-attributes",
+            "description": "Henk",
+            "attributes": [
+                {
+                    "name": "Text",
+                    "value": "Blaat blaat",
+                }
+            ]
+        }, instance=product)
+        self.assertFalse(ser.is_valid(), "Should fail because of missing code")
+        self.assertDictEqual(ser.errors, {"attributes": [{"code": "This field is required."}]})
+
+    def test_switch_product_class(self):
+        product = Product.objects.get(pk=3)
+        self.assertEqual(product.attribute_values.count(), 11)
+        self.assertEqual(product.attr.boolean, True)
+        self.assertEqual(product.attr.date, datetime.date(2018, 1, 2))
+        self.assertEqual(product.attr.datetime, make_aware(datetime.datetime(2018, 1, 2, 10, 45)))
+        self.assertEqual(product.attr.float, 3.2)
+        self.assertEqual(product.attr.html, "<p>I <strong>am</strong> a test</p>")
+        self.assertEqual(product.attr.integer, 7)
+        self.assertEqual([str(a) for a in product.attr.multioption], ['Small', 'Large'])
+        self.assertEqual(str(product.attr.option), "Small")
+        
+        ser = AdminProductSerializer(data={
+            "id": 3,
+            "product_class": "t-shirt",
+            "slug": "lots-of-attributes",
+            "description": "Henk",
+            "attributes": [
+                {
+                    "name": "Size",
+                    "value": "Large",
+                    "code": "size"
+                }
+            ]
+        }, instance=product)
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+
+        self.assertEqual(obj.product_class.slug, "t-shirt")
+
+        # reset the annoying attr object, it stinks!!
+        obj.attr.__dict__ = {}
+        obj.attr.product = obj
+        obj.attr.initiate_attributes()
+        self.assertEqual(obj.attribute_values.count(), 1,
+            "Only one attribute should be present now, because the new "
+            "product class has none of the old atributes"
+        )
+        self.assertEqual(str(obj.attr.size), "Large")
+
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(obj.attr.date, datetime.date(2018, 1, 2))
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(obj.attr.boolean, True)
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(obj.attr.datetime, make_aware(datetime.datetime(2018, 1, 2, 10, 45)))
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(obj.attr.float, 3.2)
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(obj.attr.html, "<p>I <strong>am</strong> a test</p>")
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(obj.attr.integer, 7)
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual([str(a) for a in obj.attr.multioption], ['Small', 'Large'])
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(str(obj.attr.option), "Small")

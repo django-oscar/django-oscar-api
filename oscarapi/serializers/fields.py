@@ -1,45 +1,45 @@
 import logging
 import operator
 
-from django.urls import NoReverseMatch
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework import serializers, relations
-from rest_framework.reverse import reverse
 from rest_framework.fields import get_attribute
 
 from oscar.core.loading import get_model, get_class
 
-from .utils import wrap_in_dict
+from .exceptions import FieldError
 
 logger = logging.getLogger(__name__)
-ProductAttribute = get_model('catalogue', 'ProductAttribute')
+ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
 create_from_breadcrumbs = get_class("catalogue.categories", "create_from_breadcrumbs")
-attribute_details = operator.itemgetter("product", "code", "value")
+attribute_details = operator.itemgetter("code", "value")
+
 
 class TaxIncludedDecimalField(serializers.DecimalField):
-    def __init__(self, excl_tax_field=None, excl_tax_value=None,
-                 *args, **kwargs):
+    def __init__(self, excl_tax_field=None, excl_tax_value=None, **kwargs):
         self.excl_tax_field = excl_tax_field
         self.excl_tax_value = excl_tax_value
-        super(TaxIncludedDecimalField, self).__init__(*args, **kwargs)
+        super(TaxIncludedDecimalField, self).__init__(**kwargs)
 
     def get_attribute(self, instance):
         if instance.is_tax_known:
             return super(TaxIncludedDecimalField, self).get_attribute(instance)
         if self.excl_tax_field:
-            return get_attribute(instance, (self.excl_tax_field, ))
+            return get_attribute(instance, (self.excl_tax_field,))
         return self.excl_tax_value
 
 
 class DrillDownHyperlinkedIdentityField(relations.HyperlinkedIdentityField):
     def __init__(self, *args, **kwargs):
         try:
-            self.extra_url_kwargs = kwargs.pop('extra_url_kwargs')
+            self.extra_url_kwargs = kwargs.pop("extra_url_kwargs")
         except KeyError:
-            msg = "DrillDownHyperlinkedIdentityField requires 'extra_url_kwargs' argument"
+            msg = (
+                "DrillDownHyperlinkedIdentityField requires 'extra_url_kwargs' argument"
+            )
             raise ValueError(msg)
 
         super(DrillDownHyperlinkedIdentityField, self).__init__(*args, **kwargs)
@@ -47,49 +47,25 @@ class DrillDownHyperlinkedIdentityField(relations.HyperlinkedIdentityField):
     def get_extra_url_kwargs(self, obj):
         return {
             key: operator.attrgetter(path)(obj)
-                for key, path in self.extra_url_kwargs.items()
+            for key, path in self.extra_url_kwargs.items()
         }
 
-    def get_url(self, obj, view_name, request, format):
+    def get_url(
+        self, obj, view_name, request, format
+    ):  # pylint: disable=redefined-builtin
         """
         Given an object, return the URL that hyperlinks to the object.
 
         May raise a `NoReverseMatch` if the `view_name` and `lookup_field`
         attributes are not configured to correctly match the URL conf.
         """
-        lookup_field = getattr(obj, self.lookup_field, None)
-        kwargs = {self.lookup_field: lookup_field}
-        kwargs.update(self.get_extra_url_kwargs(obj))
-        # Handle unsaved object case
-        if lookup_field is None:
+        if hasattr(obj, "pk") and obj.pk in (None, ""):
             return None
 
-        try:
-            return reverse(view_name, kwargs=kwargs, request=request, format=format)
-        except NoReverseMatch:
-            pass
-
-        if self.pk_url_kwarg != 'pk':
-            # Only try pk lookup if it has been explicitly set.
-            # Otherwise, the default `lookup_field = 'pk'` has us covered.
-            kwargs = {self.pk_url_kwarg: obj.pk}
-            kwargs.update(self.get_extra_url_kwargs(obj))
-            try:
-                return reverse(view_name, kwargs=kwargs, request=request, format=format)
-            except NoReverseMatch:
-                pass
-
-        slug = getattr(obj, self.slug_field, None)
-        if slug:
-            # Only use slug lookup if a slug field exists on the model
-            kwargs = {self.slug_url_kwarg: slug}
-            kwargs.update(self.get_extra_url_kwargs(obj))
-            try:
-                return reverse(view_name, kwargs=kwargs, request=request, format=format)
-            except NoReverseMatch:
-                pass
-
-        raise NoReverseMatch()
+        lookup_value = getattr(obj, self.lookup_field)
+        kwargs = {self.lookup_url_kwarg: lookup_value}
+        kwargs.update(self.get_extra_url_kwargs(obj))
+        return self.reverse(view_name, kwargs=kwargs, request=request, format=format)
 
 
 class AttributeValueField(serializers.Field):
@@ -100,33 +76,43 @@ class AttributeValueField(serializers.Field):
     it is not fixed. This field solves the problem of handling the different
     types.
     """
-    
+
     def __init__(self, **kwargs):
         # this field always needs the full object
         kwargs["source"] = "*"
         kwargs["error_messages"] = {
-            "no_such_option":_("Option {value} does not exist."),
-            "invalid": _('Wrong type, {error}.'),
+            "no_such_option": _("Option {value} does not exist."),
+            "invalid": _("Wrong type, {error}."),
+            "attribute_missing": _(
+                "No attribute exist named {name} with code={code}, "
+                "please define it in the product_class first."
+            ),
         }
         super(AttributeValueField, self).__init__(**kwargs)
 
-    def get_value(self, data):
+    def get_value(self, dictionary):
         # return all the data because this field uses everything
-        return data
+        return dictionary
 
-    @wrap_in_dict("value")
     def to_internal_value(self, data):
-        product_id, code, value = attribute_details(data)
+        assert "product" in data or "product_class" in data
 
-        internal_value = value
         try:
-            # we need the attribute to determine the type of the value
-            attribute = ProductAttribute.objects.get(
-                code=code,
-                product_class__products__id=product_id
-            )
+            code, value = attribute_details(data)
+            internal_value = value
+
+            if "product" in data:
+                # we need the attribute to determine the type of the value
+                attribute = ProductAttribute.objects.get(
+                    code=code, product_class__products__id=data["product"]
+                )
+            elif "product_class" in data:
+                attribute = ProductAttribute.objects.get(
+                    code=code, product_class__slug=data.get("product_class")
+                )
+
             if attribute.required and value is None:
-                self.fail('required')
+                self.fail("required")
 
             # some of these attribute types need special processing, or their
             # validation will fail
@@ -134,12 +120,14 @@ class AttributeValueField(serializers.Field):
                 internal_value = attribute.option_group.options.get(option=value)
             elif attribute.type == attribute.MULTI_OPTION:
                 if attribute.required and not value:
-                    self.fail('required')
+                    self.fail("required")
                 internal_value = attribute.option_group.options.filter(option__in=value)
                 if len(value) != internal_value.count():
-                    non_existing = set(value) - set(internal_value.values_list("option", flat=True))
+                    non_existing = set(value) - set(
+                        internal_value.values_list("option", flat=True)
+                    )
                     non_existing_as_error = ",".join(sorted(non_existing))
-                    self.fail('no_such_option', value=non_existing_as_error)
+                    self.fail("no_such_option", value=non_existing_as_error)
             elif attribute.type == attribute.DATE:
                 date_field = serializers.DateField()
                 internal_value = date_field.to_internal_value(value)
@@ -159,36 +147,38 @@ class AttributeValueField(serializers.Field):
             except TypeError as e:
                 self.fail("invalid", error=e)
 
+            return {"value": internal_value, "attribute": attribute}
         except ProductAttribute.DoesNotExist:  # maybe this is fatal I don;t know yet
-            logger.error(
-                "No attribute found %s, returning value without parsing" % data)
+            self.fail("attribute_missing", **data)
         except ObjectDoesNotExist as e:
             self.fail("no_such_option", value=value)
+        except KeyError as e:
+            field_name, = e.args
+            raise FieldError(
+                detail={field_name: self.error_messages["required"]}, code="required"
+            )
 
-        return internal_value
-
-    def to_representation(self, obj):
-        obj_type = obj.attribute.type
-        if obj_type == obj.attribute.OPTION:
-            return obj.value.option
-        elif obj_type == obj.attribute.MULTI_OPTION:
-            return obj.value.values_list('option', flat=True)
-        elif obj_type == obj.attribute.FILE:
-            return obj.value.url
-        elif obj_type == obj.attribute.IMAGE:
-            return obj.value.url
-        elif obj_type == obj.attribute.ENTITY:
-            if hasattr(obj.value, 'json'):
-                return obj.value.json()
+    def to_representation(self, value):
+        obj_type = value.attribute.type
+        if obj_type == value.attribute.OPTION:
+            return value.value.option
+        elif obj_type == value.attribute.MULTI_OPTION:
+            return value.value.values_list("option", flat=True)
+        elif obj_type == value.attribute.FILE:
+            return value.value.url
+        elif obj_type == value.attribute.IMAGE:
+            return value.value.url
+        elif obj_type == value.attribute.ENTITY:
+            if hasattr(value.value, "json"):
+                return value.value.json()
             else:
                 return _(
-                    "%(entity)s has no json method, can not convert to json" % {
-                        'entity': repr(obj.value)
-                    }
+                    "%(entity)s has no json method, can not convert to json"
+                    % {"entity": repr(value.value)}
                 )
 
         # return the value as stored on ProductAttributeValue in the correct type
-        return obj.value
+        return value.value
 
 
 class CategoryField(serializers.RelatedField):
@@ -199,5 +189,5 @@ class CategoryField(serializers.RelatedField):
     def to_internal_value(self, data):
         return create_from_breadcrumbs(data)
 
-    def to_representation(self, obj):
-        return obj.full_name
+    def to_representation(self, value):
+        return value.full_name
