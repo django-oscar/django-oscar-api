@@ -49,6 +49,6 @@ def api_root(request, format=None):
     """
     apis = PUBLIC_APIS(request, format)
     if request.user.is_staff:
-        apis += PROTECTED_APIS(request, format)
+        apis += [('admin', collections.OrderedDict(PROTECTED_APIS(request, format)))]
 
     return Response(collections.OrderedDict(apis))
