@@ -5,27 +5,26 @@ from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.models import fake_autocreated
 
 Product = get_model("catalogue", "Product")
+ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
 StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
-BaseProductSerializer, ProductImageSerializer = get_api_classes(
-    "serializers.product", [
-        "BaseProductSerializer", "ProductImageSerializer"
-    ]
+BaseProductSerializer, ProductImageSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+    "serializers.product", ["BaseProductSerializer", "ProductImageSerializer"]
 )
 
 
 class AdminProductSerializer(BaseProductSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name='admin-product-detail')
+    url = serializers.HyperlinkedIdentityField(view_name="admin-product-detail")
     stockrecords = StockRecordSerializer(many=True, required=False)
     images = ProductImageSerializer(many=True, required=False)
     children = serializers.HyperlinkedRelatedField(
         view_name="admin-product-detail",
         many=True,
         required=False,
-        queryset=Product.objects.filter(structure=Product.CHILD)
+        queryset=Product.objects.filter(structure=Product.CHILD),
     )
 
     class Meta(BaseProductSerializer.Meta):
-        exclude = ("product_options", )
+        exclude = ("product_options",)
 
     def update(self, instance, validated_data):
         "Handle the nested serializers manually"
@@ -47,7 +46,26 @@ class AdminProductSerializer(BaseProductSerializer):
             pclass_options = instance.get_product_class().options.all()
             _product_options.set(set(options) - set(pclass_options))
 
-        instance.attribute_values.set(attribute_values)
         instance.images.set(images)
+        instance.stockrecords.set(stockrecords)
 
-        return super(AdminProductSerializer, self).update(instance, validated_data)
+        # update instance
+        instance = super(AdminProductSerializer, self).update(instance, validated_data)
+
+        # deal with attributes after saving instance
+        # get the serializer
+        attribute_serializer = self.fields["attributes"]
+
+        # use the serializer to update the attribute_values
+        updated_attribute_values = attribute_serializer.update(
+            instance.attribute_values, attribute_values
+        )
+        # add the updated_attribute_values to the instance
+        instance.attribute_values.add(*updated_attribute_values)
+        # remove all the obsolete attribute values, this could be caused by
+        # the product class changing for example, lots of attributes would become
+        # obsolete.
+        current_pks = [p.pk for p in updated_attribute_values]
+        instance.attribute_values.exclude(pk__in=current_pks).delete()
+
+        return instance

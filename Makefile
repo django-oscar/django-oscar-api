@@ -34,3 +34,7 @@ publish_release_testpypi: build_release
 
 publish_release: build_release
 	twine upload dist/*
+
+lint:
+	pylint setup.py oscarapi/
+	black --check --exclude "migrations/*" setup.py oscarapi/**/*.py
