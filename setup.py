@@ -48,7 +48,8 @@ setup(
     ],
     # mark test target to require extras.
     extras_require={
-        'dev': ['coverage', 'mock', 'twine', 'wheel', 'pylint', 'black', 'pylint-django'],
+        'test': ['coverage', 'mock', 'twine', 'wheel', 'pylint', 'pylint-django'],
         'docs': ['sphinx', 'sphinx_rtd_theme'],
+        'devpy36': ['black'],
     },
 )
