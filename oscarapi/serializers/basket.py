@@ -63,7 +63,7 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
         max_digits=12, required=False)
     currency = serializers.CharField(required=False)
     voucher_discounts = VoucherDiscountSerializer(many=True, required=False)
-
+    
     class Meta:
         model = Basket
         fields = overridable('OSCARAPI_BASKET_FIELDS', default=(
@@ -72,15 +72,6 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
             'total_excl_tax_excl_discounts', 'total_incl_tax',
             'total_incl_tax_excl_discounts', 'total_tax', 'currency',
             'voucher_discounts', 'offer_discounts', 'is_tax_known'))
-
-    def get_validation_exclusions(self, instance=None):
-        """
-        This is needed because oscar declared the owner field as ``null=True``,
-        but ``blank=False``. That means the validator will claim you can not
-        leave this value set to None.
-        """
-        return super(BasketSerializer, self).get_validation_exclusions(
-            instance) + ['owner']
 
 
 class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
@@ -117,10 +108,6 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     warning = serializers.CharField(
         read_only=True, required=False, source='get_warning')
 
-    @property
-    def basket_pk(self):
-        return self.kwargs.get('basket_pk')
-
     class Meta:
         model = Line
         fields = overridable('OSCARAPI_BASKETLINE_FIELDS', default=(
@@ -130,16 +117,16 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
             'is_tax_known', 'warning', 'basket', 'stockrecord', 'date_created'
         ))
 
-    def to_representation(self, obj):
+    def to_representation(self, instance):
         # This override is needed to reflect offer discounts or strategy
         # related prices immediately in the response
-        operations.assign_basket_strategy(obj.basket, self.context['request'])
+        operations.assign_basket_strategy(instance.basket, self.context['request'])
 
         # Oscar stores the calculated discount in line._discount_incl_tax or
         # line._discount_excl_tax when offers are applied. So by just
         # retrieving the line from the db you will loose this values, that's
         # why we need to get the line from the in-memory resultset here
-        lines = (x for x in obj.basket.all_lines() if x.id == obj.id)
+        lines = (x for x in instance.basket.all_lines() if x.id == instance.id)
         line = next(lines, None)
 
         return super(BasketLineSerializer, self).to_representation(line)
