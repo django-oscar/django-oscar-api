@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+  <object pk="1" model="catalogue.productimage">
+    <field to="catalogue.product" name="product" rel="ManyToOneRel">1</field>
+    <field type="ImageField" name="original">images/products/2019/05/image.jpg</field>
+    <field type="CharField" name="caption">I'm a cow</field>
+    <field type="PositiveSmallIntegerField" name="display_order">0</field>
+    <field type="DateTimeField" name="date_created">2013-12-12T16:33:57.426000+00:00</field>
+  </object>
+</django-objects>
