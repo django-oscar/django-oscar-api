@@ -8,6 +8,7 @@ from oscarapi.serializers.fields import DrillDownHyperlinkedIdentityField
 from oscarapi.serializers.utils import(
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
+    UpdateListSerializer,
 )
 from oscarapi.serializers.fields import TaxIncludedDecimalField
 
@@ -22,6 +23,7 @@ Line = get_model('basket', 'Line')
 LineAttribute = get_model('basket', 'LineAttribute')
 StockRecord = get_model('partner', 'StockRecord')
 Voucher = get_model('voucher', 'Voucher')
+Product = get_model('catalogue', 'Product')
 
 
 class VoucherSerializer(OscarModelSerializer):
@@ -159,10 +161,14 @@ class LineSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class StockRecordSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(
+        many=False, required=False, queryset=Product.objects
+    )
 
     class Meta:
         model = StockRecord
         fields = '__all__'
+        list_serializer_class = UpdateListSerializer
 
 
 class VoucherAddSerializer(serializers.Serializer):
