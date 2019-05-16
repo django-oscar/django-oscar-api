@@ -2,13 +2,12 @@ from copy import deepcopy
 from rest_framework import serializers
 from rest_framework.fields import empty
 
-from django.db.models.manager import Manager
-
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.settings import overridable
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
+    UpdateListSerializer,
 )
 from oscar.core.loading import get_model
 
@@ -44,7 +43,7 @@ class OptionSerializer(OscarHyperlinkedModelSerializer):
         )
 
 
-class ProductAttributeValueListSerializer(serializers.ListSerializer):
+class ProductAttributeValueListSerializer(UpdateListSerializer):
     def get_value(self, dictionary):
         values = super(ProductAttributeValueListSerializer, self).get_value(dictionary)
         if values is empty:
@@ -52,21 +51,6 @@ class ProductAttributeValueListSerializer(serializers.ListSerializer):
 
         product_class = dictionary.get("product_class")
         return [dict(value, product_class=product_class) for value in values]
-
-    def update(self, instance, validated_data):
-        assert isinstance(instance, Manager)
-
-        field_name = instance.field.name
-        rel_instance = instance.instance
-
-        items = []
-        for validated_datum in validated_data:
-            complete_validated_datum = {field_name: rel_instance}
-            complete_validated_datum.update(validated_datum)
-            updated_instance = self.child.update(complete_validated_datum)
-            items.append(updated_instance)
-
-        return items
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
@@ -113,7 +97,12 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
         attribute.save_value(product, value)
         return product.attribute_values.get(attribute=attribute)
 
-    update = create = update_or_create
+    create = update_or_create
+
+    def update(self, instance, validated_data):
+        data = deepcopy(validated_data)
+        data["product"] = instance
+        return self.update_or_create(data)
 
     class Meta:
         model = ProductAttributeValue

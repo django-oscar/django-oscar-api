@@ -16,7 +16,7 @@ from oscarapi.serializers.admin.product import AdminProductSerializer
 
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
-
+StockRecord = get_model("partner", "StockRecord")
 
 class ProductListDetailSerializer(ProductLinkSerializer):
     "subclass of ProductLinkSerializer to demonstrate showing details in listview"
@@ -833,3 +833,74 @@ class AdminProductSerializerTest(_ProductSerializerTest):
             self.assertNotEqual([str(a) for a in obj.attr.multioption], ['Small', 'Large'])
         with self.assertRaises(AttributeError):
             self.assertNotEqual(str(obj.attr.option), "Small")
+
+    def test_add_stockrecords(self):
+        product = Product.objects.get(pk=3)
+        self.assertEqual(product.stockrecords.count(), 0)
+
+        ser = AdminProductSerializer(data={
+            "id": 3,
+            "product_class": "testtype",
+            "slug": "lots-of-attributes",
+            "description": "Henk",
+            "stockrecords": [
+                {
+                    "partner_sku": "keiko",
+                    "price_excl_tax": "53.67",
+                    "partner": 1,
+                }
+            ]
+        }, instance=product)
+
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.stockrecords.count(), 1)
+
+    def test_modify_stockrecords(self):
+        product = Product.objects.get(pk=1)
+        self.assertEqual(product.stockrecords.count(), 1)
+        stockrecord = product.stockrecords.get()
+        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("10"))
+
+        ser = AdminProductSerializer(data={
+            "id": 3,
+            "product_class": "t-shirt",
+            "slug": "oscar-t-shirt",
+            "description": "Henk",
+            "stockrecords": [
+                {
+                    "partner_sku": "clf-large",
+                    "price_excl_tax": "53.67",
+                    "partner": 1,
+                }
+            ]
+        }, instance=product)
+
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.stockrecords.count(), 1)
+        stockrecord.refresh_from_db()
+        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("53.67"))
+
+    def test_add_stockrecords_error(self):
+        product = Product.objects.get(pk=1)
+        self.assertEqual(product.stockrecords.count(), 1)
+        stockrecord = product.stockrecords.get()
+        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("10"))
+
+        ser = AdminProductSerializer(data={
+            "id": 3,
+            "product_class": "t-shirt",
+            "slug": "oscar-t-shirt",
+            "description": "Henk",
+            "stockrecords": [
+                {
+                    "partner_sku": "clf-med",
+                    "price_excl_tax": "53.67",
+                    "partner": 1,
+                }
+            ]
+        }, instance=product)
+
+        self.assertFalse(ser.is_valid(),
+            "This test should fail the uniqueness test.")
