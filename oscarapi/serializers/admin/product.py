@@ -1,4 +1,7 @@
+from django.db import transaction
+
 from rest_framework import serializers
+
 from oscar.core.loading import get_model
 
 from oscarapi.utils.loading import get_api_classes, get_api_class
@@ -26,46 +29,55 @@ class AdminProductSerializer(BaseProductSerializer):
     class Meta(BaseProductSerializer.Meta):
         exclude = ("product_options",)
 
-    def update(self, instance, validated_data):
-        "Handle the nested serializers manually"
-        attribute_values = validated_data.pop("attribute_values", [])
-        options = validated_data.pop("options", [])
-        stockrecords = validated_data.pop("stockrecords", [])
-        images = validated_data.pop("images", [])
-        categories = validated_data.pop("categories", [])
-        recommended_products = validated_data.pop("recommended_products", [])
+    def update_relation(self, name, manager, values):
+        if values is None:
+            return
 
-        # remove the very annoying "Cannot set values on a ManyToManyField which
-        # specifies an intermediary model" error, which does not apply at all
-        # to these models because they have sane defaults.
-        with fake_autocreated(instance.categories) as _categories:
-            _categories.set(categories)
-        with fake_autocreated(instance.recommended_products) as _recommended_products:
-            _recommended_products.set(recommended_products)
-        with fake_autocreated(instance.product_options) as _product_options:
-            pclass_options = instance.get_product_class().options.all()
-            _product_options.set(set(options) - set(pclass_options))
-
-        instance.images.set(images)
-        instance.stockrecords.set(stockrecords)
-
-        # update instance
-        instance = super(AdminProductSerializer, self).update(instance, validated_data)
-
-        # deal with attributes after saving instance
-        # get the serializer
-        attribute_serializer = self.fields["attributes"]
+        serializer = self.fields[name]
 
         # use the serializer to update the attribute_values
-        updated_attribute_values = attribute_serializer.update(
-            instance.attribute_values, attribute_values
+        updated_values = serializer.update(
+            manager, values
         )
-        # add the updated_attribute_values to the instance
-        instance.attribute_values.add(*updated_attribute_values)
-        # remove all the obsolete attribute values, this could be caused by
-        # the product class changing for example, lots of attributes would become
-        # obsolete.
-        current_pks = [p.pk for p in updated_attribute_values]
-        instance.attribute_values.exclude(pk__in=current_pks).delete()
+        if not manager.field.null:
+            # add the updated_attribute_values to the instance
+            manager.add(*updated_values)
+            # remove all the obsolete attribute values, this could be caused by
+            # the product class changing for example, lots of attributes would become
+            # obsolete.
+            current_pks = [p.pk for p in updated_values]
+            manager.exclude(pk__in=current_pks).delete()
+        else:
+            manager.set(updated_values)
 
-        return instance
+    def update(self, instance, validated_data):
+        "Handle the nested serializers manually"
+        attribute_values = validated_data.pop("attribute_values", None)
+        options = validated_data.pop("options", None)
+        stockrecords = validated_data.pop("stockrecords", None)
+        images = validated_data.pop("images", None)
+        categories = validated_data.pop("categories", None)
+        recommended_products = validated_data.pop("recommended_products", None)
+
+        with transaction.atomic():
+            # remove the very annoying "Cannot set values on a ManyToManyField which
+            # specifies an intermediary model" error, which does not apply at all
+            # to these models because they have sane defaults.
+            if categories is not None:
+                with fake_autocreated(instance.categories) as _categories:
+                    _categories.set(categories)
+            if recommended_products is not None:
+                with fake_autocreated(instance.recommended_products) as _recommended_products:
+                    _recommended_products.set(recommended_products)
+            if options is not None:
+                with fake_autocreated(instance.product_options) as _product_options:
+                    pclass_options = instance.get_product_class().options.all()
+                    _product_options.set(set(options) - set(pclass_options))
+            # update instance
+            instance = super(AdminProductSerializer, self).update(instance, validated_data)
+
+            self.update_relation("images", instance.images, images)
+            self.update_relation("stockrecords", instance.stockrecords, stockrecords)
+            self.update_relation("attributes", instance.attribute_values, attribute_values)
+
+            return instance

@@ -1,13 +1,21 @@
 import logging
 import operator
 
+from os.path import basename
+from io import BytesIO
+from six.moves.urllib.parse import urlsplit
+from six.moves.urllib.request import urlopen
+
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.files import File
 
 from rest_framework import serializers, relations
 from rest_framework.fields import get_attribute
 
 from oscar.core.loading import get_model, get_class
+
+from oscarapi.utils.request import get_domain
 
 from .exceptions import FieldError
 
@@ -191,3 +199,25 @@ class CategoryField(serializers.RelatedField):
 
     def to_representation(self, value):
         return value.full_name
+
+
+class ImageUrlField(serializers.ImageField):
+    def __init__(self, **kwargs):
+        super(ImageUrlField, self).__init__(**kwargs)
+        self.use_url = True
+
+    def to_internal_value(self, data):
+        http_prefix = data.startswith(('http:', 'https:'))
+        if http_prefix:
+            request = self.context.get('request', None)
+            if request:  # if there is a request, we can get the hostname from that
+                parsed_url = urlsplit(data)
+                host = request.get_host()
+
+                if host != parsed_url.netloc:  # we are only downloading files from a foreign server
+                    # it is a foreign image, download it
+                    response = urlopen(data)
+                    image_file_like = BytesIO(response.read())
+                    data = File(image_file_like, name=basename(data))
+                    
+        return super(ImageUrlField, self).to_internal_value(data)
