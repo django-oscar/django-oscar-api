@@ -1,0 +1,70 @@
+{
+    "id": 3,
+    "attributes": [
+        {
+            "name": "boolean",
+            "value": true,
+            "code": "boolean"
+        },
+        {
+            "name": "date",
+            "value": "2018-01-02",
+            "code": "date"
+        },
+        {
+            "name": "datetime",
+            "value": "2018-01-02T10:45:00Z",
+            "code": "datetime"
+        },
+        {
+            "name": "float",
+            "value": 3.2,
+            "code": "float"
+        },
+        {
+            "name": "html",
+            "value": "<p>I <strong>am</strong> a test</p>",
+            "code": "html"
+        },
+        {
+            "name": "integer",
+            "value": 7,
+            "code": "integer"
+        },
+        {
+            "name": "multioption",
+            "value": [
+                "Small",
+                "Large"
+            ],
+            "code": "multioption"
+        },
+        {
+            "name": "option",
+            "value": "Small",
+            "code": "option"
+        },
+        {
+            "name": "text",
+            "value": "I am some kind of text",
+            "code": "text"
+        }
+    ],
+    "categories": [],
+    "product_class": "testtype",
+    "options": [],
+    "recommended_products": [],
+    "url": "http://127.0.0.1:8000/api/admin/products/3/",
+    "stockrecords": [],
+    "images": [],
+    "children": [],
+    "structure": "standalone",
+    "is_public": true,
+    "upc": "attrtypestest",
+    "title": "lots of attributes",
+    "slug": "lots-of-attributes",
+    "description": "<p>It is a test for the attributes</p>",
+    "rating": null,
+    "is_discountable": true,
+    "parent": null
+}

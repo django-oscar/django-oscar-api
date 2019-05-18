@@ -102,6 +102,14 @@ class APITest(TestCase):
             **data
         )
 
+    def patch(self, url_name, session_id=None, authenticated=False, **data):
+        return self.api_call(
+            url_name, 'PATCH',
+            session_id=session_id,
+            authenticated=authenticated,
+            **data
+        )
+
     def delete(self, url_name, session_id=None, authenticated=False):
         return self.api_call(
             url_name, 'DELETE',
