@@ -57,23 +57,24 @@ class AdminProductSerializer(BaseProductSerializer):
         categories = validated_data.pop("categories", None)
         recommended_products = validated_data.pop("recommended_products", None)
 
-        with transaction.atomic():
+        with transaction.atomic():  # it is all or nothing!
             # remove the very annoying "Cannot set values on a ManyToManyField which
             # specifies an intermediary model" error, which does not apply at all
             # to these models because they have sane defaults.
             if categories is not None:
                 with fake_autocreated(instance.categories) as _categories:
                     _categories.set(categories)
-            if recommended_products is not None:
-                with fake_autocreated(
-                    instance.recommended_products
-                ) as _recommended_products:
-                    _recommended_products.set(recommended_products)
 
             # update instance
             instance = super(AdminProductSerializer, self).update(
                 instance, validated_data
             )
+
+            if recommended_products is not None:
+                with fake_autocreated(
+                    instance.recommended_products
+                ) as _recommended_products:
+                    _recommended_products.set(recommended_products)
 
             if options is not None:
                 with fake_autocreated(instance.product_options) as _product_options:
