@@ -23,7 +23,7 @@
         <field type="CharField" name="upc">child-1234</field>
         <field to="catalogue.product" name="parent" rel="ManyToOneRel">1</field>
         <field type="CharField" name="title"/>
-        <field type="SlugField" name="slug">oscar-t-shirt</field>
+        <field type="SlugField" name="slug">oscar-t-shirt-child</field>
         <field type="TextField" name="description"/>
         <field to="catalogue.productclass" name="product_class" rel="ManyToOneRel">
             <None/>
