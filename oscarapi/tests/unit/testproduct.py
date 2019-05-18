@@ -778,7 +778,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
-        self.assertEqual(obj.pk, 5)
+        self.assertEqual(obj.pk, 5, "Should be new object, with a high pk")
         self.assertEqual(obj.product_class.slug, "testtype")
         self.assertEqual(obj.slug, "new-product")
 
@@ -798,6 +798,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
+        self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
         self.assertEqual(obj.upc, "attrtypestest")
         self.assertEqual(obj.description, "Henk")
 
@@ -855,7 +856,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
-
+        self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
         self.assertEqual(obj.product_class.slug, "t-shirt")
 
         # reset the annoying attr object, it stinks!!
@@ -950,6 +951,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
+        self.assertEqual(obj.pk, 1, "product should be the same as passed as instance")
         self.assertEqual(obj.stockrecords.count(), 1)
         stockrecord.refresh_from_db()
         self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("53.67"))
@@ -1003,6 +1005,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
+        self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
         self.assertEqual(obj.images.count(), 1)
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
@@ -1038,6 +1041,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
+        self.assertEqual(obj.pk, 1, "product should be the same as passed as instance")
         self.assertEqual(obj.images.count(), 1)
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
@@ -1053,18 +1057,13 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [
-                    {
-                        "name": "Opdruk",
-                        "code": "opdruk",
-                        "type": "Optional",
-                    }
-                ],
+                "options": [{"name": "Opdruk", "code": "opdruk", "type": "Optional"}],
             },
-            instance=product
+            instance=product,
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
+        self.assertEqual(obj.pk, 1, "product should be the same as passed as instance")
         self.assertEqual(Option.objects.count(), 1)
         # reset has_options because of cached_propery
         del obj.has_options
@@ -1081,18 +1080,13 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [
-                    {
-                        "name": "Wous",
-                        "code": "opdruk",
-                        "type": "Optional",
-                    }
-                ],
+                "options": [{"name": "Wous", "code": "opdruk", "type": "Optional"}],
             },
-            instance=product
+            instance=product,
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
+        self.assertEqual(obj.pk, 1, "product should be the same as passed as instance")
         opt, = obj.options
         self.assertEqual(opt.name, "Wous")
         self.assertEqual(Option.objects.count(), 1)
@@ -1108,21 +1102,14 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [
-                    {
-                        "name": "Opdruk",
-                        "code": "opdruk",
-                        "type": "Optional",
-                    }
-                ],
+                "options": [{"name": "Opdruk", "code": "opdruk", "type": "Optional"}],
             },
-            instance=product
+            instance=product,
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
-        self.assertEqual(obj.pk, 3)
+        self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
         self.assertEqual(Option.objects.count(), 1)
         # reset has_options because of cached_propery
         del obj.has_options
         self.assertTrue(obj.has_options)
-        
