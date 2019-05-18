@@ -1148,3 +1148,45 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
         self.assertEqual(obj.recommended_products.count(), 0)
+
+    def test_add_categories(self):
+        product = Product.objects.get(pk=1)
+        self.assertEqual(Category.objects.count(), 1)
+        self.assertEqual(product.categories.count(), 1)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "categories": [
+                    "lal > hoe > laat > is > het",
+                    "gin > flauw > idee > gast",
+                ],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(Category.objects.count(), 10)
+        self.assertEqual(obj.categories.count(), 2)
+
+    def test_remove_categories(self):
+        self.test_add_categories()
+        product = Product.objects.get(pk=1)
+        self.assertEqual(Category.objects.count(), 10)
+        self.assertEqual(product.categories.count(), 2)
+
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "categories": [],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(Category.objects.count(), 10)
+        self.assertEqual(obj.categories.count(), 0)
+        
