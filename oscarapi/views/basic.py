@@ -17,36 +17,41 @@ from .mixin import PutIsPatchMixin
 
 
 __all__ = (
-    'BasketList', 'BasketDetail',
-    'LineAttributeList', 'LineAttributeDetail',
-    'StockRecordList', 'StockRecordDetail',
-    'UserList', 'UserDetail',
-    'OptionList', 'OptionDetail',
-    'CountryList', 'CountryDetail',
-    'PartnerList', 'PartnerDetail',
+    "BasketList",
+    "BasketDetail",
+    "LineAttributeList",
+    "LineAttributeDetail",
+    "StockRecordList",
+    "StockRecordDetail",
+    "UserList",
+    "UserDetail",
+    "OptionList",
+    "OptionDetail",
+    "CountryList",
+    "CountryDetail",
+    "PartnerList",
+    "PartnerDetail",
 )
 
-Basket = get_model('basket', 'Basket')
-LineAttribute = get_model('basket', 'LineAttribute')
-Product = get_model('catalogue', 'Product')
-StockRecord = get_model('partner', 'StockRecord')
-Option = get_model('catalogue', 'Option')
+Basket = get_model("basket", "Basket")
+LineAttribute = get_model("basket", "LineAttribute")
+Product = get_model("catalogue", "Product")
+StockRecord = get_model("partner", "StockRecord")
+Option = get_model("catalogue", "Option")
 User = auth.get_user_model()
-Country = get_model('address', 'Country')
-Partner = get_model('partner', 'Partner')
+Country = get_model("address", "Country")
+Partner = get_model("partner", "Partner")
+Range = get_model("offer", "Range")
 
-Selector = get_class('partner.strategy', 'Selector')
+Selector = get_class("partner.strategy", "Selector")
 UserSerializer = get_api_class("serializers.login", "UserSerializer")
 CountrySerializer = get_api_class("serializers.checkout", "CountrySerializer")
 BasketSerializer, LineAttributeSerializer, StockRecordSerializer = get_api_classes(
-    "serializers.basket", [
-        "BasketSerializer",
-        "LineAttributeSerializer",
-        "StockRecordSerializer"
-    ],
+    "serializers.basket",
+    ["BasketSerializer", "LineAttributeSerializer", "StockRecordSerializer"],
 )
-OptionSerializer, PartnerSerializer = get_api_classes(
-    "serializers.product", ["OptionSerializer", "PartnerSerializer"]
+RangeSerializer, OptionSerializer, PartnerSerializer = get_api_classes(
+    "serializers.product", ["RangeSerializer", "OptionSerializer", "PartnerSerializer"]
 )
 
 # TODO: For all API's in this file, the permissions should be checked if they
@@ -68,9 +73,9 @@ class BasketList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = super(BasketList, self).get_queryset()
-        return list(map(
-            functools.partial(assign_basket_strategy, request=self.request),
-            qs))
+        return list(
+            map(functools.partial(assign_basket_strategy, request=self.request), qs)
+        )
 
 
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
@@ -140,3 +145,13 @@ class PartnerList(generics.ListAPIView):
 class PartnerDetail(generics.RetrieveAPIView):
     queryset = Partner.objects.all()
     serializer_class = PartnerSerializer
+
+
+class RangeList(generics.ListAPIView):
+    queryset = Range.objects
+    serializer_class = RangeSerializer
+
+
+class RangeDetail(generics.RetrieveAPIView):
+    queryset = Range.objects
+    serializer_class = RangeSerializer

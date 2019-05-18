@@ -16,6 +16,7 @@ from oscar.core.loading import get_model
 from .exceptions import FieldError
 
 Product = get_model("catalogue", "Product")
+Range = get_model("offer", "Range")
 ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
 ProductImage = get_model("catalogue", "ProductImage")
 Option = get_model("catalogue", "Option")
@@ -31,6 +32,12 @@ StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializ
 # AttributeOption = get_model('catalogue', 'AttributeOption')
 
 
+class RangeSerializer(OscarModelSerializer):
+    class Meta:
+        model = Range
+        fields = "__all__"
+
+
 class PartnerSerializer(OscarModelSerializer):
     class Meta:
         model = Partner
@@ -39,12 +46,10 @@ class PartnerSerializer(OscarModelSerializer):
 
 class OptionSerializer(OscarHyperlinkedModelSerializer):
     code = serializers.SlugField()
-    
+
     class Meta:
         model = Option
-        fields = overridable(
-            "OSCARAPI_OPTION_FIELDS", default="__all__"
-        )
+        fields = overridable("OSCARAPI_OPTION_FIELDS", default="__all__")
         list_serializer_class = UpdateForwardManyToManySerializer
 
 
