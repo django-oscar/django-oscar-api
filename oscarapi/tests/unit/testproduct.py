@@ -1113,3 +1113,38 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         # reset has_options because of cached_propery
         del obj.has_options
         self.assertTrue(obj.has_options)
+
+    def test_add_recommended_products(self):
+        product = Product.objects.get(pk=1)
+        self.assertEqual(product.recommended_products.count(), 0)
+
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "recommended_products": [reverse("product-detail", args=(3,))],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.recommended_products.count(), 1)
+
+    def test_remove_recommended_products(self):
+        self.test_add_recommended_products()
+        product = Product.objects.get(pk=1)
+        self.assertEqual(product.recommended_products.count(), 1)
+
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "recommended_products": [],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.recommended_products.count(), 0)
