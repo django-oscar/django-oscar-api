@@ -1,11 +1,12 @@
 import logging
 import operator
 
-from os.path import basename
+from os.path import basename, join
 from io import BytesIO
 from six.moves.urllib.parse import urlsplit
 from six.moves.urllib.request import urlopen
 
+from django.conf import settings
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
@@ -207,17 +208,26 @@ class ImageUrlField(serializers.ImageField):
         self.use_url = True
 
     def to_internal_value(self, data):
-        http_prefix = data.startswith(('http:', 'https:'))
+        http_prefix = data.startswith(("http:", "https:"))
         if http_prefix:
-            request = self.context.get('request', None)
+            request = self.context.get("request", None)
             if request:  # if there is a request, we can get the hostname from that
                 parsed_url = urlsplit(data)
                 host = request.get_host()
-
-                if host != parsed_url.netloc:  # we are only downloading files from a foreign server
+                if (
+                    host != parsed_url.netloc
+                ):  # we are only downloading files from a foreign server
                     # it is a foreign image, download it
                     response = urlopen(data)
                     image_file_like = BytesIO(response.read())
-                    data = File(image_file_like, name=basename(data))
-                    
+                    file_object = File(image_file_like, name=basename(parsed_url.path))
+                else:
+                    location = parsed_url.path
+                    path = join(
+                        settings.MEDIA_ROOT, location.replace(settings.MEDIA_URL, "", 1)
+                    )
+                    file_object = File(open(path, "rb"))
+
+                return super(ImageUrlField, self).to_internal_value(file_object)
+
         return super(ImageUrlField, self).to_internal_value(data)

@@ -39,11 +39,11 @@ class PartnerSerializer(OscarModelSerializer):
 
 class OptionSerializer(OscarHyperlinkedModelSerializer):
     code = serializers.SlugField()
-
+    
     class Meta:
         model = Option
         fields = overridable(
-            "OSCARAPI_OPTION_FIELDS", default=("url", "id", "name", "code", "type")
+            "OSCARAPI_OPTION_FIELDS", default="__all__"
         )
         list_serializer_class = UpdateForwardManyToManySerializer
 
@@ -106,7 +106,7 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
 
     def update(self, instance, validated_data):
         data = deepcopy(validated_data)
-        data["product"] = instance
+        data["product"] = instance.product
         return self.update_or_create(data)
 
     class Meta:
@@ -120,6 +120,7 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
 
 class ProductImageUpdateListSerializer(UpdateListSerializer):
     "Select existing image based on hash of image content"
+
     def select_existing_item(self, manager, datum):
         # determine the hash of the passed image
         target_file_hash = file_hash(datum["original"])

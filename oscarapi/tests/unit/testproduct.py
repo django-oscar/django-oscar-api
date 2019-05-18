@@ -614,7 +614,6 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         self.assertEqual(p.attr.date, new_date)
 
     def test_productattributevalueserializer_date_error(self):
-        p = Product.objects.get(pk=3)
         ser = ProductAttributeValueSerializer(
             data={"name": "Date", "code": "date", "value": "2030", "product": 3}
         )
@@ -646,8 +645,8 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         )
 
     def test_productattributevalueserializer_datetime(self):
-        p = Product.objects.get(pk=3)
         start_date = make_aware(datetime.datetime(2018, 1, 2, 10, 45))
+        p = Product.objects.get(pk=3)
         self.assertEqual(p.attr.datetime, start_date)
         ser = ProductAttributeValueSerializer(
             data={
@@ -666,7 +665,6 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         self.assertEqual(p.attr.datetime, new_date)
 
     def test_productattributevalueserializer_datetime_error(self):
-        p = Product.objects.get(pk=3)
         ser = ProductAttributeValueSerializer(
             data={
                 "name": "Datetime",
@@ -1050,7 +1048,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
     def test_add_options(self):
         self.assertEqual(Option.objects.count(), 0)
         product = Product.objects.get(pk=1)
-        self.assertFalse(product.has_options)
+        self.assertEqual(len(product.options), 0)
 
         ser = AdminProductSerializer(
             data={
@@ -1065,9 +1063,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.pk, 1, "product should be the same as passed as instance")
         self.assertEqual(Option.objects.count(), 1)
-        # reset has_options because of cached_propery
-        del obj.has_options
-        self.assertTrue(obj.has_options)
+        self.assertGreater(len(product.options), 0)
 
     def test_modify_options(self):
         self.test_add_options()
@@ -1095,7 +1091,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.test_add_options()
         self.assertEqual(Option.objects.count(), 1)
         product = Product.objects.get(pk=3)
-        self.assertFalse(product.has_options)
+        self.assertEqual(len(product.options), 0)
 
         ser = AdminProductSerializer(
             data={
@@ -1110,9 +1106,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
         self.assertEqual(Option.objects.count(), 1)
-        # reset has_options because of cached_propery
-        del obj.has_options
-        self.assertTrue(obj.has_options)
+        self.assertGreater(len(product.options), 0)
 
     def test_add_recommended_products(self):
         product = Product.objects.get(pk=1)
@@ -1189,4 +1183,3 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(Category.objects.count(), 10)
         self.assertEqual(obj.categories.count(), 0)
-        
