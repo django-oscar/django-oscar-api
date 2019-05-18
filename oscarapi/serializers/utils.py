@@ -1,3 +1,4 @@
+import logging
 from django.db import models
 from django.db.models.manager import Manager
 from django.db.models.constants import LOOKUP_SEP
@@ -7,6 +8,9 @@ from rest_framework import serializers
 import oscar.models.fields
 
 from .fields import ImageUrlField
+
+logger = logging.getLogger(__name__)
+
 
 def expand_field_mapping(extra_fields):
     # This doesn't make a copy
@@ -19,7 +23,7 @@ class OscarSerializer(object):
     field_mapping = expand_field_mapping(
         {
             oscar.models.fields.NullCharField: serializers.CharField,
-            models.ImageField:ImageUrlField
+            models.ImageField: ImageUrlField,
         }
     )
 
@@ -32,9 +36,9 @@ class OscarSerializer(object):
         super(OscarSerializer, self).__init__(*args, **kwargs)
         if fields:
             allowed = set(fields)
-            existing = set(self.fields.keys())
+            existing = set(self.fields.keys())  # pylint: disable=no-member
             for field_name in existing - allowed:
-                self.fields.pop(field_name)
+                self.fields.pop(field_name)  # pylint: disable=no-member
 
 
 class OscarModelSerializer(OscarSerializer, serializers.ModelSerializer):
@@ -102,7 +106,7 @@ class UpdateListSerializer(serializers.ListSerializer):
         except manager.model.DoesNotExist:
             pass
         except manager.model.MultipleObjectsReturned as e:
-            logger.error("Multiple objects on unique contrained items, freaky %s" % e)
+            logger.error("Multiple objects on unique contrained items, freaky %s", e)
             logger.exception(e)
 
         # fallback to manually specified lookup_fields
@@ -117,11 +121,13 @@ class UpdateListSerializer(serializers.ListSerializer):
 
         return None
 
+    def get_name_and_rel_instance(self, manager):
+        return manager.field.name, manager.instance
+
     def update(self, instance, validated_data):
         assert isinstance(instance, Manager)
 
-        field_name = instance.field.name
-        rel_instance = instance.instance
+        field_name, rel_instance = self.get_name_and_rel_instance(instance)
 
         items = []
         for validated_datum in validated_data:
@@ -130,7 +136,6 @@ class UpdateListSerializer(serializers.ListSerializer):
             existing_item = self.select_existing_item(
                 instance, complete_validated_datum
             )
-
             if existing_item is not None:
                 updated_instance = self.child.update(
                     existing_item, complete_validated_datum
@@ -141,6 +146,18 @@ class UpdateListSerializer(serializers.ListSerializer):
             items.append(updated_instance)
 
         return items
+
+
+class UpdateForwardManyToManySerializer(UpdateListSerializer):
+    def select_existing_item(self, manager, datum):
+        # with manytomany there is no point in restricting the queryset
+        # to the parent, because it is actually MEANT to share instances.
+        return super(UpdateForwardManyToManySerializer, self).select_existing_item(
+            manager.model.objects, datum
+        )
+
+    def get_name_and_rel_instance(self, manager):
+        return manager.source_field_name, manager.instance
 
 
 def _field_name(name, prefix=None):
@@ -177,6 +194,6 @@ def construct_id_filter(model, data, prefix=None):
 
     for field in model._meta.concrete_fields:
         if field.unique and field.name in data:
-            _filter |= model.Q(**{_field_name(field.name, prefix): data[field.name]})
+            _filter |= models.Q(**{_field_name(field.name, prefix): data[field.name]})
 
     return _filter

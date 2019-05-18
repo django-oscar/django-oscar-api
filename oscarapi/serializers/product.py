@@ -9,6 +9,7 @@ from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
     UpdateListSerializer,
+    UpdateForwardManyToManySerializer,
 )
 from oscar.core.loading import get_model
 
@@ -37,11 +38,14 @@ class PartnerSerializer(OscarModelSerializer):
 
 
 class OptionSerializer(OscarHyperlinkedModelSerializer):
+    code = serializers.SlugField()
+
     class Meta:
         model = Option
         fields = overridable(
             "OSCARAPI_OPTION_FIELDS", default=("url", "id", "name", "code", "type")
         )
+        list_serializer_class = UpdateForwardManyToManySerializer
 
 
 class ProductAttributeValueListSerializer(UpdateListSerializer):

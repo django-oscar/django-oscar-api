@@ -1,6 +1,7 @@
 import mock
 import decimal
 import datetime
+import unittest
 from six import string_types
 from os.path import dirname, join
 
@@ -22,6 +23,7 @@ from oscarapi.serializers.admin.product import AdminProductSerializer
 
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
+Option = get_model("catalogue", "Option")
 StockRecord = get_model("partner", "StockRecord")
 
 
@@ -289,6 +291,7 @@ class _ProductSerializerTest(TestCase):
 
 class StockRecordSerializerTest(_ProductSerializerTest):
     def test_stockrecord_save(self):
+        "The StockRecordSerializer should be able to save stuff"
         ser = StockRecordSerializer(
             data={
                 "product": 1,
@@ -318,6 +321,7 @@ class StockRecordSerializerTest(_ProductSerializerTest):
 
 class ProductAttributeValueSerializerTest(_ProductSerializerTest):
     def test_productattributevalueserializer_error(self):
+        "If attributes do not exist on the product class a tidy error should explain"
         ser = ProductAttributeValueSerializer(
             data={"name": "zult", "code": "zult", "value": "hoolahoop", "product": 1}
         )
@@ -786,7 +790,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
         ser = AdminProductSerializer(
             data={
-                "id": 3,
                 "product_class": "testtype",
                 "slug": "lots-of-attributes",
                 "description": "Henk",
@@ -798,6 +801,11 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.upc, "attrtypestest")
         self.assertEqual(obj.description, "Henk")
 
+    @unittest.skip
+    def test_modify_product_patch(self):
+        "When using patch, exisitng attributes should not be deleted"
+        self.fail("ALl attributes not sent are currently deleted")
+
     def test_modify_product_error(self):
         "When modifying an attribute, enough information should be passed to be "
         "able to identify the attribute. An error message should indicate "
@@ -808,7 +816,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
         ser = AdminProductSerializer(
             data={
-                "id": 3,
                 "product_class": "testtype",
                 "slug": "lots-of-attributes",
                 "description": "Henk",
@@ -839,7 +846,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
         ser = AdminProductSerializer(
             data={
-                "id": 3,
                 "product_class": "t-shirt",
                 "slug": "lots-of-attributes",
                 "description": "Henk",
@@ -885,6 +891,17 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         with self.assertRaises(AttributeError):
             self.assertNotEqual(str(obj.attr.option), "Small")
 
+    @unittest.skip
+    def test_switch_product_class_patch(self):
+        """
+        When using patch switching product class should keep existing attributes
+        as much as possible. That means we have to look for an existing attribute
+        on the new product class with the same code and switch the attribute
+        value to that attribute. The rest of the attributes MUST be deleted or
+        they may cause errors.
+        """
+        self.fail("Product attributes are deleted when using patch currently")
+
     def test_add_stockrecords(self):
         "Stockrecords should be added when new."
         product = Product.objects.get(pk=3)
@@ -892,7 +909,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
         ser = AdminProductSerializer(
             data={
-                "id": 3,
                 "product_class": "testtype",
                 "slug": "lots-of-attributes",
                 "description": "Henk",
@@ -918,7 +934,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
         ser = AdminProductSerializer(
             data={
-                "id": 3,
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
@@ -948,7 +963,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
         ser = AdminProductSerializer(
             data={
-                "id": 3,
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
@@ -974,7 +988,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         request = self.factory.get("%simages/nao-robot.jpg" % settings.STATIC_URL)
         ser = AdminProductSerializer(
             data={
-                "id": 3,
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
@@ -1010,7 +1023,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         request = self.factory.get("%simages/nao-robot.jpg" % settings.STATIC_URL)
         ser = AdminProductSerializer(
             data={
-                "id": 3,
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
@@ -1030,3 +1042,87 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
         self.assertEqual(image.original.name, "images/products/2019/05/image.jpg")
+
+    def test_add_options(self):
+        self.assertEqual(Option.objects.count(), 0)
+        product = Product.objects.get(pk=1)
+        self.assertFalse(product.has_options)
+
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "options": [
+                    {
+                        "name": "Opdruk",
+                        "code": "opdruk",
+                        "type": "Optional",
+                    }
+                ],
+            },
+            instance=product
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(Option.objects.count(), 1)
+        # reset has_options because of cached_propery
+        del obj.has_options
+        self.assertTrue(obj.has_options)
+
+    def test_modify_options(self):
+        self.test_add_options()
+        product = Product.objects.get(pk=1)
+        opt, = product.options
+        self.assertEqual(opt.name, "Opdruk")
+        self.assertEqual(len(product.options), 1)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "options": [
+                    {
+                        "name": "Wous",
+                        "code": "opdruk",
+                        "type": "Optional",
+                    }
+                ],
+            },
+            instance=product
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        opt, = obj.options
+        self.assertEqual(opt.name, "Wous")
+        self.assertEqual(Option.objects.count(), 1)
+
+    def test_add_existing_options(self):
+        self.test_add_options()
+        self.assertEqual(Option.objects.count(), 1)
+        product = Product.objects.get(pk=3)
+        self.assertFalse(product.has_options)
+
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "options": [
+                    {
+                        "name": "Opdruk",
+                        "code": "opdruk",
+                        "type": "Optional",
+                    }
+                ],
+            },
+            instance=product
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.pk, 3)
+        self.assertEqual(Option.objects.count(), 1)
+        # reset has_options because of cached_propery
+        del obj.has_options
+        self.assertTrue(obj.has_options)
+        
