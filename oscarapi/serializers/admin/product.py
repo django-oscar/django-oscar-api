@@ -73,11 +73,10 @@ class AdminProductSerializer(BaseProductSerializer):
                 with fake_autocreated(instance.product_options) as _product_options:
                     pclass_options = instance.get_product_class().options.all()
                     _product_options.set(set(options) - set(pclass_options))
-            if images is not None:
-                instance.images.set(images)
             # update instance
             instance = super(AdminProductSerializer, self).update(instance, validated_data)
 
+            self.update_relation("images", instance.images, images)
             self.update_relation("stockrecords", instance.stockrecords, stockrecords)
             self.update_relation("attributes", instance.attribute_values, attribute_values)
 

@@ -4,6 +4,7 @@ from rest_framework.fields import empty
 
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.settings import overridable
+from oscarapi.utils.files import file_hash
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
@@ -113,14 +114,32 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
         )
 
 
+class ProductImageUpdateListSerializer(UpdateListSerializer):
+    "Select existing image based on hash of image content"
+    def select_existing_item(self, manager, datum):
+        # determine the hash of the passed image
+        target_file_hash = file_hash(datum["original"])
+        for image in manager.all():  # search for a match in the set of exising images
+            _hash = file_hash(image.original)
+            if _hash == target_file_hash:
+                # django will create a copy of the original under a weird name,
+                # because the image is freshly fetched, except if we use the
+                # original image FileObject
+                datum["original"] = image.original
+                return image
+
+        return None
+
+
 class ProductImageSerializer(OscarModelSerializer):
     product = serializers.PrimaryKeyRelatedField(
-        write_only=True, queryset=Product.objects
+        write_only=True, required=False, queryset=Product.objects
     )
 
     class Meta:
         model = ProductImage
         fields = "__all__"
+        list_serializer_class = ProductImageUpdateListSerializer
 
 
 class AvailabilitySerializer(serializers.Serializer):  # pylint: disable=abstract-method

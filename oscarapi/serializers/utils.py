@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 import oscar.models.fields
 
+from .fields import ImageUrlField
 
 def expand_field_mapping(extra_fields):
     # This doesn't make a copy
@@ -16,7 +17,10 @@ def expand_field_mapping(extra_fields):
 
 class OscarSerializer(object):
     field_mapping = expand_field_mapping(
-        {oscar.models.fields.NullCharField: serializers.CharField}
+        {
+            oscar.models.fields.NullCharField: serializers.CharField,
+            models.ImageField:ImageUrlField
+        }
     )
 
     def __init__(self, *args, **kwargs):
