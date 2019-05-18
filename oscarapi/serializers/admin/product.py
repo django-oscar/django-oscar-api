@@ -39,7 +39,7 @@ class AdminProductSerializer(BaseProductSerializer):
         updated_values = serializer.update(
             manager, values
         )
-        if not manager.field.null:
+        if hasattr(manager, "field") and not manager.field.null:
             # add the updated_attribute_values to the instance
             manager.add(*updated_values)
             # remove all the obsolete attribute values, this could be caused by
@@ -69,12 +69,16 @@ class AdminProductSerializer(BaseProductSerializer):
             if recommended_products is not None:
                 with fake_autocreated(instance.recommended_products) as _recommended_products:
                     _recommended_products.set(recommended_products)
-            if options is not None:
-                with fake_autocreated(instance.product_options) as _product_options:
-                    pclass_options = instance.get_product_class().options.all()
-                    _product_options.set(set(options) - set(pclass_options))
+
             # update instance
             instance = super(AdminProductSerializer, self).update(instance, validated_data)
+
+            if options is not None:
+                with fake_autocreated(instance.product_options) as _product_options:
+                    pclass_option_codes = instance.get_product_class().options.filter(code__in=[opt["code"] for opt in options]).values_list("code", flat=True)
+                    # only options not allready defined on the product class are important
+                    new_options = [opt for opt in options if opt["code"] not in pclass_option_codes]
+                    self.update_relation("options", _product_options, new_options)
 
             self.update_relation("images", instance.images, images)
             self.update_relation("stockrecords", instance.stockrecords, stockrecords)
