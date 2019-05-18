@@ -2,6 +2,7 @@ import mock
 import decimal
 import datetime
 import unittest
+import json
 from six import string_types
 from os.path import dirname, join
 
@@ -800,11 +801,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.upc, "attrtypestest")
         self.assertEqual(obj.description, "Henk")
 
-    @unittest.skip
-    def test_modify_product_patch(self):
-        "When using patch, exisitng attributes should not be deleted"
-        self.fail("ALl attributes not sent are currently deleted")
-
     def test_modify_product_error(self):
         "When modifying an attribute, enough information should be passed to be "
         "able to identify the attribute. An error message should indicate "
@@ -890,7 +886,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         with self.assertRaises(AttributeError):
             self.assertNotEqual(str(obj.attr.option), "Small")
 
-    @unittest.skip
     def test_switch_product_class_patch(self):
         """
         When using patch switching product class should keep existing attributes
@@ -899,7 +894,49 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         value to that attribute. The rest of the attributes MUST be deleted or
         they may cause errors.
         """
-        self.fail("Product attributes are deleted when using patch currently")
+        product = Product.objects.get(pk=3)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "lots-of-attributes",
+                "description": "Henk",
+                "attributes": [{"name": "Size", "value": "Large", "code": "size"}],
+            },
+            instance=product,
+            partial=True,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(
+            obj.attribute_values.count(),
+            2,
+            "One old attribute is also present on the new product class, so should not be deleted",
+        )
+        obj.attr.__dict__ = {}
+        obj.attr.product = obj
+        obj.attr.initiate_attributes()
+        self.assertEqual(str(obj.attr.size), "Large")
+        self.assertEqual(obj.attr.text, "I am some kind of text")
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(obj.attr.date, datetime.date(2018, 1, 2))
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(obj.attr.boolean, True)
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(
+                obj.attr.datetime, make_aware(datetime.datetime(2018, 1, 2, 10, 45))
+            )
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(obj.attr.float, 3.2)
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(obj.attr.html, "<p>I <strong>am</strong> a test</p>")
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(obj.attr.integer, 7)
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(
+                [str(a) for a in obj.attr.multioption], ["Small", "Large"]
+            )
+        with self.assertRaises(AttributeError):
+            self.assertNotEqual(str(obj.attr.option), "Small")
 
     def test_add_stockrecords(self):
         "Stockrecords should be added when new."
@@ -1183,3 +1220,65 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(Category.objects.count(), 10)
         self.assertEqual(obj.categories.count(), 0)
+
+    def test_update_categories(self):
+        "Partial update should only add categories never delete"
+        product = Product.objects.get(pk=1)
+        self.assertEqual(Category.objects.count(), 1)
+        self.assertEqual(product.categories.count(), 1)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "categories": ["there can be only one", "ok but two is the maximum"],
+            },
+            instance=product,
+            partial=True,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.categories.count(), 3)
+
+
+class TestProductAdmin(APITest):
+    fixtures = [
+        "product",
+        "productcategory",
+        "productattribute",
+        "productclass",
+        "productattributevalue",
+        "category",
+        "attributeoptiongroup",
+        "attributeoption",
+        "stockrecord",
+        "partner",
+        "productimage",
+    ]
+
+    def setUp(self):
+        super(TestProductAdmin, self).setUp()
+        with open(join(dirname(__file__), "testdata", "oscar-t-shirt.json")) as p:
+            self.tshirt = json.load(p)
+        with open(join(dirname(__file__), "testdata", "lots-of-attributes.json")) as p:
+            self.attributes = json.load(p)
+
+    def test_put_product(self):
+        self.login("admin", "admin")
+        url = reverse("admin-product-detail", args=(3,))
+        self.response = self.put(url, **self.attributes)
+        self.response.assertStatusEqual(200)
+
+        url = reverse("admin-product-detail", args=(1,))
+        self.response = self.put(url, **self.tshirt)
+        self.response.assertStatusEqual(200)
+
+    def test_patch_product(self):
+        self.login("admin", "admin")
+        url = reverse("admin-product-detail", args=(3,))
+        self.response = self.patch(url, **self.attributes)
+        self.response.assertStatusEqual(200)
+
+        url = reverse("admin-product-detail", args=(1,))
+        self.response = self.patch(url, **self.tshirt)
+        self.response.assertStatusEqual(200)

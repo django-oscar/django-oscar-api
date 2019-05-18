@@ -37,7 +37,10 @@ class AdminProductSerializer(BaseProductSerializer):
 
         # use the serializer to update the attribute_values
         updated_values = serializer.update(manager, values)
-        if hasattr(manager, "field") and not manager.field.null:
+
+        if self.partial:
+            manager.add(*updated_values)
+        elif hasattr(manager, "field") and not manager.field.null:
             # add the updated_attribute_values to the instance
             manager.add(*updated_values)
             # remove all the obsolete attribute values, this could be caused by
@@ -56,6 +59,7 @@ class AdminProductSerializer(BaseProductSerializer):
         images = validated_data.pop("images", None)
         categories = validated_data.pop("categories", None)
         recommended_products = validated_data.pop("recommended_products", None)
+        children = validated_data.pop("children", None)
 
         with transaction.atomic():  # it is all or nothing!
 
@@ -71,21 +75,33 @@ class AdminProductSerializer(BaseProductSerializer):
 
             if categories is not None:
                 with fake_autocreated(instance.categories) as _categories:
-                    _categories.set(categories)
+                    if self.partial:
+                        _categories.add(*categories)
+                    else:
+                        _categories.set(categories)
 
             if recommended_products is not None:
                 with fake_autocreated(
                     instance.recommended_products
                 ) as _recommended_products:
-                    _recommended_products.set(recommended_products)
+                    if self.partial:
+                        _recommended_products.add(*recommended_products)
+                    else:
+                        _recommended_products.set(recommended_products)
 
+            if children is not None:
+                if self.partial:
+                    instance.children.add(*children)
+                else:
+                    instance.children.set(children)
+
+            product_class = instance.get_product_class()
+            pclass_option_codes = set()
             if options is not None:
                 with fake_autocreated(instance.product_options) as _product_options:
-                    pclass_option_codes = (
-                        instance.get_product_class()
-                        .options.filter(code__in=[opt["code"] for opt in options])
-                        .values_list("code", flat=True)
-                    )
+                    pclass_option_codes = product_class.options.filter(
+                        code__in=[opt["code"] for opt in options]
+                    ).values_list("code", flat=True)
                     # only options not allready defined on the product class are important
                     new_options = [
                         opt for opt in options if opt["code"] not in pclass_option_codes
@@ -97,5 +113,22 @@ class AdminProductSerializer(BaseProductSerializer):
             self.update_relation(
                 "attributes", instance.attribute_values, attribute_values
             )
+
+            if (
+                self.partial
+            ):  # we need to clean up all the attributes with wrong product class
+                for attribute_value in instance.attribute_values.exclude(
+                    attribute__product_class=product_class
+                ):
+                    code = attribute_value.attribute.code
+                    if (
+                        code in pclass_option_codes
+                    ):  # if the attribute exist also on the new product class, update the attribute
+                        attribute_value.attribute = product_class.attributes.get(
+                            code=code
+                        )
+                        attribute_value.save()
+                    else:
+                        attribute_value.delete()
 
             return instance
