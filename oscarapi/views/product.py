@@ -6,27 +6,28 @@ from oscar.core.loading import get_class, get_model
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
 
-Selector = get_class('partner.strategy', 'Selector')
+Selector = get_class("partner.strategy", "Selector")
 (
+    CategorySerializer,
     ProductLinkSerializer,
     ProductSerializer,
-    AvailabilitySerializer
+    AvailabilitySerializer,
 ) = get_api_classes(
-    "serializers.product", [
+    "serializers.product",
+    [
+        "CategorySerializer",
         "ProductLinkSerializer",
         "ProductSerializer",
-        "AvailabilitySerializer"
-    ]
+        "AvailabilitySerializer",
+    ],
 )
 
 PriceSerializer = get_api_class("serializers.checkout", "PriceSerializer")
 
-__all__ = (
-    'ProductList', 'ProductDetail',
-    'ProductPrice', 'ProductAvailability',
-)
+__all__ = ("ProductList", "ProductDetail", "ProductPrice", "ProductAvailability")
 
-Product = get_model('catalogue', 'Product')
+Product = get_model("catalogue", "Product")
+Category = get_model("catalogue", "Category")
 
 
 class ProductList(generics.ListAPIView):
@@ -45,7 +46,7 @@ class ProductList(generics.ListAPIView):
             http://127.0.0.1:8000/api/products/?structure=parent
         """
         qs = super(ProductList, self).get_queryset()
-        structure = self.request.query_params.get('structure')
+        structure = self.request.query_params.get("structure")
         if structure is not None:
             return qs.filter(structure=structure)
 
@@ -64,8 +65,8 @@ class ProductPrice(generics.RetrieveAPIView):
         product = self.get_object()
         strategy = Selector().strategy(request=request, user=request.user)
         ser = PriceSerializer(
-            strategy.fetch_for_product(product).price,
-            context={'request': request})
+            strategy.fetch_for_product(product).price, context={"request": request}
+        )
         return Response(ser.data)
 
 
@@ -77,5 +78,16 @@ class ProductAvailability(generics.RetrieveAPIView):
         strategy = Selector().strategy(request=request, user=request.user)
         ser = AvailabilitySerializer(
             strategy.fetch_for_product(product).availability,
-            context={'request': request})
+            context={"request": request},
+        )
         return Response(ser.data)
+
+
+class CategoryList(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class CategoryDetail(generics.RetrieveAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer

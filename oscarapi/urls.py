@@ -65,9 +65,23 @@ LoginView = get_api_class("views.login", "LoginView")
     ],
 )
 
-(ProductList, ProductDetail, ProductPrice, ProductAvailability) = get_api_classes(
+(
+    ProductList,
+    ProductDetail,
+    ProductPrice,
+    ProductAvailability,
+    CategoryList,
+    CategoryDetail,
+) = get_api_classes(
     "views.product",
-    ["ProductList", "ProductDetail", "ProductPrice", "ProductAvailability"],
+    [
+        "ProductList",
+        "ProductDetail",
+        "ProductPrice",
+        "ProductAvailability",
+        "CategoryList",
+        "CategoryDetail",
+    ],
 )
 
 (
@@ -93,8 +107,18 @@ LoginView = get_api_class("views.login", "LoginView")
     ],
 )
 
-ProductAdminList, ProductAdminDetail = get_api_classes(
-    "views.admin.product", ["ProductAdminList", "ProductAdminDetail"]
+ProductAdminList, ProductAdminDetail, ProductClassAdminList, ProductClassAdminDetail, ProductAttributeAdminList, ProductAttributeAdminDetail, AttributeOptionGroupAdminList, AttributeOptionGroupAdminDetail = get_api_classes(
+    "views.admin.product",
+    [
+        "ProductAdminList",
+        "ProductAdminDetail",
+        "ProductClassAdminList",
+        "ProductClassAdminDetail",
+        "ProductAttributeAdminList",
+        "ProductAttributeAdminDetail",
+        "AttributeOptionGroupAdminList",
+        "AttributeOptionGroupAdminDetail",
+    ],
 )
 
 urlpatterns = [
@@ -157,6 +181,12 @@ urlpatterns = [
     url(r"^options/(?P<pk>[0-9]+)/$", OptionDetail.as_view(), name="option-detail"),
     url(r"^ranges/$", RangeList.as_view(), name="range-list"),
     url(r"^ranges/(?P<pk>[0-9]+)/$", RangeDetail.as_view(), name="range-detail"),
+    url(r"^categories/$", CategoryList.as_view(), name="category-list"),
+    url(
+        r"^categories/(?P<pk>[0-9]+)/$",
+        CategoryDetail.as_view(),
+        name="category-detail",
+    ),
     url(r"^users/(?P<pk>[0-9]+)/$", UserDetail.as_view(), name="user-detail"),
     url(r"^checkout/$", CheckoutView.as_view(), name="api-checkout"),
     url(r"^orders/$", OrderList.as_view(), name="order-list"),
@@ -207,6 +237,36 @@ admin_urlpatterns = [
         r"^admin/products/(?P<pk>[0-9]+)/$",
         ProductAdminDetail.as_view(),
         name="admin-product-detail",
+    ),
+    url(
+        r"^admin/productclasses/$",
+        ProductClassAdminList.as_view(),
+        name="admin-productclass-list",
+    ),
+    url(
+        r"^admin/productclasses/(?P<slug>[-\w]+)/$",
+        ProductClassAdminDetail.as_view(),
+        name="admin-productclass-detail",
+    ),
+    url(
+        r"^productattributes/$",
+        ProductAttributeAdminList.as_view(),
+        name="admin-productattribute-list",
+    ),
+    url(
+        r"^productattributes/(?P<pk>[0-9]+)/$",
+        ProductAttributeAdminDetail.as_view(),
+        name="admin-productattribute-detail",
+    ),
+    url(
+        r"^attributeoptiongroups/$",
+        AttributeOptionGroupAdminList.as_view(),
+        name="admin-attributeoptiongroup-list",
+    ),
+    url(
+        r"^attributeoptiongroups/(?P<pk>[0-9]+)/$",
+        AttributeOptionGroupAdminDetail.as_view(),
+        name="admin-attributeoptiongroup-detail",
     ),
 ]
 

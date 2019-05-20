@@ -4,14 +4,22 @@ from rest_framework import serializers
 
 from oscar.core.loading import get_model
 
+from oscarapi.serializers.utils import OscarHyperlinkedModelSerializer
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.models import fake_autocreated
 
 Product = get_model("catalogue", "Product")
+ProductClass = get_model("catalogue", "ProductClass")
 ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
 StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
-BaseProductSerializer, ProductImageSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
-    "serializers.product", ["BaseProductSerializer", "ProductImageSerializer"]
+BaseProductSerializer, ProductImageSerializer, ProductAttributeSerializer, OptionSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+    "serializers.product",
+    [
+        "BaseProductSerializer",
+        "ProductImageSerializer",
+        "ProductAttributeSerializer",
+        "OptionSerializer",
+    ],
 )
 
 
@@ -132,3 +140,15 @@ class AdminProductSerializer(BaseProductSerializer):
                         attribute_value.delete()
 
             return instance
+
+
+class AdminProductClassSerializer(OscarHyperlinkedModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name="admin-productclass-detail", lookup_field="slug"
+    )
+    attributes = ProductAttributeSerializer(many=True, required=False)
+    options = OptionSerializer(many=True, required=False)
+
+    class Meta:
+        model = ProductClass
+        fields = "__all__"
