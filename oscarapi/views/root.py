@@ -5,41 +5,42 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 
-__all__ = ('api_root',)
+__all__ = ("api_root",)
 
 
 def PUBLIC_APIS(r, f):
     return [
-        ('login', reverse('api-login', request=r, format=f)),
-        ('basket', reverse('api-basket', request=r, format=f)),
-        ('basket-add-product', reverse(
-            'api-basket-add-product', request=r, format=f)),
-        ('basket-add-voucher', reverse(
-            'api-basket-add-voucher', request=r, format=f)),
-        ('basket-shipping-methods', reverse(
-            'api-basket-shipping-methods', request=r, format=f)),
-        ('checkout', reverse('api-checkout', request=r, format=f)),
-        ('orders', reverse('order-list', request=r, format=f)),
-        ('options', reverse('option-list', request=r, format=f)),
-        ('products', reverse('product-list', request=r, format=f)),
-        ('countries', reverse('country-list', request=r, format=f)),
-        ('useraddresses', reverse('useraddress-list', request=r, format=f)),
+        ("login", reverse("api-login", request=r, format=f)),
+        ("basket", reverse("api-basket", request=r, format=f)),
+        ("basket-add-product", reverse("api-basket-add-product", request=r, format=f)),
+        ("basket-add-voucher", reverse("api-basket-add-voucher", request=r, format=f)),
+        (
+            "basket-shipping-methods",
+            reverse("api-basket-shipping-methods", request=r, format=f),
+        ),
+        ("checkout", reverse("api-checkout", request=r, format=f)),
+        ("orders", reverse("order-list", request=r, format=f)),
+        ("options", reverse("option-list", request=r, format=f)),
+        ("products", reverse("product-list", request=r, format=f)),
+        ("countries", reverse("country-list", request=r, format=f)),
+        ("useraddresses", reverse("useraddress-list", request=r, format=f)),
     ]
 
 
 def PROTECTED_APIS(r, f):
     return [
-        ('baskets', reverse('admin-basket-list', request=r, format=f)),
-        ('products', reverse('admin-product-list', request=r, format=f)),
-        ('lines', reverse('admin-line-list', request=r, format=f)),
-        ('lineattributes', reverse('admin-lineattribute-list', request=r, format=f)),
-        ('stockrecords', reverse('admin-stockrecord-list', request=r, format=f)),
-        ('users', reverse('admin-user-list', request=r, format=f)),
-        ('partners', reverse('admin-partner-list', request=r, format=f)),
+        ("baskets", reverse("admin-basket-list", request=r, format=f)),
+        ("productclasses", reverse("admin-productclass-list", request=r, format=f)),
+        ("products", reverse("admin-product-list", request=r, format=f)),
+        ("lines", reverse("admin-line-list", request=r, format=f)),
+        ("lineattributes", reverse("admin-lineattribute-list", request=r, format=f)),
+        ("stockrecords", reverse("admin-stockrecord-list", request=r, format=f)),
+        ("users", reverse("admin-user-list", request=r, format=f)),
+        ("partners", reverse("admin-partner-list", request=r, format=f)),
     ]
 
 
-@api_view(('GET',))
+@api_view(("GET",))
 def api_root(request, format=None):
     """
     GET:
@@ -50,6 +51,6 @@ def api_root(request, format=None):
     """
     apis = PUBLIC_APIS(request, format)
     if request.user.is_staff:
-        apis += [('admin', collections.OrderedDict(PROTECTED_APIS(request, format)))]
+        apis += [("admin", collections.OrderedDict(PROTECTED_APIS(request, format)))]
 
     return Response(collections.OrderedDict(apis))

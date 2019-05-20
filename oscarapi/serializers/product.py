@@ -22,23 +22,59 @@ ProductImage = get_model("catalogue", "ProductImage")
 Option = get_model("catalogue", "Option")
 Partner = get_model("partner", "Partner")
 ProductClass = get_model("catalogue", "ProductClass")
+ProductAttribute = get_model("catalogue", "ProductAttribute")
+Category = get_model("catalogue", "Category")
+AttributeOption = get_model("catalogue", "AttributeOption")
+AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 AttributeValueField, CategoryField = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
     "serializers.fields", ["AttributeValueField", "CategoryField"]
 )
 StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
 
-# ProductCategory = get_model('catalogue', 'ProductCategory')
-# ProductAttribute = get_model('catalogue', 'ProductAttribute')
-# AttributeOption = get_model('catalogue', 'AttributeOption')
+
+class AttributeOptionGroupSerializer(OscarHyperlinkedModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name="admin-attributeoptiongroup-detail"
+    )
+    options = serializers.SlugRelatedField(
+        many=True,
+        required=True,
+        slug_field="option",
+        queryset=AttributeOption.objects.get_queryset(),
+    )
+
+    class Meta:
+        model = AttributeOptionGroup
+        fields = "__all__"
 
 
-class RangeSerializer(OscarModelSerializer):
+class CategorySerializer(OscarHyperlinkedModelSerializer):
+    class Meta:
+        model = Category
+        fields = "__all__"
+
+
+class ProductAttributeSerializer(OscarHyperlinkedModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name="admin-productattribute-detail"
+    )
+    product_class = serializers.SlugRelatedField(
+        slug_field="slug", queryset=ProductClass.objects.get_queryset()
+    )
+    option_group = AttributeOptionGroupSerializer(required=False)
+
+    class Meta:
+        model = ProductAttribute
+        fields = "__all__"
+
+
+class RangeSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = Range
         fields = "__all__"
 
 
-class PartnerSerializer(OscarModelSerializer):
+class PartnerSerializer(OscarHyperlinkedModelSerializer):
     class Meta:
         model = Partner
         fields = "__all__"
