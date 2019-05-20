@@ -2,14 +2,14 @@ import functools
 
 from django.contrib import auth
 
-from oscar.core.loading import get_class, get_classes, get_model
+from oscar.core.loading import get_class, get_model
 
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
 
 from six.moves import map
 
-from oscarapi import permissions, serializers
+from oscarapi import permissions
 from oscarapi.basket.operations import assign_basket_strategy
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
@@ -148,10 +148,10 @@ class PartnerDetail(generics.RetrieveAPIView):
 
 
 class RangeList(generics.ListAPIView):
-    queryset = Range.objects
+    queryset = Range.objects.all()
     serializer_class = RangeSerializer
 
 
 class RangeDetail(generics.RetrieveAPIView):
-    queryset = Range.objects
+    queryset = Range.objects.all()
     serializer_class = RangeSerializer
