@@ -1,20 +1,26 @@
+import logging
 from copy import deepcopy
+
 from rest_framework import serializers
 from rest_framework.fields import empty
 
+from oscar.core.loading import get_model
+
+from oscarapi.utils.exists import bound_unique_together_get_or_create_multiple
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.settings import overridable
 from oscarapi.utils.files import file_hash
+from oscarapi.utils.exists import find_existing_attribute_option_group
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
     UpdateListSerializer,
     UpdateForwardManyToManySerializer,
 )
-from oscar.core.loading import get_model
 
 from .exceptions import FieldError
 
+logger = logging.getLogger(__name__)
 Product = get_model("catalogue", "Product")
 Range = get_model("offer", "Range")
 ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
@@ -26,8 +32,9 @@ ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
 AttributeOption = get_model("catalogue", "AttributeOption")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
-AttributeValueField, CategoryField = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
-    "serializers.fields", ["AttributeValueField", "CategoryField"]
+AttributeValueField, CategoryField, SingleValueSlugRelatedField = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+    "serializers.fields",
+    ["AttributeValueField", "CategoryField", "SingleValueSlugRelatedField"],
 )
 StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
 
@@ -36,12 +43,53 @@ class AttributeOptionGroupSerializer(OscarHyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name="admin-attributeoptiongroup-detail"
     )
-    options = serializers.SlugRelatedField(
+    options = SingleValueSlugRelatedField(
         many=True,
         required=True,
         slug_field="option",
         queryset=AttributeOption.objects.get_queryset(),
     )
+
+    def create(self, validated_data):
+        existing_option = find_existing_attribute_option_group(
+            validated_data["name"], validated_data["options"]
+        )
+        if existing_option is not None:
+            return existing_option
+        else:
+            options = validated_data.pop("options", None)
+            instance = super(AttributeOptionGroupSerializer, self).create(
+                validated_data
+            )
+            options = bound_unique_together_get_or_create_multiple(
+                instance.options, options
+            )
+            instance.options.set(options)
+            return instance
+
+    def update(self, instance, validated_data):
+        existing_option = find_existing_attribute_option_group(
+            validated_data["name"], validated_data["options"]
+        )
+        if existing_option is not None:
+            return existing_option
+        else:
+            options = validated_data.pop("options", None)
+            updated_instance = super(AttributeOptionGroupSerializer, self).update(
+                instance, validated_data
+            )
+            # if the field was returned unbound,
+            options = bound_unique_together_get_or_create_multiple(
+                updated_instance.options, options
+            )
+            updated_instance.options.set(options, bulk=False)
+            if not self.partial:
+                # we need to manually remove the options
+                updated_instance.options.exclude(
+                    pk__in=[o.pk for o in options]
+                ).delete()
+
+            return updated_instance
 
     class Meta:
         model = AttributeOptionGroup
@@ -54,17 +102,58 @@ class CategorySerializer(OscarHyperlinkedModelSerializer):
         fields = "__all__"
 
 
+class ProductAttributeListSerializer(UpdateListSerializer):
+    def select_existing_item(self, manager, datum):
+        try:
+            return manager.get(product_class=datum["product_class"], code=datum["code"])
+        except manager.model.DoesNotExist:
+            pass
+        except manager.model.MultipleObjectsReturned as e:
+            logger.error("Multiple objects on unique contrained items, freaky %s", e)
+            logger.exception(e)
+
+        return None
+
+
 class ProductAttributeSerializer(OscarHyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name="admin-productattribute-detail"
     )
     product_class = serializers.SlugRelatedField(
-        slug_field="slug", queryset=ProductClass.objects.get_queryset()
+        slug_field="slug",
+        queryset=ProductClass.objects.get_queryset(),
+        write_only=True,
+        required=False,
     )
-    option_group = AttributeOptionGroupSerializer(required=False)
+    option_group = AttributeOptionGroupSerializer(required=False, allow_null=True)
+
+    def create(self, validated_data):
+        option_group = validated_data.pop("option_group", None)
+        instance = super(ProductAttributeSerializer, self).create(validated_data)
+        return self.update(instance, {"option_group": option_group})
+
+    def update(self, instance, validated_data):
+        option_group = validated_data.pop("option_group", None)
+        updated_instance = super(ProductAttributeSerializer, self).update(
+            instance, validated_data
+        )
+        if option_group is not None:
+            serializer = self.fields["option_group"]
+            # use the serializer to update the attribute_values
+            if instance.option_group:
+                updated_instance.option_group = serializer.update(
+                    instance.option_group, option_group
+                )
+            else:
+                updated_instance.option_group = serializer.create(option_group)
+
+            updated_instance.save()
+
+        return updated_instance
 
     class Meta:
         model = ProductAttribute
+        list_serializer_class = ProductAttributeListSerializer
         fields = "__all__"
 
 
