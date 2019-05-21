@@ -1,3 +1,4 @@
+# pylint: disable=unbalanced-tuple-unpacking
 from rest_framework import generics
 from rest_framework.permissions import IsAdminUser
 
@@ -32,42 +33,38 @@ class ProductAdminDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView)
     permission_classes = (IsAdminUser,)
 
 
-class ProductClassAdminList(PutIsPatchMixin, generics.ListCreateAPIView):
+class ProductClassAdminList(generics.ListCreateAPIView):
     serializer_class = AdminProductClassSerializer
     queryset = ProductClass.objects.get_queryset()
     permission_classes = (IsAdminUser,)
 
 
-class ProductClassAdminDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
+class ProductClassAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AdminProductClassSerializer
     queryset = ProductClass.objects.get_queryset()
     permission_classes = (IsAdminUser,)
     lookup_field = "slug"
 
 
-class ProductAttributeAdminList(PutIsPatchMixin, generics.ListCreateAPIView):
+class ProductAttributeAdminList(generics.ListCreateAPIView):
     serializer_class = ProductAttributeSerializer
     queryset = ProductAttribute.objects.get_queryset()
     permission_classes = (IsAdminUser,)
 
 
-class ProductAttributeAdminDetail(
-    PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView
-):
+class ProductAttributeAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductAttributeSerializer
     queryset = ProductAttribute.objects.get_queryset()
     permission_classes = (IsAdminUser,)
 
 
-class AttributeOptionGroupAdminList(PutIsPatchMixin, generics.ListCreateAPIView):
+class AttributeOptionGroupAdminList(generics.ListCreateAPIView):
     serializer_class = AttributeOptionGroupSerializer
     queryset = AttributeOptionGroup.objects.get_queryset()
     permission_classes = (IsAdminUser,)
 
 
-class AttributeOptionGroupAdminDetail(
-    PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView
-):
+class AttributeOptionGroupAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AttributeOptionGroupSerializer
     queryset = AttributeOptionGroup.objects.get_queryset()
     permission_classes = (IsAdminUser,)

@@ -7,6 +7,7 @@ from rest_framework import serializers
 
 import oscar.models.fields
 
+from oscarapi.utils.exists import construct_id_filter
 from .fields import ImageUrlField
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,28 @@ class OscarSerializer(object):
             existing = set(self.fields.keys())  # pylint: disable=no-member
             for field_name in existing - allowed:
                 self.fields.pop(field_name)  # pylint: disable=no-member
+
+    def update_relation(self, name, manager, values):
+        if values is None:
+            return
+
+        serializer = self.fields[name]  # pylint: disable=no-member
+
+        # use the serializer to update the attribute_values
+        updated_values = serializer.update(manager, values)
+
+        if self.partial:  # pylint: disable=no-member
+            manager.add(*updated_values)
+        elif hasattr(manager, "field") and not manager.field.null:
+            # add the updated_attribute_values to the instance
+            manager.add(*updated_values)
+            # remove all the obsolete attribute values, this could be caused by
+            # the product class changing for example, lots of attributes would become
+            # obsolete.
+            current_pks = [p.pk for p in updated_values]
+            manager.exclude(pk__in=current_pks).delete()
+        else:
+            manager.set(updated_values)
 
 
 class OscarModelSerializer(OscarSerializer, serializers.ModelSerializer):
@@ -100,8 +123,8 @@ class UpdateListSerializer(serializers.ListSerializer):
     def select_existing_item(self, manager, datum):
         automatic_filter = construct_id_filter(manager.model, datum)
 
+        intermediate_result = manager.filter(automatic_filter)
         try:
-            intermediate_result = manager.filter(automatic_filter)
             return intermediate_result.distinct().get()
         except manager.model.DoesNotExist:
             pass
@@ -113,7 +136,9 @@ class UpdateListSerializer(serializers.ListSerializer):
         for lookup_field in self.Meta.lookup_fields:
             if lookup_field in datum:
                 try:
-                    return manager.get(**{lookup_field: datum[lookup_field]})
+                    return intermediate_result.get(
+                        **{lookup_field: datum[lookup_field]}
+                    )
                 except manager.model.DoesNotExist:
                     continue
                 except manager.model.MultipleObjectsReturned:
@@ -158,42 +183,3 @@ class UpdateForwardManyToManySerializer(UpdateListSerializer):
 
     def get_name_and_rel_instance(self, manager):
         return manager.source_field_name, manager.instance
-
-
-def _field_name(name, prefix=None):
-    """
-    Util for quick prefixes
-    
-    >>> _field_name(1)
-    '1'
-    >>> _field_name("henk")
-    'henk'
-    >>> _field_name("henk", 1)
-    '1henk'
-    """
-    if prefix is None:
-        return str(name)
-    return "%s%s" % (prefix, name)
-
-
-def construct_id_filter(model, data, prefix=None):
-    """
-    This function will construct a filter that can be used to uniquely
-    identify an object based on the keys present in the data object.
-    
-    So if there are multiple fields on a model that are marked as unique, or
-    the model has unique_together specifucations, all these can be used to
-    uniquely identify the instance that represents the data.
-    """
-    _filter = models.Q()
-
-    for unique_together in model._meta.unique_together:
-        _filter |= models.Q(
-            **{_field_name(key, prefix): data.get(key) for key in unique_together}
-        )
-
-    for field in model._meta.concrete_fields:
-        if field.unique and field.name in data:
-            _filter |= models.Q(**{_field_name(field.name, prefix): data[field.name]})
-
-    return _filter
