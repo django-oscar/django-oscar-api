@@ -7,6 +7,7 @@ from six.moves.urllib.parse import urlsplit
 from six.moves.urllib.request import urlopen
 
 from django.conf import settings
+from django.db import IntegrityError
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
@@ -15,8 +16,6 @@ from rest_framework import serializers, relations
 from rest_framework.fields import get_attribute
 
 from oscar.core.loading import get_model, get_class
-
-from oscarapi.utils.request import get_domain
 
 from .exceptions import FieldError
 
@@ -200,6 +199,32 @@ class CategoryField(serializers.RelatedField):
 
     def to_representation(self, value):
         return value.full_name
+
+
+class SingleValueSlugRelatedField(serializers.SlugRelatedField):
+    """
+    Represents a queryset as a list of slugs, and can be used to create new
+    items, as long as only the slug_field is required
+    """
+
+    def get_bound_queryset(self):
+        parent = self.parent
+        source_name = parent.source
+        if hasattr(parent, "child_relation"):
+            parent = parent.parent
+
+        manager = getattr(parent.instance, source_name, None)
+        if manager is None:
+            return super(SingleValueSlugRelatedField, self).get_queryset()
+        return manager
+
+    def to_internal_value(self, data):
+        qs = self.get_bound_queryset()
+        try:
+            item, _ = qs.get_or_create(**{self.slug_field: data})
+            return item
+        except IntegrityError:
+            return qs.model(**{self.slug_field: data})
 
 
 class ImageUrlField(serializers.ImageField):

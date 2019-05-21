@@ -26,8 +26,9 @@ ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
 AttributeOption = get_model("catalogue", "AttributeOption")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
-AttributeValueField, CategoryField = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
-    "serializers.fields", ["AttributeValueField", "CategoryField"]
+AttributeValueField, CategoryField, SingleValueSlugRelatedField = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+    "serializers.fields",
+    ["AttributeValueField", "CategoryField", "SingleValueSlugRelatedField"],
 )
 StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
 
@@ -36,12 +37,29 @@ class AttributeOptionGroupSerializer(OscarHyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(
         view_name="admin-attributeoptiongroup-detail"
     )
-    options = serializers.SlugRelatedField(
+    options = SingleValueSlugRelatedField(
         many=True,
         required=True,
         slug_field="option",
         queryset=AttributeOption.objects.get_queryset(),
     )
+
+    def create(self, validated_data):
+        options = validated_data.pop("options", None)
+        instance = super(AttributeOptionGroupSerializer, self).create(validated_data)
+        instance.options.set(options, bulk=False)
+        return instance
+
+    def update(self, instance, validated_data):
+        options = validated_data.get("options", None)
+        updated_instance = super(AttributeOptionGroupSerializer, self).update(
+            instance, validated_data
+        )
+        if not self.partial:
+            # we need to manually remove the options
+            updated_instance.options.exclude(pk__in=[o.pk for o in options]).delete()
+
+        return updated_instance
 
     class Meta:
         model = AttributeOptionGroup

@@ -59,15 +59,13 @@ class ProductAttributeAdminDetail(
     permission_classes = (IsAdminUser,)
 
 
-class AttributeOptionGroupAdminList(PutIsPatchMixin, generics.ListCreateAPIView):
+class AttributeOptionGroupAdminList(generics.ListCreateAPIView):
     serializer_class = AttributeOptionGroupSerializer
     queryset = AttributeOptionGroup.objects.get_queryset()
     permission_classes = (IsAdminUser,)
 
 
-class AttributeOptionGroupAdminDetail(
-    PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView
-):
+class AttributeOptionGroupAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AttributeOptionGroupSerializer
     queryset = AttributeOptionGroup.objects.get_queryset()
     permission_classes = (IsAdminUser,)

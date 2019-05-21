@@ -1,7 +1,6 @@
 import mock
 import decimal
 import datetime
-import unittest
 import json
 from six import string_types
 from os.path import dirname, join
@@ -21,10 +20,12 @@ from oscarapi.serializers.product import (
 )
 from oscarapi.serializers.basket import StockRecordSerializer
 from oscarapi.serializers.admin.product import AdminProductSerializer
+from oscarapi.serializers.product import AttributeOptionGroupSerializer
 
 Product = get_model("catalogue", "Product")
 Category = get_model("catalogue", "Category")
 Option = get_model("catalogue", "Option")
+AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 StockRecord = get_model("partner", "StockRecord")
 
 
@@ -713,7 +714,6 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         self.assertEqual([str(o) for o in p.attr.multioption], ["Large"])
 
     def test_productattributevalueserializer_multioption_error(self):
-        p = Product.objects.get(pk=3)
         ser = ProductAttributeValueSerializer(
             data={
                 "name": "Multioption",
@@ -802,9 +802,9 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.description, "Henk")
 
     def test_modify_product_error(self):
-        "When modifying an attribute, enough information should be passed to be "
-        "able to identify the attribute. An error message should indicate "
-        "missing information"
+        """When modifying an attribute, enough information should be passed to be
+        able to identify the attribute. An error message should indicate
+        missing information"""
         product = Product.objects.get(pk=3)
         self.assertEqual(product.upc, "attrtypestest")
         self.assertEqual(product.description, "<p>It is a test for the attributes</p>")
@@ -824,8 +824,8 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
 
     def test_switch_product_class(self):
-        "When the product class is switched, the product should only have "
-        "attributes from the new product class."
+        """When the product class is switched, the product should only have
+        attributes from the new product class."""
         product = Product.objects.get(pk=3)
         self.assertEqual(product.attribute_values.count(), 11)
         self.assertEqual(product.attr.boolean, True)
@@ -960,9 +960,9 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.stockrecords.count(), 1)
 
     def test_modify_stockrecords(self):
-        "Even without specifying product id the serializer should be able to "
-        "detect that we are modifying an existing stockrecord because slug is "
-        "unique for stockrecord"
+        """Even without specifying product id the serializer should be able to
+        detect that we are modifying an existing stockrecord because slug is
+        unique for stockrecord"""
         product = Product.objects.get(pk=1)
         self.assertEqual(product.stockrecords.count(), 1)
         stockrecord = product.stockrecords.get()
@@ -1282,3 +1282,71 @@ class TestProductAdmin(APITest):
         url = reverse("admin-product-detail", args=(1,))
         self.response = self.patch(url, **self.tshirt)
         self.response.assertStatusEqual(200)
+
+
+class TestAttributeOptionGroupSerializer(APITest):
+    fixtures = [
+        "product",
+        "productcategory",
+        "productattribute",
+        "productclass",
+        "productattributevalue",
+        "category",
+        "attributeoptiongroup",
+        "attributeoption",
+        "stockrecord",
+        "partner",
+        "productimage",
+    ]
+
+    def test_put(self):
+        self.login("admin", "admin")
+        url = reverse("admin-attributeoptiongroup-detail", args=(1,))
+        self.response = self.get(url)
+        self.assertCountEqual(self.response["options"], ["Large", "Small"])
+        self.response = self.put(
+            url, options=["Large", "Medium", "Small", "Rokeol"], name="Sizes"
+        )
+        self.response.assertStatusEqual(200)
+        self.assertCountEqual(
+            self.response["options"], ["Large", "Medium", "Small", "Rokeol"]
+        )
+
+    def test_remove(self):
+        self.test_put()
+        url = reverse("admin-attributeoptiongroup-detail", args=(1,))
+        self.response = self.put(url, options=["Small", "Rokeol"], name="Sizes")
+        self.response.assertStatusEqual(200)
+        self.assertCountEqual(self.response["options"], ["Small", "Rokeol"])
+
+    def test_create(self):
+        option_group = AttributeOptionGroup.objects.get()
+        self.assertEqual(option_group.options.count(), 2)
+        ser = AttributeOptionGroupSerializer(
+            data={"options": ["zult", "blup", "knek"], "name": "Hanbrek"}
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.options.count(), 3)
+
+    def test_add_options(self):
+        option_group = AttributeOptionGroup.objects.get()
+        self.assertEqual(option_group.options.count(), 2)
+        ser = AttributeOptionGroupSerializer(
+            data={"options": ["Large", "Medium", "Small", "Rokeol"], "name": "Sizes"},
+            instance=option_group,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.options.count(), 4)
+
+    def test_remove_options(self):
+        self.test_add_options()
+        option_group = AttributeOptionGroup.objects.get()
+        self.assertEqual(option_group.options.count(), 4)
+        ser = AttributeOptionGroupSerializer(
+            data={"options": ["Small"], "name": "Sizes"}, instance=option_group
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.options.count(), 1)

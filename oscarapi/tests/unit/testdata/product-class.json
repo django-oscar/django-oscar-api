@@ -1,0 +1,107 @@
+{
+  "attributes": [
+    {
+      "option_group": null,
+      "name": "boolean",
+      "code": "boolean",
+      "type": "boolean",
+      "required": true
+    },
+    {
+      "option_group": null,
+      "name": "date",
+      "code": "date",
+      "type": "date",
+      "required": true
+    },
+    {
+      "option_group": null,
+      "name": "datetime",
+      "code": "datetime",
+      "type": "datetime",
+      "required": true
+    },
+    {
+      "option_group": null,
+      "name": "file",
+      "code": "file",
+      "type": "file",
+      "required": true
+    },
+    {
+      "option_group": null,
+      "name": "float",
+      "code": "float",
+      "type": "float",
+      "required": true
+    },
+    {
+      "option_group": null,
+      "name": "html",
+      "code": "html",
+      "type": "richtext",
+      "required": true
+    },
+    {
+      "option_group": null,
+      "name": "image",
+      "code": "image",
+      "type": "image",
+      "required": true
+    },
+    {
+      "option_group": null,
+      "name": "integer",
+      "code": "integer",
+      "type": "integer",
+      "required": true
+    },
+    {
+      "option_group": {
+        "options": [
+          "Large",
+          "Small",
+          "Humongous"
+        ],
+        "name": "Sizes"
+      },
+      "name": "multioption",
+      "code": "multioption",
+      "type": "multi_option",
+      "required": true
+    },
+    {
+      "option_group": {
+        "options": [
+          "Large",
+          "Small",
+          "Extreme"
+        ],
+        "name": "Sizes"
+      },
+      "name": "option",
+      "code": "option",
+      "type": "option",
+      "required": true
+    },
+    {
+      "option_group": null,
+      "name": "text",
+      "code": "text",
+      "type": "text",
+      "required": true
+    }
+  ],
+  "options": [
+    {
+      "code": "horloge",
+      "name": "horloge",
+      "type": "Required",
+      "help_text": "Wil je een horloge erbij?"
+    }
+  ],
+  "name": "TestType",
+  "slug": "testtype",
+  "requires_shipping": true,
+  "track_stock": true
+}
