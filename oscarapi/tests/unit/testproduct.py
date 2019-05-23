@@ -1397,6 +1397,16 @@ class TestProductClassSerializer(APITest):
             option.options.values_list("option", flat=True), ["Large", "Small"]
         )
 
+    def test_post_product_class(self):
+        self.login("admin", "admin")
+        self.assertEqual(ProductClass.objects.count(), 3)
+        data = deepcopy(self.data)  # remove some of the attributes
+        data["name"] = "henk"
+        data["slug"] = "henk"
+        self.response = self.post("admin-productclass-list", **data)
+        self.response.assertStatusEqual(201)
+        self.assertEqual(ProductClass.objects.count(), 4)
+
     def test_put_add_options(self):
         "We should be able to options with put"
         self.login("admin", "admin")
