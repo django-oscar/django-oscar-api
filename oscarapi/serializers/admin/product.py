@@ -162,6 +162,18 @@ class AdminProductClassSerializer(OscarHyperlinkedModelSerializer):
     attributes = ProductAttributeSerializer(many=True, required=False)
     options = OptionSerializer(many=True, required=False)
 
+    def create(self, validated_data):
+        attributes = validated_data.pop("attributes", None)
+        options = validated_data.pop("options", None)
+
+        with transaction.atomic():
+            self.instance = instance = super(AdminProductClassSerializer, self).create(
+                validated_data
+            )
+            return self.update(
+                instance, dict(validated_data, attributes=attributes, options=options)
+            )
+
     def update(self, instance, validated_data):
         attributes = validated_data.pop("attributes", None)
         options = validated_data.pop("options", None)
