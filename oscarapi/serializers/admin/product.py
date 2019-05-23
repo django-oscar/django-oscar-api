@@ -1,5 +1,4 @@
 from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
@@ -9,7 +8,6 @@ from oscar.core.loading import get_model, get_class
 from oscarapi.serializers.utils import OscarHyperlinkedModelSerializer
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.models import fake_autocreated
-from oscarapi.utils.exists import categories_for_breadcrumbs
 
 create_from_breadcrumbs = get_class("catalogue.categories", "create_from_breadcrumbs")
 Product = get_model("catalogue", "Product")
@@ -165,21 +163,17 @@ class AdminCategorySerializer(BaseCategorySerializer):
 
     def create(self, validated_data):
         breadcrumbs = self.context.get("breadcrumbs", None)
-        slug = validated_data["slug"]
-        try:
-            instance = categories_for_breadcrumbs(breadcrumbs).get(slug=slug)
-        except ObjectDoesNotExist:
-            if breadcrumbs is None:
-                breadcrumbs = slug
-            else:
-                breadcrumbs = "/".join((breadcrumbs, slug))
+        name = validated_data["name"]
 
+        if breadcrumbs is None:
+            breadcrumbs = name
+        else:
+            breadcrumbs = "/".join((breadcrumbs, name))
+
+        try:
             instance = create_from_breadcrumbs(breadcrumbs, separator="/")
-        except MultipleObjectsReturned:
-            raise APIException(
-                "there are multiple objects with slug %s in %s, can not determine which one to update"
-                % (slug, breadcrumbs)
-            )
+        except ValueError as e:
+            raise APIException(str(e))
 
         return self.update(instance, validated_data)
 
