@@ -1495,3 +1495,96 @@ class TestProductClassSerializer(APITest):
                 "Sizes", ["Large", "Small", "Humongous", "Megalomaniac"]
             )
         )
+
+
+class AdminCategoryApiTest(APITest):
+    fixtures = [
+        "product",
+        "productcategory",
+        "productattribute",
+        "productclass",
+        "productattributevalue",
+        "category",
+        "attributeoptiongroup",
+        "attributeoption",
+        "stockrecord",
+        "partner",
+        "productimage",
+    ]
+
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_create_category_and_ancestors(self, urlopen):
+        urlopen.return_value = open(
+            join(dirname(__file__), "testdata", "image.jpg"), "rb"
+        )
+
+        self.login("admin", "admin")
+        self.assertEqual(Category.objects.count(), 1)
+        url = reverse(
+            "admin-category-child-list",
+            kwargs={"breadcrumbs": "this/does/not/exist/yet"},
+        )
+
+        self.response = self.post(
+            url,
+            **{
+                "name": "klaas",
+                "slug": "blaat",
+                "description": "bloep",
+                "image": "https://example.com/testdata/image.jpg",
+            }
+        )
+
+        self.response.assertStatusEqual(201)
+        self.assertEqual(Category.objects.count(), 7)
+
+    def test_create_or_update_category_and_ancestors(self):
+        self.test_create_category_and_ancestors()  # pylint: disable=no-value-for-parameter
+        self.assertEqual(Category.objects.count(), 7)
+        url = reverse(
+            "admin-category-child-list",
+            kwargs={"breadcrumbs": "this/does/not/exist/yet"},
+        )
+
+        self.response = self.post(
+            url, **{"name": "klaas", "slug": "blaat", "description": "Klak"}
+        )
+
+        self.assertEqual(Category.objects.count(), 7)
+        self.response.assertStatusEqual(201)
+        self.assertEqual(self.response["description"], "Klak")
+
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_create_root_category(self, urlopen):
+        urlopen.return_value = open(
+            join(dirname(__file__), "testdata", "image.jpg"), "rb"
+        )
+
+        self.login("admin", "admin")
+        self.assertEqual(Category.objects.count(), 1)
+
+        self.response = self.post(
+            "admin-category-list",
+            **{
+                "name": "blubbie",
+                "slug": "blub",
+                "description": "brop",
+                "image": "https://example.com/testdata/image.jpg",
+            }
+        )
+
+        self.response.assertStatusEqual(201)
+        self.assertEqual(Category.objects.count(), 2)
+
+    def test_create_or_update_root_category(self):
+        self.test_create_root_category()  # pylint: disable=no-value-for-parameter
+        self.assertEqual(Category.objects.count(), 2)
+
+        self.response = self.post(
+            "admin-category-list",
+            **{"name": "blubbie", "slug": "blub", "description": "Klakaa"}
+        )
+
+        self.assertEqual(Category.objects.count(), 2)
+        self.response.assertStatusEqual(201)
+        self.assertEqual(self.response["description"], "Klakaa")

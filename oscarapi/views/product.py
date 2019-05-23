@@ -4,6 +4,7 @@ from rest_framework.response import Response
 
 from oscar.core.loading import get_class, get_model
 
+from oscarapi.utils.exists import categories_for_breadcrumbs
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
 
@@ -89,22 +90,11 @@ class ProductAvailability(generics.RetrieveAPIView):
 
 
 class CategoryList(generics.ListAPIView):
-    queryset = Category.get_root_nodes()
     serializer_class = CategorySerializer
 
     def get_queryset(self):
-        qs = super(CategoryList, self).get_queryset()
         breadcrumb_path = self.kwargs.get("breadcrumbs", None)
-
-        if breadcrumb_path is not None:
-            breadcrumbs = breadcrumb_path.split("/")
-            first = breadcrumbs[0]
-            depth = len(breadcrumbs)
-            root = qs.get(slug=first)
-            qs = root.get_descendants()
-            return qs.filter(depth=depth + 1)
-
-        return qs
+        return categories_for_breadcrumbs(breadcrumb_path)
 
 
 class CategoryDetail(generics.RetrieveAPIView):

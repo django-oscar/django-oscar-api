@@ -3,11 +3,13 @@ This module contains functions that can be used to identofy an existing piece
 of data in the database based on it's unique attributes
 """
 from django.db import models
+
 from oscar.core.loading import get_model
 
 from .accessors import destructure
 
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
+Category = get_model("catalogue", "Category")
 
 
 def _field_name(name, prefix=None):
@@ -68,12 +70,12 @@ def find_existing_attribute_option_group(name, options):
 
 
 def bound_unique_together_get_or_create(bound_queryset, datum):
-    qModel = bound_queryset.model
-    if isinstance(datum, qModel):
+    QuerySetModel = bound_queryset.model
+    if isinstance(datum, QuerySetModel):
         return datum
 
     keys = set(datum.keys())
-    for unique_pair in qModel._meta.unique_together:
+    for unique_pair in QuerySetModel._meta.unique_together:
         overlap = keys & set(unique_pair)
         # one of the items in the unique specification should be allready
         # bound in the queryset (used in a filter). So we need to look
@@ -92,3 +94,29 @@ def bound_unique_together_get_or_create_multiple(bound_queryset, data):
     return [
         bound_unique_together_get_or_create(bound_queryset, datum) for datum in data
     ]
+
+
+def categories_for_breadcrumbs(breadcrumbs, queryset=None):
+    if queryset is None:
+        queryset = Category.get_root_nodes()
+
+    if breadcrumbs:
+        try:
+            selection = breadcrumbs.split("/", maxsplit=1)
+            if len(selection) == 1:
+                slug, = selection
+                return queryset.get(slug=slug).get_children()
+            else:
+                slug, breadcrumbs = selection
+                return categories_for_breadcrumbs(
+                    breadcrumbs, queryset.get(slug=slug).get_children()
+                )
+        except Category.DoesNotExist:
+            return queryset.none()
+        except Category.MultipleObjectsReturned:
+            multi = queryset.none()
+            for category in queryset.filter(slug=slug):
+                multi |= category.get_children()
+            return multi
+
+    return queryset
