@@ -108,7 +108,18 @@ LoginView = get_api_class("views.login", "LoginView")
     ],
 )
 
-ProductAdminList, ProductAdminDetail, ProductClassAdminList, ProductClassAdminDetail, ProductAttributeAdminList, ProductAttributeAdminDetail, AttributeOptionGroupAdminList, AttributeOptionGroupAdminDetail = get_api_classes(
+(
+    ProductAdminList,
+    ProductAdminDetail,
+    ProductClassAdminList,
+    ProductClassAdminDetail,
+    ProductAttributeAdminList,
+    ProductAttributeAdminDetail,
+    AttributeOptionGroupAdminList,
+    AttributeOptionGroupAdminDetail,
+    CategoryAdminList,
+    CategoryAdminDetail,
+) = get_api_classes(
     "views.admin.product",
     [
         "ProductAdminList",
@@ -119,6 +130,8 @@ ProductAdminList, ProductAdminDetail, ProductClassAdminList, ProductClassAdminDe
         "ProductAttributeAdminDetail",
         "AttributeOptionGroupAdminList",
         "AttributeOptionGroupAdminDetail",
+        "CategoryAdminList",
+        "CategoryAdminDetail",
     ],
 )
 
@@ -255,22 +268,35 @@ admin_urlpatterns = [
         name="admin-productclass-detail",
     ),
     url(
-        r"^productattributes/$",
+        r"^admin/categories/$", CategoryAdminList.as_view(), name="admin-category-list"
+    ),
+    url(
+        r"^admin/categories/(?P<pk>[0-9]+)/$",
+        CategoryAdminDetail.as_view(),
+        name="admin-category-detail",
+    ),
+    url(
+        r"^admin/categories/(?P<breadcrumbs>.*)/$",
+        CategoryAdminList.as_view(),
+        name="admin-category-child-list",
+    ),
+    url(
+        r"^admin/productattributes/$",
         ProductAttributeAdminList.as_view(),
         name="admin-productattribute-list",
     ),
     url(
-        r"^productattributes/(?P<pk>[0-9]+)/$",
+        r"^admin/productattributes/(?P<pk>[0-9]+)/$",
         ProductAttributeAdminDetail.as_view(),
         name="admin-productattribute-detail",
     ),
     url(
-        r"^attributeoptiongroups/$",
+        r"^admin/attributeoptiongroups/$",
         AttributeOptionGroupAdminList.as_view(),
         name="admin-attributeoptiongroup-list",
     ),
     url(
-        r"^attributeoptiongroups/(?P<pk>[0-9]+)/$",
+        r"^admin/attributeoptiongroups/(?P<pk>[0-9]+)/$",
         AttributeOptionGroupAdminDetail.as_view(),
         name="admin-attributeoptiongroup-detail",
     ),
