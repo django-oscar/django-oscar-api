@@ -2,6 +2,7 @@ import mock
 import decimal
 import datetime
 import json
+from copy import deepcopy
 from six import string_types
 from os.path import dirname, join
 
@@ -12,6 +13,7 @@ from django.utils.timezone import make_aware
 
 from oscar.core.loading import get_model
 
+from oscarapi.utils.exists import find_existing_attribute_option_group
 from oscarapi.tests.utils import APITest
 from oscarapi.serializers.fields import CategoryField
 from oscarapi.serializers.product import (
@@ -22,7 +24,9 @@ from oscarapi.serializers.basket import StockRecordSerializer
 from oscarapi.serializers.admin.product import AdminProductSerializer
 from oscarapi.serializers.product import AttributeOptionGroupSerializer
 
+
 Product = get_model("catalogue", "Product")
+ProductClass = get_model("catalogue", "ProductClass")
 Category = get_model("catalogue", "Category")
 Option = get_model("catalogue", "Option")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
@@ -1350,3 +1354,144 @@ class TestAttributeOptionGroupSerializer(APITest):
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
         self.assertEqual(obj.options.count(), 1)
+
+
+class TestProductClassSerializer(APITest):
+    fixtures = [
+        "product",
+        "productcategory",
+        "productattribute",
+        "productclass",
+        "productattributevalue",
+        "category",
+        "attributeoptiongroup",
+        "attributeoption",
+        "stockrecord",
+        "partner",
+        "productimage",
+    ]
+
+    def setUp(self):
+        super(TestProductClassSerializer, self).setUp()
+        with open(join(dirname(__file__), "testdata", "product-class.json")) as p:
+            self.data = json.load(p)
+
+    def test_find_existing_attribute_option_groups(self):
+        o = AttributeOptionGroup.objects.get(name="Sizes")
+        self.assertEqual(o.name, "Sizes")
+        self.assertCountEqual(
+            o.options.values_list("option", flat=True), ["Large", "Small"]
+        )
+
+        option = find_existing_attribute_option_group("Sizes", ["Large"])
+        self.assertIsNone(option)
+
+        option = find_existing_attribute_option_group(
+            "Sizes", ["Large", "Small", "Henk"]
+        )
+        self.assertIsNone(option)
+
+        option = find_existing_attribute_option_group("Sizes", ["Large", "Small"])
+        self.assertEqual(option.name, "Sizes")
+        self.assertCountEqual(
+            option.options.values_list("option", flat=True), ["Large", "Small"]
+        )
+
+    def test_put_add_options(self):
+        "We should be able to options with put"
+        self.login("admin", "admin")
+        pc = ProductClass.objects.get(slug="testtype")
+        self.assertEqual(pc.options.count(), 0)
+
+        url = reverse("admin-productclass-detail", args=("testtype",))
+        self.response = self.get(url)
+        self.response.assertStatusEqual(200)
+
+        self.assertEqual(
+            len(self.response["attributes"]), 11, "Initially there should be 11 options"
+        )
+        self.assertEqual(
+            len(self.response["options"]), 0, "Initially there should be no options"
+        )
+
+        data = deepcopy(self.data)  # remove some of the attributes
+        data["attributes"] = data["attributes"][:1]
+        self.response = self.put(url, **data)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response["attributes"]), 1)
+        self.assertEqual(pc.options.count(), 1)
+        self.assertEqual(len(self.response["options"]), 1)
+
+    def test_put_add_attributes(self):
+        "We should be able to add attributes with put"
+        self.test_put_add_options()
+        pc = ProductClass.objects.get(slug="testtype")
+        self.assertEqual(pc.options.count(), 1)
+        self.assertEqual(pc.attributes.count(), 1)
+
+        url = reverse("admin-productclass-detail", args=("testtype",))
+        data = deepcopy(self.data)
+        data["options"] = []
+        self.response = self.put(url, **data)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response["attributes"]), 11)
+        self.assertEqual(len(self.response["options"]), 0)
+        self.assertIsNotNone(
+            find_existing_attribute_option_group("Sizes", ["Large", "Small"])
+        )
+
+    def test_option_group(self):
+        "Updating an options group should create new options groups when needed"
+        self.assertEqual(AttributeOptionGroup.objects.count(), 1)
+        self.assertIsNotNone(
+            find_existing_attribute_option_group("Sizes", ["Large", "Small"])
+        )
+
+        self.test_put_add_attributes()
+
+        self.assertEqual(AttributeOptionGroup.objects.count(), 3)
+        self.assertIsNotNone(
+            find_existing_attribute_option_group("Sizes", ["Large", "Small"])
+        )
+        self.assertIsNotNone(
+            find_existing_attribute_option_group("Sizes", ["Large", "Small", "Extreme"])
+        )
+        self.assertIsNotNone(
+            find_existing_attribute_option_group(
+                "Sizes", ["Large", "Small", "Humongous"]
+            )
+        )
+
+        data = deepcopy(self.data)
+        data["attributes"] = [
+            {
+                "option_group": {
+                    "options": ["Large", "Small", "Humongous", "Megalomaniac"],
+                    "name": "Sizes",
+                },
+                "name": "multioption",
+                "code": "multioption",
+                "type": "multi_option",
+                "required": True,
+            }
+        ]
+        url = reverse("admin-productclass-detail", args=("testtype",))
+        self.response = self.put(url, **data)
+        self.response.assertStatusEqual(200)
+        self.assertEqual(len(self.response["attributes"]), 1)
+        self.assertIsNotNone(
+            find_existing_attribute_option_group("Sizes", ["Large", "Small"])
+        )
+        self.assertIsNotNone(
+            find_existing_attribute_option_group("Sizes", ["Large", "Small", "Extreme"])
+        )
+        self.assertIsNone(
+            find_existing_attribute_option_group(
+                "Sizes", ["Large", "Small", "Humongous"]
+            )
+        )
+        self.assertIsNotNone(
+            find_existing_attribute_option_group(
+                "Sizes", ["Large", "Small", "Humongous", "Megalomaniac"]
+            )
+        )

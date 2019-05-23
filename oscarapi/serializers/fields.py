@@ -17,6 +17,7 @@ from rest_framework.fields import get_attribute
 
 from oscar.core.loading import get_model, get_class
 
+from oscarapi.utils.exists import bound_unique_together_get_or_create
 from .exceptions import FieldError
 
 logger = logging.getLogger(__name__)
@@ -213,18 +214,19 @@ class SingleValueSlugRelatedField(serializers.SlugRelatedField):
         if hasattr(parent, "child_relation"):
             parent = parent.parent
 
-        manager = getattr(parent.instance, source_name, None)
-        if manager is None:
-            return super(SingleValueSlugRelatedField, self).get_queryset()
-        return manager
+        return getattr(parent.instance, source_name, None)
 
     def to_internal_value(self, data):
         qs = self.get_bound_queryset()
-        try:
-            item, _ = qs.get_or_create(**{self.slug_field: data})
-            return item
-        except IntegrityError:
-            return qs.model(**{self.slug_field: data})
+        if qs is not None:  # first try to obtain a bound item.
+            try:
+                return bound_unique_together_get_or_create(qs, {self.slug_field: data})
+            except IntegrityError:
+                pass
+
+        # if no bound item can be found, return an unbound unsaved instance.
+        qs = self.get_queryset()
+        return {self.slug_field: data}
 
 
 class ImageUrlField(serializers.ImageField):

@@ -11,6 +11,7 @@ from oscarapi.utils.models import fake_autocreated
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
 ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
+Option = get_model("catalogue", "Option")
 StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
 BaseProductSerializer, ProductImageSerializer, ProductAttributeSerializer, OptionSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
     "serializers.product",
@@ -36,28 +37,6 @@ class AdminProductSerializer(BaseProductSerializer):
 
     class Meta(BaseProductSerializer.Meta):
         exclude = ("product_options",)
-
-    def update_relation(self, name, manager, values):
-        if values is None:
-            return
-
-        serializer = self.fields[name]
-
-        # use the serializer to update the attribute_values
-        updated_values = serializer.update(manager, values)
-
-        if self.partial:
-            manager.add(*updated_values)
-        elif hasattr(manager, "field") and not manager.field.null:
-            # add the updated_attribute_values to the instance
-            manager.add(*updated_values)
-            # remove all the obsolete attribute values, this could be caused by
-            # the product class changing for example, lots of attributes would become
-            # obsolete.
-            current_pks = [p.pk for p in updated_values]
-            manager.exclude(pk__in=current_pks).delete()
-        else:
-            manager.set(updated_values)
 
     def update(self, instance, validated_data):
         "Handle the nested serializers manually"
@@ -148,6 +127,19 @@ class AdminProductClassSerializer(OscarHyperlinkedModelSerializer):
     )
     attributes = ProductAttributeSerializer(many=True, required=False)
     options = OptionSerializer(many=True, required=False)
+
+    def update(self, instance, validated_data):
+        attributes = validated_data.pop("attributes", None)
+        options = validated_data.pop("options", None)
+
+        with transaction.atomic():
+            updated_instance = super(AdminProductClassSerializer, self).update(
+                instance, validated_data
+            )
+            self.update_relation("attributes", updated_instance.attributes, attributes)
+            self.update_relation("options", instance.options, options)
+
+            return updated_instance
 
     class Meta:
         model = ProductClass
