@@ -755,15 +755,20 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
 class CategoryFieldTest(_ProductSerializerTest):
     def test_write(self):
         "New categories should be created by the field if needed."
-        self.assertEqual(Category.objects.count(), 1)
-        ser = CategoryField(many=True, required=False)
-        data = ["Henk > is > een > keel", "En > klaas > is > er > ook > een"]
-        validated_data = ser.run_validation(data)
-        self.assertEqual(len(validated_data), 2)
-        first, second = validated_data
-        self.assertEqual(first.full_slug, "henk/is/een/keel")
-        self.assertEqual(second.full_slug, "en/klaas/is/er/ook/een")
-        self.assertEqual(Category.objects.count(), 11)
+        with self.settings(
+            CACHES={
+                "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
+            }
+        ):
+            self.assertEqual(Category.objects.count(), 1)
+            ser = CategoryField(many=True, required=False)
+            data = ["Henk > is > een > keel", "En > klaas > is > er > ook > een"]
+            validated_data = ser.run_validation(data)
+            self.assertEqual(len(validated_data), 2)
+            first, second = validated_data
+            self.assertEqual(Category.objects.count(), 11)
+            self.assertEqual(first.full_slug, "henk/is/een/keel")
+            self.assertEqual(second.full_slug, "en/klaas/is/er/ook/een")
 
     def test_read(self):
         "The field should display categories as a hierarchical string with >"
@@ -1266,6 +1271,24 @@ class TestProductAdmin(APITest):
             self.tshirt = json.load(p)
         with open(join(dirname(__file__), "testdata", "lots-of-attributes.json")) as p:
             self.attributes = json.load(p)
+
+    def test_post_product(self):
+        self.assertEqual(Product.objects.count(), 4)
+        self.login("admin", "admin")
+        data = deepcopy(self.attributes)
+        data["slug"] = "keikeikke"
+        data["upc"] = "roekoekoe"
+        self.response = self.post("admin-product-list", **data)
+        self.response.assertStatusEqual(201)
+        self.assertEqual(Product.objects.count(), 5)
+
+        data = deepcopy(self.tshirt)
+        data["slug"] = "hoelahoepie"
+        data["upc"] = "maalmaal"
+        data["stockrecords"][0]["partner_sku"] = "kjdfshkshjfkh"
+        self.response = self.post("admin-product-list", **data)
+        self.response.assertStatusEqual(201)
+        self.assertEqual(Product.objects.count(), 6)
 
     def test_put_product(self):
         self.login("admin", "admin")
