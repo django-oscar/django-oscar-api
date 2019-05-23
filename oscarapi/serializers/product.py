@@ -97,9 +97,16 @@ class AttributeOptionGroupSerializer(OscarHyperlinkedModelSerializer):
 
 
 class CategorySerializer(OscarHyperlinkedModelSerializer):
+    breadcrumbs = serializers.CharField(source="full_name")
+    children = serializers.HyperlinkedIdentityField(
+        view_name="category-child-list",
+        lookup_field="full_slug",
+        lookup_url_kwarg="breadcrumbs",
+    )
+
     class Meta:
         model = Category
-        fields = "__all__"
+        exclude = ("path", "depth", "numchild")
 
 
 class ProductAttributeListSerializer(UpdateListSerializer):

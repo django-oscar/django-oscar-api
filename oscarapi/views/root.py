@@ -18,6 +18,7 @@ def PUBLIC_APIS(r, f):
             "basket-shipping-methods",
             reverse("api-basket-shipping-methods", request=r, format=f),
         ),
+        ("categories", reverse("category-list", request=r, format=f)),
         ("checkout", reverse("api-checkout", request=r, format=f)),
         ("orders", reverse("order-list", request=r, format=f)),
         ("options", reverse("option-list", request=r, format=f)),
@@ -41,7 +42,7 @@ def PROTECTED_APIS(r, f):
 
 
 @api_view(("GET",))
-def api_root(request, format=None):
+def api_root(request, format=None):  # pylint: disable=redefined-builtin
     """
     GET:
     Display all available urls.
