@@ -43,6 +43,35 @@ class AdminProductSerializer(BaseProductSerializer):
     class Meta(BaseProductSerializer.Meta):
         exclude = ("product_options",)
 
+    def create(self, validated_data):
+        attribute_values = validated_data.pop("attribute_values", None)
+        options = validated_data.pop("options", None)
+        stockrecords = validated_data.pop("stockrecords", None)
+        images = validated_data.pop("images", None)
+        categories = validated_data.pop("categories", None)
+        recommended_products = validated_data.pop("recommended_products", None)
+        children = validated_data.pop("children", None)
+
+        with transaction.atomic():  # it is all or nothing!
+
+            # update instance
+            self.instance = (  # pylint:disable=attribute-defined-outside-init
+                instance
+            ) = super(AdminProductSerializer, self).create(validated_data)
+            return self.update(
+                instance,
+                dict(
+                    validated_data,
+                    attribute_values=attribute_values,
+                    options=options,
+                    stockrecords=stockrecords,
+                    images=images,
+                    categories=categories,
+                    recommended_products=recommended_products,
+                    children=children,
+                ),
+            )
+
     def update(self, instance, validated_data):
         "Handle the nested serializers manually"
         attribute_values = validated_data.pop("attribute_values", None)
