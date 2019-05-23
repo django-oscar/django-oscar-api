@@ -777,6 +777,16 @@ class CategoryFieldTest(_ProductSerializerTest):
         val = ser.to_representation(Category.objects.filter(pk__in=[7, 4]))
         self.assertListEqual(val, ["Henk > is > een", "En > klaas"])
 
+    def test_existing_cayegorries_are_not_duplicated(self):
+        self.test_write()
+        ser = CategoryField(many=True, required=False)
+        data = ["Henk > is > een > keel", "En > klaas > is > er > ook > een"]
+        validated_data = ser.run_validation(data)
+        self.assertEqual(len(validated_data), 2)
+        self.assertEqual(
+            Category.objects.count(), 11, "No extra categories should have been created"
+        )
+
 
 class AdminProductSerializerTest(_ProductSerializerTest):
     def test_create_product(self):

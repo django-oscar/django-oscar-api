@@ -94,29 +94,3 @@ def bound_unique_together_get_or_create_multiple(bound_queryset, data):
     return [
         bound_unique_together_get_or_create(bound_queryset, date) for date in data
     ]
-
-
-def categories_for_breadcrumbs(breadcrumbs, queryset=None):
-    if queryset is None:
-        queryset = Category.get_root_nodes()
-
-    if breadcrumbs:
-        try:
-            selection = breadcrumbs.split("/", maxsplit=1)
-            if len(selection) == 1:
-                slug, = selection
-                return queryset.get(slug=slug).get_children()
-            else:
-                slug, breadcrumbs = selection
-                return categories_for_breadcrumbs(
-                    breadcrumbs, queryset.get(slug=slug).get_children()
-                )
-        except Category.DoesNotExist:
-            return queryset.none()
-        except Category.MultipleObjectsReturned:
-            multi = queryset.none()
-            for category in queryset.filter(slug=slug):
-                multi |= category.get_children()
-            return multi
-
-    return queryset
