@@ -1,22 +1,27 @@
 from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 from rest_framework import serializers
+from rest_framework.exceptions import APIException
 
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
 
 from oscarapi.serializers.utils import OscarHyperlinkedModelSerializer
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.models import fake_autocreated
+from oscarapi.utils.exists import categories_for_breadcrumbs
 
+create_from_breadcrumbs = get_class("catalogue.categories", "create_from_breadcrumbs")
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
 ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
 Option = get_model("catalogue", "Option")
 StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
-BaseProductSerializer, ProductImageSerializer, ProductAttributeSerializer, OptionSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+BaseProductSerializer, BaseCategorySerializer, ProductImageSerializer, ProductAttributeSerializer, OptionSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
     "serializers.product",
     [
         "BaseProductSerializer",
+        "BaseCategorySerializer",
         "ProductImageSerializer",
         "ProductAttributeSerializer",
         "OptionSerializer",
@@ -119,6 +124,35 @@ class AdminProductSerializer(BaseProductSerializer):
                         attribute_value.delete()
 
             return instance
+
+
+class AdminCategorySerializer(BaseCategorySerializer):
+    url = serializers.HyperlinkedIdentityField(view_name="admin-category-detail")
+    children = serializers.HyperlinkedIdentityField(
+        view_name="admin-category-child-list",
+        lookup_field="full_slug",
+        lookup_url_kwarg="breadcrumbs",
+    )
+
+    def create(self, validated_data):
+        breadcrumbs = self.context.get("breadcrumbs", None)
+        slug = validated_data["slug"]
+        try:
+            instance = categories_for_breadcrumbs(breadcrumbs).get(slug=slug)
+        except ObjectDoesNotExist:
+            if breadcrumbs is None:
+                breadcrumbs = slug
+            else:
+                breadcrumbs = "/".join((breadcrumbs, slug))
+
+            instance = create_from_breadcrumbs(breadcrumbs, separator="/")
+        except MultipleObjectsReturned:
+            raise APIException(
+                "there are multiple objects with slug %s in %s, can not determine which one to update"
+                % (slug, breadcrumbs)
+            )
+
+        return self.update(instance, validated_data)
 
 
 class AdminProductClassSerializer(OscarHyperlinkedModelSerializer):

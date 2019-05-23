@@ -33,6 +33,7 @@ def PROTECTED_APIS(r, f):
         ("baskets", reverse("admin-basket-list", request=r, format=f)),
         ("productclasses", reverse("admin-productclass-list", request=r, format=f)),
         ("products", reverse("admin-product-list", request=r, format=f)),
+        ("categories", reverse("admin-category-list", request=r, format=f)),
         ("lines", reverse("admin-line-list", request=r, format=f)),
         ("lineattributes", reverse("admin-lineattribute-list", request=r, format=f)),
         ("stockrecords", reverse("admin-stockrecord-list", request=r, format=f)),
