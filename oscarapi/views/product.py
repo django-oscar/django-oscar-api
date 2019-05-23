@@ -1,3 +1,4 @@
+# pylint: disable=unbalanced-tuple-unpacking
 from rest_framework import generics
 from rest_framework.response import Response
 
@@ -61,7 +62,9 @@ class ProductDetail(generics.RetrieveAPIView):
 class ProductPrice(generics.RetrieveAPIView):
     queryset = Product.objects.all()
 
-    def get(self, request, pk=None, format=None):
+    def get(
+        self, request, pk=None, format=None
+    ):  # pylint: disable=redefined-builtin,arguments-differ
         product = self.get_object()
         strategy = Selector().strategy(request=request, user=request.user)
         ser = PriceSerializer(
@@ -73,7 +76,9 @@ class ProductPrice(generics.RetrieveAPIView):
 class ProductAvailability(generics.RetrieveAPIView):
     queryset = Product.objects.all()
 
-    def get(self, request, pk=None, format=None):
+    def get(
+        self, request, pk=None, format=None
+    ):  # pylint: disable=redefined-builtin,arguments-differ
         product = self.get_object()
         strategy = Selector().strategy(request=request, user=request.user)
         ser = AvailabilitySerializer(
@@ -84,8 +89,22 @@ class ProductAvailability(generics.RetrieveAPIView):
 
 
 class CategoryList(generics.ListAPIView):
-    queryset = Category.objects.all()
+    queryset = Category.get_root_nodes()
     serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        qs = super(CategoryList, self).get_queryset()
+        breadcrumb_path = self.kwargs.get("breadcrumbs", None)
+
+        if breadcrumb_path is not None:
+            breadcrumbs = breadcrumb_path.split("/")
+            first = breadcrumbs[0]
+            depth = len(breadcrumbs)
+            root = qs.get(slug=first)
+            qs = root.get_descendants()
+            return qs.filter(depth=depth + 1)
+
+        return qs
 
 
 class CategoryDetail(generics.RetrieveAPIView):

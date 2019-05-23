@@ -1,3 +1,4 @@
+# pylint: disable=unbalanced-tuple-unpacking
 from django.conf.urls import url
 from rest_framework.urlpatterns import format_suffix_patterns
 
@@ -186,6 +187,11 @@ urlpatterns = [
         r"^categories/(?P<pk>[0-9]+)/$",
         CategoryDetail.as_view(),
         name="category-detail",
+    ),
+    url(
+        r"^categories/(?P<breadcrumbs>.*)/$",
+        CategoryList.as_view(),
+        name="category-child-list",
     ),
     url(r"^users/(?P<pk>[0-9]+)/$", UserDetail.as_view(), name="user-detail"),
     url(r"^checkout/$", CheckoutView.as_view(), name="api-checkout"),
