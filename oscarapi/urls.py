@@ -263,7 +263,7 @@ admin_urlpatterns = [
         name="admin-productclass-list",
     ),
     path(
-        "admin/productclasses/(?P<slug>[-\w]+)/",
+        "admin/productclasses/<slug:slug>/",
         ProductClassAdminDetail.as_view(),
         name="admin-productclass-detail",
     ),
@@ -275,7 +275,7 @@ admin_urlpatterns = [
         CategoryAdminDetail.as_view(),
         name="admin-category-detail",
     ),
-    path(
+    re_path(
         "admin/categories/(?P<breadcrumbs>.*)/",
         CategoryAdminList.as_view(),
         name="admin-category-child-list",
