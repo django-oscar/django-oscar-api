@@ -1282,6 +1282,15 @@ class TestProductAdmin(APITest):
         with open(join(dirname(__file__), "testdata", "lots-of-attributes.json")) as p:
             self.attributes = json.load(p)
 
+    def test_staff_has_no_access_by_default(self):
+        "Staff users without explicit admin permissions should not be able to edit products"
+        self.login("somebody", "somebody")
+        data = deepcopy(self.attributes)
+        data["slug"] = "keikeikke"
+        data["upc"] = "roekoekoe"
+        self.response = self.post("admin-product-list", **data)
+        self.response.assertStatusEqual(403)
+
     def test_post_product(self):
         self.assertEqual(Product.objects.count(), 4)
         self.login("admin", "admin")
