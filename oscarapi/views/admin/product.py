@@ -7,6 +7,7 @@ from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.views.mixin import PutIsPatchMixin
 
 
+APIAdminPermission = get_api_class("permissions", "APIAdminPermission")
 ProductAttributeSerializer, AttributeOptionGroupSerializer = get_api_classes(
     "serializers.product",
     ["ProductAttributeSerializer", "AttributeOptionGroupSerializer"],
@@ -30,56 +31,56 @@ AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 class ProductAdminList(generics.ListCreateAPIView):
     serializer_class = AdminProductSerializer
     queryset = Product.objects.get_queryset()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (APIAdminPermission,)
 
 
 class ProductAdminDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AdminProductSerializer
     queryset = Product.objects.get_queryset()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (APIAdminPermission,)
 
 
 class ProductClassAdminList(generics.ListCreateAPIView):
     serializer_class = AdminProductClassSerializer
     queryset = ProductClass.objects.get_queryset()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (APIAdminPermission,)
 
 
 class ProductClassAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AdminProductClassSerializer
     queryset = ProductClass.objects.get_queryset()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (APIAdminPermission,)
     lookup_field = "slug"
 
 
 class ProductAttributeAdminList(generics.ListCreateAPIView):
     serializer_class = ProductAttributeSerializer
     queryset = ProductAttribute.objects.get_queryset()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (APIAdminPermission,)
 
 
 class ProductAttributeAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductAttributeSerializer
     queryset = ProductAttribute.objects.get_queryset()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (APIAdminPermission,)
 
 
 class AttributeOptionGroupAdminList(generics.ListCreateAPIView):
     serializer_class = AttributeOptionGroupSerializer
     queryset = AttributeOptionGroup.objects.get_queryset()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (APIAdminPermission,)
 
 
 class AttributeOptionGroupAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AttributeOptionGroupSerializer
     queryset = AttributeOptionGroup.objects.get_queryset()
-    permission_classes = (IsAdminUser,)
+    permission_classes = (APIAdminPermission,)
 
 
 class CategoryAdminList(generics.ListCreateAPIView, CategoryList):
     queryset = Category.get_root_nodes()
     serializer_class = AdminCategorySerializer
-    permission_classes = (IsAdminUser,)
+    permission_classes = (APIAdminPermission,)
 
     def get_serializer_context(self):
         ctx = super(CategoryAdminList, self).get_serializer_context()
@@ -94,4 +95,4 @@ class CategoryAdminList(generics.ListCreateAPIView, CategoryList):
 class CategoryAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = AdminCategorySerializer
-    permission_classes = (IsAdminUser,)
+    permission_classes = (APIAdminPermission,)

@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.permissions import BasePermission, IsAuthenticated, DjangoModelPermissions
 
 from oscarapi.basket.operations import request_allows_access_to
 
@@ -25,3 +25,12 @@ class IsOwner(IsAuthenticated):
 
     def has_object_permission(self, request, view, obj):
         return obj.user == request.user
+
+
+class APIAdminPermission(DjangoModelPermissions):
+    """
+    The permission for all the admin api views, by default you get api
+    access if you've got django admin access.
+    
+    Feel free to customize!
+    """
