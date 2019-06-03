@@ -1,9 +1,9 @@
 from rest_framework import serializers
 from django.utils.translation import ugettext as _
 
-from oscarapi.utils import (
+from oscarapi.utils.settings import overridable
+from oscarapi.serializers.utils import (
     OscarModelSerializer,
-    overridable,
     OscarHyperlinkedModelSerializer
 )
 from oscar.core.loading import get_model

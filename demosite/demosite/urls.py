@@ -2,8 +2,8 @@ from django.conf.urls import url
 from django.contrib import admin
 
 from oscar.app import application as oscar
+from oscarapi.app import application as api
 
-from .app import application as api
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
