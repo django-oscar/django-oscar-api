@@ -27,7 +27,7 @@ ProductClass = get_model("catalogue", "ProductClass")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 
 
-class ProductAdminList(PutIsPatchMixin, generics.ListCreateAPIView):
+class ProductAdminList(generics.ListCreateAPIView):
     serializer_class = AdminProductSerializer
     queryset = Product.objects.get_queryset()
     permission_classes = (IsAdminUser,)
