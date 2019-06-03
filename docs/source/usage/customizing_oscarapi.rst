@@ -62,7 +62,7 @@ Let's see what happens in the checkout serializer file
 .. literalinclude:: ../../../demosite/mycustomapi/serializers/checkout.py
 
 So this override would add a field to the json of a country called
-``proof_of_functionality``, and the content would always be "HELLOW WORLD"
+``is_benelux_country``, and the content would be ``true`` when the country is in the Benelux.
 
 The complete example above is available in the `Github repository of Oscar API`_ if you want to try it out.
 

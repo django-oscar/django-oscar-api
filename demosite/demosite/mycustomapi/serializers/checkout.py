@@ -3,7 +3,7 @@ from oscarapi.serializers import checkout
 
 
 class CountrySerializer(checkout.CountrySerializer):
-    proof_of_functionality = serializers.SerializerMethodField()
+    is_benelux_country = serializers.SerializerMethodField()
 
-    def get_proof_of_functionality(self, obj):
-        return "HELLOW WORLD"
+    def get_is_benelux_country(self, obj):
+        return obj.iso_3166_1_a2.lower() in ("nl", "be", "lu")
