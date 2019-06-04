@@ -13,7 +13,7 @@ This package provides a RESTful API for `django-oscar`_, it's based on `django-r
 
 Requirements:
 -------------
-This version of Oscar API is compatbile with python 2.7 / 3.5 / 3.6 / 3.7 and the following django versions:
+This version of Oscar API is compatbile with python 2.7 / 3.5 / 3.6 / 3.7 and the following Django versions:
 
 Django 1.11:
 ~~~~~~~~~~~~
@@ -91,6 +91,7 @@ Probably you want this, because you already extended or changed Oscar's function
 
    usage/outofthebox
    usage/communicate_with_the_api
+   usage/the_admin_api
    usage/middleware
    usage/settings
    usage/permissions
