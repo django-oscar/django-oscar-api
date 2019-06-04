@@ -135,6 +135,24 @@ LoginView = get_api_class("views.login", "LoginView")
     ],
 )
 
+(
+    OrderAdminList,
+    OrderAdminDetail,
+    OrderLineAdminList,
+    OrderLineAdminDetail,
+    OrderLineAttributeAdminDetail
+) = get_api_classes(
+    "views.admin.order",
+    [
+        "OrderAdminList",
+        "OrderAdminDetail",
+        "OrderLineAdminList",
+        "OrderLineAdminDetail",
+        "OrderLineAttributeAdminDetail"
+    ],
+)
+
+
 urlpatterns = [
     url(r"^$", api_root, name="api-root"),
     url(r"^login/$", LoginView.as_view(), name="api-login"),
@@ -302,6 +320,33 @@ admin_urlpatterns = [
         r"^admin/attributeoptiongroups/(?P<pk>[0-9]+)/$",
         AttributeOptionGroupAdminDetail.as_view(),
         name="admin-attributeoptiongroup-detail",
+    ),
+
+    url(
+        r"^orderlineattributes/(?P<pk>[0-9]+)/$",
+        OrderLineAttributeDetail.as_view(),
+        name="order-lineattributes-detail",
+    ),
+    url(r"^admin/orders/$", OrderAdminList.as_view(), name="admin-order-list"),
+    url(
+        r"^admin/orders/(?P<pk>[0-9]+)/$",
+        OrderAdminDetail.as_view(),
+        name="admin-order-detail",
+    ),
+    url(
+        r"^admin/orders/(?P<pk>[0-9]+)/lines/$",
+        OrderLineAdminList.as_view(),
+        name="admin-order-lines-list",
+    ),
+    url(
+        r"^admin/orderlines/(?P<pk>[0-9]+)/$",
+        OrderLineAdminDetail.as_view(),
+        name="admin-order-lines-detail",
+    ),
+    url(
+        r"^ad,in/orderlineattributes/(?P<pk>[0-9]+)/$",
+        OrderLineAttributeDetail.as_view(),
+        name="admin-order-lineattributes-detail",
     ),
 ]
 
