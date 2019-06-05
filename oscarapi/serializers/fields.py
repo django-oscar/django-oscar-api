@@ -93,7 +93,7 @@ class AttributeValueField(serializers.Field):
             "no_such_option": _("Option {value} does not exist."),
             "invalid": _("Wrong type, {error}."),
             "attribute_missing": _(
-                "No attribute exist named {name} with code={code}, "
+                "No attribute exist with code={code}, "
                 "please define it in the product_class first."
             ),
         }
