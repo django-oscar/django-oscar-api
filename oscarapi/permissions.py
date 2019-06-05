@@ -8,12 +8,6 @@ from rest_framework.permissions import (
 from oscarapi.basket.operations import request_allows_access_to
 
 
-class HasUser(BasePermission):
-    "Only anonymous and authenticated users can access this resource."
-    def has_permission(self, request, view):
-        return request.user
-
-
 class IsAdminUserOrRequestAllowsAccessTo(BasePermission):
     """
     Permission class that checks if a request allows access to a basket.
