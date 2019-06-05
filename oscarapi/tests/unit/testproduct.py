@@ -339,7 +339,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         self.assertEqual(
             ser.errors["value"],
             [
-                "No attribute exist named zult with code=zult, please define it in "
+                "No attribute exist with code=zult, please define it in "
                 "the product_class first."
             ],
         )
