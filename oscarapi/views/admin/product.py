@@ -1,10 +1,8 @@
 # pylint: disable=unbalanced-tuple-unpacking
 from rest_framework import generics
-from rest_framework.permissions import IsAdminUser
 
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_classes, get_api_class
-from oscarapi.views.mixin import PutIsPatchMixin
 
 
 APIAdminPermission = get_api_class("permissions", "APIAdminPermission")
@@ -34,7 +32,7 @@ class ProductAdminList(generics.ListCreateAPIView):
     permission_classes = (APIAdminPermission,)
 
 
-class ProductAdminDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
+class ProductAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AdminProductSerializer
     queryset = Product.objects.get_queryset()
     permission_classes = (APIAdminPermission,)
