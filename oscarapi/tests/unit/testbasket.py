@@ -1,7 +1,6 @@
 import json
 import re
 
-from django.conf import settings
 from django.urls import reverse
 
 from oscar.core.loading import get_model
@@ -839,7 +838,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(404)
 
         # admin can cheat, but he uses a different url
-        line0id = re.search('(?P<id>\d+)/$', line0url).group('id')
+        line0id = re.search(r'(?P<id>\d+)/$', line0url).group('id')
         admin_line0url = reverse('line-detail', args=(line0id,))
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             self.login('admin', 'admin')
@@ -874,7 +873,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(404)
 
         # admin can cheat, but he uses a different url
-        line0id = re.search('(?P<id>\d+)/$', line0url).group('id')
+        line0id = re.search(r'(?P<id>\d+)/$', line0url).group('id')
         admin_line0url = reverse('line-detail', args=(line0id,))
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             self.hlogin('admin', 'admin', session_id='admin')
@@ -885,6 +884,66 @@ class BasketTest(APITest):
         self.login('somebody', 'somebody')
         self.response = self.get(admin_line0url)
         self.response.assertStatusEqual(403)
+
+    def test_basket_will_be_merged(self):
+        "After logging in, existing baskets should be merged into open basket"
+        self.login('nobody', 'nobody')
+        self.response = self.get('api-basket')
+        self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('total_incl_tax', '50.00')
+
+        self.client.logout()
+
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
+
+        self.response = self.post('api-basket-add-product', url="http://testserver/api/products/2/", quantity=1)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('total_incl_tax', '10.00')
+        self.response.assertValueEqual('status', 'Open')
+
+        self.post('api-login', username='nobody', password='nobody')
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('total_incl_tax', '60.00', "Amount should be increased")
+
+    def test_saved_basket_can_be_accessed(self):
+        "Prove that saved baskets can still be accessed"
+        self.login('nobody', 'nobody')
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('status', 'Open')
+        self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('total_incl_tax', '50.00')
+        self.response.assertValueEqual('status', 'Open')
+
+        # change status to saved
+        url = reverse('basket-detail', args=(self.response['id'],))
+        self.response = self.put(url, status='Saved')
+        self.response.assertValueEqual('status', 'Saved')
+
+        self.response = self.get(url)
+        self.response.assertStatusEqual(200)
+
+    def test_saved_basket_will_not_be_merged(self):
+        "Saved baskets should not be merged into open basket"
+        self.test_saved_basket_can_be_accessed()
+        self.client.logout()
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('status', 'Open')
+        self.response = self.post('api-basket-add-product', url="http://testserver/api/products/2/", quantity=1)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('total_incl_tax', '10.00')
+        self.response.assertValueEqual('status', 'Open')
+
+        self.post('api-login', username='nobody', password='nobody')
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('total_incl_tax', '10.00', "Amount should not be increased")
+        self.response.assertValueEqual('status', 'Open')
 
     def test_frozen_basket_can_not_be_accessed(self):
         "Prove that frozen baskets can nolonger be accessed by the user."

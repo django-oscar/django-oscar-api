@@ -74,7 +74,7 @@ def get_basket_id_from_session(request):
 
 
 def editable_baskets():
-    return Basket.objects.filter(status__in=["Open", "Saved"])
+    return Basket.objects.filter(status__in=Basket.editable_statuses)
 
 
 def get_anonymous_basket(request):
@@ -82,7 +82,7 @@ def get_anonymous_basket(request):
 
     basket_id = get_basket_id_from_session(request)
     try:
-        basket = editable_baskets().get(pk=basket_id)
+        basket = Basket.open.get(pk=basket_id)
     except Basket.DoesNotExist:
         basket = None
 
@@ -93,11 +93,11 @@ def get_user_basket(user):
     "get basket for a user."
 
     try:
-        basket, __ = editable_baskets().get_or_create(owner=user)
+        basket, __ = Basket.open.get_or_create(owner=user)
     except Basket.MultipleObjectsReturned:
         # Not sure quite how we end up here with multiple baskets.
         # We merge them and create a fresh one
-        old_baskets = list(editable_baskets().filter(owner=user))
+        old_baskets = list(Basket.open.filter(owner=user))
         basket = old_baskets[0]
         for other_basket in old_baskets[1:]:
             basket.merge(other_basket, add_quantities=False)
