@@ -236,21 +236,24 @@ urlpatterns = [
     ),
 ]
 
-admin_urlpatterns = [
-    url(r"^admin/baskets/$", BasketList.as_view(), name="admin-basket-list"),
-    url(r"^admin/lines/$", LineList.as_view(), name="admin-line-list"),
+staff_urlpatterns = [
+    url(r"^baskets/$", BasketList.as_view(), name="basket-list"),
+    url(r"^lines/$", LineList.as_view(), name="line-list"),
     url(
-        r"^admin/lineattributes/$",
+        r"^lineattributes/$",
         LineAttributeList.as_view(),
-        name="admin-lineattribute-list",
+        name="lineattribute-list",
     ),
     url(
-        r"^admin/stockrecords/$",
+        r"^stockrecords/$",
         StockRecordList.as_view(),
-        name="admin-stockrecord-list",
+        name="stockrecord-list",
     ),
-    url(r"^admin/users/$", UserList.as_view(), name="admin-user-list"),
-    url(r"^admin/partners/$", PartnerList.as_view(), name="admin-partner-list"),
+    url(r"^partners/$", PartnerList.as_view(), name="partner-list"),
+    url(r"^users/$", UserList.as_view(), name="user-list"),
+]
+
+admin_urlpatterns = [
     url(r"^admin/products/$", ProductAdminList.as_view(), name="admin-product-list"),
     url(
         r"^admin/products/(?P<pk>[0-9]+)/$",
@@ -302,4 +305,4 @@ admin_urlpatterns = [
     ),
 ]
 
-urlpatterns = format_suffix_patterns(urlpatterns + admin_urlpatterns)
+urlpatterns = format_suffix_patterns(urlpatterns + staff_urlpatterns + admin_urlpatterns)
