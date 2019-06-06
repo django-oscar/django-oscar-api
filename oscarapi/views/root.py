@@ -28,18 +28,23 @@ def PUBLIC_APIS(r, f):
     ]
 
 
-def PROTECTED_APIS(r, f):
+def STAFF_APIS(r, f):
     return [
-        ("baskets", reverse("admin-basket-list", request=r, format=f)),
+        ("baskets", reverse("basket-list", request=r, format=f)),
+        ("lines", reverse("line-list", request=r, format=f)),
+        ("lineattributes", reverse("lineattribute-list", request=r, format=f)),
+        ("stockrecords", reverse("stockrecord-list", request=r, format=f)),
+        ("partners", reverse("partner-list", request=r, format=f)),
+        ("users", reverse("user-list", request=r, format=f)),
+    ]
+
+
+def ADMIN_APIS(r, f):
+    return [
         ("productclasses", reverse("admin-productclass-list", request=r, format=f)),
         ("products", reverse("admin-product-list", request=r, format=f)),
         ("categories", reverse("admin-category-list", request=r, format=f)),
-        ("lines", reverse("admin-line-list", request=r, format=f)),
-        ("lineattributes", reverse("admin-lineattribute-list", request=r, format=f)),
-        ("stockrecords", reverse("admin-stockrecord-list", request=r, format=f)),
-        ("users", reverse("admin-user-list", request=r, format=f)),
-        ("partners", reverse("admin-partner-list", request=r, format=f)),
-    ]
+   ]
 
 
 @api_view(("GET",))
@@ -52,7 +57,11 @@ def api_root(request, format=None):  # pylint: disable=redefined-builtin
     them all.
     """
     apis = PUBLIC_APIS(request, format)
+
     if request.user.is_staff:
-        apis += [("admin", collections.OrderedDict(PROTECTED_APIS(request, format)))]
+        apis += [
+            ("staff", collections.OrderedDict(STAFF_APIS(request, format))),
+            ("admin", collections.OrderedDict(ADMIN_APIS(request, format))),
+        ]
 
     return Response(collections.OrderedDict(apis))
