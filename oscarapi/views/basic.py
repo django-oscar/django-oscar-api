@@ -91,6 +91,7 @@ class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
 class LineAttributeList(generics.ListCreateAPIView):
     queryset = LineAttribute.objects.all()
     serializer_class = LineAttributeSerializer
+    permission_classes = (IsAdminUser,)
 
 
 class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
@@ -102,6 +103,7 @@ class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
 class StockRecordList(generics.ListAPIView):
     serializer_class = StockRecordSerializer
     queryset = StockRecord.objects.all()
+    permission_classes = (IsAdminUser,)
 
     def get(self, request, pk=None, *args, **kwargs):
         if pk is not None:
@@ -140,6 +142,7 @@ class OptionDetail(generics.RetrieveAPIView):
 class PartnerList(generics.ListAPIView):
     queryset = Partner.objects.all()
     serializer_class = PartnerSerializer
+    permission_classes = (IsAdminUser,)
 
 
 class PartnerDetail(generics.RetrieveAPIView):
