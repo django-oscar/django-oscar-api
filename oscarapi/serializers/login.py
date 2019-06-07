@@ -16,7 +16,7 @@ def field_length(fieldname):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = overridable('OSCARAPI_USER_FIELDS', (
+        fields = overridable('OSCARAPI_USER_FIELDS', default=(
             User.USERNAME_FIELD, 'id', 'date_joined',))
 
 
