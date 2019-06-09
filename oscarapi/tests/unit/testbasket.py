@@ -224,11 +224,11 @@ class BasketTest(APITest):
             # try to acces somebody else's basket (hihi).
             url = reverse('basket-detail', args=(1,))
             self.response = self.client.get(url)
-            self.response.assertStatusEqual(200, "Staff users can access anything.")
+            self.response.assertStatusEqual(403, "Staff users not access other peoples baskets.")
 
             url = reverse('basket-lines-list', args=(1,))
             self.response = self.client.get(url)
-            self.response.assertStatusEqual(200, "Staff users can access anything.")
+            self.response.assertStatusEqual(403, "Staff users not access other peoples baskets.")
 
         self.assertEqual(Basket.objects.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
@@ -305,11 +305,11 @@ class BasketTest(APITest):
             # try to acces somebody else's basket (hihi).
             url = reverse('basket-detail', args=(1,))
             self.response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
-            self.response.assertStatusEqual(200, "Staff users can access anything.")
+            self.response.assertStatusEqual(403, "Staff users not access other peoples baskets.")
 
             url = reverse('basket-lines-list', args=(1,))
             self.response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
-            self.response.assertStatusEqual(200, "Staff users can access anything.")
+            self.response.assertStatusEqual(403, "Staff users not access other peoples baskets.")
 
         self.assertEqual(Basket.objects.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
@@ -601,7 +601,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(403)
 
     def test_basket_write_permissions_admin(self):
-        "An admin user can change someone elses basket."
+        "An admin user can not change someone elses basket."
 
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             # now try for authenticated user.
@@ -677,7 +677,7 @@ class BasketTest(APITest):
             # try to write to someone else's basket directly
             url = reverse('basket-detail', args=(somebody_basket_id,))
             self.response = self.put(url, status='Saved')
-            self.response.assertStatusEqual(200)
+            self.response.assertStatusEqual(403)
 
             # try adding lines to someone elses basket
             line_data = {
@@ -692,14 +692,14 @@ class BasketTest(APITest):
             }
             zurl = reverse('basket-lines-list', args=(basket_id,))
             self.response = self.post(zurl, **line_data)
-            self.response.assertStatusEqual(406)
+            self.response.assertStatusEqual(403)
 
             # try to delete someone else's basket
             self.response = self.delete(url)
-            self.response.assertStatusEqual(204)
+            self.response.assertStatusEqual(403)
 
     def test_basket_write_permissions_header_admin(self):
-        "An admin user can change someone elses basket, when authinticating with session header."
+        "An admin user can not change someone elses basket, even when authenticating with session header."
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             # now try for authenticated user.
             self.hlogin('admin', 'admin', session_id='admin')
@@ -774,7 +774,7 @@ class BasketTest(APITest):
             # try to write to someone else's basket directly
             url = reverse('basket-detail', args=(somebody_basket_id,))
             self.response = self.put(url, status='Saved', session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(200)
+            self.response.assertStatusEqual(403)
 
             # try adding lines to someone elses basket
             line_data = {
@@ -789,11 +789,11 @@ class BasketTest(APITest):
             }
             zurl = reverse('basket-lines-list', args=(basket_id,))
             self.response = self.post(zurl, session_id='admin', authenticated=True, **line_data)
-            self.response.assertStatusEqual(406)
+            self.response.assertStatusEqual(403)
 
             # try to delete someone else's basket
             self.response = self.delete(url, session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(204)
+            self.response.assertStatusEqual(403)
 
     def test_add_product_anonymous(self):
         "Test if an anonymous user can add a product to his basket"
@@ -960,7 +960,7 @@ class BasketTest(APITest):
         self.response.assertValueEqual('status', 'Frozen')
 
         self.response = self.get(url)
-        self.response.assertStatusEqual(403)
+        self.response.assertStatusEqual(404)
 
     def test_frozen_basket_can_not_be_accessed_header(self):
         "Prove that frozen baskets can nolonger be accessed by the user, even with header authentication"
@@ -975,7 +975,7 @@ class BasketTest(APITest):
         self.response.assertValueEqual('status', 'Frozen')
 
         self.response = self.get(url, session_id='nobody', authenticated=True)
-        self.response.assertStatusEqual(403)
+        self.response.assertStatusEqual(404)
 
     def test_header_login_does_not_cause_regular_login(self):
         "Prove that there is not a bug in the test client that logs a user in when doing hlogin."
