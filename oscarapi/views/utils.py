@@ -12,7 +12,17 @@ __all__ = ('BasketPermissionMixin',)
 Basket = get_model('basket', 'Basket')
 
 
-def parse_basket_from_hyperlink(DATA, format):  # noqa
+class QuerySetList(list):
+    def __init__(self, some_list, queryset):
+        super(QuerySetList, self).__init__(some_list)
+        self.queryset = queryset
+
+    @property
+    def model(self):
+        return self.queryset.model
+
+
+def parse_basket_from_hyperlink(DATA, format):  # pylint: disable=redefined-builtin
     "Parse basket from relation hyperlink"
     basket_parser = HyperlinkedRelatedField(
         view_name='basket-detail',
@@ -34,9 +44,9 @@ class BasketPermissionMixin(object):
     on a basket instance.
     """
     # The permission class is mainly used to check Basket permission!
-    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)
+    permission_classes = (permissions.RequestAllowsAccessTo,)
 
-    def get_data_basket(self, DATA, format):  # noqa
+    def get_data_basket(self, DATA, format):  # pylint: disable=redefined-builtin
         return parse_basket_from_hyperlink(DATA, format)
 
     def check_basket_permission(self, request, basket_pk=None, basket=None):
