@@ -1,19 +1,10 @@
 from rest_framework.permissions import (
     BasePermission,
-    IsAdminUser,
     IsAuthenticated,
     DjangoModelPermissions,
 )
 
 from oscarapi.basket.operations import request_allows_access_to
-
-
-class IsAdminUserOrRequestAllowsAccessTo(BasePermission):
-    """
-    Permission class that checks if a request allows access to a basket.
-    """
-    def has_object_permission(self, request, view, obj):
-        return request_allows_access_to(request, obj) or request.user.is_staff
 
 
 class IsOwner(IsAuthenticated):
@@ -49,3 +40,22 @@ class APIAdminPermission(DjangoModelPermissions):
         if not request.user.is_staff:
             return False
         return super(APIAdminPermission, self).has_permission(request, view)
+
+
+class RequestAllowsAccessTo(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request_allows_access_to(request, obj)
+
+
+class IsAdminUserOrRequestAllowsAccessTo(APIAdminPermission):
+    """
+    Permission class that checks if a request allows access to a basket.
+    """
+    def has_permission(self, request, view):
+        return True  # the permissions are dealt with on an object level
+
+    def has_object_permission(self, request, view, obj):
+        return (
+            request_allows_access_to(request, obj)
+            or super(IsAdminUserOrRequestAllowsAccessTo, self).has_permission(request, view)
+        )

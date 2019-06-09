@@ -18,6 +18,7 @@ def PUBLIC_APIS(r, f):
             "basket-shipping-methods",
             reverse("api-basket-shipping-methods", request=r, format=f),
         ),
+        ("baskets", reverse("basket-list", request=r, format=f)),
         ("categories", reverse("category-list", request=r, format=f)),
         ("checkout", reverse("api-checkout", request=r, format=f)),
         ("orders", reverse("order-list", request=r, format=f)),
@@ -30,7 +31,6 @@ def PUBLIC_APIS(r, f):
 
 def STAFF_APIS(r, f):
     return [
-        ("baskets", reverse("basket-list", request=r, format=f)),
         ("lines", reverse("line-list", request=r, format=f)),
         ("lineattributes", reverse("lineattribute-list", request=r, format=f)),
         ("stockrecords", reverse("stockrecord-list", request=r, format=f)),
