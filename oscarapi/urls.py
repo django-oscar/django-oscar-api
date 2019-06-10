@@ -25,6 +25,9 @@ LoginView = get_api_class("views.login", "LoginView")
     ],
 )
 
+(UserList, UserDetail) = get_api_classes(
+    "views.admin.user", ["UserList", "UserDetail"]
+)
 (StockRecordDetail, PartnerList, PartnerDetail) = get_api_classes(
     "views.admin.partner", ["StockRecordDetail", "PartnerList", "PartnerDetail"]
 )
@@ -35,8 +38,6 @@ LoginView = get_api_class("views.login", "LoginView")
     LineAttributeDetail,
     OptionList,
     OptionDetail,
-    UserList,
-    UserDetail,
     CountryList,
     CountryDetail,
     RangeList,
@@ -49,8 +50,6 @@ LoginView = get_api_class("views.login", "LoginView")
         "LineAttributeDetail",
         "OptionList",
         "OptionDetail",
-        "UserList",
-        "UserDetail",
         "CountryList",
         "CountryDetail",
         "RangeList",
@@ -164,6 +163,7 @@ urlpatterns = [
         ShippingMethodView.as_view(),
         name="api-basket-shipping-methods",
     ),
+    url(r"^baskets/$", BasketList.as_view(), name="basket-list"),
     url(r"^baskets/(?P<pk>[0-9]+)/$", BasketDetail.as_view(), name="basket-detail"),
     url(
         r"^baskets/(?P<pk>[0-9]+)/lines/$", LineList.as_view(), name="basket-lines-list"
@@ -232,11 +232,6 @@ urlpatterns = [
         UserAddressDetail.as_view(),
         name="useraddress-detail",
     ),
-]
-
-staff_urlpatterns = [
-    url(r"^baskets/$", BasketList.as_view(), name="basket-list"),
-    url(r"^users/$", UserList.as_view(), name="user-list"),
 ]
 
 admin_urlpatterns = [
@@ -317,8 +312,9 @@ admin_urlpatterns = [
         OrderLineAttributeAdminDetail.as_view(),
         name="admin-order-lineattributes-detail",
     ),
+    url(r"^admin/users/$", UserList.as_view(), name="user-list"),
 ]
 
 urlpatterns = format_suffix_patterns(
-    urlpatterns + staff_urlpatterns + admin_urlpatterns
+    urlpatterns + admin_urlpatterns
 )
