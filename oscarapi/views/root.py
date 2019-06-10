@@ -31,8 +31,6 @@ def PUBLIC_APIS(r, f):
 
 def STAFF_APIS(r, f):
     return [
-        ("stockrecords", reverse("stockrecord-list", request=r, format=f)),
-        ("partners", reverse("partner-list", request=r, format=f)),
         ("users", reverse("user-list", request=r, format=f)),
     ]
 
@@ -43,6 +41,7 @@ def ADMIN_APIS(r, f):
         ("products", reverse("admin-product-list", request=r, format=f)),
         ("categories", reverse("admin-category-list", request=r, format=f)),
         ("orders", reverse("admin-order-list", request=r, format=f)),
+        ("partners", reverse("partner-list", request=r, format=f)),
     ]
 
 

@@ -184,7 +184,6 @@ class ProductTest(APITest):
             "attributes",
             "categories",
             "product_class",
-            "stockrecords",
             "images",
             "price",
             "availability",
@@ -301,7 +300,7 @@ class StockRecordSerializerTest(_ProductSerializerTest):
         ser = StockRecordSerializer(
             data={
                 "product": 1,
-                "partner": 1,
+                "partner": "http://testserver/api/admin/partners/1/",
                 "partner_sku": "henk",
                 "price_currency": "EUR",
                 "price_excl_tax": 20,
@@ -968,7 +967,11 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "slug": "lots-of-attributes",
                 "description": "Henk",
                 "stockrecords": [
-                    {"partner_sku": "keiko", "price_excl_tax": "53.67", "partner": 1}
+                    {
+                        "partner_sku": "keiko",
+                        "price_excl_tax": "53.67",
+                        "partner": "http://testserver/api/admin/partners/1/",
+                    }
                 ],
             },
             instance=product,
@@ -996,7 +999,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                     {
                         "partner_sku": "clf-large",
                         "price_excl_tax": "53.67",
-                        "partner": 1,
+                        "partner": "http://testserver/api/admin/partners/1/",
                     }
                 ],
             },
@@ -1023,7 +1026,11 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
                 "stockrecords": [
-                    {"partner_sku": "clf-med", "price_excl_tax": "53.67", "partner": 1}
+                    {
+                        "partner_sku": "clf-med",
+                        "price_excl_tax": "53.67",
+                        "partner": "http://testserver/api/admin/partners/1/",
+                    }
                 ],
             },
             instance=product,
