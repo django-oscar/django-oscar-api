@@ -1,9 +1,13 @@
 import logging
+from decimal import Decimal
+
+from django.utils.translation import ugettext as _
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from oscarapi.basket import operations
+from oscar.core.loading import get_model
 
+from oscarapi.basket import operations
 from oscarapi.utils.settings import overridable
 from oscarapi.serializers.fields import DrillDownHyperlinkedIdentityField
 from oscarapi.serializers.utils import (
@@ -14,9 +18,6 @@ from oscarapi.serializers.utils import (
 from oscarapi.serializers.fields import TaxIncludedDecimalField
 from oscarapi.serializers.utils import DelayUniqueSerializerMixin
 
-from django.utils.translation import ugettext as _
-from oscar.core.loading import get_model
-from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +107,14 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
+    url = DrillDownHyperlinkedIdentityField(
+        view_name="lineattribute-detail",
+        extra_url_kwargs={"basket_pk": "line.basket.id", "line_pk": "line.id"},
+    )
+    line = DrillDownHyperlinkedIdentityField(
+        view_name="basket-line-detail", extra_url_kwargs={"basket_pk": "line.basket.id"}
+    )
+
     class Meta:
         model = LineAttribute
         fields = "__all__"
@@ -124,22 +133,27 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         many=True, fields=("url", "option", "value"), required=False, read_only=True
     )
     price_excl_tax = serializers.DecimalField(
-        decimal_places=2, max_digits=12, source="line_price_excl_tax_incl_discounts"
+        decimal_places=2,
+        max_digits=12,
+        source="line_price_excl_tax_incl_discounts",
+        read_only=True,
     )
     price_incl_tax = TaxIncludedDecimalField(
         decimal_places=2,
         max_digits=12,
         excl_tax_field="line_price_excl_tax_incl_discounts",
         source="line_price_incl_tax_incl_discounts",
+        read_only=True,
     )
     price_incl_tax_excl_discounts = TaxIncludedDecimalField(
         decimal_places=2,
         max_digits=12,
         excl_tax_field="line_price_excl_tax",
         source="line_price_incl_tax",
+        read_only=True,
     )
     price_excl_tax_excl_discounts = serializers.DecimalField(
-        decimal_places=2, max_digits=12, source="line_price_excl_tax"
+        decimal_places=2, max_digits=12, source="line_price_excl_tax", read_only=True
     )
     warning = serializers.CharField(
         read_only=True, required=False, source="get_warning"
@@ -170,7 +184,7 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     def to_representation(self, obj):
         # This override is needed to reflect offer discounts or strategy
         # related prices immediately in the response
-        operations.assign_basket_strategy(obj.basket, self.context['request'])
+        operations.assign_basket_strategy(obj.basket, self.context["request"])
 
         # Oscar stores the calculated discount in line._discount_incl_tax or
         # line._discount_excl_tax when offers are applied. So by just

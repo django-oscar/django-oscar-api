@@ -12,7 +12,6 @@ LoginView = get_api_class("views.login", "LoginView")
     AddVoucherView,
     ShippingMethodView,
     LineList,
-    LineDetail,
     BasketLineDetail,
 ) = get_api_classes(
     "views.basket",
@@ -22,7 +21,6 @@ LoginView = get_api_class("views.login", "LoginView")
         "AddVoucherView",
         "ShippingMethodView",
         "LineList",
-        "LineDetail",
         "BasketLineDetail",
     ],
 )
@@ -30,7 +28,6 @@ LoginView = get_api_class("views.login", "LoginView")
 (
     BasketList,
     BasketDetail,
-    LineAttributeList,
     LineAttributeDetail,
     StockRecordList,
     StockRecordDetail,
@@ -49,7 +46,6 @@ LoginView = get_api_class("views.login", "LoginView")
     [
         "BasketList",
         "BasketDetail",
-        "LineAttributeList",
         "LineAttributeDetail",
         "StockRecordList",
         "StockRecordDetail",
@@ -140,7 +136,7 @@ LoginView = get_api_class("views.login", "LoginView")
     OrderAdminDetail,
     OrderLineAdminList,
     OrderLineAdminDetail,
-    OrderLineAttributeAdminDetail
+    OrderLineAttributeAdminDetail,
 ) = get_api_classes(
     "views.admin.order",
     [
@@ -148,7 +144,7 @@ LoginView = get_api_class("views.login", "LoginView")
         "OrderAdminDetail",
         "OrderLineAdminList",
         "OrderLineAdminDetail",
-        "OrderLineAttributeAdminDetail"
+        "OrderLineAttributeAdminDetail",
     ],
 )
 
@@ -181,9 +177,8 @@ urlpatterns = [
         BasketLineDetail.as_view(),
         name="basket-line-detail",
     ),
-    url(r"^lines/(?P<pk>[0-9]+)/$", LineDetail.as_view(), name="line-detail"),
     url(
-        r"^lineattributes/(?P<pk>[0-9]+)/$",
+        r"^baskets/(?P<basket_pk>[0-9]+)/lines/(?P<line_pk>[0-9]+)/lineattributes/(?P<pk>[0-9]+)/$",
         LineAttributeDetail.as_view(),
         name="lineattribute-detail",
     ),
@@ -256,17 +251,7 @@ urlpatterns = [
 
 staff_urlpatterns = [
     url(r"^baskets/$", BasketList.as_view(), name="basket-list"),
-    url(r"^lines/$", LineList.as_view(), name="line-list"),
-    url(
-        r"^lineattributes/$",
-        LineAttributeList.as_view(),
-        name="lineattribute-list",
-    ),
-    url(
-        r"^stockrecords/$",
-        StockRecordList.as_view(),
-        name="stockrecord-list",
-    ),
+    url(r"^stockrecords/$", StockRecordList.as_view(), name="stockrecord-list"),
     url(r"^partners/$", PartnerList.as_view(), name="partner-list"),
     url(r"^users/$", UserList.as_view(), name="user-list"),
 ]
@@ -321,7 +306,6 @@ admin_urlpatterns = [
         AttributeOptionGroupAdminDetail.as_view(),
         name="admin-attributeoptiongroup-detail",
     ),
-
     url(
         r"^orderlineattributes/(?P<pk>[0-9]+)/$",
         OrderLineAttributeDetail.as_view(),
@@ -344,10 +328,12 @@ admin_urlpatterns = [
         name="admin-order-lines-detail",
     ),
     url(
-        r"^ad,in/orderlineattributes/(?P<pk>[0-9]+)/$",
+        r"^admin/orderlineattributes/(?P<pk>[0-9]+)/$",
         OrderLineAttributeDetail.as_view(),
         name="admin-order-lineattributes-detail",
     ),
 ]
 
-urlpatterns = format_suffix_patterns(urlpatterns + staff_urlpatterns + admin_urlpatterns)
+urlpatterns = format_suffix_patterns(
+    urlpatterns + staff_urlpatterns + admin_urlpatterns
+)
