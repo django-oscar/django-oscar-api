@@ -1,4 +1,5 @@
 import logging
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from oscarapi.basket import operations
@@ -19,6 +20,7 @@ from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
+User = get_user_model()
 Basket = get_model("basket", "Basket")
 Line = get_model("basket", "Line")
 LineAttribute = get_model("basket", "LineAttribute")
@@ -36,7 +38,9 @@ class VoucherSerializer(OscarModelSerializer):
         )
 
 
-class OfferDiscountSerializer(serializers.Serializer):
+class OfferDiscountSerializer(
+    serializers.Serializer
+):  # pylint: disable=abstract-method
     description = serializers.CharField()
     name = serializers.CharField()
     amount = serializers.DecimalField(
@@ -71,6 +75,12 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
     )
     currency = serializers.CharField(required=False)
     voucher_discounts = VoucherDiscountSerializer(many=True, required=False)
+    owner = serializers.HyperlinkedRelatedField(
+        view_name="user-detail",
+        required=False,
+        allow_null=True,
+        queryset=User.objects.all(),
+    )
 
     class Meta:
         model = Basket
@@ -93,15 +103,6 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
                 "is_tax_known",
             ),
         )
-
-    def get_validation_exclusions(self, instance=None):
-        """
-        This is needed because oscar declared the owner field as ``null=True``,
-        but ``blank=False``. That means the validator will claim you can not
-        leave this value set to None.
-        """
-        return super(BasketSerializer, self).get_validation_exclusions(
-            instance) + ['owner']
 
 
 class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
@@ -144,10 +145,6 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         read_only=True, required=False, source="get_warning"
     )
 
-    @property
-    def basket_pk(self):
-        return self.kwargs.get('basket_pk')
-
     class Meta:
         model = Line
         fields = overridable(
@@ -183,20 +180,6 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         line = next(lines, None)
 
         return super(BasketLineSerializer, self).to_representation(line)
-
-
-class LineSerializer(serializers.HyperlinkedModelSerializer):
-    """
-    This serializer just shows fields stored in the database for this line.
-    """
-
-    attributes = LineAttributeSerializer(
-        many=True, fields=("url", "option", "value"), required=False, read_only=True
-    )
-
-    class Meta:
-        model = Line
-        fields = "__all__"
 
 
 class StockRecordSerializer(DelayUniqueSerializerMixin, serializers.ModelSerializer):
