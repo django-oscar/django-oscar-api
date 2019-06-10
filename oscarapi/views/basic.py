@@ -1,11 +1,10 @@
 import functools
 
-from django.contrib import auth
 
 from oscar.core.loading import get_class, get_model
 
 from rest_framework import generics
-from rest_framework.permissions import IsAdminUser, DjangoModelPermissions
+from rest_framework.permissions import DjangoModelPermissions
 
 from six.moves import map
 
@@ -25,8 +24,6 @@ __all__ = (
     "BasketList",
     "BasketDetail",
     "LineAttributeDetail",
-    "UserList",
-    "UserDetail",
     "OptionList",
     "OptionDetail",
     "CountryList",
@@ -37,12 +34,10 @@ Basket = get_model("basket", "Basket")
 LineAttribute = get_model("basket", "LineAttribute")
 Product = get_model("catalogue", "Product")
 Option = get_model("catalogue", "Option")
-User = auth.get_user_model()
 Country = get_model("address", "Country")
 Range = get_model("offer", "Range")
 
 Selector = get_class("partner.strategy", "Selector")
-UserSerializer = get_api_class("serializers.login", "UserSerializer")
 CountrySerializer = get_api_class("serializers.checkout", "CountrySerializer")
 BasketSerializer, LineAttributeSerializer, StockRecordSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
     "serializers.basket",
@@ -103,18 +98,6 @@ class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
     queryset = LineAttribute.objects.all()
     serializer_class = LineAttributeSerializer
     permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)  # noqa
-
-
-class UserList(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsAdminUser,)
-
-
-class UserDetail(generics.RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsAdminUser,)
 
 
 class OptionList(generics.ListAPIView):
