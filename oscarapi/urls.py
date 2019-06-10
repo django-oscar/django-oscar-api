@@ -25,19 +25,20 @@ LoginView = get_api_class("views.login", "LoginView")
     ],
 )
 
+(StockRecordDetail, PartnerList, PartnerDetail) = get_api_classes(
+    "views.admin.partner", ["StockRecordDetail", "PartnerList", "PartnerDetail"]
+)
+
 (
     BasketList,
     BasketDetail,
     LineAttributeDetail,
-    StockRecordDetail,
     OptionList,
     OptionDetail,
     UserList,
     UserDetail,
     CountryList,
     CountryDetail,
-    PartnerList,
-    PartnerDetail,
     RangeList,
     RangeDetail,
 ) = get_api_classes(
@@ -46,15 +47,12 @@ LoginView = get_api_class("views.login", "LoginView")
         "BasketList",
         "BasketDetail",
         "LineAttributeDetail",
-        "StockRecordDetail",
         "OptionList",
         "OptionDetail",
         "UserList",
         "UserDetail",
         "CountryList",
         "CountryDetail",
-        "PartnerList",
-        "PartnerDetail",
         "RangeList",
         "RangeDetail",
     ],
@@ -192,11 +190,6 @@ urlpatterns = [
         ProductAvailability.as_view(),
         name="product-availability",
     ),
-    url(
-        r"^stockrecords/(?P<pk>[0-9]+)/$",
-        StockRecordDetail.as_view(),
-        name="stockrecord-detail",
-    ),
     url(r"^options/$", OptionList.as_view(), name="option-list"),
     url(r"^options/(?P<pk>[0-9]+)/$", OptionDetail.as_view(), name="option-detail"),
     url(r"^ranges/$", RangeList.as_view(), name="range-list"),
@@ -233,7 +226,6 @@ urlpatterns = [
     ),
     url(r"^countries/$", CountryList.as_view(), name="country-list"),
     url(r"^countries/(?P<pk>[A-z]+)/$", CountryDetail.as_view(), name="country-detail"),
-    url(r"^partners/(?P<pk>[0-9]+)/$", PartnerDetail.as_view(), name="partner-detail"),
     url(r"^useraddresses/$", UserAddressList.as_view(), name="useraddress-list"),
     url(
         r"^useraddresses/(?P<pk>[0-9]+)/$",
@@ -244,7 +236,6 @@ urlpatterns = [
 
 staff_urlpatterns = [
     url(r"^baskets/$", BasketList.as_view(), name="basket-list"),
-    url(r"^partners/$", PartnerList.as_view(), name="partner-list"),
     url(r"^users/$", UserList.as_view(), name="user-list"),
 ]
 
@@ -284,6 +275,13 @@ admin_urlpatterns = [
         name="admin-productattribute-list",
     ),
     url(
+        r"^admin/stockrecords/(?P<pk>[0-9]+)/$",
+        StockRecordDetail.as_view(),
+        name="stockrecord-detail",
+    ),
+    url(r"^admin/partners/$", PartnerList.as_view(), name="partner-list"),
+    url(r"^admin/partners/(?P<pk>[0-9]+)/$", PartnerDetail.as_view(), name="partner-detail"),
+    url(
         r"^admin/productattributes/(?P<pk>[0-9]+)/$",
         ProductAttributeAdminDetail.as_view(),
         name="admin-productattribute-detail",
@@ -297,11 +295,6 @@ admin_urlpatterns = [
         r"^admin/attributeoptiongroups/(?P<pk>[0-9]+)/$",
         AttributeOptionGroupAdminDetail.as_view(),
         name="admin-attributeoptiongroup-detail",
-    ),
-    url(
-        r"^orderlineattributes/(?P<pk>[0-9]+)/$",
-        OrderLineAttributeDetail.as_view(),
-        name="order-lineattributes-detail",
     ),
     url(r"^admin/orders/$", OrderAdminList.as_view(), name="admin-order-list"),
     url(
@@ -321,7 +314,7 @@ admin_urlpatterns = [
     ),
     url(
         r"^admin/orderlineattributes/(?P<pk>[0-9]+)/$",
-        OrderLineAttributeDetail.as_view(),
+        OrderLineAttributeAdminDetail.as_view(),
         name="admin-order-lineattributes-detail",
     ),
 ]

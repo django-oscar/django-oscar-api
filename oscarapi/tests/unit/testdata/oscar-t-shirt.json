@@ -16,7 +16,7 @@
     "url": "http://127.0.0.1:8000/api/admin/products/1/",
     "stockrecords": [
         {
-            "id": 1,
+            "url": "http://127.0.0.1:8000/api/admin/stockrecords/1/",
             "product": 1,
             "partner_sku": "clf-large",
             "price_currency": "EUR",
@@ -28,7 +28,7 @@
             "low_stock_threshold": null,
             "date_created": "2013-12-13T11:37:08.232000Z",
             "date_updated": "2013-12-13T11:37:08.232000Z",
-            "partner": 1
+            "partner": "http://127.0.0.1:8000/api/admin/partners/1/"
         }
     ],
     "children": [
