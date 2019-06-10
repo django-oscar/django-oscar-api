@@ -29,12 +29,6 @@ def PUBLIC_APIS(r, f):
     ]
 
 
-def STAFF_APIS(r, f):
-    return [
-        ("users", reverse("user-list", request=r, format=f)),
-    ]
-
-
 def ADMIN_APIS(r, f):
     return [
         ("productclasses", reverse("admin-productclass-list", request=r, format=f)),
@@ -42,6 +36,7 @@ def ADMIN_APIS(r, f):
         ("categories", reverse("admin-category-list", request=r, format=f)),
         ("orders", reverse("admin-order-list", request=r, format=f)),
         ("partners", reverse("partner-list", request=r, format=f)),
+        ("users", reverse("user-list", request=r, format=f)),
     ]
 
 
@@ -58,7 +53,6 @@ def api_root(request, format=None):  # pylint: disable=redefined-builtin
 
     if request.user.is_staff:
         apis += [
-            ("staff", collections.OrderedDict(STAFF_APIS(request, format))),
             ("admin", collections.OrderedDict(ADMIN_APIS(request, format))),
         ]
 
