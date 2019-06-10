@@ -5,7 +5,7 @@ from django.contrib import auth
 from oscar.core.loading import get_class, get_model
 
 from rest_framework import generics
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, DjangoModelPermissions
 
 from six.moves import map
 
@@ -25,37 +25,31 @@ __all__ = (
     "BasketList",
     "BasketDetail",
     "LineAttributeDetail",
-    "StockRecordDetail",
     "UserList",
     "UserDetail",
     "OptionList",
     "OptionDetail",
     "CountryList",
     "CountryDetail",
-    "PartnerList",
-    "PartnerDetail",
 )
 
 Basket = get_model("basket", "Basket")
 LineAttribute = get_model("basket", "LineAttribute")
 Product = get_model("catalogue", "Product")
-StockRecord = get_model("partner", "StockRecord")
 Option = get_model("catalogue", "Option")
 User = auth.get_user_model()
 Country = get_model("address", "Country")
-Partner = get_model("partner", "Partner")
 Range = get_model("offer", "Range")
 
 Selector = get_class("partner.strategy", "Selector")
-APIAdminPermission = get_api_class("permissions", "APIAdminPermission")
 UserSerializer = get_api_class("serializers.login", "UserSerializer")
 CountrySerializer = get_api_class("serializers.checkout", "CountrySerializer")
 BasketSerializer, LineAttributeSerializer, StockRecordSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
     "serializers.basket",
     ["BasketSerializer", "LineAttributeSerializer", "StockRecordSerializer"],
 )
-RangeSerializer, OptionSerializer, PartnerSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
-    "serializers.product", ["RangeSerializer", "OptionSerializer", "PartnerSerializer"]
+RangeSerializer, OptionSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+    "serializers.product", ["RangeSerializer", "OptionSerializer"]
 )
 
 # TODO: For all API's in this file, the permissions should be checked if they
@@ -73,10 +67,13 @@ class CountryDetail(generics.RetrieveAPIView):
 class BasketList(generics.ListCreateAPIView):
     """
     Retrieve all baskets that belong to the current user.
+    
+    While each user can view their own basket, for creating baskets
+    user must be assigned the correct (basket update) permissions.
     """
     serializer_class = BasketSerializer
     queryset = editable_baskets()
-    permission_classes = (APIAdminPermission,)
+    permission_classes = (DjangoModelPermissions,)
 
     def get_queryset(self):
         qs = super(BasketList, self).get_queryset()
@@ -108,11 +105,6 @@ class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
     permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)  # noqa
 
 
-class StockRecordDetail(generics.RetrieveAPIView):
-    queryset = StockRecord.objects.all()
-    serializer_class = StockRecordSerializer
-
-
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -133,17 +125,6 @@ class OptionList(generics.ListAPIView):
 class OptionDetail(generics.RetrieveAPIView):
     queryset = Option.objects.all()
     serializer_class = OptionSerializer
-
-
-class PartnerList(generics.ListAPIView):
-    queryset = Partner.objects.all()
-    serializer_class = PartnerSerializer
-    permission_classes = (IsAdminUser,)
-
-
-class PartnerDetail(generics.RetrieveAPIView):
-    queryset = Partner.objects.all()
-    serializer_class = PartnerSerializer
 
 
 class RangeList(generics.ListAPIView):

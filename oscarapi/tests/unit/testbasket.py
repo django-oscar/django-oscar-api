@@ -342,7 +342,7 @@ class BasketTest(APITest):
             "basket": basket_url,
             "line_reference": "234_345",
             "product": "http://testserver/api/products/1/",
-            "stockrecord": "http://testserver/api/stockrecords/1/",
+            "stockrecord": "http://testserver/api/admin/stockrecords/1/",
             "quantity": 3,
             "price_currency": "EUR",
             "price_excl_tax": "100.0",
@@ -395,7 +395,7 @@ class BasketTest(APITest):
             "basket": "http://testserver/api/baskets/%s/" % nobody_basket_id,
             "line_reference": "234_345",
             "product": "http://testserver/api/products/1/",
-            "stockrecord": "http://testserver/api/stockrecords/1/",
+            "stockrecord": "http://testserver/api/admin/stockrecords/1/",
             "quantity": 3,
             "price_currency": "EUR",
             "price_excl_tax": "100.0",
@@ -439,7 +439,7 @@ class BasketTest(APITest):
             "basket": basket_url,
             "line_reference": "234_345",
             "product": "http://testserver/api/products/1/",
-            "stockrecord": "http://testserver/api/stockrecords/1/",
+            "stockrecord": "http://testserver/api/admin/stockrecords/1/",
             "quantity": 3,
             "price_currency": "EUR",
             "price_excl_tax": "100.0",
@@ -492,7 +492,7 @@ class BasketTest(APITest):
             "basket": "http://testserver/api/baskets/%s/" % somebody_basket_id,
             "line_reference": "234_345",
             "product": "http://testserver/api/products/1/",
-            "stockrecord": "http://testserver/api/stockrecords/1/",
+            "stockrecord": "http://testserver/api/admin/stockrecords/1/",
             "quantity": 3,
             "price_currency": "EUR",
             "price_excl_tax": "100.0",
@@ -503,7 +503,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(403)
 
     def test_basket_write_permissions_header_authenticated(self):
-        "An authenticated user should not be able to change someone elses basket, when authinticating with session header."
+        "An authenticated user should not be able to change someone elses basket, when authenticating with session header."
 
         # now try for authenticated user.
         self.hlogin('nobody', 'nobody', session_id='nobody')
@@ -536,7 +536,7 @@ class BasketTest(APITest):
             "basket": basket_url,
             "line_reference": "234_345",
             "product": "http://testserver/api/products/1/",
-            "stockrecord": "http://testserver/api/stockrecords/1/",
+            "stockrecord": "http://testserver/api/admin/stockrecords/1/",
             "quantity": 3,
             "price_currency": "EUR",
             "price_excl_tax": "100.0",
@@ -589,7 +589,7 @@ class BasketTest(APITest):
             "basket": "http://testserver/api/baskets/%s/" % somebody_basket_id,
             "line_reference": "234_345",
             "product": "http://testserver/api/products/1/",
-            "stockrecord": "http://testserver/api/stockrecords/1/",
+            "stockrecord": "http://testserver/api/admin/stockrecords/1/",
             "quantity": 3,
             "price_currency": "EUR",
             "price_excl_tax": "100.0",
@@ -634,7 +634,7 @@ class BasketTest(APITest):
                 "basket": basket_url,
                 "line_reference": "234_345",
                 "product": "http://testserver/api/products/1/",
-                "stockrecord": "http://testserver/api/stockrecords/1/",
+                "stockrecord": "http://testserver/api/admin/stockrecords/1/",
                 "quantity": 3,
                 "price_currency": "EUR",
                 "price_excl_tax": "100.0",
@@ -683,7 +683,7 @@ class BasketTest(APITest):
                 "basket": "http://testserver/api/baskets/%s/" % somebody_basket_id,
                 "line_reference": "234_345",
                 "product": "http://testserver/api/products/1/",
-                "stockrecord": "http://testserver/api/stockrecords/1/",
+                "stockrecord": "http://testserver/api/admin/stockrecords/1/",
                 "quantity": 3,
                 "price_currency": "EUR",
                 "price_excl_tax": "100.0",
@@ -731,7 +731,7 @@ class BasketTest(APITest):
                 "basket": basket_url,
                 "line_reference": "234_345",
                 "product": "http://testserver/api/products/1/",
-                "stockrecord": "http://testserver/api/stockrecords/1/",
+                "stockrecord": "http://testserver/api/admin/stockrecords/1/",
                 "quantity": 3,
                 "price_currency": "EUR",
                 "price_excl_tax": "100.0",
@@ -780,7 +780,7 @@ class BasketTest(APITest):
                 "basket": "http://testserver/api/baskets/%s/" % somebody_basket_id,
                 "line_reference": "234_345",
                 "product": "http://testserver/api/products/1/",
-                "stockrecord": "http://testserver/api/stockrecords/1/",
+                "stockrecord": "http://testserver/api/admin/stockrecords/1/",
                 "quantity": 3,
                 "price_currency": "EUR",
                 "price_excl_tax": "100.0",
