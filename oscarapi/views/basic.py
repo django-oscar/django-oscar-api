@@ -47,8 +47,6 @@ RangeSerializer, OptionSerializer = get_api_classes(  # pylint: disable=unbalanc
     "serializers.product", ["RangeSerializer", "OptionSerializer"]
 )
 
-# TODO: For all API's in this file, the permissions should be checked if they
-# are sensible.
 class CountryList(generics.ListAPIView):
     serializer_class = CountrySerializer
     queryset = Country.objects.all()
@@ -97,7 +95,7 @@ class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
 class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
     queryset = LineAttribute.objects.all()
     serializer_class = LineAttributeSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)  # noqa
+    permission_classes = (permissions.RequestAllowsAccessTo,)
 
 
 class OptionList(generics.ListAPIView):

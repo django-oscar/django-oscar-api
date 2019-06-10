@@ -327,7 +327,7 @@ class BasketLineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
 
     queryset = Line.objects.all()
     serializer_class = BasketLineSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)
+    permission_classes = (permissions.RequestAllowsAccessTo,)
 
     def get_queryset(self):
         basket_pk = self.kwargs.get("basket_pk")
