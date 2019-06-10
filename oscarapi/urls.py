@@ -29,7 +29,6 @@ LoginView = get_api_class("views.login", "LoginView")
     BasketList,
     BasketDetail,
     LineAttributeDetail,
-    StockRecordList,
     StockRecordDetail,
     OptionList,
     OptionDetail,
@@ -47,7 +46,6 @@ LoginView = get_api_class("views.login", "LoginView")
         "BasketList",
         "BasketDetail",
         "LineAttributeDetail",
-        "StockRecordList",
         "StockRecordDetail",
         "OptionList",
         "OptionDetail",
@@ -195,11 +193,6 @@ urlpatterns = [
         name="product-availability",
     ),
     url(
-        r"^products/(?P<pk>[0-9]+)/stockrecords/$",
-        StockRecordList.as_view(),
-        name="product-stockrecord-list",
-    ),
-    url(
         r"^stockrecords/(?P<pk>[0-9]+)/$",
         StockRecordDetail.as_view(),
         name="stockrecord-detail",
@@ -251,7 +244,6 @@ urlpatterns = [
 
 staff_urlpatterns = [
     url(r"^baskets/$", BasketList.as_view(), name="basket-list"),
-    url(r"^stockrecords/$", StockRecordList.as_view(), name="stockrecord-list"),
     url(r"^partners/$", PartnerList.as_view(), name="partner-list"),
     url(r"^users/$", UserList.as_view(), name="user-list"),
 ]
