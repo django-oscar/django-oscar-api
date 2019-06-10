@@ -31,8 +31,6 @@ def PUBLIC_APIS(r, f):
 
 def STAFF_APIS(r, f):
     return [
-        ("lines", reverse("line-list", request=r, format=f)),
-        ("lineattributes", reverse("lineattribute-list", request=r, format=f)),
         ("stockrecords", reverse("stockrecord-list", request=r, format=f)),
         ("partners", reverse("partner-list", request=r, format=f)),
         ("users", reverse("user-list", request=r, format=f)),

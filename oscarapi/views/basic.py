@@ -24,7 +24,6 @@ from .utils import QuerySetList
 __all__ = (
     "BasketList",
     "BasketDetail",
-    "LineAttributeList",
     "LineAttributeDetail",
     "StockRecordList",
     "StockRecordDetail",
@@ -102,12 +101,6 @@ class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     def get_object(self):
         basket = super(BasketDetail, self).get_object()
         return assign_basket_strategy(basket, self.request)
-
-
-class LineAttributeList(generics.ListCreateAPIView):
-    queryset = LineAttribute.objects.all()
-    serializer_class = LineAttributeSerializer
-    permission_classes = (APIAdminPermission,)
 
 
 class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
