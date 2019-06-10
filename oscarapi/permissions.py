@@ -45,17 +45,3 @@ class APIAdminPermission(DjangoModelPermissions):
 class RequestAllowsAccessTo(BasePermission):
     def has_object_permission(self, request, view, obj):
         return request_allows_access_to(request, obj)
-
-
-class IsAdminUserOrRequestAllowsAccessTo(APIAdminPermission):
-    """
-    Permission class that checks if a request allows access to a basket.
-    """
-    def has_permission(self, request, view):
-        return True  # the permissions are dealt with on an object level
-
-    def has_object_permission(self, request, view, obj):
-        return (
-            request_allows_access_to(request, obj)
-            or super(IsAdminUserOrRequestAllowsAccessTo, self).has_permission(request, view)
-        )
