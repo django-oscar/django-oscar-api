@@ -1,7 +1,5 @@
 import json
-import re
 
-from django.conf import settings
 from django.urls import reverse
 
 from oscar.core.loading import get_model
@@ -820,7 +818,7 @@ class BasketTest(APITest):
         self.assertEqual(line0['quantity'], 5)
 
     def test_basket_line_permissions(self):
-        "A user's Basket lines can not be viewed by another user in any way (except admins)"
+        "A user's Basket lines can not be viewed by another user in any way."
         self.login('nobody', 'nobody')
         self.response = self.get('api-basket')
         self.response.assertStatusEqual(200)
@@ -840,21 +838,8 @@ class BasketTest(APITest):
         self.response = self.get(line0url)
         self.response.assertStatusEqual(404)
 
-        # admin can cheat, but he uses a different url
-        line0id = re.search(r'(?P<id>\d+)/$', line0url).group('id')
-        admin_line0url = reverse('line-detail', args=(line0id,))
-        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
-            self.login('admin', 'admin')
-            self.response = self.get(admin_line0url)
-            self.response.assertStatusEqual(200)
-
-        # nobody can not cheat like admin
-        self.login('somebody', 'somebody')
-        self.response = self.get(admin_line0url)
-        self.response.assertStatusEqual(403)
-
     def test_basket_line_permissions_header(self):
-        "A user's Basket lines can not be viewed by another user in any way (except admins), even with header authetication"
+        "A user's Basket lines can not be viewed by another user in any way, even with header authetication"
         self.hlogin('nobody', 'nobody', session_id='nobody')
         self.response = self.get('api-basket', session_id='nobody', authenticated=True)
         self.response.assertStatusEqual(200)
@@ -874,19 +859,6 @@ class BasketTest(APITest):
         self.hlogin('somebody', 'somebody', session_id='somebody')
         self.response = self.get(line0url, session_id='somebody', authenticated=True)
         self.response.assertStatusEqual(404)
-
-        # admin can cheat, but he uses a different url
-        line0id = re.search(r'(?P<id>\d+)/$', line0url).group('id')
-        admin_line0url = reverse('line-detail', args=(line0id,))
-        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
-            self.hlogin('admin', 'admin', session_id='admin')
-            self.response = self.get(admin_line0url, session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(200)
-
-        # nobody can not cheat like admin
-        self.login('somebody', 'somebody')
-        self.response = self.get(admin_line0url)
-        self.response.assertStatusEqual(403)
 
     def test_frozen_basket_can_not_be_accessed(self):
         "Prove that frozen baskets can nolonger be accessed by the user."
