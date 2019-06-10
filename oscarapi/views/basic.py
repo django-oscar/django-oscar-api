@@ -25,7 +25,6 @@ __all__ = (
     "BasketList",
     "BasketDetail",
     "LineAttributeDetail",
-    "StockRecordList",
     "StockRecordDetail",
     "UserList",
     "UserDetail",
@@ -107,18 +106,6 @@ class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
     queryset = LineAttribute.objects.all()
     serializer_class = LineAttributeSerializer
     permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)  # noqa
-
-
-class StockRecordList(generics.ListAPIView):
-    serializer_class = StockRecordSerializer
-    queryset = StockRecord.objects.all()
-    permission_classes = (IsAdminUser,)
-
-    def get(self, request, pk=None, *args, **kwargs):  # pylint: disable=keyword-arg-before-vararg,arguments-differ
-        if pk is not None:
-            self.queryset = self.queryset.filter(product__id=pk)
-
-        return super(StockRecordList, self).get(request, *args, **kwargs)
 
 
 class StockRecordDetail(generics.RetrieveAPIView):
