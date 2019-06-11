@@ -35,7 +35,7 @@ HTML frontend.
 There is an upgrade path for an anonymous user, to become an authenticated user,
 which opens up the functionality restricted to authenticated users.
 
-A client application can upgrade a user by using the login API, See also 
+A client application can upgrade a user by using the login API, See also
 the :ref:`login-user-label` example.
 
 
@@ -52,11 +52,13 @@ The following actions will be performed when a user logs in:
 6. A response will be issued containing the new session id.
 
 
+.. _permissions-label:
+
 Permissions
 -----------
 
-The Django REST Framework already supplies it's own defined permissions to make 
-sure that you can define which user can do what (PUT or just GET etc.). Oscar API 
+The Django REST Framework already supplies it's own defined permissions to make
+sure that you can define which user can do what (PUT or just GET etc.). Oscar API
 is using the following permissions, which you can use in your own views:
 
 .. automodule:: oscarapi.permissions
