@@ -4,7 +4,7 @@ from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 ALLOWED_HOSTS = []
 
-BASE_DIR = os.path.dirname(__file__)
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 OSCARAPI_BLOCK_ADMIN_API_ACCESS = False
 

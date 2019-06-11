@@ -1,6 +1,6 @@
-=============
-Example Usage
-=============
+============================
+Example Usage: checkout flow
+============================
 When you browse through the API (see also the :ref:`django-oscar-sandbox` section), most of the things are already pretty clear in terms how you can communicate with the API. In the following examples we use the python `requests`_ package to demonstate how the API works.
 
 .. _`requests`: http://docs.python-requests.org/

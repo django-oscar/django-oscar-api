@@ -1,56 +1,52 @@
 import functools
 
-from django.contrib import auth
 
-from oscar.core.loading import get_class, get_classes, get_model
+from oscar.core.loading import get_class, get_model
 
 from rest_framework import generics
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import DjangoModelPermissions
 
 from six.moves import map
 
-from oscarapi import permissions, serializers
-from oscarapi.basket.operations import assign_basket_strategy
+from oscarapi import permissions
+from oscarapi.basket.operations import (
+    assign_basket_strategy,
+    editable_baskets,
+    get_anonymous_basket,
+    prepare_basket
+)
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
 from .mixin import PutIsPatchMixin
-
+from .utils import QuerySetList
 
 __all__ = (
-    'BasketList', 'BasketDetail',
-    'LineAttributeList', 'LineAttributeDetail',
-    'StockRecordList', 'StockRecordDetail',
-    'UserList', 'UserDetail',
-    'OptionList', 'OptionDetail',
-    'CountryList', 'CountryDetail',
-    'PartnerList', 'PartnerDetail',
+    "BasketList",
+    "BasketDetail",
+    "LineAttributeDetail",
+    "OptionList",
+    "OptionDetail",
+    "CountryList",
+    "CountryDetail",
 )
 
-Basket = get_model('basket', 'Basket')
-LineAttribute = get_model('basket', 'LineAttribute')
-Product = get_model('catalogue', 'Product')
-StockRecord = get_model('partner', 'StockRecord')
-Option = get_model('catalogue', 'Option')
-User = auth.get_user_model()
-Country = get_model('address', 'Country')
-Partner = get_model('partner', 'Partner')
+Basket = get_model("basket", "Basket")
+LineAttribute = get_model("basket", "LineAttribute")
+Product = get_model("catalogue", "Product")
+Option = get_model("catalogue", "Option")
+Country = get_model("address", "Country")
+Range = get_model("offer", "Range")
 
-Selector = get_class('partner.strategy', 'Selector')
-UserSerializer = get_api_class("serializers.login", "UserSerializer")
+Selector = get_class("partner.strategy", "Selector")
 CountrySerializer = get_api_class("serializers.checkout", "CountrySerializer")
-BasketSerializer, LineAttributeSerializer, StockRecordSerializer = get_api_classes(
-    "serializers.basket", [
-        "BasketSerializer",
-        "LineAttributeSerializer",
-        "StockRecordSerializer"
-    ],
+BasketSerializer, LineAttributeSerializer, StockRecordSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+    "serializers.basket",
+    ["BasketSerializer", "LineAttributeSerializer", "StockRecordSerializer"],
 )
-OptionSerializer, PartnerSerializer = get_api_classes(
-    "serializers.product", ["OptionSerializer", "PartnerSerializer"]
+RangeSerializer, OptionSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+    "serializers.product", ["RangeSerializer", "OptionSerializer"]
 )
 
-# TODO: For all API's in this file, the permissions should be checked if they
-# are sensible.
 class CountryList(generics.ListAPIView):
     serializer_class = CountrySerializer
     queryset = Country.objects.all()
@@ -62,64 +58,44 @@ class CountryDetail(generics.RetrieveAPIView):
 
 
 class BasketList(generics.ListCreateAPIView):
+    """
+    Retrieve all baskets that belong to the current user.
+    
+    While each user can view their own basket, for creating baskets
+    user must be assigned the correct (basket update) permissions.
+    """
     serializer_class = BasketSerializer
-    queryset = Basket.objects.all()
-    permission_classes = (IsAdminUser,)
+    queryset = editable_baskets()
+    permission_classes = (DjangoModelPermissions,)
 
     def get_queryset(self):
         qs = super(BasketList, self).get_queryset()
-        return list(map(
-            functools.partial(assign_basket_strategy, request=self.request),
-            qs))
+        if self.request.user.is_authenticated:
+            qs = qs.filter(owner=self.request.user)
+            mapped_with_baskets = list(
+                map(functools.partial(assign_basket_strategy, request=self.request), qs)
+            )
+        else:  # anonymous users have max 1 basket.
+            basket = get_anonymous_basket(self.request)
+            mapped_with_baskets = [prepare_basket(basket, self.request)]
+
+        return QuerySetList(mapped_with_baskets, qs)
 
 
 class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BasketSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)
-    queryset = Basket.objects.all()
+    permission_classes = (permissions.RequestAllowsAccessTo,)
+    queryset = editable_baskets()
 
     def get_object(self):
         basket = super(BasketDetail, self).get_object()
         return assign_basket_strategy(basket, self.request)
 
 
-class LineAttributeList(generics.ListCreateAPIView):
-    queryset = LineAttribute.objects.all()
-    serializer_class = LineAttributeSerializer
-
-
 class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
     queryset = LineAttribute.objects.all()
     serializer_class = LineAttributeSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo,)  # noqa
-
-
-class StockRecordList(generics.ListAPIView):
-    serializer_class = StockRecordSerializer
-    queryset = StockRecord.objects.all()
-
-    def get(self, request, pk=None, *args, **kwargs):
-        if pk is not None:
-            self.queryset = self.queryset.filter(product__id=pk)
-
-        return super(StockRecordList, self).get(request, *args, **kwargs)
-
-
-class StockRecordDetail(generics.RetrieveAPIView):
-    queryset = StockRecord.objects.all()
-    serializer_class = StockRecordSerializer
-
-
-class UserList(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsAdminUser,)
-
-
-class UserDetail(generics.RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsAdminUser,)
+    permission_classes = (permissions.RequestAllowsAccessTo,)
 
 
 class OptionList(generics.ListAPIView):
@@ -132,11 +108,11 @@ class OptionDetail(generics.RetrieveAPIView):
     serializer_class = OptionSerializer
 
 
-class PartnerList(generics.ListAPIView):
-    queryset = Partner.objects.all()
-    serializer_class = PartnerSerializer
+class RangeList(generics.ListAPIView):
+    queryset = Range.objects.all()
+    serializer_class = RangeSerializer
 
 
-class PartnerDetail(generics.RetrieveAPIView):
-    queryset = Partner.objects.all()
-    serializer_class = PartnerSerializer
+class RangeDetail(generics.RetrieveAPIView):
+    queryset = Range.objects.all()
+    serializer_class = RangeSerializer

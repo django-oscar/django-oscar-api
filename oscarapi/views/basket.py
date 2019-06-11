@@ -14,33 +14,36 @@ from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.views.mixin import PutIsPatchMixin
 from oscarapi.views.utils import BasketPermissionMixin
 
-__all__ = ('BasketView', 'LineList', 'LineDetail', 'AddProductView',
-           'BasketLineDetail', 'AddVoucherView', 'ShippingMethodView')
+__all__ = (
+    "BasketView",
+    "LineList",
+    "AddProductView",
+    "BasketLineDetail",
+    "AddVoucherView",
+    "ShippingMethodView",
+)
 
-Basket = get_model('basket', 'Basket')
-Line = get_model('basket', 'Line')
-Repository = get_class('shipping.repository', 'Repository')
-ShippingAddress = get_model('order', 'ShippingAddress')
-(
+Basket = get_model("basket", "Basket")
+Line = get_model("basket", "Line")
+Repository = get_class("shipping.repository", "Repository")
+ShippingAddress = get_model("order", "ShippingAddress")
+(  # pylint: disable=unbalanced-tuple-unpacking
     BasketSerializer,
     VoucherAddSerializer,
     VoucherSerializer,
-    LineSerializer,
-    BasketLineSerializer
+    BasketLineSerializer,
 ) = get_api_classes(
-    "serializers.basket", [
+    "serializers.basket",
+    [
         "BasketSerializer",
         "VoucherAddSerializer",
         "VoucherSerializer",
-        "LineSerializer",
-        "BasketLineSerializer"
-    ]
+        "BasketLineSerializer",
+    ],
 )
 AddProductSerializer = get_api_class("serializers.product", "AddProductSerializer")
-ShippingAddressSerializer, ShippingMethodSerializer = get_api_classes(
-    "serializers.checkout", [
-        "ShippingAddressSerializer", "ShippingMethodSerializer"
-    ]
+ShippingAddressSerializer, ShippingMethodSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+    "serializers.checkout", ["ShippingAddressSerializer", "ShippingMethodSerializer"]
 )
 
 
@@ -51,11 +54,12 @@ class BasketView(APIView):
     GET:
     Retrieve your basket.
     """
+
     serializer_class = BasketSerializer
 
-    def get(self, request, format=None):
+    def get(self, request, format=None):  # pylint: disable=redefined-builtin
         basket = operations.get_basket(request)
-        ser = self.serializer_class(basket, context={'request': request})
+        ser = self.serializer_class(basket, context={"request": request})
         return Response(ser.data)
 
 
@@ -80,12 +84,14 @@ class AddProductView(APIView):
         }]
     }
     """
+
     add_product_serializer_class = AddProductSerializer
     serializer_class = BasketSerializer
 
-    def validate(self, basket, product, quantity, options):
-        availability = basket.strategy.fetch_for_product(
-            product).availability
+    def validate(
+        self, basket, product, quantity, options
+    ):  # pylint: disable=unused-argument
+        availability = basket.strategy.fetch_for_product(product).availability
 
         # check if product is available at all
         if not availability.is_available_to_buy:
@@ -102,30 +108,28 @@ class AddProductView(APIView):
             return False, message
         return True, None
 
-    def post(self, request, format=None):
+    def post(self, request, format=None):  # pylint: disable=redefined-builtin
         p_ser = self.add_product_serializer_class(
-            data=request.data, context={'request': request})
+            data=request.data, context={"request": request}
+        )
         if p_ser.is_valid():
             basket = operations.get_basket(request)
-            product = p_ser.validated_data['url']
-            quantity = p_ser.validated_data['quantity']
-            options = p_ser.validated_data.get('options', [])
+            product = p_ser.validated_data["url"]
+            quantity = p_ser.validated_data["quantity"]
+            options = p_ser.validated_data.get("options", [])
 
-            basket_valid, message = self.validate(
-                basket, product, quantity, options)
+            basket_valid, message = self.validate(basket, product, quantity, options)
             if not basket_valid:
                 return Response(
-                    {'reason': message},
-                    status=status.HTTP_406_NOT_ACCEPTABLE)
+                    {"reason": message}, status=status.HTTP_406_NOT_ACCEPTABLE
+                )
 
             basket.add_product(product, quantity=quantity, options=options)
             operations.apply_offers(request, basket)
-            ser = self.serializer_class(
-                basket, context={'request': request})
+            ser = self.serializer_class(basket, context={"request": request})
             return Response(ser.data)
 
-        return Response(
-            {'reason': p_ser.errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        return Response({"reason": p_ser.errors}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 class AddVoucherView(APIView):
@@ -140,20 +144,21 @@ class AddVoucherView(APIView):
     Will return 200 and the voucher as json if succesful.
     If unsuccessful, will return 406 with the error.
     """
+
     add_voucher_serializer_class = VoucherAddSerializer
     serializer_class = VoucherSerializer
 
-    def post(self, request, format=None):
+    def post(self, request, format=None):  # pylint: disable=redefined-builtin
         v_ser = self.add_voucher_serializer_class(
-            data=request.data, context={'request': request})
+            data=request.data, context={"request": request}
+        )
         if v_ser.is_valid():
             basket = operations.get_basket(request)
 
             voucher = v_ser.instance
             basket.vouchers.add(voucher)
 
-            signals.voucher_addition.send(
-                sender=None, basket=basket, voucher=voucher)
+            signals.voucher_addition.send(sender=None, basket=basket, voucher=voucher)
 
             # Recalculate discounts to see if the voucher gives any
             operations.apply_offers(request, basket)
@@ -161,17 +166,20 @@ class AddVoucherView(APIView):
 
             # Look for discounts from this new voucher
             for discount in discounts_after:
-                if discount['voucher'] and discount['voucher'] == voucher:
+                if discount["voucher"] and discount["voucher"] == voucher:
                     break
             else:
                 basket.vouchers.remove(voucher)
                 return Response(
-                    {'reason': _(
-                        "Your basket does not qualify for a voucher discount")},  # noqa
-                    status=status.HTTP_406_NOT_ACCEPTABLE)
+                    {
+                        "reason": _(
+                            "Your basket does not qualify for a voucher discount"
+                        )
+                    },  # noqa
+                    status=status.HTTP_406_NOT_ACCEPTABLE,
+                )
 
-            ser = self.serializer_class(
-                voucher, context={'request': request})
+            ser = self.serializer_class(voucher, context={"request": request})
             return Response(ser.data)
 
         return Response(v_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -201,19 +209,26 @@ class ShippingMethodView(APIView):
     Post a shipping_address if your shipping methods are dependent on the
     address.
     """
+
     serializer_class = ShippingAddressSerializer
     shipping_method_serializer_class = ShippingMethodSerializer
 
-    def _get(self, request, shipping_address=None, format=None):
+    def _get(
+        self, request, shipping_address=None, format=None
+    ):  # pylint: disable=redefined-builtin
         basket = operations.get_basket(request)
         shiping_methods = Repository().get_shipping_methods(
-            basket=basket, user=request.user, shipping_addr=shipping_address,
-            request=request)
+            basket=basket,
+            user=request.user,
+            shipping_addr=shipping_address,
+            request=request,
+        )
         ser = self.shipping_method_serializer_class(
-            shiping_methods, many=True, context={'basket': basket})
+            shiping_methods, many=True, context={"basket": basket}
+        )
         return Response(ser.data)
 
-    def get(self, request, format=None):
+    def get(self, request, format=None):  # pylint: disable=redefined-builtin
         """
         Get the available shipping methods and their cost for this order.
 
@@ -222,16 +237,11 @@ class ShippingMethodView(APIView):
         """
         return self._get(request, format=format)
 
-    def post(self, request, format=None):
-        s_ser = self.serializer_class(
-            data=request.data, context={'request': request})
+    def post(self, request, format=None):  # pylint: disable=redefined-builtin
+        s_ser = self.serializer_class(data=request.data, context={"request": request})
         if s_ser.is_valid():
             shipping_address = ShippingAddress(**s_ser.validated_data)
-            return self._get(
-                request,
-                format=format,
-                shipping_address=shipping_address
-            )
+            return self._get(request, format=format, shipping_address=shipping_address)
 
         return Response(s_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -263,22 +273,25 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
             "price_incl_tax": "121.0"
         }
     """
-    serializer_class = LineSerializer
+
+    permission_classes = (permissions.RequestAllowsAccessTo,)
+    serializer_class = BasketLineSerializer
     queryset = Line.objects.all()
 
     def get_queryset(self):
-        pk = self.kwargs.get('pk')
+        pk = self.kwargs.get("pk")
         if pk is not None:  # usually we need the lines of the basket
             basket = self.check_basket_permission(self.request, basket_pk=pk)
-            prepped_basket = operations.assign_basket_strategy(
-                basket, self.request)
+            prepped_basket = operations.assign_basket_strategy(basket, self.request)
             return prepped_basket.all_lines()
         elif self.request.user.is_staff:  # admin users can view a bit more
             return super(LineList, self).get_queryset()
         else:  # non admin users can view nothing at all here.
             return self.permission_denied(self.request)
 
-    def get(self, request, pk=None, format=None):
+    def get(
+        self, request, pk=None, format=None
+    ):  # pylint: disable=redefined-builtin,arguments-differ
         if pk is not None:
             basket = self.check_basket_permission(request, pk)
             prepped_basket = operations.assign_basket_strategy(basket, request)
@@ -287,7 +300,9 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
 
         return super(LineList, self).get(request, format)
 
-    def post(self, request, pk=None, format=None):
+    def post(
+        self, request, pk=None, format=None
+    ):  # pylint: disable=redefined-builtin,arguments-differ
         data_basket = self.get_data_basket(request.data, format)
         self.check_basket_permission(request, basket=data_basket)
 
@@ -295,9 +310,8 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
             url_basket = self.check_basket_permission(request, basket_pk=pk)
             if url_basket != data_basket:
                 raise exceptions.NotAcceptable(
-                    _('Target basket inconsistent %s != %s') % (
-                        url_basket.pk, data_basket.pk
-                    )
+                    _("Target basket inconsistent %s != %s")
+                    % (url_basket.pk, data_basket.pk)
                 )
         elif not request.user.is_staff:
             self.permission_denied(request)
@@ -305,33 +319,18 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
         return super(LineList, self).post(request, format=format)
 
 
-class LineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
-    queryset = Line.objects.all()
-    serializer_class = LineSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo, )
-
-    def get(self, request, pk=None, format=None):
-        line = self.get_object()
-        basket = operations.get_basket(request)
-
-        # if the line is from the current basket, use the serializer that
-        # computes the prices by using the strategy.
-        if line.basket == basket:
-            operations.assign_basket_strategy(line.basket, request)
-            ser = BasketLineSerializer(
-                instance=line, context={'request': request})
-            return Response(ser.data)
-
-        return super(LineDetail, self).get(request, pk, format)
-
-
 class BasketLineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
+    """
+    Only the field `quantity` can be changed in this view.
+    All other fields are readonly.
+    """
+
     queryset = Line.objects.all()
     serializer_class = BasketLineSerializer
-    permission_classes = (permissions.IsAdminUserOrRequestAllowsAccessTo, )
+    permission_classes = (permissions.RequestAllowsAccessTo,)
 
     def get_queryset(self):
-        basket_pk = self.kwargs.get('basket_pk')
+        basket_pk = self.kwargs.get("basket_pk")
         basket = get_object_or_404(operations.editable_baskets(), pk=basket_pk)
         prepped_basket = operations.prepare_basket(basket, self.request)
         if operations.request_allows_access_to_basket(self.request, prepped_basket):

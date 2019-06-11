@@ -14,7 +14,7 @@
         <field name="code" type="SlugField">text</field>
         <field name="type" type="CharField">text</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
-        <field name="required" type="BooleanField">False</field>
+        <field name="required" type="BooleanField">True</field>
     </object>
     <object model="catalogue.productattribute" pk="3">
         <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">2</field>
@@ -22,7 +22,7 @@
         <field name="code" type="SlugField">integer</field>
         <field name="type" type="CharField">integer</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
-        <field name="required" type="BooleanField">False</field>
+        <field name="required" type="BooleanField">True</field>
     </object>
     <object model="catalogue.productattribute" pk="4">
         <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">2</field>
@@ -30,7 +30,7 @@
         <field name="code" type="SlugField">boolean</field>
         <field name="type" type="CharField">boolean</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
-        <field name="required" type="BooleanField">False</field>
+        <field name="required" type="BooleanField">True</field>
     </object>
     <object model="catalogue.productattribute" pk="5">
         <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">2</field>
@@ -38,7 +38,7 @@
         <field name="code" type="SlugField">float</field>
         <field name="type" type="CharField">float</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
-        <field name="required" type="BooleanField">False</field>
+        <field name="required" type="BooleanField">True</field>
     </object>
     <object model="catalogue.productattribute" pk="6">
         <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">2</field>
@@ -46,7 +46,7 @@
         <field name="code" type="SlugField">html</field>
         <field name="type" type="CharField">richtext</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
-        <field name="required" type="BooleanField">False</field>
+        <field name="required" type="BooleanField">True</field>
     </object>
     <object model="catalogue.productattribute" pk="7">
         <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">2</field>
@@ -54,7 +54,7 @@
         <field name="code" type="SlugField">date</field>
         <field name="type" type="CharField">date</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
-        <field name="required" type="BooleanField">False</field>
+        <field name="required" type="BooleanField">True</field>
     </object>
     <object model="catalogue.productattribute" pk="8">
         <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">2</field>
@@ -62,7 +62,7 @@
         <field name="code" type="SlugField">datetime</field>
         <field name="type" type="CharField">datetime</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
-        <field name="required" type="BooleanField">False</field>
+        <field name="required" type="BooleanField">True</field>
     </object>
     <object model="catalogue.productattribute" pk="9">
         <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">2</field>
@@ -70,7 +70,7 @@
         <field name="code" type="SlugField">option</field>
         <field name="type" type="CharField">option</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup">1</field>
-        <field name="required" type="BooleanField">False</field>
+        <field name="required" type="BooleanField">True</field>
     </object>
     <object model="catalogue.productattribute" pk="10">
         <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">2</field>
@@ -78,7 +78,7 @@
         <field name="code" type="SlugField">multioption</field>
         <field name="type" type="CharField">multi_option</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup">1</field>
-        <field name="required" type="BooleanField">False</field>
+        <field name="required" type="BooleanField">True</field>
     </object>
     <object model="catalogue.productattribute" pk="11">
         <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">2</field>
@@ -86,7 +86,7 @@
         <field name="code" type="SlugField">file</field>
         <field name="type" type="CharField">file</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
-        <field name="required" type="BooleanField">False</field>
+        <field name="required" type="BooleanField">True</field>
     </object>
     <object model="catalogue.productattribute" pk="12">
         <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">2</field>
@@ -94,7 +94,7 @@
         <field name="code" type="SlugField">image</field>
         <field name="type" type="CharField">image</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
-        <field name="required" type="BooleanField">False</field>
+        <field name="required" type="BooleanField">True</field>
     </object>
     <object model="catalogue.productattribute" pk="13">
         <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">3</field>
@@ -102,6 +102,15 @@
         <field name="code" type="SlugField">entity</field>
         <field name="type" type="CharField">entity</field>
         <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
+        <field name="required" type="BooleanField">True</field>
+    </object>
+    <object model="catalogue.productattribute" pk="14">
+        <field name="product_class" rel="ManyToOneRel" to="catalogue.productclass">1</field>
+        <field name="name" type="CharField">text</field>
+        <field name="code" type="SlugField">text</field>
+        <field name="type" type="CharField">text</field>
+        <field name="option_group" rel="ManyToOneRel" to="catalogue.attributeoptiongroup"><None></None></field>
         <field name="required" type="BooleanField">False</field>
     </object>
+
 </django-objects>
