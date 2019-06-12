@@ -1,7 +1,6 @@
 import warnings
 
 from django.db import IntegrityError
-from rest_framework.response import Response
 
 from django.conf import settings
 from django.urls import reverse, NoReverseMatch
@@ -141,11 +140,11 @@ class OrderLineSerializer(OscarHyperlinkedModelSerializer):
 
     class Meta:
         model = OrderLine
-        fields = overridable('OSCAR_ORDERLINE_FIELD', default=[
+        fields = overridable('OSCARAPI_ORDERLINE_FIELDS', default=(
             'attributes', 'url', 'product', 'stockrecord', 'quantity',
             'price_currency', 'price_excl_tax', 'price_incl_tax',
             'price_incl_tax_excl_discounts', 'price_excl_tax_excl_discounts',
-            'order'])
+            'order'))
 
 
 class OrderOfferDiscountSerializer(OfferDiscountSerializer):
@@ -196,7 +195,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
 
     class Meta:
         model = Order
-        fields = overridable('OSCARAPI_ORDER_FIELD', default=(
+        fields = overridable('OSCARAPI_ORDER_FIELDS', default=(
             'number', 'basket', 'url', 'lines',
             'owner', 'billing_address', 'currency', 'total_incl_tax',
             'total_excl_tax', 'shipping_incl_tax', 'shipping_excl_tax',
@@ -363,7 +362,7 @@ class UserAddressSerializer(OscarModelSerializer):
 
     class Meta:
         model = UserAddress
-        fields = overridable('OSCARAPI_USERADDRESS_FIELDS', (
+        fields = overridable('OSCARAPI_USERADDRESS_FIELDS', default=(
             'id', 'title', 'first_name', 'last_name', 'line1', 'line2',
             'line3', 'line4', 'state', 'postcode', 'search_text',
             'phone_number', 'notes', 'is_default_for_shipping',
