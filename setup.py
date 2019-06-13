@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-__version__ = "1.5.4"
+__version__ = "1.6.0"
 
 
 setup(
@@ -15,7 +15,6 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Django',
         'Framework :: Django :: 1.11',
-        'Framework :: Django :: 2.0',
         'Framework :: Django :: 2.1',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
@@ -45,7 +44,7 @@ setup(
     # specify dependencies
     install_requires=[
         'setuptools',
-        'django-oscar>=1.5.1',
+        'django-oscar>=1.5.1,<2.0',
         'djangorestframework>=3.4',
         'six'
     ],
