@@ -42,6 +42,7 @@ setup(
     install_requires=[
         'setuptools',
         'django-oscar>=2.0.dev0',
+        'Django>=2.1.9',  # CVE-2019-12308
         'djangorestframework>=3.9',  # first version to support Django 2.2
     ],
     # mark test target to require extras.
