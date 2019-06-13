@@ -5,8 +5,6 @@ from oscar.core.loading import get_class, get_model
 
 from rest_framework import generics
 
-from six.moves import map
-
 from oscarapi import permissions
 from oscarapi.basket.operations import (
     assign_basket_strategy,

@@ -1,4 +1,4 @@
-from six.moves import reload_module
+from importlib import reload as reload_module
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory
 from django.urls import reverse

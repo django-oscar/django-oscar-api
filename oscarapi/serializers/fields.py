@@ -3,8 +3,8 @@ import operator
 
 from os.path import basename, join
 from io import BytesIO
-from six.moves.urllib.parse import urlsplit
-from six.moves.urllib.request import urlopen
+from urllib.parse import urlsplit
+from urllib.request import urlopen
 
 from django.conf import settings
 from django.db import IntegrityError
@@ -82,7 +82,7 @@ class DrillDownHyperlinkedIdentityField(relations.HyperlinkedIdentityField):
 class AttributeValueField(serializers.Field):
     """
     This field is used to handle the value of the ProductAttributeValue model
-    
+
     Because the value is dependant on the type of the corresponding attribute,
     it is not fixed. This field solves the problem of handling the different
     types.
