@@ -20,11 +20,13 @@ Django 1.11:
 - Oscar 1.5.3 / 1.6.x
 - requires `djangorestframework>=3.4`
 
-Django 2.0 and 2.1:
+Django 2.1:
 ~~~~~~~~~~~~~~~~~~~
 - Oscar 1.6.x
 - requires `djangorestframework>=3.7`
 - requires python >=3.5
+
+Oscar 2.0 will soon be supported in Oscar API version 2.0
 
 See `Travis`_ for the current tested platforms.
 
