@@ -57,9 +57,9 @@ setting would look like this::
     OSCARAPI_OVERRIDE_MODULES = ["demosite.mycustomapi"]
 
 Let's see what happens in the checkout serializer file
-``demosite.mycustomapi.serializers.checkout``::
+``demosite.mycustomapi.serializers.checkout``:
 
-.. literalinclude:: ../../../demosite/mycustomapi/serializers/checkout.py
+.. literalinclude:: ../../../demosite/demosite/mycustomapi/serializers/checkout.py
 
 So this override would add a field to the json of a country called
 ``is_benelux_country``, and the content would be ``true`` when the country is in the Benelux.
