@@ -30,16 +30,16 @@ class ApiGatewayMiddleWareTest(TestCase):
         # without Authorization header
         request = self.rf.get(basket_url)
         with self.assertRaises(PermissionDenied):
-            ApiGatewayMiddleWare().process_request(request)
+            ApiGatewayMiddleWare('response')(request)
 
         # invalid Authorization header
         request = self.rf.get(basket_url, HTTP_AUTHORIZATION='wrongkey')
         with self.assertRaises(PermissionDenied):
-            ApiGatewayMiddleWare().process_request(request)
+            ApiGatewayMiddleWare('response')(request)
 
         # valid Authorization header
         request = self.rf.get(basket_url, HTTP_AUTHORIZATION='testapikey')
-        self.assertIsNone(ApiGatewayMiddleWare().process_request(request))
+        self.assertIsNone(ApiGatewayMiddleWare('response')(request))
 
     def test_parse_session_id(self):
         dummy_request = DummyRequest()
@@ -95,6 +95,6 @@ class HeaderSessionMiddlewareTest(TestCase):
         response = HeaderSessionMiddleware().process_request(request)
         self.assertEqual(response.status_code, 403)
         self.assertEqual(
-            response.content, 
+            response.content,
             b'{"reason": "Can not accept cookie with realm example.com on realm testserver"}'
         )
