@@ -1,5 +1,5 @@
-from oscar.core.application import OscarConfig
+from django.apps import AppConfig
 
 
-class OscarAPIConfig(OscarConfig):
+class OscarAPIConfig(AppConfig):
     name = "oscarapi"
