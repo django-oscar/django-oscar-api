@@ -1,6 +1,30 @@
 =========
 Changelog
 =========
+
+1.6.0  (2019-06-13)
+-------------------
+This release is primary focussed on (some long desired) new features. This will also be the last release which is compatible with django-oscar 1.5.x and 1.6.x and django 1.11/2.1. The next release, 2.0,  will be compatible with django-oscar 2.0.
+
+Fixed:
+ * Include setup.py when creating a source dist
+ * `#165 <https://github.com/django-oscar/django-oscar-api/pull/165>`_ Only open baskets should be merged (dipen30)
+ * `#168 <https://github.com/django-oscar/django-oscar-api/pull/168>`_ Serializers consistency improvements (samitnuk)
+
+Features:
+ * `#157 <https://github.com/django-oscar/django-oscar-api/pull/157>`_ introduced ``get_api_class`` and ``get_api_classes`` for easier customisation of Oscar API. See the `Updated documentation <https://django-oscar-api.readthedocs.io/en/latest/usage/customizing_oscarapi.html>`_ about this topic.
+ * `#158 <https://github.com/django-oscar/django-oscar-api/pull/158>`_ introduced the *Admin API* which makes it possible to manage Oscar entities via the API. Think of Product / Productclass / Category creation and managing. See the `Admin API documentation <https://django-oscar-api.readthedocs.io/en/latest/usage/the_admin_api.html>`_ about this topic.
+
+Some noticable features and changes of `#158 <https://github.com/django-oscar/django-oscar-api/pull/158>`_:
+ * `#126 <https://github.com/django-oscar/django-oscar-api/pull/126>`_ Added a *Category API*
+ * `#154 <https://github.com/django-oscar/django-oscar-api/issues/154>`_ Added a *Order Admin API*
+ * Removed the ``IsAdminUserOrRequestAllowsAccessTo`` and ``HasUser`` permissions and added the ``RequestAllowsAccessTo`` and ``APIAdminPermission`` permissions and applied them to the corresponding views.
+ * Removed the ``LineList`` and ``LineaAtributes`` list API's
+ * Removed the ``StockRecordList`` API
+ * Moved the ``PartnerList`` API to the *Admin API* and added the correct permission
+ * Moved the ``UserList`` API to the *Admin API* and added the correct permission
+ * Fixed several wrong usages of ``PutIsPatchMixin``
+
 1.5.4 (2019-03-05)
 ------------------
 Fixed:
