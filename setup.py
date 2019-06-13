@@ -47,7 +47,7 @@ setup(
     ],
     # mark test target to require extras.
     extras_require={
-        'dev': ['coverage', 'mock', 'twine', 'wheel'],
+        'dev': ['coverage', 'mock', 'twine', 'wheel', 'pylint', 'pylint-django', 'flake8'],
         'docs': ['sphinx', 'sphinx_rtd_theme'],
     },
 )
