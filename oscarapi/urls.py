@@ -1,5 +1,5 @@
 # pylint: disable=unbalanced-tuple-unpacking
-from django.conf.urls import url
+from django.urls import path, re_path
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from oscarapi.utils.loading import get_api_classes, get_api_class
@@ -145,174 +145,174 @@ LoginView = get_api_class("views.login", "LoginView")
 
 
 urlpatterns = [
-    url(r"^$", api_root, name="api-root"),
-    url(r"^login/$", LoginView.as_view(), name="api-login"),
-    url(r"^basket/$", BasketView.as_view(), name="api-basket"),
-    url(
-        r"^basket/add-product/$",
+    path("", api_root, name="api-root"),
+    path("login/", LoginView.as_view(), name="api-login"),
+    path("basket/", BasketView.as_view(), name="api-basket"),
+    path(
+        "basket/add-product/",
         AddProductView.as_view(),
         name="api-basket-add-product",
     ),
-    url(
-        r"^basket/add-voucher/$",
+    path(
+        "basket/add-voucher/",
         AddVoucherView.as_view(),
         name="api-basket-add-voucher",
     ),
-    url(
-        r"^basket/shipping-methods/$",
+    path(
+        "basket/shipping-methods/",
         ShippingMethodView.as_view(),
         name="api-basket-shipping-methods",
     ),
-    url(r"^baskets/$", BasketList.as_view(), name="basket-list"),
-    url(r"^baskets/(?P<pk>[0-9]+)/$", BasketDetail.as_view(), name="basket-detail"),
-    url(
-        r"^baskets/(?P<pk>[0-9]+)/lines/$", LineList.as_view(), name="basket-lines-list"
+    path("baskets/", BasketList.as_view(), name="basket-list"),
+    path("baskets/<int:pk>/", BasketDetail.as_view(), name="basket-detail"),
+    path(
+        "baskets/<int:pk>/lines/", LineList.as_view(), name="basket-lines-list"
     ),
-    url(
-        r"^baskets/(?P<basket_pk>[0-9]+)/lines/(?P<pk>[0-9]+)/$",
+    path(
+        "baskets/<int:basket_pk>/lines/<int:pk>/",
         BasketLineDetail.as_view(),
         name="basket-line-detail",
     ),
-    url(
-        r"^baskets/(?P<basket_pk>[0-9]+)/lines/(?P<line_pk>[0-9]+)/lineattributes/(?P<pk>[0-9]+)/$",
+    path(
+        "baskets/<int:basket_pk>/lines/<int:line_pk>/lineattributes/<int:pk>/",
         LineAttributeDetail.as_view(),
         name="lineattribute-detail",
     ),
-    url(r"^products/$", ProductList.as_view(), name="product-list"),
-    url(r"^products/(?P<pk>[0-9]+)/$", ProductDetail.as_view(), name="product-detail"),
-    url(
-        r"^products/(?P<pk>[0-9]+)/price/$",
+    path("products/", ProductList.as_view(), name="product-list"),
+    path("products/<int:pk>/", ProductDetail.as_view(), name="product-detail"),
+    path(
+        "products/<int:pk>/price/",
         ProductPrice.as_view(),
         name="product-price",
     ),
-    url(
-        r"^products/(?P<pk>[0-9]+)/availability/$",
+    path(
+        "products/<int:pk>/availability/",
         ProductAvailability.as_view(),
         name="product-availability",
     ),
-    url(r"^options/$", OptionList.as_view(), name="option-list"),
-    url(r"^options/(?P<pk>[0-9]+)/$", OptionDetail.as_view(), name="option-detail"),
-    url(r"^ranges/$", RangeList.as_view(), name="range-list"),
-    url(r"^ranges/(?P<pk>[0-9]+)/$", RangeDetail.as_view(), name="range-detail"),
-    url(r"^categories/$", CategoryList.as_view(), name="category-list"),
-    url(
-        r"^categories/(?P<pk>[0-9]+)/$",
+    path("options/", OptionList.as_view(), name="option-list"),
+    path("options/<int:pk>/", OptionDetail.as_view(), name="option-detail"),
+    path("ranges/", RangeList.as_view(), name="range-list"),
+    path("ranges/<int:pk>/", RangeDetail.as_view(), name="range-detail"),
+    path("categories/", CategoryList.as_view(), name="category-list"),
+    path(
+        "categories/<int:pk>/",
         CategoryDetail.as_view(),
         name="category-detail",
     ),
-    url(
-        r"^categories/(?P<breadcrumbs>.*)/$",
+    re_path(
+        "^categories/(?P<breadcrumbs>.*)/$",
         CategoryList.as_view(),
         name="category-child-list",
     ),
-    url(r"^users/(?P<pk>[0-9]+)/$", UserDetail.as_view(), name="user-detail"),
-    url(r"^checkout/$", CheckoutView.as_view(), name="api-checkout"),
-    url(r"^orders/$", OrderList.as_view(), name="order-list"),
-    url(r"^orders/(?P<pk>[0-9]+)/$", OrderDetail.as_view(), name="order-detail"),
-    url(
-        r"^orders/(?P<pk>[0-9]+)/lines/$",
+    path("users/<int:pk>/", UserDetail.as_view(), name="user-detail"),
+    path("checkout/", CheckoutView.as_view(), name="api-checkout"),
+    path("orders/", OrderList.as_view(), name="order-list"),
+    path("orders/<int:pk>/", OrderDetail.as_view(), name="order-detail"),
+    path(
+        "orders/<int:pk>/lines/",
         OrderLineList.as_view(),
         name="order-lines-list",
     ),
-    url(
-        r"^orderlines/(?P<pk>[0-9]+)/$",
+    path(
+        "orderlines/<int:pk>/",
         OrderLineDetail.as_view(),
         name="order-lines-detail",
     ),
-    url(
-        r"^orderlineattributes/(?P<pk>[0-9]+)/$",
+    path(
+        "orderlineattributes/<int:pk>/",
         OrderLineAttributeDetail.as_view(),
         name="order-lineattributes-detail",
     ),
-    url(r"^countries/$", CountryList.as_view(), name="country-list"),
-    url(r"^countries/(?P<pk>[A-z]+)/$", CountryDetail.as_view(), name="country-detail"),
-    url(r"^useraddresses/$", UserAddressList.as_view(), name="useraddress-list"),
-    url(
-        r"^useraddresses/(?P<pk>[0-9]+)/$",
+    path("countries/", CountryList.as_view(), name="country-list"),
+    re_path(r"^countries/(?P<pk>[A-z]{2})/$", CountryDetail.as_view(), name="country-detail"),
+    path("useraddresses/", UserAddressList.as_view(), name="useraddress-list"),
+    path(
+        "useraddresses/<int:pk>/",
         UserAddressDetail.as_view(),
         name="useraddress-detail",
     ),
 ]
 
 admin_urlpatterns = [
-    url(r"^admin/products/$", ProductAdminList.as_view(), name="admin-product-list"),
-    url(
-        r"^admin/products/(?P<pk>[0-9]+)/$",
+    path("admin/products/", ProductAdminList.as_view(), name="admin-product-list"),
+    path(
+        "admin/products/<int:pk>/",
         ProductAdminDetail.as_view(),
         name="admin-product-detail",
     ),
-    url(
-        r"^admin/productclasses/$",
+    path(
+        "admin/productclasses/",
         ProductClassAdminList.as_view(),
         name="admin-productclass-list",
     ),
-    url(
-        r"^admin/productclasses/(?P<slug>[-\w]+)/$",
+    path(
+        "admin/productclasses/<slug:slug>/",
         ProductClassAdminDetail.as_view(),
         name="admin-productclass-detail",
     ),
-    url(
-        r"^admin/categories/$", CategoryAdminList.as_view(), name="admin-category-list"
+    path(
+        "admin/categories/", CategoryAdminList.as_view(), name="admin-category-list"
     ),
-    url(
-        r"^admin/categories/(?P<pk>[0-9]+)/$",
+    path(
+        "admin/categories/<int:pk>/",
         CategoryAdminDetail.as_view(),
         name="admin-category-detail",
     ),
-    url(
+    re_path(
         r"^admin/categories/(?P<breadcrumbs>.*)/$",
         CategoryAdminList.as_view(),
         name="admin-category-child-list",
     ),
-    url(
-        r"^admin/productattributes/$",
+    path(
+        "admin/productattributes/",
         ProductAttributeAdminList.as_view(),
         name="admin-productattribute-list",
     ),
-    url(
-        r"^admin/stockrecords/(?P<pk>[0-9]+)/$",
+    path(
+        "admin/stockrecords/<int:pk>/",
         StockRecordDetail.as_view(),
         name="stockrecord-detail",
     ),
-    url(r"^admin/partners/$", PartnerList.as_view(), name="partner-list"),
-    url(r"^admin/partners/(?P<pk>[0-9]+)/$", PartnerDetail.as_view(), name="partner-detail"),
-    url(
-        r"^admin/productattributes/(?P<pk>[0-9]+)/$",
+    path("admin/partners/", PartnerList.as_view(), name="partner-list"),
+    path("admin/partners/<int:pk>/", PartnerDetail.as_view(), name="partner-detail"),
+    path(
+        "admin/productattributes/<int:pk>/",
         ProductAttributeAdminDetail.as_view(),
         name="admin-productattribute-detail",
     ),
-    url(
-        r"^admin/attributeoptiongroups/$",
+    path(
+        "admin/attributeoptiongroups/",
         AttributeOptionGroupAdminList.as_view(),
         name="admin-attributeoptiongroup-list",
     ),
-    url(
-        r"^admin/attributeoptiongroups/(?P<pk>[0-9]+)/$",
+    path(
+        "admin/attributeoptiongroups/<int:pk>/",
         AttributeOptionGroupAdminDetail.as_view(),
         name="admin-attributeoptiongroup-detail",
     ),
-    url(r"^admin/orders/$", OrderAdminList.as_view(), name="admin-order-list"),
-    url(
-        r"^admin/orders/(?P<pk>[0-9]+)/$",
+    path("admin/orders/", OrderAdminList.as_view(), name="admin-order-list"),
+    path(
+        "admin/orders/<int:pk>/",
         OrderAdminDetail.as_view(),
         name="admin-order-detail",
     ),
-    url(
-        r"^admin/orders/(?P<pk>[0-9]+)/lines/$",
+    path(
+        "admin/orders/<int:pk>/lines/",
         OrderLineAdminList.as_view(),
         name="admin-order-lines-list",
     ),
-    url(
-        r"^admin/orderlines/(?P<pk>[0-9]+)/$",
+    path(
+        "admin/orderlines/<int:pk>/",
         OrderLineAdminDetail.as_view(),
         name="admin-order-lines-detail",
     ),
-    url(
-        r"^admin/orderlineattributes/(?P<pk>[0-9]+)/$",
+    path(
+        "admin/orderlineattributes/<int:pk>/",
         OrderLineAttributeAdminDetail.as_view(),
         name="admin-order-lineattributes-detail",
     ),
-    url(r"^admin/users/$", UserList.as_view(), name="user-list"),
+    path("admin/users/", UserList.as_view(), name="user-list"),
 ]
 
 urlpatterns = format_suffix_patterns(
