@@ -127,10 +127,10 @@ class APITest(TestCase):
 
     @response.setter
     def response(self, response):
-        self._response = ParsedReponse(response, self)
+        self._response = ParsedResponse(response, self)
 
 
-class ParsedReponse(object):
+class ParsedResponse(object):
     def __init__(self, response, unittestcase):
         self.response = response
         self.t = unittestcase
