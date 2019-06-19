@@ -33,26 +33,11 @@ steps:
 
    .. code-block:: python
 
-      from django.conf.urls import url
-
-      from oscarapi.app import application as api
+      from django.urls import include
 
       urlpatterns = (
           # all the things you already have
-          url(r'^oscarapi/', api.urls),
-      )
-
-   or with the newer Django 2.x way
-
-   .. code-block:: python
-
-      from django.urls import path
-
-      from oscarapi.app import application as api
-
-      urlpatterns = (
-          # all the things you already have
-          path('oscarapi/', api.urls),
+          path("api/", include("oscarapi.urls")),
       )
 
 4. Apply migrations::
