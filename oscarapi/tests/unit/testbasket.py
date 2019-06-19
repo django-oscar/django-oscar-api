@@ -927,7 +927,7 @@ class BasketTest(APITest):
         # Get the basket lines, and update the quantity to 4
         self.response = self.get(self.response['lines'])
         basket_line_url = self.response.data[0]['url']
-        self.response = self.put(basket_line_url, quantity=4)
+        self.response = self.patch(basket_line_url, quantity=4)
         self.response.assertStatusEqual(200)
 
         # see if it's updated
@@ -961,7 +961,7 @@ class BasketTest(APITest):
         self.assertEqual(attribute['value'], 'red')
 
         # now update it to blue
-        self.response = self.put(attribute['url'], value='blue')
+        self.response = self.patch(attribute['url'], value='blue')
         self.response.assertStatusEqual(200)
 
         # check that it's updated

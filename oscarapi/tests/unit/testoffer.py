@@ -13,7 +13,7 @@ Basket = get_model('basket', 'Basket')
 class OfferTest(APITest):
     fixtures = [
         'product', 'productcategory', 'productattribute', 'productclass',
-        'productattributevalue', 'category', 'attributeoptiongroup', 
+        'productattributevalue', 'category', 'attributeoptiongroup',
         'attributeoption', 'stockrecord', 'partner', 'offer'
     ]
 
@@ -63,7 +63,7 @@ class OfferTest(APITest):
         self.response = self.get('api-basket')
         self.response = self.get(self.response['lines'])
         basket_line_url = self.response.data[0]['url']
-        self.response = self.put(basket_line_url, quantity=2)
+        self.response = self.patch(basket_line_url, quantity=2)
         self.response.assertStatusEqual(200)
 
         # this price is excl discount

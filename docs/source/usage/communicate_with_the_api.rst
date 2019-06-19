@@ -193,7 +193,7 @@ You can use a REST PUT and DELETE to update/delete the basket lines. So let's up
     data = {
         "quantity": 3
     }
-    response = session.put(line_url, data)
+    response = session.patch(line_url, data)
 
     # and we can see it's been updated
     print(response.content)
@@ -232,7 +232,7 @@ You can also update the color to red if you like:
         "value": "red"
     }
 
-    session.put(line_attribute_url, data)
+    session.patch(line_attribute_url, data)
 
 
 Now we will delete this line, it will return a 204 when it's successful:

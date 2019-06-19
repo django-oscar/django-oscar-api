@@ -14,7 +14,6 @@ from oscarapi.basket.operations import (
 )
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
-from .mixin import PutIsPatchMixin
 from .utils import QuerySetList
 
 __all__ = (
@@ -77,7 +76,7 @@ class BasketList(generics.ListAPIView):
         return QuerySetList(mapped_with_baskets, qs)
 
 
-class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
+class BasketDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = BasketSerializer
     permission_classes = (permissions.RequestAllowsAccessTo,)
     queryset = editable_baskets()
@@ -87,7 +86,7 @@ class BasketDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
         return assign_basket_strategy(basket, self.request)
 
 
-class LineAttributeDetail(PutIsPatchMixin, generics.RetrieveUpdateAPIView):
+class LineAttributeDetail(generics.RetrieveUpdateAPIView):
     queryset = LineAttribute.objects.all()
     serializer_class = LineAttributeSerializer
     permission_classes = (permissions.RequestAllowsAccessTo,)
