@@ -25,6 +25,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Topic :: Software Development :: Libraries :: Application Frameworks',
     ],
+    python_requires='>=3.5',
     keywords='',
     author='Lars van de Kerkhof, Martijn Jacobs',
     author_email='lars@permanentmarkers.nl, martijn@devopsconsulting.nl',
