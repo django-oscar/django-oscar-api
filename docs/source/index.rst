@@ -93,12 +93,12 @@ Probably you want this, because you already extended or changed Oscar's function
 
    usage/outofthebox
    usage/communicate_with_the_api
+   usage/customizing_oscarapi
    usage/the_admin_api
    usage/middleware
    usage/settings
    usage/permissions
    usage/signals
-   usage/customizing_oscarapi
    changelog.rst
 
 .. Indices and tables
