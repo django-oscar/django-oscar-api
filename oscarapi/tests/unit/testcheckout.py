@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import unittest
 from mock import patch
+
+from django.urls import reverse
 
 from oscar.core.loading import get_model
 
@@ -18,240 +19,200 @@ class CheckOutTest(APITest):
         'attributeoption', 'stockrecord', 'partner', 'orderanditemcharges',
         'country']
 
+    def _get_common_payload(self, basket_url):
+        return {
+            "basket": basket_url,
+            "guest_email": "henk@example.com",
+            "total": "50.00",
+            "shipping_method_code": "no-shipping-required",
+            "shipping_charge": {
+                "currency": "EUR",
+                "excl_tax": "0.00",
+                "tax": "0.00",
+            },
+            "shipping_address": {
+                "country": "http://127.0.0.1:8000/api/countries/NL/",
+                "first_name": "Henk",
+                "last_name": "Van den Heuvel",
+                "line1": "Roemerlaan 44",
+                "line2": "",
+                "line3": "",
+                "line4": "Kroekingen",
+                "notes": "Niet STUK MAKEN OK!!!!",
+                "phone_number": "+31 26 370 4887",
+                "postcode": "7777KK",
+                "state": "Gerendrecht",
+                "title": "Mr"
+            }
+        }
+
     def test_checkout(self):
         """Test if an order can be placed as an authenticated user with session based auth."""
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
         basket = response.data
-        basket_url = basket.get('url')
-        basket_id = basket.get('id')
 
-        request = {
-            'basket': basket_url,
-            'guest_email': 'henk@example.com',
-            'total': '50.0',
-            'shipping_method_code': "no-shipping-required",
-            'shipping_charge': {
-                'currency': 'EUR',
-                'excl_tax': '0.00',
-                'tax': '0.00'
-            },
-            "shipping_address": {
-                "country": "http://127.0.0.1:8000/api/countries/NL/",
-                "first_name": "Henk",
-                "last_name": "Van den Heuvel",
-                "line1": "Roemerlaan 44",
-                "line2": "",
-                "line3": "",
-                "line4": "Kroekingen",
-                "notes": "Niet STUK MAKEN OK!!!!",
-                "phone_number": "+31 26 370 4887",
-                "postcode": "7777KK",
-                "state": "Gerendrecht",
-                "title": "Mr"
-            }
-        }
-        response = self.post('api-checkout', **request)
-        self.assertEqual(response.status_code, 406)
-        response = self.post(
-            'api-basket-add-product',
-            url="http://testserver/api/products/1/", quantity=5)
-        self.assertEqual(response.status_code, 200)
-        response = self.post('api-checkout', **request)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.data['guest_email'],
-            '',
-            'Guest email should be blank since user was authenticated')
-        self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
-
-    def test_checkout_implicit_shipping(self):
-        "Test if an order can be placed without specifying shipping method."
-        self.login(username='nobody', password='nobody')
-        response = self.get('api-basket')
-        self.assertTrue(response.status_code, 200)
-        basket = response.data
-        basket_url = basket.get('url')
-        basket_id = basket.get('id')
-
-        request = {
-            'basket': basket_url,
-            'total': '50.0',
-            "shipping_address": {
-                "country": "http://127.0.0.1:8000/api/countries/NL/",
-                "first_name": "Henk",
-                "last_name": "Van den Heuvel",
-                "line1": "Roemerlaan 44",
-                "line2": "",
-                "line3": "",
-                "line4": "Kroekingen",
-                "notes": "Niet STUK MAKEN OK!!!!",
-                "phone_number": "+31 26 370 4887",
-                "postcode": "7777KK",
-                "state": "Gerendrecht",
-                "title": "Mr"
-            }
-        }
-        response = self.post('api-checkout', **request)
+        payload = self._get_common_payload(basket['url'])
+        response = self.post('api-checkout', **payload)
         self.assertEqual(response.status_code, 406)
         response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
         self.assertEqual(response.status_code, 200)
-        response = self.post('api-checkout', **request)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
+        response = self.post('api-checkout', **payload)
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(
+            response.data['guest_email'], '',
+            'Guest email should be blank since user was authenticated'
+        )
+        self.assertEqual(
+            Basket.objects.get(pk=basket['id']).status, 'Frozen',
+            'Basket should be frozen after placing order and before payment'
+        )
 
-    def test_checkout_billing_address(self):
-        "Test if an order can be placed with a billing address"
+    def test_checkout_header(self):
+        """Prove that the user 'nobody' can checkout his cart when authenticating with header session."""
+        self.hlogin('nobody', 'nobody', session_id='nobody')
+        response = self.get('api-basket', session_id='nobody', authenticated=True)
+        self.assertTrue(response.status_code, 200)
+        basket = response.data
+
+        payload = self._get_common_payload(basket['url'])
+        response = self.post('api-checkout', session_id='nobody', authenticated=True, **payload)
+        self.assertEqual(response.status_code, 406)
+        response = self.post(
+            'api-basket-add-product', url="http://testserver/api/products/1/", quantity=5,
+            session_id='nobody', authenticated=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        response = self.post('api-checkout', session_id='nobody', authenticated=True, **payload)
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(
+            response.data['guest_email'], '',
+            'Guest email should be blank since user was authenticated'
+        )
+        self.assertEqual(
+            Basket.objects.get(pk=basket['id']).status, 'Frozen',
+            'Basket should be frozen after placing order and before payment'
+        )
+
+    def test_checkout_implicit_shipping(self):
+        """Test if an order can be placed without specifying shipping method."""
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
         basket = response.data
-        basket_url = basket.get('url')
 
-        request = {
-            'basket': basket_url,
-            'total': '50.0',
-            "shipping_address": {
-                "country": "http://127.0.0.1:8000/api/countries/NL/",
-                "first_name": "Henk",
-                "last_name": "Van den Heuvel",
-                "line1": "Roemerlaan 44",
-                "line2": "",
-                "line3": "",
-                "line4": "Kroekingen",
-                "notes": "Niet STUK MAKEN OK!!!!",
-                "phone_number": "+31 26 370 4887",
-                "postcode": "7777KK",
-                "state": "Gerendrecht",
-                "title": "Mr"
-            },
-            "billing_address": {
-                "country": "http://127.0.0.1:8000/api/countries/NL/",
-                "first_name": "Jos",
-                "last_name": "Henken",
-                "line1": "Stationstraat 4",
-                "line2": "",
-                "line3": "",
-                "line4": "Hengelo",
-                "notes": "",
-                "phone_number": "+31 26 370 1111",
-                "postcode": "1234AA",
-                "state": "Gelderland",
-                "title": "Mr"
-            }
+        payload = self._get_common_payload(basket['url'])
+        del payload['shipping_method_code']
+        del payload['shipping_charge']
+
+        response = self.post('api-checkout', **payload)
+        self.assertEqual(response.status_code, 406)
+        response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.assertEqual(response.status_code, 200)
+        response = self.post('api-checkout', **payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            Basket.objects.get(pk=basket['id']).status, 'Frozen',
+            'Basket should be frozen after placing order and before payment'
+        )
+
+    def test_checkout_billing_address(self):
+        """Test if an order can be placed with a billing address."""
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = response.data
+
+        payload = self._get_common_payload(basket['url'])
+        payload['billing_address'] = {
+            "country": "http://127.0.0.1:8000/api/countries/NL/",
+            "first_name": "Jos",
+            "last_name": "Henken",
+            "line1": "Stationstraat 4",
+            "line2": "",
+            "line3": "",
+            "line4": "Hengelo",
+            "notes": "",
+            "phone_number": "+31 26 370 1111",
+            "postcode": "1234AA",
+            "state": "Gelderland",
+            "title": "Mr"
         }
-        self.post(
-            'api-basket-add-product',
-            url="http://testserver/api/products/1/", quantity=5)
-        response = self.post('api-checkout', **request)
+
+        self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        response = self.post('api-checkout', **payload)
         self.assertEqual(response.status_code, 200)
 
     def test_checkout_wrong_billing_address(self):
-        "Test if an order can be placed with a billing address"
+        """Prove that an order cannot be placed with invalid billing address."""
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
         basket = response.data
-        basket_url = basket.get('url')
 
-        request = {
-            'basket': basket_url,
-            'total': '50.0',
-            "shipping_address": {
-                "country": "http://127.0.0.1:8000/api/countries/NL/",
-                "first_name": "Henk",
-                "last_name": "Van den Heuvel",
-                "line1": "Roemerlaan 44",
-                "line2": "",
-                "line3": "",
-                "line4": "Kroekingen",
-                "notes": "Niet STUK MAKEN OK!!!!",
-                "phone_number": "+31 26 370 4887",
-                "postcode": "7777KK",
-                "state": "Gerendrecht",
-                "title": "Mr"
-            },
-            "billing_address": {
-                "country": "This is wrong"
-            }
-        }
-        self.post(
-            'api-basket-add-product',
-            url="http://testserver/api/products/1/", quantity=5)
-        response = self.post('api-checkout', **request)
+        payload = self._get_common_payload(basket['url'])
+        payload['billing_address'] = {'country': 'This is wrong'}
+
+        self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        response = self.post('api-checkout', **payload)
         # It should complain about the billing address
         self.assertEqual(response.status_code, 406)
         self.assertEqual(
             response.data['billing_address']['country'][0],
             "Invalid hyperlink - No URL match.")
 
-    def test_checkout_total_error(self):
-        "When sending a wrong total, checkout should raise an error"
+    def test_client_cannot_falsify_total_price(self):
+        """Prove that the total price variable sent along with a checkout request, can not be manipulated."""
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
         basket = response.data
-        basket_url = basket.get('url')
 
-        request = {
-            'basket': basket_url,
-            'total': '150.0',
-            "shipping_address": {
-                "country": "http://127.0.0.1:8000/api/countries/NL/",
-                "first_name": "Henk",
-                "last_name": "Van den Heuvel",
-                "line1": "Roemerlaan 44",
-                "line2": "",
-                "line3": "",
-                "line4": "Kroekingen",
-                "notes": "Niet STUK MAKEN OK!!!!",
-                "phone_number": "+31 26 370 4887",
-                "postcode": "7777KK",
-                "state": "Gerendrecht",
-                "title": "Mr"
-            }
-        }
+        payload = self._get_common_payload(basket['url'])
+        payload['total'] = '150.00'  # Instead of '50.00'
+
         self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
         self.response.assertStatusEqual(200)
-        self.response = self.post('api-checkout', **request)
+        self.response = self.post('api-checkout', **payload)
         self.response.assertStatusEqual(406)
-        self.assertTrue("Total incorrect" in self.response['non_field_errors'][0])
+        self.response.assertValueEqual('non_field_errors', ['Total incorrect 150.00 != 50.00'])
+
+    def test_client_cannot_falsify_shipping_charge(self):
+        """Prove that the shipping charge variable sent along with a checkout request, can not be manipulated."""
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = response.data
+
+        payload = self._get_common_payload(basket['url'])
+        payload['shipping_charge']['excl_tax'] = '42.00'  # Instead of '0.00'
+
+        response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.assertEqual(response.status_code, 200)
+        response = self.post('api-checkout', **payload)
+        self.assertEqual(response.status_code, 406, response.data)
+        error_message = response.data['non_field_errors'][0]
+        self.assertIn("Shipping price incorrect", error_message)
 
     def test_utf8_encoding(self):
-        "We should accept utf-8 (non ascii) characters in the address"
+        """We should accept utf-8 (non ascii) characters in the address."""
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
         basket = response.data
-        basket_url = basket.get('url')
 
-        request = {
-            'basket': basket_url,
-            "shipping_address": {
-                "country": "http://127.0.0.1:8000/api/countries/NL/",
-                "first_name": "Henk",
-                "last_name": "Van den Heuvel",
-                "line1": "Ї ❤ chǼractɇɌȘ",
-                "line2": "",
-                "line3": "",
-                "line4": "Kroekingen",
-                "notes": "Niet STUK MAKEN OK!!!!",
-                "phone_number": "+31 26 370 4887",
-                "postcode": "7777KK",
-                "state": "Gerendrecht",
-                "title": "Mr"
-            }
-        }
+        payload = self._get_common_payload(basket['url'])
+        payload['shipping_address']['line1'] = "Ї ❤ chǼractɇɌȘ"
+
         self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
         self.response.assertStatusEqual(200)
-        self.response = self.post('api-checkout', **request)
+        self.response = self.post('api-checkout', **payload)
         self.response.assertStatusEqual(200)
-        self.assertEqual(
-            self.response.data['shipping_address']['line1'], u"Ї ❤ chǼractɇɌȘ")
+        self.assertEqual(self.response.data['shipping_address']['line1'], u"Ї ❤ chǼractɇɌȘ")
 
     def test_checkout_empty_basket(self):
-        "When basket is empty, checkout should raise an error"
+        """When basket is empty, checkout should raise an error."""
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
@@ -263,61 +224,28 @@ class CheckOutTest(APITest):
 
         self.assertEqual(lines, [])
 
-        request = {
-            'basket': basket.get('url'),
-            'total': '0.00',
-            "shipping_address": {
-                "country": "http://127.0.0.1:8000/api/countries/NL/",
-                "first_name": "Henk",
-                "last_name": "Van den Heuvel",
-                "line1": "Roemerlaan 44",
-                "line2": "",
-                "line3": "",
-                "line4": "Kroekingen",
-                "notes": "Niet STUK MAKEN OK!!!!",
-                "phone_number": "+31 26 370 4887",
-                "postcode": "7777KK",
-                "state": "Gerendrecht",
-                "title": "Mr"
-            }
-        }
-        self.response = self.post('api-checkout', **request)
+        payload = self._get_common_payload(basket.get('url'))
+        self.response = self.post('api-checkout', **payload)
         self.response.assertStatusEqual(406)
         self.response.assertValueEqual('non_field_errors', ['Cannot checkout with empty basket'])
 
     def test_total_is_optional(self):
-        "Total should be an optional value"
+        """Total should be an optional value."""
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
         basket = response.data
-        basket_url = basket.get('url')
-        basket_id = basket.get('id')
 
-        request = {
-            'basket': basket_url,
-            "shipping_address": {
-                "country": "http://127.0.0.1:8000/api/countries/NL/",
-                "first_name": "Henk",
-                "last_name": "Van den Heuvel",
-                "line1": "Roemerlaan 44",
-                "line2": "",
-                "line3": "",
-                "line4": "Kroekingen",
-                "notes": "Niet STUK MAKEN OK!!!!",
-                "phone_number": "+31 26 370 4887",
-                "postcode": "7777KK",
-                "state": "Gerendrecht",
-                "title": "Mr"
-            }
-        }
+        payload = self._get_common_payload(basket['url'])
+        del payload['total']
+
         self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
         self.response.assertStatusEqual(200)
-        self.response = self.post('api-checkout', **request)
+        self.response = self.post('api-checkout', **payload)
         self.response.assertStatusEqual(200)
 
     def test_can_login_with_frozen_user_basket(self):
-        "When a user has an unpaid order, he should still be able to log in"
+        """When a user has an unpaid order, he should still be able to log in."""
         self.test_checkout()
         self.delete('api-login')
         self.get('api-basket')
@@ -327,130 +255,76 @@ class CheckOutTest(APITest):
         self.login(username='nobody', password='nobody')
 
     def test_checkout_creates_an_order(self):
-        "After checkout has been done, a user should have gained an order object"
+        """After checkout has been done, a user should have gained an order object."""
         self.test_checkout()
         self.response = self.get('order-list')
         self.assertEqual(len(self.response), 1, 'An order should have been created.')
 
-    @unittest.skip('Please add implementation')
-    def test_checkout_header(self):
-        "Prove that the user 'nobody' can checkout his cart when authenticating with header session"
-        self.fail('Please add implementation')
-
     def test_anonymous_checkout(self):
-        "Test if an order can be placed as an anonymous user."
+        """Test if an order can be placed as an anonymous user."""
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
         basket = response.data
-        basket_url = basket.get('url')
-        basket_id = basket.get('id')
 
-        request = {
-            'basket': basket_url,
-            'total': '50.0',
-            'shipping_method_code': "no-shipping-required",
-            'shipping_charge': {
-                'currency': 'EUR',
-                'excl_tax': '0.00',
-                'tax': '0.00'
-            },
-            "shipping_address": {
-                "country": "http://127.0.0.1:8000/api/countries/NL/",
-                "first_name": "Henk",
-                "last_name": "Van den Heuvel",
-                "line1": "Roemerlaan 44",
-                "line2": "",
-                "line3": "",
-                "line4": "Kroekingen",
-                "notes": "Niet STUK MAKEN OK!!!!",
-                "phone_number": "+31 26 370 4887",
-                "postcode": "7777KK",
-                "state": "Gerendrecht",
-                "title": "Mr"
-            }
-        }
+        payload = self._get_common_payload(basket['url'])
+        del payload['guest_email']
 
         with self.settings(OSCAR_ALLOW_ANON_CHECKOUT=True):
-            response = self.post('api-checkout', **request)
+            response = self.post('api-checkout', **payload)
             self.assertEqual(response.status_code, 406)
             response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
             self.assertEqual(response.status_code, 200)
 
-            # no guest email specified should say 406
-            response = self.post('api-checkout', **request)
+            # No guest email specified should say 406
+            response = self.post('api-checkout', **payload)
             self.assertEqual(response.status_code, 406)
 
-            # an empty email address should say this as well
-            request['guest_email'] = ''
-            response = self.post('api-checkout', **request)
+            # An empty email address should say this as well
+            payload['guest_email'] = ''
+            response = self.post('api-checkout', **payload)
             self.assertEqual(response.status_code, 406)
 
             # Add in guest_email to get a 200
-            request['guest_email'] = 'henk@example.com'
-            response = self.post('api-checkout', **request)
+            payload['guest_email'] = 'henk@example.com'
+            response = self.post('api-checkout', **payload)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.data['guest_email'], 'henk@example.com')
-            self.assertEqual(Basket.objects.get(pk=basket_id).status, 'Frozen', 'Basket should be frozen after placing order and before payment')
+            self.assertEqual(
+                Basket.objects.get(pk=basket['id']).status, 'Frozen',
+                'Basket should be frozen after placing order and before payment'
+            )
 
     @patch('oscarapi.signals.oscarapi_post_checkout.send')
     def test_post_checkout_signal_send(self, mock):
-        "The oscarapi_post_checkout signal should be send after checkout"
+        """The `oscarapi_post_checkout` signal should be send after checkout."""
         self.test_anonymous_checkout()
         self.assertTrue(mock.called)
-        # make sure it's a django Response instance and not the DRF module
+        # Make sure it's a django Response instance and not the DRF module
         self.assertTrue(isinstance(mock.call_args[1]['response'], Response))
 
     def test_checkout_permissions(self):
-        "Prove that someone can not check out someone elses cart by mistake"
-
-        # first login as nobody
+        """Prove that someone cannot check out someone else's cart by mistake."""
+        # First login as nobody
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
 
-        # store this basket because somebody is going to checkout with this
+        # Store this basket because somebody is going to checkout with this
         basket = response.data
         nobody_basket_url = basket.get('url')
 
-        response = self.post(
-            'api-basket-add-product',
-            url="http://testserver/api/products/1/", quantity=5)
+        self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
 
         self.client.logout()
 
-        # now login as smomebody and fill another basket
+        # Now login as somebody and fill another basket
         self.login(username='somebody', password='somebody')
-        response = self.post(
-            'api-basket-add-product',
-            url="http://testserver/api/products/1/", quantity=5)
+        self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
 
-        # so let's checkout with nobody's basket WHAHAAAHAHA!
-        request = {
-            'basket': nobody_basket_url,
-            'total': '50.0',
-            'shipping_method_code': "no-shipping-required",
-            'shipping_charge': {
-                'currency': 'EUR',
-                'excl_tax': '0.00',
-                'tax': '0.00'
-            },
-            "shipping_address": {
-                "country": "http://127.0.0.1:8000/api/countries/NL/",
-                "first_name": "Henk",
-                "last_name": "Van den Heuvel",
-                "line1": "Roemerlaan 44",
-                "line2": "",
-                "line3": "",
-                "line4": "Kroekingen",
-                "notes": "Niet STUK MAKEN OK!!!!",
-                "phone_number": "+31 26 370 4887",
-                "postcode": "7777KK",
-                "state": "Gerendrecht",
-                "title": "Mr"
-            }
-        }
+        # So let's checkout with nobody's basket WHAHAAAHAHA!
+        payload = self._get_common_payload(nobody_basket_url)
 
         # Oh, this is indeed not possible
-        response = self.post('api-checkout', **request)
+        response = self.post('api-checkout', **payload)
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.data, "Unauthorized")
 
@@ -459,25 +333,9 @@ class CheckOutTest(APITest):
         self.login(username='nobody', password='nobody')
         response = self.get('api-basket')
         self.assertTrue(response.status_code, 200)
-        basket = response.data
-        basket_url = basket.get('url')
-        basket_id = basket.get('id')
 
-        request =  {
-            "country": "http://127.0.0.1:8000/api/countries/NL/",
-            "first_name": "Henk",
-            "last_name": "Van den Heuvel",
-            "line1": "Roemerlaan 44",
-            "line2": "",
-            "line3": "",
-            "line4": "Kroekingen",
-            "notes": "Niet STUK MAKEN OK!!!!",
-            "phone_number": "+31 26 370 4887",
-            "postcode": "7777KK",
-            "state": "Gerendrecht",
-            "title": "Mr"
-        }
-        self.response = self.post('api-basket-shipping-methods', **request)
+        payload = self._get_common_payload(None)['shipping_address']
+        self.response = self.post('api-basket-shipping-methods', **payload)
         self.response.assertStatusEqual(200)
         self.assertEqual(len(self.response), 1)
         self.assertDictEqual(self.response[0], {
@@ -493,12 +351,10 @@ class CheckOutTest(APITest):
                 'tax': '0.00'
             }
         })
-        response = self.post(
-            'api-basket-add-product',
-            url="http://testserver/api/products/1/", quantity=5)
+        response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
         self.assertEqual(response.status_code, 200)
 
-        self.response = self.post('api-basket-shipping-methods', **request)
+        self.response = self.post('api-basket-shipping-methods', **payload)
         self.response.assertStatusEqual(200)
         self.assertEqual(len(self.response), 1)
         self.assertDictEqual(self.response[0], {
@@ -515,13 +371,21 @@ class CheckOutTest(APITest):
             }
         })
 
-
-    @unittest.skip('Please add implementation')
     def test_cart_immutable_after_checkout(self):
-        "Prove that the cart can not be changed with the webservice by users in any way after checkout has been made."
-        self.fail("It might be that admin users can actually still modify a checked out cart (frozen)")
+        """Prove that the cart can not be changed after checkout."""
+        self.login(username='nobody', password='nobody')
+        response = self.get('api-basket')
+        self.assertTrue(response.status_code, 200)
+        basket = response.data
 
-    @unittest.skip('Please add implementation')
-    def test_client_can_not_falsify_picing(self):
-        "Prove that the total and shippingcharge variable sent along with a checkout request, can not be manipulated"
-        self.fail('checkout variable can not be used to buy products for prices they are not available at.')
+        payload = self._get_common_payload(basket['url'])
+        self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+        self.post('api-checkout', **payload)
+        self.assertEqual(
+            Basket.objects.get(pk=basket['id']).status, 'Frozen',
+            'Basket should be frozen after placing order and before payment'
+        )
+
+        url = reverse('basket-detail', args=(basket['id'],))
+        response = self.get(url)
+        self.assertEqual(response.status_code, 404)  # Frozen basket can not be accessed
