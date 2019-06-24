@@ -1,5 +1,6 @@
 import logging
 from copy import deepcopy
+from django.utils.translation import ugettext as _
 
 from rest_framework import serializers
 from rest_framework.fields import empty
@@ -11,6 +12,7 @@ from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.settings import overridable
 from oscarapi.utils.files import file_hash
 from oscarapi.utils.exists import find_existing_attribute_option_group
+from oscarapi.utils.accessors import getitems
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
@@ -194,8 +196,10 @@ class ProductAttributeValueListSerializer(UpdateListSerializer):
         if values is empty:
             return values
 
-        product_class = dictionary.get("product_class")
-        return [dict(value, product_class=product_class) for value in values]
+        product_class, parent = getitems(dictionary, "product_class", "parent")
+        return [
+            dict(value, product_class=product_class, parent=parent) for value in values
+        ]
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
@@ -308,7 +312,9 @@ class BaseProductSerializer(OscarModelSerializer):
     )
     categories = CategoryField(many=True, required=False)
     product_class = serializers.SlugRelatedField(
-        slug_field="slug", queryset=ProductClass.objects
+        slug_field="slug",
+        queryset=ProductClass.objects,
+        allow_null=True,
     )
     options = OptionSerializer(many=True, required=False)
     recommended_products = serializers.HyperlinkedRelatedField(
@@ -319,6 +325,19 @@ class BaseProductSerializer(OscarModelSerializer):
             structure__in=[Product.PARENT, Product.STANDALONE]
         ),
     )
+
+    def validate(self, attrs):
+        if "structure" in attrs and "parent" in attrs:
+            if attrs["structure"] == Product.CHILD and attrs["parent"] is None:
+                raise serializers.ValidationError(_("child without parent"))
+        if "structure" in attrs and "product_class" in attrs:
+            if attrs["product_class"] is None and attrs["structure"] != Product.CHILD:
+                raise serializers.ValidationError(
+                    _("product_class can not be empty for structure %(structure)s")
+                    % attrs
+                )
+
+        return super(BaseProductSerializer, self).validate(attrs)
 
     class Meta:
         model = Product

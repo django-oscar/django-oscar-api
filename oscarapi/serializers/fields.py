@@ -96,6 +96,10 @@ class AttributeValueField(serializers.Field):
                 "No attribute exist with code={code}, "
                 "please define it in the product_class first."
             ),
+            "child_without_parent": _(
+                "Can not find attribute if product_class is empty and "
+                "parent is empty as well, child without parent?"
+            ),
         }
         super(AttributeValueField, self).__init__(**kwargs)
 
@@ -104,7 +108,7 @@ class AttributeValueField(serializers.Field):
         return dictionary
 
     def to_internal_value(self, data):
-        assert "product" in data or "product_class" in data
+        assert "product" in data or "product_class" in data or "parent" in data
 
         try:
             code, value = attribute_details(data)
@@ -115,9 +119,13 @@ class AttributeValueField(serializers.Field):
                 attribute = ProductAttribute.objects.get(
                     code=code, product_class__products__id=data["product"]
                 )
-            elif "product_class" in data:
+            elif "product_class" in data and data["product_class"] is not None:
                 attribute = ProductAttribute.objects.get(
                     code=code, product_class__slug=data.get("product_class")
+                )
+            elif "parent" in data:
+                attribute = ProductAttribute.objects.get(
+                    code=code, product_class__products__id=data["parent"]
                 )
 
             if attribute.required and value is None:
@@ -157,8 +165,16 @@ class AttributeValueField(serializers.Field):
                 self.fail("invalid", error=e)
 
             return {"value": internal_value, "attribute": attribute}
-        except ProductAttribute.DoesNotExist:  # maybe this is fatal I don;t know yet
-            self.fail("attribute_missing", **data)
+        except ProductAttribute.DoesNotExist:
+            if (
+                "product_class" in data
+                and "parent" in data
+                and data["product_class"] is None
+                and data["parent"] is None
+            ):
+                self.fail("child_without_parent")
+            else:
+                self.fail("attribute_missing", **data)
         except ObjectDoesNotExist as e:
             self.fail("no_such_option", value=value)
         except KeyError as e:
