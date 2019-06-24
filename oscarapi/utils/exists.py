@@ -45,7 +45,7 @@ def construct_id_filter(model, data, prefix=None):
         )
 
     for field in model._meta.concrete_fields:
-        if field.unique and field.name in data:
+        if field.unique and field.name in data and data[field.name] is not None:
             _filter |= models.Q(**{_field_name(field.name, prefix): data[field.name]})
 
     return _filter
@@ -91,6 +91,4 @@ def bound_unique_together_get_or_create(bound_queryset, datum):
 
 
 def bound_unique_together_get_or_create_multiple(bound_queryset, data):
-    return [
-        bound_unique_together_get_or_create(bound_queryset, date) for date in data
-    ]
+    return [bound_unique_together_get_or_create(bound_queryset, date) for date in data]
