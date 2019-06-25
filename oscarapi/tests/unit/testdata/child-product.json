@@ -1,0 +1,42 @@
+{
+    "id": 2,
+    "attributes": [
+        {
+            "name": "Size",
+            "value": "Small",
+            "code": "size"
+        }
+    ],
+    "categories": [
+        "Clothing"
+    ],
+    "product_class": null,
+    "options": [],
+    "recommended_products": [],
+    "url": "http://127.0.0.1:8000/api/admin/products/1/",
+    "stockrecords": [
+        {
+            "url": "http://127.0.0.1:8000/api/admin/stockrecords/2/",
+            "product": 1,
+            "partner_sku": "clf-med",
+            "price_currency": "EUR",
+            "price_excl_tax": "11.00",
+            "price_retail": "13.10",
+            "cost_price": null,
+            "num_in_stock": 20,
+            "num_allocated": null,
+            "low_stock_threshold": null,
+            "partner": "http://127.0.0.1:8000/api/admin/partners/1/"
+        }
+    ],
+    "children": [],
+    "structure": "child",
+    "is_public": true,
+    "upc": "child-1234",
+    "title": "Oscar T-shirt",
+    "slug": "oscar-t-shirt-child",
+    "description": "",
+    "rating": null,
+    "is_discountable": true,
+    "parent": 1
+}

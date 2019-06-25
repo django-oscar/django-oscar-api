@@ -1288,6 +1288,8 @@ class TestProductAdmin(APITest):
             self.tshirt = json.load(p)
         with open(join(dirname(__file__), "testdata", "lots-of-attributes.json")) as p:
             self.attributes = json.load(p)
+        with open(join(dirname(__file__), "testdata", "child-product.json")) as p:
+            self.child = json.load(p)
 
     def test_staff_has_no_access_by_default(self):
         "Staff users without explicit admin permissions should not be able to edit products"
@@ -1334,6 +1336,32 @@ class TestProductAdmin(APITest):
 
         url = reverse("admin-product-detail", args=(1,))
         self.response = self.patch(url, **self.tshirt)
+        self.response.assertStatusEqual(200)
+
+    def test_post_child_product(self):
+        self.login("admin", "admin")
+        data = deepcopy(self.child)
+        data["slug"] = "child-hoepie"
+        data["upc"] = "child-ding"
+        data["stockrecords"] = [{
+            "partner_sku": "henk-het-kind",
+            "price_currency": "EUR",
+            "price_excl_tax": "110.00",
+            "partner": "http://127.0.0.1:8000/api/admin/partners/1/"
+        }]
+        self.response = self.post("admin-product-list", **data)
+        self.response.assertStatusEqual(201)
+
+    def test_put_child(self):
+        self.login("admin", "admin")
+        url = reverse("admin-product-detail", args=(2,))
+        self.response = self.put(url, **self.child)
+        self.response.assertStatusEqual(200)
+
+    def test_patch_child(self):
+        self.login("admin", "admin")
+        url = reverse("admin-product-detail", args=(2,))
+        self.response = self.patch(url, **self.child)
         self.response.assertStatusEqual(200)
 
 
