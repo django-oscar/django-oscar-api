@@ -2,6 +2,14 @@
 Changelog
 =========
 
+1.6.1  (2019-06-25)
+-------------------
+
+Fixed:
+- * `#176 <https://github.com/django-oscar/django-oscar-api/pull/176>`_ Fixed an issue where Child Products could not be updated with the Admin API
+
+Updated the documentation to explain `OSCARAPI_BLOCK_ADMIN_API_ACCESS` a bit more.
+
 1.6.0  (2019-06-13)
 -------------------
 This release is primary focussed on (some long desired) new features. This will also be the last release which is compatible with django-oscar 1.5.x and 1.6.x and django 1.11/2.1. The next release, 2.0,  will be compatible with django-oscar 2.0.
