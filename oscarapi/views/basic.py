@@ -4,7 +4,6 @@ import functools
 from oscar.core.loading import get_class, get_model
 
 from rest_framework import generics
-from rest_framework.permissions import DjangoModelPermissions
 
 from six.moves import map
 
@@ -47,6 +46,7 @@ RangeSerializer, OptionSerializer = get_api_classes(  # pylint: disable=unbalanc
     "serializers.product", ["RangeSerializer", "OptionSerializer"]
 )
 
+
 class CountryList(generics.ListAPIView):
     serializer_class = CountrySerializer
     queryset = Country.objects.all()
@@ -57,19 +57,16 @@ class CountryDetail(generics.RetrieveAPIView):
     queryset = Country.objects.all()
 
 
-class BasketList(generics.ListCreateAPIView):
+class BasketList(generics.ListAPIView):
     """
-    Retrieve all baskets that belong to the current user.
-    
-    While each user can view their own basket, for creating baskets
-    user must be assigned the correct (basket update) permissions.
+    Retrieve all baskets that belong to the current (authenticated) user.
     """
     serializer_class = BasketSerializer
     queryset = editable_baskets()
-    permission_classes = (DjangoModelPermissions,)
 
     def get_queryset(self):
         qs = super(BasketList, self).get_queryset()
+
         if self.request.user.is_authenticated:
             qs = qs.filter(owner=self.request.user)
             mapped_with_baskets = list(
