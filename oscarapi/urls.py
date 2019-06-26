@@ -1,4 +1,5 @@
 # pylint: disable=unbalanced-tuple-unpacking
+from django.conf import settings
 from django.conf.urls import url
 from rest_framework.urlpatterns import format_suffix_patterns
 
@@ -315,6 +316,7 @@ admin_urlpatterns = [
     url(r"^admin/users/$", UserList.as_view(), name="user-list"),
 ]
 
-urlpatterns = format_suffix_patterns(
-    urlpatterns + admin_urlpatterns
-)
+if settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS is False:
+    urlpatterns = urlpatterns + admin_urlpatterns
+
+urlpatterns = format_suffix_patterns(urlpatterns)
