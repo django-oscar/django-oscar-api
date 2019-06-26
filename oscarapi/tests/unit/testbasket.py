@@ -21,8 +21,8 @@ class BasketTest(APITest):
         'stockrecord', 'partner', 'option'
     ]
 
-    def test_basket_api_create(self):
-        "The basket api create command should work with regular cookie based login"
+    def test_basket_api_create_not_possible(self):
+        "it should not possible to create baskets with the basket-list view"
         url = reverse('basket-list')
         baskets = Basket.objects.all()
 
@@ -30,56 +30,24 @@ class BasketTest(APITest):
 
         # anonymous
         data = {}
-
         self.response = self.client.post(url, json.dumps(data), content_type='application/json')
-        self.response.assertStatusEqual(403, "Anonymous users can not use the basket api to create baskets.")
+        self.response.assertStatusEqual(405, "It is not possible to use the basket-list view to create baskets.")
 
         # authenticated
         self.login('nobody', 'nobody')
         data = {'owner': "http://testserver%s" % reverse('user-detail', args=[2])}
 
         self.response = self.client.post(url, json.dumps(data), content_type='application/json')
-        self.response.assertStatusEqual(403, "Authenticated regular users can not use the basket api to create baskets.")
+        self.response.assertStatusEqual(405, "It is not possible to use the basket-list view to create baskets.")
 
         # admin
         self.login('admin', 'admin')
 
         data = {'owner': "http://testserver%s" % reverse('user-detail', args=[1])}
         self.response = self.client.post(url, json.dumps(data), content_type='application/json')
-        self.response.assertStatusEqual(201, "It should be possible for a basket to be created, for a specific user.")
-        self.response.assertObjectIdEqual('owner', 1)
+        self.response.assertStatusEqual(405, "It is not possible to use the basket-list view to create baskets.")
 
-        # When we created a basket, it should be listed in the basket-list view
-        self.response = self.client.get(url, content_type='application/json')
-
-        self.assertEqual(len(self.response.data), 1)
-
-        data = {}
-        self.response = self.client.post(url, json.dumps(data), content_type='application/json')
-        self.response.assertStatusEqual(201, "It should be possible for a basket to be created for an anonymous user.")
-        self.assertEqual(Basket.objects.count(), 2, "2 baskets should after creating 2 baskets.")
-
-    def test_basket_api_create_header(self):
-        "The basket api create command should work with header based login."
-        empty = Basket.objects.all()
-        self.assertFalse(empty.exists(), "There should be no baskets yet.")
-
-        if self.hlogin('nobody', 'nobody', session_id='nobody'):
-            self.response = self.post(
-                'basket-list', session_id='nobody', authenticated=True,
-                owner="http://testserver%s" % reverse('user-detail', args=[2])
-            )
-            self.response.assertStatusEqual(403, "Authenticated regular users can not use the basket api to create baskets.")
-
-        if self.hlogin('admin', 'admin', session_id='admin'):
-            self.response = self.post(
-                'basket-list', session_id='admin', authenticated=True,
-                owner="http://testserver%s" % reverse('user-detail', args=[1])
-            )
-            self.response.assertStatusEqual(201, "It should be possible for a basket to be created, for a specific user.")
-            self.response.assertObjectIdEqual('owner', 1)
-
-        self.assertEqual(Basket.objects.count(), 3, "There should be 2 baskets from loging in and 1 is created with the api.")
+        self.assertEqual(Basket.objects.count(), 0)
 
     def test_retrieve_basket(self):
         "A user can fetch their own basket with the basket API and get's the same basket every time."
@@ -104,17 +72,15 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(200)
         self.response.assertValueEqual('id', basket_id)
 
-        # admin
-        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
-            self.login('admin', 'admin')
-            self.response = self.get('api-basket')
-            self.response.assertStatusEqual(200)
-            self.response.assertObjectIdEqual('owner', 1)
-            basket_id = self.response['id']
+        self.login('admin', 'admin')
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
+        self.response.assertObjectIdEqual('owner', 1)
+        basket_id = self.response['id']
 
-            self.response = self.get('api-basket')
-            self.response.assertStatusEqual(200)
-            self.response.assertValueEqual('id', basket_id)
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('id', basket_id)
 
         self.assertEqual(Basket.objects.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
@@ -142,16 +108,15 @@ class BasketTest(APITest):
         self.response.assertValueEqual('id', basket_id)
 
         # admin
-        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
-            self.hlogin('admin', 'admin', session_id='admin')
-            self.response = self.get('api-basket', session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(200)
-            self.response.assertObjectIdEqual('owner', 1)
-            basket_id = self.response['id']
+        self.hlogin('admin', 'admin', session_id='admin')
+        self.response = self.get('api-basket', session_id='admin', authenticated=True)
+        self.response.assertStatusEqual(200)
+        self.response.assertObjectIdEqual('owner', 1)
+        basket_id = self.response['id']
 
-            self.response = self.get('api-basket', session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(200)
-            self.response.assertValueEqual('id', basket_id)
+        self.response = self.get('api-basket', session_id='admin', authenticated=True)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('id', basket_id)
 
         self.assertEqual(Basket.objects.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
@@ -208,30 +173,28 @@ class BasketTest(APITest):
         self.response = self.client.get(url)
         self.response.assertStatusEqual(403, "Script kiddies should fail to collect other users cart items.")
 
-        # now let's show the power of the admin!
-        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
-            self.login('admin', 'admin')
-            self.response = self.get('api-basket')
-            self.response.assertStatusEqual(200)
+        self.login('admin', 'admin')
+        self.response = self.get('api-basket')
+        self.response.assertStatusEqual(200)
 
-            # try to access the urls in the response.
-            basket_url = self.response['url']
-            basket_lines = self.response['lines']
+        # try to access the urls in the response.
+        basket_url = self.response['url']
+        basket_lines = self.response['lines']
 
-            self.response = self.client.get(basket_url)
-            self.response.assertStatusEqual(200)
+        self.response = self.client.get(basket_url)
+        self.response.assertStatusEqual(200)
 
-            self.response = self.client.get(basket_lines)
-            self.response.assertStatusEqual(200)
+        self.response = self.client.get(basket_lines)
+        self.response.assertStatusEqual(200)
 
-            # try to acces somebody else's basket (hihi).
-            url = reverse('basket-detail', args=(1,))
-            self.response = self.client.get(url)
-            self.response.assertStatusEqual(403, "Staff users not access other peoples baskets.")
+        # try to acces somebody else's basket (hihi).
+        url = reverse('basket-detail', args=(1,))
+        self.response = self.client.get(url)
+        self.response.assertStatusEqual(403, "Users cannot access other peoples baskets.")
 
-            url = reverse('basket-lines-list', args=(1,))
-            self.response = self.client.get(url)
-            self.response.assertStatusEqual(403, "Staff users not access other peoples baskets.")
+        url = reverse('basket-lines-list', args=(1,))
+        self.response = self.client.get(url)
+        self.response.assertStatusEqual(403, "Users not access other peoples baskets.")
 
         self.assertEqual(Basket.objects.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
@@ -289,30 +252,28 @@ class BasketTest(APITest):
         self.response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:nobody')
         self.response.assertStatusEqual(403, "Script kiddies should fail to collect other users cart items.")
 
-        # now let's show the power of the admin!
-        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
-            self.hlogin('admin', 'admin', session_id='admin')
-            self.response = self.get('api-basket', session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(200)
+        self.hlogin('admin', 'admin', session_id='admin')
+        self.response = self.get('api-basket', session_id='admin', authenticated=True)
+        self.response.assertStatusEqual(200)
 
-            # try to access the urls in the response.
-            basket_url = self.response['url']
-            basket_lines = self.response['lines']
+        # try to access the urls in the response.
+        basket_url = self.response['url']
+        basket_lines = self.response['lines']
 
-            self.response = self.client.get(basket_url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
-            self.response.assertStatusEqual(200)
+        self.response = self.client.get(basket_url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
+        self.response.assertStatusEqual(200)
 
-            self.response = self.client.get(basket_lines, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
-            self.response.assertStatusEqual(200)
+        self.response = self.client.get(basket_lines, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
+        self.response.assertStatusEqual(200)
 
-            # try to acces somebody else's basket (hihi).
-            url = reverse('basket-detail', args=(1,))
-            self.response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
-            self.response.assertStatusEqual(403, "Staff users not access other peoples baskets.")
+        # try to acces somebody else's basket (hihi).
+        url = reverse('basket-detail', args=(1,))
+        self.response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
+        self.response.assertStatusEqual(403, "Users cannot access other peoples baskets.")
 
-            url = reverse('basket-lines-list', args=(1,))
-            self.response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
-            self.response.assertStatusEqual(403, "Staff users not access other peoples baskets.")
+        url = reverse('basket-lines-list', args=(1,))
+        self.response = self.client.get(url, HTTP_SESSION_ID='SID:AUTH:testserver:admin')
+        self.response.assertStatusEqual(403, "Users cannot access other peoples baskets.")
 
         self.assertEqual(Basket.objects.count(), 3, "There should be 3 baskets open after 3 users accessed a basket.")
 
@@ -703,100 +664,100 @@ class BasketTest(APITest):
 
     def test_basket_write_permissions_header_admin(self):
         "An admin user can not change someone elses basket, even when authenticating with session header."
-        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
-            # now try for authenticated user.
-            self.hlogin('admin', 'admin', session_id='admin')
-            self.response = self.get('api-basket', session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(200)
 
-            # try to access the urls in the response.
-            basket_id = self.response['id']
-            basket_url = self.response['url']
-            owner_url = self.response['owner']
-            self.assertIn(reverse('user-detail', args=(1,)), owner_url)
-            self.response.assertValueEqual('status', 'Open')
+        # now try for authenticated user.
+        self.hlogin('admin', 'admin', session_id='admin')
+        self.response = self.get('api-basket', session_id='admin', authenticated=True)
+        self.response.assertStatusEqual(200)
 
-            # change status to saved
-            url = reverse('basket-detail', args=(basket_id,))
-            self.response = self.put(url, status='Saved', session_id='admin', authenticated=True)
+        # try to access the urls in the response.
+        basket_id = self.response['id']
+        basket_url = self.response['url']
+        owner_url = self.response['owner']
+        self.assertIn(reverse('user-detail', args=(1,)), owner_url)
+        self.response.assertValueEqual('status', 'Open')
 
-            self.response.assertStatusEqual(200)
-            self.response.assertValueEqual('id', basket_id)
-            self.response.assertValueEqual('status', 'Saved')
+        # change status to saved
+        url = reverse('basket-detail', args=(basket_id,))
+        self.response = self.put(url, status='Saved', session_id='admin', authenticated=True)
 
-            # and back to open again
-            self.response = self.put(url, status='Open', session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(200)
-            self.response.assertValueEqual('id', basket_id)
-            self.response.assertValueEqual('status', 'Open')
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('id', basket_id)
+        self.response.assertValueEqual('status', 'Saved')
 
-            # write a line to the basket
-            line_data = {
-                "basket": basket_url,
-                "line_reference": "234_345",
-                "product": "http://testserver/api/products/1/",
-                "stockrecord": "http://testserver/api/admin/stockrecords/1/",
-                "quantity": 3,
-                "price_currency": "EUR",
-                "price_excl_tax": "100.0",
-                "price_incl_tax": "121.0",
-            }
-            line_url = reverse('basket-lines-list', args=(basket_id,))
-            self.response = self.post(line_url, session_id='admin', authenticated=True, **line_data)
-            self.response.assertStatusEqual(201)
+        # and back to open again
+        self.response = self.put(url, status='Open', session_id='admin', authenticated=True)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('id', basket_id)
+        self.response.assertValueEqual('status', 'Open')
 
-            # throw the basket away
-            self.response = self.delete(url, session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(204)
+        # write a line to the basket
+        line_data = {
+            "basket": basket_url,
+            "line_reference": "234_345",
+            "product": "http://testserver/api/products/1/",
+            "stockrecord": "http://testserver/api/admin/stockrecords/1/",
+            "quantity": 3,
+            "price_currency": "EUR",
+            "price_excl_tax": "100.0",
+            "price_incl_tax": "121.0",
+        }
+        line_url = reverse('basket-lines-list', args=(basket_id,))
+        self.response = self.post(line_url, session_id='admin', authenticated=True, **line_data)
+        self.response.assertStatusEqual(201)
 
-            # now lets start messing around
-            self.response = self.get('api-basket', session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(200)
-            basket_id = self.response['id']
+        # throw the basket away
+        self.response = self.delete(url, session_id='admin', authenticated=True)
+        self.response.assertStatusEqual(204)
 
-            # create a basket for another user.
-            b = Basket.objects.create(owner_id=3)
-            self.assertEqual(str(b.owner), 'somebody')
-            self.assertEqual(Basket.objects.count(), 2)
-            somebody_basket_id = b.pk
+        # now lets start messing around
+        self.response = self.get('api-basket', session_id='admin', authenticated=True)
+        self.response.assertStatusEqual(200)
+        basket_id = self.response['id']
 
-            # try to access the urls in the response.
-            basket_id = self.response['id']
-            basket_url = self.response['url']
-            url = reverse('basket-detail', args=(basket_id,))
+        # create a basket for another user.
+        b = Basket.objects.create(owner_id=3)
+        self.assertEqual(str(b.owner), 'somebody')
+        self.assertEqual(Basket.objects.count(), 2)
+        somebody_basket_id = b.pk
 
-            self.response.assertValueEqual('status', 'Open')
+        # try to access the urls in the response.
+        basket_id = self.response['id']
+        basket_url = self.response['url']
+        url = reverse('basket-detail', args=(basket_id,))
 
-            # try to write to someone else's basket by sending the primary key
-            # along.
-            self.response = self.put(url, status='Saved', session_id='admin', authenticated=True, id=somebody_basket_id)
-            self.response.assertStatusEqual(200)
-            self.response.assertValueEqual('id', basket_id, 'Primary key value can not be changed.')
-            self.response.assertValueEqual('status', 'Saved')
+        self.response.assertValueEqual('status', 'Open')
 
-            # try to write to someone else's basket directly
-            url = reverse('basket-detail', args=(somebody_basket_id,))
-            self.response = self.put(url, status='Saved', session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(403)
+        # try to write to someone else's basket by sending the primary key
+        # along.
+        self.response = self.put(url, status='Saved', session_id='admin', authenticated=True, id=somebody_basket_id)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual('id', basket_id, 'Primary key value can not be changed.')
+        self.response.assertValueEqual('status', 'Saved')
 
-            # try adding lines to someone elses basket
-            line_data = {
-                "basket": "http://testserver/api/baskets/%s/" % somebody_basket_id,
-                "line_reference": "234_345",
-                "product": "http://testserver/api/products/1/",
-                "stockrecord": "http://testserver/api/admin/stockrecords/1/",
-                "quantity": 3,
-                "price_currency": "EUR",
-                "price_excl_tax": "100.0",
-                "price_incl_tax": "121.0"
-            }
-            zurl = reverse('basket-lines-list', args=(basket_id,))
-            self.response = self.post(zurl, session_id='admin', authenticated=True, **line_data)
-            self.response.assertStatusEqual(403)
+        # try to write to someone else's basket directly
+        url = reverse('basket-detail', args=(somebody_basket_id,))
+        self.response = self.put(url, status='Saved', session_id='admin', authenticated=True)
+        self.response.assertStatusEqual(403)
 
-            # try to delete someone else's basket
-            self.response = self.delete(url, session_id='admin', authenticated=True)
-            self.response.assertStatusEqual(403)
+        # try adding lines to someone elses basket
+        line_data = {
+            "basket": "http://testserver/api/baskets/%s/" % somebody_basket_id,
+            "line_reference": "234_345",
+            "product": "http://testserver/api/products/1/",
+            "stockrecord": "http://testserver/api/admin/stockrecords/1/",
+            "quantity": 3,
+            "price_currency": "EUR",
+            "price_excl_tax": "100.0",
+            "price_incl_tax": "121.0"
+        }
+        zurl = reverse('basket-lines-list', args=(basket_id,))
+        self.response = self.post(zurl, session_id='admin', authenticated=True, **line_data)
+        self.response.assertStatusEqual(403)
+
+        # try to delete someone else's basket
+        self.response = self.delete(url, session_id='admin', authenticated=True)
+        self.response.assertStatusEqual(403)
 
     def test_add_product_anonymous(self):
         "Test if an anonymous user can add a product to his basket"
