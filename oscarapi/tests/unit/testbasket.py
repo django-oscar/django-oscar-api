@@ -1,13 +1,17 @@
 import json
 
+from mock import patch
+
 from django.urls import reverse
 
 from oscar.core.loading import get_model
 
+from oscarapi.basket.operations import get_basket
 from oscarapi.tests.utils import APITest
 
 
 Basket = get_model('basket', 'Basket')
+Product = get_model('catalogue', 'Product')
 
 
 class BasketTest(APITest):
@@ -816,6 +820,22 @@ class BasketTest(APITest):
         line0 = self.response.body[0]
         self.assertEqual(line0['product'], "http://testserver/api/products/1/")
         self.assertEqual(line0['quantity'], 5)
+
+    @patch('oscarapi.views.basket.signals.basket_addition.send')
+    def test_add_product_basket_addition_signal_send(self, mock):
+        """The oscar `basket_addition` signal should be send when adding a product"""
+        self.login('nobody', 'nobody')
+        self.response = self.post('api-basket-add-product', url="http://testserver/api/products/1/", quantity=5)
+
+        self.assertTrue(mock.called)
+
+        signal_arguments = mock.call_args[1]
+        self.assertEqual(signal_arguments['product'], Product.objects.get(pk=1))
+        self.assertEqual(signal_arguments['user'].username, 'nobody')
+
+        # see if we can get the basket from the request
+        basket = get_basket(signal_arguments['request'])
+        self.assertTrue(isinstance(basket, Basket))
 
     def test_basket_line_permissions(self):
         "A user's Basket lines can not be viewed by another user in any way."
