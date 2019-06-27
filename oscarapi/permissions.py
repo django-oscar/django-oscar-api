@@ -39,8 +39,12 @@ class APIAdminPermission(DjangoModelPermissions):
         "DELETE": ["%(app_label)s.delete_%(model_name)s"],
     }
 
+    @staticmethod
+    def disallowed_by_setting_and_request(request):
+        return settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS or not request.user.is_staff
+
     def has_permission(self, request, view):
-        if settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS or not request.user.is_staff:
+        if self.disallowed_by_setting_and_request(request):
             return False
         return super(APIAdminPermission, self).has_permission(request, view)
 

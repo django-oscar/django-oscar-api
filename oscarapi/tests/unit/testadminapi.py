@@ -1,10 +1,14 @@
 from six.moves import reload_module
-
+from django.contrib.auth import get_user_model
+from django.test import RequestFactory
 from django.urls import reverse
 
 from oscarapi.tests.utils import APITest
 
 from oscarapi import urls
+from oscarapi.permissions import APIAdminPermission
+
+User = get_user_model()
 
 
 class BlockAdminApiTest(APITest):
@@ -48,3 +52,39 @@ class BlockAdminApiTest(APITest):
 
             for pattern in urls.admin_urlpatterns:
                 self.assertNotIn(pattern.name, urlpattern_names)
+
+    def test_api_admin_permission(self):
+        permission = APIAdminPermission()
+        request = RequestFactory()
+
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
+            # nobody can't access the admin api
+            request.user = User.objects.get(username="nobody")
+            self.assertTrue(
+                permission.disallowed_by_setting_and_request(request),
+                "a non staff user can't access the admin api"
+            )
+
+            # but a staff user can
+            request.user = User.objects.get(username="admin")
+            self.assertFalse(
+                permission.disallowed_by_setting_and_request(request),
+                "a staff user can access the admin api"
+            )
+
+        with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=True):
+            # nobody can't access the admin api
+            request.user = User.objects.get(username="nobody")
+            self.assertTrue(
+                permission.disallowed_by_setting_and_request(request),
+                "a non staff user can't access the admin api"
+            )
+
+            # and a staff user can't access it either when
+            # OSCARAPI_BLOCK_ADMIN_API_ACCESS=True
+            request.user = User.objects.get(username="admin")
+            self.assertTrue(
+                permission.disallowed_by_setting_and_request(request),
+                "a staff user can't access the admin api with "
+                "OSCARAPI_BLOCK_ADMIN_API_ACCESS=True"
+            )
