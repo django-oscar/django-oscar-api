@@ -57,13 +57,9 @@ class OrderLineList(generics.ListAPIView):
     queryset = OrderLine.objects.all()
     serializer_class = OrderLineSerializer
 
-    def get(self, request, pk=None, format=None):
-        if pk is None:
-            return self.permission_denied(request)
-
+    def get(self, request, pk, format=None):
         self.queryset = self.queryset.filter(
             order__id=pk, order__user=request.user)
-
         return super(OrderLineList, self).get(request, format)
 
 
@@ -71,13 +67,9 @@ class OrderLineDetail(generics.RetrieveAPIView):
     queryset = OrderLine.objects.all()
     serializer_class = OrderLineSerializer
 
-    def get(self, request, pk=None, format=None):
-        if pk is None:
-            return self.permission_denied(request)
-
+    def get(self, request, pk, format=None):
         self.queryset = self.queryset.filter(
             order__id=pk, order__user=request.user)
-
         return super(OrderLineDetail, self).get(request, format)
 
 

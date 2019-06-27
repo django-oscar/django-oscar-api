@@ -283,35 +283,20 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
     serializer_class = BasketLineSerializer
     queryset = Line.objects.all()
 
-    def get_queryset(self):
-        pk = self.kwargs.get("pk")
-        if pk is None:
-            return self.permission_denied(self.request)
-
-        # usually we need the lines of the basket
-        basket = self.check_basket_permission(self.request, basket_pk=pk)
-        prepped_basket = operations.assign_basket_strategy(basket, self.request)
-        return prepped_basket.all_lines()
-
     def get(
-        self, request, pk=None, format=None
+        self, request, pk, format=None
     ):  # pylint: disable=redefined-builtin,arguments-differ
-        if pk is not None:
-            basket = self.check_basket_permission(request, pk)
-            prepped_basket = operations.assign_basket_strategy(basket, request)
-            self.queryset = prepped_basket.all_lines()
-            self.serializer_class = BasketLineSerializer
+        basket = self.check_basket_permission(request, basket_pk=pk)
+        prepped_basket = operations.assign_basket_strategy(basket, request)
+        self.queryset = prepped_basket.all_lines()
 
         return super(LineList, self).get(request, format)
 
     def post(
-        self, request, pk=None, format=None
+        self, request, pk, format=None
     ):  # pylint: disable=redefined-builtin,arguments-differ
         data_basket = self.get_data_basket(request.data, format)
         self.check_basket_permission(request, basket=data_basket)
-
-        if pk is None:
-            return self.permission_denied(self.request)
 
         url_basket = self.check_basket_permission(request, basket_pk=pk)
 
