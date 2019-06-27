@@ -283,43 +283,28 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
     serializer_class = BasketLineSerializer
     queryset = Line.objects.all()
 
-    def get_queryset(self):
-        pk = self.kwargs.get("pk")
-        if pk is not None:  # usually we need the lines of the basket
-            basket = self.check_basket_permission(self.request, basket_pk=pk)
-            prepped_basket = operations.assign_basket_strategy(basket, self.request)
-            return prepped_basket.all_lines()
-        elif self.request.user.is_staff:  # admin users can view a bit more
-            return super(LineList, self).get_queryset()
-        else:  # non admin users can view nothing at all here.
-            return self.permission_denied(self.request)
-
     def get(
-        self, request, pk=None, format=None
+        self, request, pk, format=None
     ):  # pylint: disable=redefined-builtin,arguments-differ
-        if pk is not None:
-            basket = self.check_basket_permission(request, pk)
-            prepped_basket = operations.assign_basket_strategy(basket, request)
-            self.queryset = prepped_basket.all_lines()
-            self.serializer_class = BasketLineSerializer
+        basket = self.check_basket_permission(request, basket_pk=pk)
+        prepped_basket = operations.assign_basket_strategy(basket, request)
+        self.queryset = prepped_basket.all_lines()
 
         return super(LineList, self).get(request, format)
 
     def post(
-        self, request, pk=None, format=None
+        self, request, pk, format=None
     ):  # pylint: disable=redefined-builtin,arguments-differ
         data_basket = self.get_data_basket(request.data, format)
         self.check_basket_permission(request, basket=data_basket)
 
-        if pk is not None:
-            url_basket = self.check_basket_permission(request, basket_pk=pk)
-            if url_basket != data_basket:
-                raise exceptions.NotAcceptable(
-                    _("Target basket inconsistent %s != %s")
-                    % (url_basket.pk, data_basket.pk)
-                )
-        elif not request.user.is_staff:
-            self.permission_denied(request)
+        url_basket = self.check_basket_permission(request, basket_pk=pk)
+
+        if url_basket != data_basket:
+            raise exceptions.NotAcceptable(
+                _("Target basket inconsistent %s != %s")
+                % (url_basket.pk, data_basket.pk)
+            )
 
         return super(LineList, self).post(request, format=format)
 

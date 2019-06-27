@@ -11,9 +11,7 @@ Main settings
 -----------------------------------
 Default: ``True``
 
-Useful in production websites wehere you want to make sure that admin users 
-can't access the API (they can read/write anything which is exposed by the API).
-
+Useful in production websites wehere you want to make sure that the admin api is not exposed at all.
 
 Serializer settings
 ===================

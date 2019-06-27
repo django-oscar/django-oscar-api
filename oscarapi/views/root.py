@@ -1,5 +1,7 @@
 import collections
 
+from django.conf import settings
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -51,7 +53,7 @@ def api_root(request, format=None):  # pylint: disable=redefined-builtin
     """
     apis = PUBLIC_APIS(request, format)
 
-    if request.user.is_staff:
+    if not settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS and request.user.is_staff:
         apis += [
             ("admin", collections.OrderedDict(ADMIN_APIS(request, format))),
         ]

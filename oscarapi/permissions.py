@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from rest_framework.permissions import (
     BasePermission,
     IsAuthenticated,
@@ -19,9 +21,10 @@ class IsOwner(IsAuthenticated):
 
 class APIAdminPermission(DjangoModelPermissions):
     """
-    The permission for all the admin api views. You only get admin api access if you
-    are a staff user. You will get access to the objects according to the model
-    persmissons you have (iew / add / change / delete)
+    The permission for all the admin api views. You only get admin api access when:
+    - OSCARAPI_BLOCK_ADMIN_API_ACCESS is false
+    - you are a staff user (is_staff)
+    - you have any of the model persmissons needed (view / add / change / delete)
 
     Feel free to customize!
     """
@@ -36,8 +39,12 @@ class APIAdminPermission(DjangoModelPermissions):
         "DELETE": ["%(app_label)s.delete_%(model_name)s"],
     }
 
+    @staticmethod
+    def disallowed_by_setting_and_request(request):
+        return settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS or not request.user.is_staff
+
     def has_permission(self, request, view):
-        if not request.user.is_staff:
+        if self.disallowed_by_setting_and_request(request):
             return False
         return super(APIAdminPermission, self).has_permission(request, view)
 

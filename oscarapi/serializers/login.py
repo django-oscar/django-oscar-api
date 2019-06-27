@@ -34,10 +34,6 @@ class LoginSerializer(serializers.Serializer):
         elif not user.is_active:
             raise serializers.ValidationError(
                 'Can not log in as inactive user')
-        elif user.is_staff and overridable(
-                'OSCARAPI_BLOCK_ADMIN_API_ACCESS', True):
-            raise serializers.ValidationError(
-                'Staff users can not log in via the rest api')
 
         # set instance to the user so we can use this in the view
         self.instance = user
