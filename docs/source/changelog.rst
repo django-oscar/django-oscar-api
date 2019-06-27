@@ -5,15 +5,15 @@ Changelog
 1.6.1  (2019-06-27)
 -------------------
 Fixed:
-* `#176 <https://github.com/django-oscar/django-oscar-api/pull/176>`_ Fixed an issue where Child Products could not be updated with the Admin API
-* `#179 <https://github.com/django-oscar/django-oscar-api/pull/179>`_ Make sure we don't use the ``.is_staff`` check anymore anywhere. This is now completely replaced with the *Admin API*.
-* `#179 <https://github.com/django-oscar/django-oscar-api/pull/179>`_ Removed any functionality to create (``POST``) new baskets in the ``BasketList`` view. If any need of this exists, this should be implemented in the *Admin API*
-* `#179 <https://github.com/django-oscar/django-oscar-api/pull/179>`_ Staff users are now allowed to login and do a regular checkout.
+ * `#176 <https://github.com/django-oscar/django-oscar-api/pull/176>`_ Fixed an issue where Child Products could not be updated with the Admin API
+ * `#179 <https://github.com/django-oscar/django-oscar-api/pull/179>`_ Make sure we don't use the ``.is_staff`` check anymore anywhere. This is now completely replaced with the *Admin API*
+ * `#179 <https://github.com/django-oscar/django-oscar-api/pull/179>`_ Removed any functionality to create (``POST``) new baskets in the ``BasketList`` view. If any need of this exists, this should be implemented in the *Admin API*
+ * `#179 <https://github.com/django-oscar/django-oscar-api/pull/179>`_ Staff users are now allowed to login and do a regular checkout
 
 Features:
-* `#173 <https://github.com/django-oscar/django-oscar-api/pull/173>`_ Added missing checkout tests (samitnuk)
-* `#178 <https://github.com/django-oscar/django-oscar-api/pull/178>`_ Send the basket addition signal in the ``AddProductView``
-* `#179 <https://github.com/django-oscar/django-oscar-api/pull/179>`_ Check for the ``OSCARAPI_BLOCK_ADMIN_API_ACCESS`` setting to expose the *Admin API* at all. Useful for production websites where you completely want to disable this. Updated documentation for this.
+ * `#173 <https://github.com/django-oscar/django-oscar-api/pull/173>`_ Added missing checkout tests (samitnuk)
+ * `#178 <https://github.com/django-oscar/django-oscar-api/pull/178>`_ Send the basket addition signal in the ``AddProductView``
+ * `#179 <https://github.com/django-oscar/django-oscar-api/pull/179>`_ Check for the ``OSCARAPI_BLOCK_ADMIN_API_ACCESS`` setting to expose the *Admin API* at all. Useful for production websites where you completely want to disable this. Updated documentation for this
 
 1.6.0  (2019-06-13)
 -------------------
