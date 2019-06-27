@@ -36,7 +36,7 @@ setup(
     packages=find_packages(
         exclude=[
             '*tests.unit', '*tests.serializers*', '*tests.doctests*',
-            '*fixtures', '*sandbox*'
+            '*fixtures', '*fixtures*', '*sandbox*'
         ]),
     # include non python files
     include_package_data=True,
