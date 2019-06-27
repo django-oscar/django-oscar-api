@@ -2,16 +2,18 @@ import json
 
 from mock import patch
 
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 
 from oscar.core.loading import get_model
 
-from oscarapi.basket.operations import get_basket
+from oscarapi.basket.operations import get_basket, get_user_basket
 from oscarapi.tests.utils import APITest
 
 
 Basket = get_model('basket', 'Basket')
 Product = get_model('catalogue', 'Product')
+User = get_user_model()
 
 
 class BasketTest(APITest):
@@ -974,3 +976,14 @@ class BasketTest(APITest):
         self.hlogin('somebody', 'somebody', session_id='somebody')
         self.response = self.put(attribute['url'], value='Hack HAHAHAHA')
         self.response.assertStatusEqual(403, "Other users cannot update my line attributes")
+
+    def test_get_user_basket_with_multiple_baskets(self):
+        user = User.objects.get(username="nobody")
+        Basket.open.create(owner=user)
+        Basket.open.create(owner=user)
+        self.assertEqual(Basket.open.count(), 2)
+
+        # get_user_basket will fix this automatically for us
+        user_basket = get_user_basket(user)
+        self.assertEqual(Basket.open.count(), 1)
+        self.assertEqual(user_basket, Basket.open.first())
