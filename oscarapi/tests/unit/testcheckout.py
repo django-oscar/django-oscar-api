@@ -254,12 +254,6 @@ class CheckOutTest(APITest):
         self.response.assertStatusEqual(200)
         self.login(username='nobody', password='nobody')
 
-    def test_checkout_creates_an_order(self):
-        """After checkout has been done, a user should have gained an order object."""
-        self.test_checkout()
-        self.response = self.get('order-list')
-        self.assertEqual(len(self.response), 1, 'An order should have been created.')
-
     def test_anonymous_checkout(self):
         """Test if an order can be placed as an anonymous user."""
         response = self.get('api-basket')
@@ -293,6 +287,31 @@ class CheckOutTest(APITest):
                 Basket.objects.get(pk=basket['id']).status, 'Frozen',
                 'Basket should be frozen after placing order and before payment'
             )
+
+    def test_checkout_creates_an_order(self):
+        """After checkout has been done, a user should have gained an order object."""
+        # first create an anoymous order
+        self.test_anonymous_checkout()
+
+        # and now an order for the user nobody
+        self.login(username='nobody', password='nobody')
+        self.test_checkout()
+        self.response = self.get('order-list')
+        # the anonymous order should not be listed
+        self.assertEqual(len(self.response), 1, 'An order should have been created.')
+
+        order_url = self.response.data[0]['url']
+        self.response = self.get(order_url)
+        orderlines_url = self.response['lines']
+        self.response = self.get(orderlines_url)
+        self.assertEqual(len(self.response), 1, 'The order should have one orderline.')
+
+        orderline_url = self.response.data[0]['url']
+        self.response = self.get(orderline_url)
+
+        self.assertEqual(
+            self.response['order'],
+            order_url, 'the order url from a line is the same as the one created')
 
     @patch('oscarapi.signals.oscarapi_post_checkout.send')
     def test_post_checkout_signal_send(self, mock):
