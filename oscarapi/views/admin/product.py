@@ -1,5 +1,6 @@
 # pylint: disable=unbalanced-tuple-unpacking
 from rest_framework import generics
+from rest_framework.exceptions import NotFound
 
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_classes, get_api_class
@@ -79,6 +80,12 @@ class CategoryAdminList(generics.ListCreateAPIView, CategoryList):
     queryset = Category.get_root_nodes()
     serializer_class = AdminCategorySerializer
     permission_classes = (APIAdminPermission,)
+
+    def get_queryset(self):
+        try:
+            return super(CategoryAdminList, self).get_queryset()
+        except NotFound:  # admins might be able to create so hold the error.
+            return Category.objects.none()
 
     def get_serializer_context(self):
         ctx = super(CategoryAdminList, self).get_serializer_context()
