@@ -163,12 +163,12 @@ class AdminCategorySerializer(BaseCategorySerializer):
 
     def create(self, validated_data):
         breadcrumbs = self.context.get("breadcrumbs", None)
-        name = validated_data["name"]
+        slug = validated_data["slug"]
 
         if breadcrumbs is None:
-            breadcrumbs = name
+            breadcrumbs = slug
         else:
-            breadcrumbs = "/".join((breadcrumbs, name))
+            breadcrumbs = "/".join((breadcrumbs, slug))
 
         try:
             instance = create_from_full_slug(breadcrumbs, separator="/")
