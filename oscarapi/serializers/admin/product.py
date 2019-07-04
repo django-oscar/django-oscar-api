@@ -6,10 +6,10 @@ from rest_framework.exceptions import APIException
 from oscar.core.loading import get_model, get_class
 
 from oscarapi.serializers.utils import OscarHyperlinkedModelSerializer
+from oscarapi.utils.categories import create_from_full_slug
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.models import fake_autocreated
 
-create_from_breadcrumbs = get_class("catalogue.categories", "create_from_breadcrumbs")
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
 ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
@@ -171,7 +171,7 @@ class AdminCategorySerializer(BaseCategorySerializer):
             breadcrumbs = "/".join((breadcrumbs, name))
 
         try:
-            instance = create_from_breadcrumbs(breadcrumbs, separator="/")
+            instance = create_from_full_slug(breadcrumbs, separator="/")
         except ValueError as e:
             raise APIException(str(e))
 
