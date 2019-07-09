@@ -53,7 +53,7 @@ def api_root(request, format=None):  # pylint: disable=redefined-builtin
     """
     apis = PUBLIC_APIS(request, format)
 
-    if not settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS and request.user.is_staff:
+    if not getattr(settings, "OSCARAPI_BLOCK_ADMIN_API_ACCESS", True) and request.user.is_staff:
         apis += [
             ("admin", collections.OrderedDict(ADMIN_APIS(request, format))),
         ]
