@@ -316,7 +316,7 @@ admin_urlpatterns = [
     url(r"^admin/users/$", UserList.as_view(), name="user-list"),
 ]
 
-if settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS is False:
+if not getattr(settings, "OSCARAPI_BLOCK_ADMIN_API_ACCESS", True):
     urlpatterns = urlpatterns + admin_urlpatterns
 
 urlpatterns = format_suffix_patterns(urlpatterns)
