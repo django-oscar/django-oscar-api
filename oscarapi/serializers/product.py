@@ -437,7 +437,7 @@ class ProductSerializer(PublicProductSerializer):
 class ProductLinkSerializer(ProductSerializer):
     """
     Summary serializer for list view, listing all products.
-    
+
     This serializer can be easily made to show any field on ``ProductSerializer``,
     just add fields to the ``OSCARAPI_PRODUCT_FIELDS`` setting.
     """
@@ -465,6 +465,3 @@ class AddProductSerializer(serializers.Serializer):  # pylint: disable=abstract-
         view_name="product-detail", queryset=Product.objects, required=True
     )
     options = OptionValueSerializer(many=True, required=False)
-
-    class Meta:
-        model = Product
