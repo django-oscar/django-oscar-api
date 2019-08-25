@@ -36,9 +36,9 @@ class ProductAdminList(generics.UpdateAPIView, generics.ListCreateAPIView):
     primary key(id) of the product, as long as you are sending enough data
     to uniquely identify the product (upc). That means you can try updating and
     if that fails, try POST. Or the other way around, whatever makes most
-    sense in you scenatio.
+    sense in you scenario.
 
-    Note that if you have changed the product model and changed upc to nolonger
+    Note that if you have changed the product model and changed upc to no longer
     be unique, you MUST add another unique field or specify a unique together
     constraint. And you have to send that data along.
     """
