@@ -1,0 +1,20 @@
+{
+    "upc": "entity",
+    "id": 4,
+    "title": "Entity product",
+    "description": "<p>An entity</p>",
+    "structure": "standalone",
+    "recommended_products": [],
+    "attributes": [
+        {
+            "name": "entity",
+            "value": "henk",
+            "code": "entity"
+        }
+    ],
+    "categories": [],
+    "product_class": "entityproduct",
+    "images": [],
+    "options": [],
+    "children": []
+}

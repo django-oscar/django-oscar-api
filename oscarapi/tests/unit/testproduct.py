@@ -1290,6 +1290,8 @@ class TestProductAdmin(APITest):
             self.attributes = json.load(p)
         with open(join(dirname(__file__), "testdata", "child-product.json")) as p:
             self.child = json.load(p)
+        with open(join(dirname(__file__), "testdata", "entity-product.json")) as p:
+            self.entity = json.load(p)
 
     def test_staff_has_no_access_by_default(self):
         "Staff users without explicit admin permissions should not be able to edit products"
@@ -1378,6 +1380,22 @@ class TestProductAdmin(APITest):
             error,
             "Can not find attribute if product_class is empty and parent is empty as well, child without parent?",
         )
+
+    def test_entity_error(self):
+        self.login("admin", "admin")
+        url = reverse("admin-product-detail", args=(4,))
+
+        with self.assertRaises(NotImplementedError) as e:
+            self.response = self.put(url, **self.entity)
+
+        msg = (
+            "Writable Entity support requires a manual implementation, because "
+            "it is not possible to guess how the value sent should be "
+            "interpreted. You can override "
+            "'oscarapi.serializers.hooks.entity_internal_value' to provide an "
+            "implementation"
+        )
+        self.assertEqual(str(e.exception), msg)
 
 
 class TestAttributeOptionGroupSerializer(APITest):
