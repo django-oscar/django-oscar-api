@@ -17,6 +17,7 @@ from rest_framework.fields import get_attribute
 
 from oscar.core.loading import get_model, get_class
 
+from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.exists import bound_unique_together_get_or_create
 from .exceptions import FieldError
 
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
 create_from_breadcrumbs = get_class("catalogue.categories", "create_from_breadcrumbs")
+entity_internal_value = get_api_class("serializers.hooks", "entity_internal_value")
 attribute_details = operator.itemgetter("code", "value")
 
 
@@ -152,11 +154,7 @@ class AttributeValueField(serializers.Field):
                 date_field = serializers.DateTimeField()
                 internal_value = date_field.to_internal_value(value)
             elif attribute.type == attribute.ENTITY:
-                raise NotImplementedError(
-                    "Writable Entity support requires a manual implementation, "
-                    "because it is not possible to guess how the value "
-                    "sent should be interpreted"
-                )
+                internal_value = entity_internal_value(attribute, value)
 
             # the rest of the attribute types don't need special processing
             try:
