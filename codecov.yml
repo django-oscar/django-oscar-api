@@ -4,6 +4,6 @@ coverage:
     changes: false
     project:
       default:
-        target: '80'
+        target: '92'
 
 comment: false
