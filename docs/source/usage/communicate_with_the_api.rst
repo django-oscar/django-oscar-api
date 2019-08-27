@@ -137,7 +137,7 @@ Ok, now we want to add this to our basket:
     data = {
         "url": products[1]['url'],
         "quantity": 1,
-        "options" = [{
+        "options": [{
             "option": option_url, "value": "blue"
         }]
     }
