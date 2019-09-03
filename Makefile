@@ -33,3 +33,9 @@ publish_release_testpypi: build_release
 
 publish_release: build_release
 	twine upload dist/*
+
+lint:
+	flake8 setup.py oscarapi/
+
+black:
+	black --exclude "/migrations/" oscarapi/
