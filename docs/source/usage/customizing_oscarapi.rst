@@ -39,7 +39,7 @@ Example
 So what would that look like? As long as you keep the same package structure in
 your overrides as oscarapi, your overrides will be found::
 
-    ├── demosite
+    ├── mysite
     │   ├── __init__.py
     │   ├── app.py
     │   ├── conf.py
@@ -50,23 +50,23 @@ your overrides as oscarapi, your overrides will be found::
     │   │       ├── checkout.py
     │   │       └── product.py
 
-In this case the demosite app has a package called mycustomapi and in it are
+In this case the mysite app has a package called mycustomapi and in it are
 overrides for the product and the checkout serializers. The ``OSCARAPI_OVERRIDE_MODULES``
 setting would look like this::
 
-    OSCARAPI_OVERRIDE_MODULES = ["demosite.mycustomapi"]
+    OSCARAPI_OVERRIDE_MODULES = ["mysite.mycustomapi"]
 
 Let's see what happens in the checkout serializer file
-``demosite.mycustomapi.serializers.checkout``:
+``mysite.mycustomapi.serializers.checkout``:
 
-.. literalinclude:: ../../../demosite/demosite/mycustomapi/serializers/checkout.py
+.. literalinclude:: ../../../override-example/mycustomapi/serializers/checkout.py
 
 So this override would add a field to the json of a country called
 ``is_benelux_country``, and the content would be ``true`` when the country is in the Benelux.
 
-The complete example above is available in the `Github repository of Oscar API`_ if you want to try it out.
+The complete example above is available in the `Github repository of Oscar API`_ if you want to check it out.
 
-.. _`Github repository of Oscar API`: https://github.com/django-oscar/django-oscar-api/tree/master/demosite/
+.. _`Github repository of Oscar API`: https://github.com/django-oscar/django-oscar-api/tree/master/override-example
 
 Missing overrides
 -----------------

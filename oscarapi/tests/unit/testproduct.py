@@ -3,7 +3,6 @@ import decimal
 import datetime
 import json
 from copy import deepcopy
-from six import string_types
 from os.path import dirname, join
 
 from django.conf import settings
@@ -205,7 +204,7 @@ class ProductTest(APITest):
         attributes = self.response.json()["attributes"]
         attributes_by_name = {a["name"]: a["value"] for a in attributes}
 
-        self.assertIsInstance(attributes_by_name["entity"], string_types)
+        self.assertIsInstance(attributes_by_name["entity"], str)
         self.assertEqual(
             attributes_by_name["entity"],
             "<User: admin> has no json method, can not convert to json",
@@ -224,21 +223,21 @@ class ProductTest(APITest):
         # check all the attributes and their types.
         self.assertIsInstance(attributes_by_name["boolean"], bool)
         self.assertEqual(attributes_by_name["boolean"], True)
-        self.assertIsInstance(attributes_by_name["date"], string_types)
+        self.assertIsInstance(attributes_by_name["date"], str)
         self.assertEqual(attributes_by_name["date"], "2018-01-02")
-        self.assertIsInstance(attributes_by_name["datetime"], string_types)
+        self.assertIsInstance(attributes_by_name["datetime"], str)
         self.assertEqual(attributes_by_name["datetime"], "2018-01-02T10:45:00Z")
-        self.assertIsInstance(attributes_by_name["file"], string_types)
+        self.assertIsInstance(attributes_by_name["file"], str)
         self.assertEqual(
             attributes_by_name["file"], "/media/images/products/2018/01/sony-xa50ES.pdf"
         )
         self.assertIsInstance(attributes_by_name["float"], float)
         self.assertEqual(attributes_by_name["float"], 3.2)
-        self.assertIsInstance(attributes_by_name["html"], string_types)
+        self.assertIsInstance(attributes_by_name["html"], str)
         self.assertEqual(
             attributes_by_name["html"], "<p>I <strong>am</strong> a test</p>"
         )
-        self.assertIsInstance(attributes_by_name["image"], string_types)
+        self.assertIsInstance(attributes_by_name["image"], str)
         self.assertEqual(
             attributes_by_name["image"], "/media/images/products/2018/01/IMG_3777.JPG"
         )
@@ -246,7 +245,7 @@ class ProductTest(APITest):
         self.assertEqual(attributes_by_name["integer"], 7)
         self.assertIsInstance(attributes_by_name["multioption"], list)
         self.assertEqual(attributes_by_name["multioption"], ["Small", "Large"])
-        self.assertIsInstance(attributes_by_name["option"], string_types)
+        self.assertIsInstance(attributes_by_name["option"], str)
         self.assertEqual(attributes_by_name["option"], "Small")
 
     def test_product_price(self):

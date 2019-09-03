@@ -11,7 +11,6 @@ from rest_framework.views import APIView
 from oscarapi import permissions
 from oscarapi.basket import operations
 from oscarapi.utils.loading import get_api_classes, get_api_class
-from oscarapi.views.mixin import PutIsPatchMixin
 from oscarapi.views.utils import BasketPermissionMixin
 
 __all__ = (
@@ -309,7 +308,7 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
         return super(LineList, self).post(request, format=format)
 
 
-class BasketLineDetail(PutIsPatchMixin, generics.RetrieveUpdateDestroyAPIView):
+class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Only the field `quantity` can be changed in this view.
     All other fields are readonly.

@@ -1,7 +1,6 @@
 from setuptools import find_packages, setup
 
-__version__ = "1.6.2"
-
+__version__ = "2.0.dev0"
 
 setup(
     # package name in pypi
@@ -14,20 +13,19 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 1.11',
         'Framework :: Django :: 2.1',
+        'Framework :: Django :: 2.2',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: Unix',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Topic :: Software Development :: Libraries :: Application Frameworks',
     ],
+    python_requires='>=3.5',
     keywords='',
     author='Lars van de Kerkhof, Martijn Jacobs',
     author_email='lars@permanentmarkers.nl, martijn@devopsconsulting.nl',
@@ -44,9 +42,9 @@ setup(
     # specify dependencies
     install_requires=[
         'setuptools',
-        'django-oscar>=1.5.1,<2.0',
-        'djangorestframework>=3.4',
-        'six'
+        'django-oscar>=2.0.dev0',
+        'Django>=2.1.9',  # CVE-2019-12308
+        'djangorestframework>=3.9',  # first version to support Django 2.2
     ],
     # mark test target to require extras.
     extras_require={

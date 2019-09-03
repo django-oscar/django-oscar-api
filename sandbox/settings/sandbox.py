@@ -1,6 +1,4 @@
 import os
-from oscar import get_core_apps
-from oscar import OSCAR_MAIN_TEMPLATE_DIR
 
 ALLOWED_HOSTS = []
 
@@ -32,10 +30,39 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.flatpages',
     'django.contrib.staticfiles',
+    'oscar',
+    'oscar.apps.analytics',
+    'oscar.apps.checkout',
+    'oscar.apps.address',
+    'oscar.apps.shipping',
+    'oscar.apps.catalogue',
+    'oscar.apps.catalogue.reviews',
+    'oscar.apps.partner',
+    'oscar.apps.basket',
+    'oscar.apps.payment',
+    'oscar.apps.offer',
+    'oscar.apps.order',
+    'oscar.apps.customer',
+    'oscar.apps.search',
+    'oscar.apps.voucher',
+    'oscar.apps.wishlists',
+    'oscar.apps.dashboard',
+    'oscar.apps.dashboard.reports',
+    'oscar.apps.dashboard.users',
+    'oscar.apps.dashboard.orders',
+    'oscar.apps.dashboard.catalogue',
+    'oscar.apps.dashboard.offers',
+    'oscar.apps.dashboard.partners',
+    'oscar.apps.dashboard.pages',
+    'oscar.apps.dashboard.ranges',
+    'oscar.apps.dashboard.reviews',
+    'oscar.apps.dashboard.vouchers',
+    'oscar.apps.dashboard.communications',
+    'oscar.apps.dashboard.shipping',
     'oscarapi',
     'rest_framework',
     'widget_tweaks',
-] + get_core_apps()
+]
 
 LANGUAGE_CODE = 'en-us'
 
@@ -138,7 +165,6 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
-            OSCAR_MAIN_TEMPLATE_DIR
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -149,7 +175,6 @@ TEMPLATES = [
                 'django.template.context_processors.i18n',
                 'django.contrib.messages.context_processors.messages',
                 'oscar.apps.search.context_processors.search_form',
-                'oscar.apps.promotions.context_processors.promotions',
                 'oscar.apps.checkout.context_processors.checkout',
                 'oscar.apps.customer.notifications.context_processors.notifications',
                 'oscar.core.context_processors.metadata',

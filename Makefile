@@ -15,15 +15,14 @@ sandbox: install
 	python sandbox/manage.py loaddata product productcategory productattribute productclass productattributevalue category option attributeoptiongroup attributeoption stockrecord partner voucher country
 
 test:
-	python sandbox/manage.py test oscarapi --settings=sandbox.settings.nomigrations
+	python sandbox/manage.py test oscarapi --settings=sandbox.settings
 
 coverage:
-	coverage run sandbox/manage.py test oscarapi --settings=sandbox.settings.nomigrations
+	coverage run sandbox/manage.py test oscarapi --settings=sandbox.settings
 	coverage report -m
 	coverage xml -i
 
 docs: install
-	pip install "Django>=1.11.0,<2.0"
 	cd docs && make clean && make html
 
 build_release: clean

@@ -5,7 +5,6 @@ from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import PermissionDenied
 from django.http.response import HttpResponse
-from django.utils.deprecation import MiddlewareMixin
 from django.utils.translation import ugettext as _
 
 from oscar.core.loading import get_class
@@ -122,12 +121,11 @@ class HeaderSessionMiddleware(SessionMiddleware, IsApiRequest):
             request, response)
 
 
-class ApiGatewayMiddleWare(MiddlewareMixin, IsApiRequest):
-    """
-    Protect the api gateway with a token.
-    """
+class ApiGatewayMiddleWare(IsApiRequest):
+    def __init__(self, get_response):
+        self.get_response = get_response
 
-    def process_request(self, request):
+    def __call__(self, request):
         if self.is_api_request(request):
             key = authentication.get_authorization_header(request)
             key = key.decode(HTTP_HEADER_ENCODING)
@@ -141,17 +139,14 @@ class ApiGatewayMiddleWare(MiddlewareMixin, IsApiRequest):
             ))
             raise PermissionDenied()
 
-        return None
+        response = self.get_response(request)
+        return response
 
 
 class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
     """
     Use this middleware instead of Oscar's basket middleware if you
     want to mix the api with regular oscar views.
-
-    Note that this middleware only works with MIDDLEWARE (Django > 1.10)
-    as MIDDLEWARE_CLASSES is deprecated and Oscar drops the MiddlewareMixin
-    compatibility in BasketMiddleware since version 1.6
 
     Oscar uses a cookie based session to store baskets for anonymous users, but
     oscarapi can not do that, because we don't want to put the burden
