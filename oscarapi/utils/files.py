@@ -4,7 +4,7 @@ import hashlib
 def file_hash(content):
     """
     file_hash will hash the content of a file.
-    
+
     >>> from io import BytesIO
     >>> long_text = "Harrie en Henk (Hent)" * 879
     >>> file_hash(BytesIO(long_text.encode()))

@@ -8,33 +8,36 @@ from oscarapi.utils.loading import get_api_classes
 from oscarapi.signals import oscarapi_post_checkout
 from oscarapi.views.utils import parse_basket_from_hyperlink
 
-Order = get_model('order', 'Order')
-OrderLine = get_model('order', 'Line')
-OrderLineAttribute = get_model('order', 'LineAttribute')
-UserAddress = get_model('address', 'UserAddress')
+Order = get_model("order", "Order")
+OrderLine = get_model("order", "Line")
+OrderLineAttribute = get_model("order", "LineAttribute")
+UserAddress = get_model("address", "UserAddress")
 (
     CheckoutSerializer,
     OrderLineAttributeSerializer,
     OrderLineSerializer,
     OrderSerializer,
-    UserAddressSerializer
+    UserAddressSerializer,
 ) = get_api_classes(
-    "serializers.checkout", [
+    "serializers.checkout",
+    [
         "CheckoutSerializer",
         "OrderLineAttributeSerializer",
         "OrderLineSerializer",
         "OrderSerializer",
-        "UserAddressSerializer"
-    ]
+        "UserAddressSerializer",
+    ],
 )
 
 __all__ = (
-    'CheckoutView',
-    'OrderList', 'OrderDetail',
-    'OrderLineList', 'OrderLineDetail',
-    'OrderLineAttributeDetail',
-    'UserAddressList',
-    'UserAddressDetail'
+    "CheckoutView",
+    "OrderList",
+    "OrderDetail",
+    "OrderLineList",
+    "OrderLineDetail",
+    "OrderLineAttributeDetail",
+    "UserAddressList",
+    "UserAddressDetail",
 )
 
 
@@ -58,8 +61,7 @@ class OrderLineList(generics.ListAPIView):
     serializer_class = OrderLineSerializer
 
     def get(self, request, pk, format=None):
-        self.queryset = self.queryset.filter(
-            order__id=pk, order__user=request.user)
+        self.queryset = self.queryset.filter(order__id=pk, order__user=request.user)
         return super(OrderLineList, self).get(request, format)
 
 
@@ -68,8 +70,7 @@ class OrderLineDetail(generics.RetrieveAPIView):
     serializer_class = OrderLineSerializer
 
     def get(self, request, pk, format=None):
-        self.queryset = self.queryset.filter(
-            order__id=pk, order__user=request.user)
+        self.queryset = self.queryset.filter(order__id=pk, order__user=request.user)
         return super(OrderLineDetail, self).get(request, format)
 
 
@@ -125,6 +126,7 @@ class CheckoutView(views.APIView):
     }
     returns the order object.
     """
+
     order_serializer_class = OrderSerializer
     serializer_class = CheckoutSerializer
 
@@ -137,22 +139,25 @@ class CheckoutView(views.APIView):
 
         if not request_allows_access_to_basket(request, basket):
             return response.Response(
-                "Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
+                "Unauthorized", status=status.HTTP_401_UNAUTHORIZED
+            )
 
-        c_ser = self.serializer_class(
-            data=request.data, context={'request': request})
+        c_ser = self.serializer_class(data=request.data, context={"request": request})
 
         if c_ser.is_valid():
             order = c_ser.save()
             basket.freeze()
-            o_ser = self.order_serializer_class(
-                order, context={'request': request})
+            o_ser = self.order_serializer_class(order, context={"request": request})
 
             resp = response.Response(o_ser.data)
 
             oscarapi_post_checkout.send(
-                sender=self, order=order, user=request.user,
-                request=request, response=resp)
+                sender=self,
+                order=order,
+                user=request.user,
+                request=request,
+                response=resp,
+            )
             return resp
 
         return response.Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)

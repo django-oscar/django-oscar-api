@@ -4,7 +4,7 @@ from rest_framework.exceptions import NotFound
 
 from oscar.core.loading import get_model
 
-Category = get_model('catalogue', 'category')
+Category = get_model("catalogue", "category")
 
 
 def create_from_sequence(bits, create):
@@ -21,12 +21,14 @@ def create_from_sequence(bits, create):
             if create:
                 root = Category.add_root(name=slug, slug=slug)
             else:
-                raise NotFound(_("No %(verbose_name)s found matching the query") %
-                               {'verbose_name': Category._meta.verbose_name})
+                raise NotFound(
+                    _("No %(verbose_name)s found matching the query")
+                    % {"verbose_name": Category._meta.verbose_name}
+                )
         except Category.MultipleObjectsReturned:
-            raise ValueError((
-                "There are more than one categories with slug "
-                "%s at depth=1") % slug)
+            raise ValueError(
+                ("There are more than one categories with slug " "%s at depth=1") % slug
+            )
         return [root]
     else:
         parents = create_from_sequence(bits[:-1], create)
@@ -37,17 +39,23 @@ def create_from_sequence(bits, create):
             if create:
                 child = parent.add_child(name=slug, slug=slug)
             else:
-                raise NotFound(_("No %(verbose_name)s found matching the query") %
-                               {'verbose_name': Category._meta.verbose_name})
+                raise NotFound(
+                    _("No %(verbose_name)s found matching the query")
+                    % {"verbose_name": Category._meta.verbose_name}
+                )
         except Category.MultipleObjectsReturned:
-            raise ValueError((
-                "There are more than one categories with slug "
-                "%s which are children of %s") % (slug, parent))
+            raise ValueError(
+                (
+                    "There are more than one categories with slug "
+                    "%s which are children of %s"
+                )
+                % (slug, parent)
+            )
         parents.append(child)
         return parents
 
 
-def create_from_full_slug(breadcrumb_str, separator='/'):
+def create_from_full_slug(breadcrumb_str, separator="/"):
     """
     Create categories from a breadcrumb string
     """
@@ -56,7 +64,7 @@ def create_from_full_slug(breadcrumb_str, separator='/'):
     return categories[-1]
 
 
-def find_from_full_slug(breadcrumb_str, separator='/'):
+def find_from_full_slug(breadcrumb_str, separator="/"):
     """
     Find categories from a breadcrumb string
     """

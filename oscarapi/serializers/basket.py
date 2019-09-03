@@ -196,7 +196,9 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         return super(BasketLineSerializer, self).to_representation(line)
 
 
-class StockRecordSerializer(DelayUniqueSerializerMixin, OscarHyperlinkedModelSerializer):
+class StockRecordSerializer(
+    DelayUniqueSerializerMixin, OscarHyperlinkedModelSerializer
+):
     product = serializers.PrimaryKeyRelatedField(
         many=False, required=False, queryset=Product.objects
     )

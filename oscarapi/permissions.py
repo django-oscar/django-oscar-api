@@ -41,7 +41,10 @@ class APIAdminPermission(DjangoModelPermissions):
 
     @staticmethod
     def disallowed_by_setting_and_request(request):
-        return getattr(settings, "OSCARAPI_BLOCK_ADMIN_API_ACCESS", True) or not request.user.is_staff
+        return (
+            getattr(settings, "OSCARAPI_BLOCK_ADMIN_API_ACCESS", True)
+            or not request.user.is_staff
+        )
 
     def has_permission(self, request, view):
         if self.disallowed_by_setting_and_request(request):

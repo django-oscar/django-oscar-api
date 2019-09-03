@@ -26,9 +26,7 @@ LoginView = get_api_class("views.login", "LoginView")
     ],
 )
 
-(UserList, UserDetail) = get_api_classes(
-    "views.admin.user", ["UserList", "UserDetail"]
-)
+(UserList, UserDetail) = get_api_classes("views.admin.user", ["UserList", "UserDetail"])
 (StockRecordDetail, PartnerList, PartnerDetail) = get_api_classes(
     "views.admin.partner", ["StockRecordDetail", "PartnerList", "PartnerDetail"]
 )
@@ -150,14 +148,10 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="api-login"),
     path("basket/", BasketView.as_view(), name="api-basket"),
     path(
-        "basket/add-product/",
-        AddProductView.as_view(),
-        name="api-basket-add-product",
+        "basket/add-product/", AddProductView.as_view(), name="api-basket-add-product"
     ),
     path(
-        "basket/add-voucher/",
-        AddVoucherView.as_view(),
-        name="api-basket-add-voucher",
+        "basket/add-voucher/", AddVoucherView.as_view(), name="api-basket-add-voucher"
     ),
     path(
         "basket/shipping-methods/",
@@ -166,9 +160,7 @@ urlpatterns = [
     ),
     path("baskets/", BasketList.as_view(), name="basket-list"),
     path("baskets/<int:pk>/", BasketDetail.as_view(), name="basket-detail"),
-    path(
-        "baskets/<int:pk>/lines/", LineList.as_view(), name="basket-lines-list"
-    ),
+    path("baskets/<int:pk>/lines/", LineList.as_view(), name="basket-lines-list"),
     path(
         "baskets/<int:basket_pk>/lines/<int:pk>/",
         BasketLineDetail.as_view(),
@@ -181,11 +173,7 @@ urlpatterns = [
     ),
     path("products/", ProductList.as_view(), name="product-list"),
     path("products/<int:pk>/", ProductDetail.as_view(), name="product-detail"),
-    path(
-        "products/<int:pk>/price/",
-        ProductPrice.as_view(),
-        name="product-price",
-    ),
+    path("products/<int:pk>/price/", ProductPrice.as_view(), name="product-price"),
     path(
         "products/<int:pk>/availability/",
         ProductAvailability.as_view(),
@@ -196,11 +184,7 @@ urlpatterns = [
     path("ranges/", RangeList.as_view(), name="range-list"),
     path("ranges/<int:pk>/", RangeDetail.as_view(), name="range-detail"),
     path("categories/", CategoryList.as_view(), name="category-list"),
-    path(
-        "categories/<int:pk>/",
-        CategoryDetail.as_view(),
-        name="category-detail",
-    ),
+    path("categories/<int:pk>/", CategoryDetail.as_view(), name="category-detail"),
     re_path(
         "^categories/(?P<breadcrumbs>.*)/$",
         CategoryList.as_view(),
@@ -210,23 +194,17 @@ urlpatterns = [
     path("checkout/", CheckoutView.as_view(), name="api-checkout"),
     path("orders/", OrderList.as_view(), name="order-list"),
     path("orders/<int:pk>/", OrderDetail.as_view(), name="order-detail"),
-    path(
-        "orders/<int:pk>/lines/",
-        OrderLineList.as_view(),
-        name="order-lines-list",
-    ),
-    path(
-        "orderlines/<int:pk>/",
-        OrderLineDetail.as_view(),
-        name="order-lines-detail",
-    ),
+    path("orders/<int:pk>/lines/", OrderLineList.as_view(), name="order-lines-list"),
+    path("orderlines/<int:pk>/", OrderLineDetail.as_view(), name="order-lines-detail"),
     path(
         "orderlineattributes/<int:pk>/",
         OrderLineAttributeDetail.as_view(),
         name="order-lineattributes-detail",
     ),
     path("countries/", CountryList.as_view(), name="country-list"),
-    re_path(r"^countries/(?P<pk>[A-z]{2})/$", CountryDetail.as_view(), name="country-detail"),
+    re_path(
+        r"^countries/(?P<pk>[A-z]{2})/$", CountryDetail.as_view(), name="country-detail"
+    ),
     path("useraddresses/", UserAddressList.as_view(), name="useraddress-list"),
     path(
         "useraddresses/<int:pk>/",
@@ -252,9 +230,7 @@ admin_urlpatterns = [
         ProductClassAdminDetail.as_view(),
         name="admin-productclass-detail",
     ),
-    path(
-        "admin/categories/", CategoryAdminList.as_view(), name="admin-category-list"
-    ),
+    path("admin/categories/", CategoryAdminList.as_view(), name="admin-category-list"),
     path(
         "admin/categories/<int:pk>/",
         CategoryAdminDetail.as_view(),
@@ -294,9 +270,7 @@ admin_urlpatterns = [
     ),
     path("admin/orders/", OrderAdminList.as_view(), name="admin-order-list"),
     path(
-        "admin/orders/<int:pk>/",
-        OrderAdminDetail.as_view(),
-        name="admin-order-detail",
+        "admin/orders/<int:pk>/", OrderAdminDetail.as_view(), name="admin-order-detail"
     ),
     path(
         "admin/orders/<int:pk>/lines/",

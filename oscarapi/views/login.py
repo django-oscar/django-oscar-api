@@ -10,16 +10,12 @@ from oscarapi.basket import operations
 from oscar.core.loading import get_model
 
 LoginSerializer, UserSerializer = get_api_classes(
-    "serializers.login", [
-        "LoginSerializer",
-        "UserSerializer"
-    ]
+    "serializers.login", ["LoginSerializer", "UserSerializer"]
 )
 
-Basket = get_model('basket', 'Basket')
+Basket = get_model("basket", "Basket")
 
-__all__ = ('LoginView',)
-
+__all__ = ("LoginView",)
 
 
 class LoginView(APIView):
@@ -50,6 +46,7 @@ class LoginView(APIView):
     If more details are needed, use the ``OSCARAPI_USER_FIELDS`` setting to change
     the fields the ``UserSerializer`` will render.
     """
+
     serializer_class = LoginSerializer
 
     def get(self, request, format=None):
@@ -59,7 +56,7 @@ class LoginView(APIView):
                 return Response(ser.data)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        raise MethodNotAllowed('GET')
+        raise MethodNotAllowed("GET")
 
     def merge_baskets(self, anonymous_basket, basket):
         "Hook to enforce rules when merging baskets."
@@ -77,8 +74,9 @@ class LoginView(APIView):
             # multiple users at the same time.
             if request.user.is_authenticated:
                 return Response(
-                    {'detail': 'Session is in use, log out first'},
-                    status=status.HTTP_405_METHOD_NOT_ALLOWED)
+                    {"detail": "Session is in use, log out first"},
+                    status=status.HTTP_405_METHOD_NOT_ALLOWED,
+                )
 
             request.user = user
 

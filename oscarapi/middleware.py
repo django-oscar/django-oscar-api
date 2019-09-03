@@ -16,30 +16,28 @@ from rest_framework import authentication
 from oscarapi.basket.operations import (
     request_allows_access_to_basket,
     store_basket_in_session,
-    get_basket
+    get_basket,
 )
 
 from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.request import get_domain
-from oscarapi.utils.session import (
-    session_id_from_parsed_session_uri,
-    get_session
-)
+from oscarapi.utils.session import session_id_from_parsed_session_uri, get_session
 from oscarapi import models
 
 
-BasketMiddleware = get_class('basket.middleware', 'BasketMiddleware')
+BasketMiddleware = get_class("basket.middleware", "BasketMiddleware")
 IsApiRequest = get_api_class("utils.request", "IsApiRequest")
 
 logger = logging.getLogger(__name__)
 
 HTTP_SESSION_ID_REGEX = re.compile(
-    r'^SID:(?P<type>(?:ANON|AUTH)):(?P<realm>.*?):(?P<session_id>.+?)(?:[-:][0-9a-fA-F]+){0,2}$')
+    r"^SID:(?P<type>(?:ANON|AUTH)):(?P<realm>.*?):(?P<session_id>.+?)(?:[-:][0-9a-fA-F]+){0,2}$"
+)
 
 
 def parse_session_id(request):
     """Parse a session id from the request"""
-    unparsed_session_id = request.META.get('HTTP_SESSION_ID', None)
+    unparsed_session_id = request.META.get("HTTP_SESSION_ID", None)
     if unparsed_session_id is not None:
         parsed_session_id = HTTP_SESSION_ID_REGEX.match(unparsed_session_id)
         if parsed_session_id is not None:
@@ -49,7 +47,7 @@ def parse_session_id(request):
 
 
 def start_or_resume(session_id, session_type):
-    if session_type == 'ANON':
+    if session_type == "ANON":
         return get_session(session_id, raise_on_create=False)
 
     return get_session(session_id, raise_on_create=True)
@@ -66,6 +64,7 @@ class HeaderSessionMiddleware(SessionMiddleware, IsApiRequest):
     header sessions. With that in place the api can be used for both trusted
     and non trusted clients, see README.rst.
     """
+
     def process_request(self, request):
         """
         Parse the session id from the 'Session-Id: ' header when using the api.
@@ -75,17 +74,15 @@ class HeaderSessionMiddleware(SessionMiddleware, IsApiRequest):
                 parsed_session_uri = parse_session_id(request)
                 if parsed_session_uri is not None:
                     domain = get_domain(request)
-                    if parsed_session_uri['realm'] != domain:
+                    if parsed_session_uri["realm"] != domain:
                         raise exceptions.PermissionDenied(
-                            _('Can not accept cookie with realm %s on realm %s') % (
-                                parsed_session_uri['realm'],
-                                domain
-                            )
+                            _("Can not accept cookie with realm %s on realm %s")
+                            % (parsed_session_uri["realm"], domain)
                         )
-                    session_id = session_id_from_parsed_session_uri(
-                        parsed_session_uri)
+                    session_id = session_id_from_parsed_session_uri(parsed_session_uri)
                     request.session = start_or_resume(
-                        session_id, session_type=parsed_session_uri['type'])
+                        session_id, session_type=parsed_session_uri["type"]
+                    )
                     request.parsed_session_uri = parsed_session_uri
 
                     # since the session id is assigned by the CLIENT, there is
@@ -94,8 +91,9 @@ class HeaderSessionMiddleware(SessionMiddleware, IsApiRequest):
                     request.csrf_processing_done = True
                     return None
             except exceptions.APIException as e:
-                response = HttpResponse('{"reason": "%s"}' % e.detail,
-                                        content_type='application/json')
+                response = HttpResponse(
+                    '{"reason": "%s"}' % e.detail, content_type="application/json"
+                )
                 response.status_code = e.status_code
                 return response
 
@@ -105,20 +103,24 @@ class HeaderSessionMiddleware(SessionMiddleware, IsApiRequest):
         """
         Add the 'Session-Id: ' header when using the api.
         """
-        if self.is_api_request(request) \
-                and getattr(request, 'session', None) is not None \
-                and hasattr(request, 'parsed_session_uri'):
+        if (
+            self.is_api_request(request)
+            and getattr(request, "session", None) is not None
+            and hasattr(request, "parsed_session_uri")
+        ):
             session_key = request.session.session_key
             parsed_session_key = session_id_from_parsed_session_uri(
-                request.parsed_session_uri)
-            assert(session_key == parsed_session_key), \
-                '%s is not equal to %s' % (session_key, parsed_session_key)
-            response['Session-Id'] = \
-                'SID:%(type)s:%(realm)s:%(session_id)s' % (
-                    request.parsed_session_uri)
+                request.parsed_session_uri
+            )
+            assert session_key == parsed_session_key, "%s is not equal to %s" % (
+                session_key,
+                parsed_session_key,
+            )
+            response["Session-Id"] = "SID:%(type)s:%(realm)s:%(session_id)s" % (
+                request.parsed_session_uri
+            )
 
-        return super(HeaderSessionMiddleware, self).process_response(
-            request, response)
+        return super(HeaderSessionMiddleware, self).process_response(request, response)
 
 
 class ApiGatewayMiddleWare(IsApiRequest):
@@ -132,11 +134,14 @@ class ApiGatewayMiddleWare(IsApiRequest):
             if models.ApiKey.objects.filter(key=key).exists():
                 return None
 
-            logger.error('Invalid credentials provided for %s:%s by %s' % (
-                request.method,
-                request.path,
-                request.META.get('REMOTE_ADDR', '<unknown>')
-            ))
+            logger.error(
+                "Invalid credentials provided for %s:%s by %s"
+                % (
+                    request.method,
+                    request.path,
+                    request.META.get("REMOTE_ADDR", "<unknown>"),
+                )
+            )
             raise PermissionDenied()
 
         response = self.get_response(request)
@@ -152,6 +157,7 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
     oscarapi can not do that, because we don't want to put the burden
     of managing a cookie jar on oscarapi clients that are not websites.
     """
+
     def __call__(self, request):
         if self.is_api_request(request):
             request.cookies_to_delete = []
@@ -163,7 +169,7 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
             basket = self.get_cookie_basket(
                 cookie_key,
                 request,
-                Exception("get_cookie_basket doesn't use the manager argument")
+                Exception("get_cookie_basket doesn't use the manager argument"),
             )
 
             if basket is not None:
@@ -177,7 +183,11 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
         return super(ApiBasketMiddleWare, self).__call__(request)
 
     def process_response(self, request, response):
-        if self.is_api_request(request) and hasattr(request, 'user') and request.session:
+        if (
+            self.is_api_request(request)
+            and hasattr(request, "user")
+            and request.session
+        ):
             # at this point we are sure a basket can be found in the session
             # (if the session hasn't been destroyed by logging out),
             # because it is enforced in process_request.
@@ -188,16 +198,18 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
             cookie = self.get_basket_hash(basket.id)
 
             # Delete any surplus cookies
-            cookies_to_delete = getattr(request, 'cookies_to_delete', [])
+            cookies_to_delete = getattr(request, "cookies_to_delete", [])
             for cookie_key in cookies_to_delete:
                 response.delete_cookie(cookie_key)
 
             if not request.user.is_authenticated:
                 response.set_cookie(
-                    cookie_key, cookie,
+                    cookie_key,
+                    cookie,
                     max_age=settings.OSCAR_BASKET_COOKIE_LIFETIME,
-                    secure=settings.OSCAR_BASKET_COOKIE_SECURE, httponly=True)
+                    secure=settings.OSCAR_BASKET_COOKIE_SECURE,
+                    httponly=True,
+                )
             return response
         else:
-            return super(
-                ApiBasketMiddleWare, self).process_response(request, response)
+            return super(ApiBasketMiddleWare, self).process_response(request, response)

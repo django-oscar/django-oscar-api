@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+
 try:
     from unittest.mock import patch
 except ImportError:

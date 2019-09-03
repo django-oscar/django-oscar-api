@@ -21,7 +21,7 @@ class BlockAdminApiTest(APITest):
             self.assertNotIn("admin", self.response.data)
 
             # now we are
-            self.login('admin', 'admin')
+            self.login("admin", "admin")
             self.response = self.get(reverse("api-root"))
             self.response.assertStatusEqual(200)
             self.assertIn("admin", self.response.data)
@@ -33,7 +33,7 @@ class BlockAdminApiTest(APITest):
             self.assertNotIn("admin", self.response.data)
 
             # even when we are logged in as admin
-            self.login('admin', 'admin')
+            self.login("admin", "admin")
             self.response = self.get(reverse("api-root"))
             self.response.assertStatusEqual(200)
             self.assertNotIn("admin", self.response.data)
@@ -62,14 +62,14 @@ class BlockAdminApiTest(APITest):
             request.user = User.objects.get(username="nobody")
             self.assertTrue(
                 permission.disallowed_by_setting_and_request(request),
-                "a non staff user can't access the admin api"
+                "a non staff user can't access the admin api",
             )
 
             # but a staff user can
             request.user = User.objects.get(username="admin")
             self.assertFalse(
                 permission.disallowed_by_setting_and_request(request),
-                "a staff user can access the admin api"
+                "a staff user can access the admin api",
             )
 
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=True):
@@ -77,7 +77,7 @@ class BlockAdminApiTest(APITest):
             request.user = User.objects.get(username="nobody")
             self.assertTrue(
                 permission.disallowed_by_setting_and_request(request),
-                "a non staff user can't access the admin api"
+                "a non staff user can't access the admin api",
             )
 
             # and a staff user can't access it either when
@@ -86,5 +86,5 @@ class BlockAdminApiTest(APITest):
             self.assertTrue(
                 permission.disallowed_by_setting_and_request(request),
                 "a staff user can't access the admin api with "
-                "OSCARAPI_BLOCK_ADMIN_API_ACCESS=True"
+                "OSCARAPI_BLOCK_ADMIN_API_ACCESS=True",
             )

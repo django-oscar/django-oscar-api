@@ -173,7 +173,7 @@ class AttributeValueField(serializers.Field):
                 self.fail("child_without_parent")
             else:
                 self.fail("attribute_missing", **data)
-        except ObjectDoesNotExist as e:
+        except ObjectDoesNotExist:
             self.fail("no_such_option", value=value)
         except KeyError as e:
             field_name, = e.args
