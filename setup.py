@@ -53,7 +53,8 @@ setup(
     ],
     # mark test target to require extras.
     extras_require={
-        "dev": ["coverage", "mock", "twine", "wheel", "flake8", "flake8-black"],
+        "dev": ["coverage", "mock", "twine", "wheel"],
+        "lint": ["flake8", "flake8-black"],
         "docs": ["sphinx", "sphinx_rtd_theme"],
     },
 )

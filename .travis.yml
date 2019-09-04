@@ -28,7 +28,7 @@ install:
     - pip freeze
 
 script:
-    - if [ ${ENABLE_LINT} == "1" ]; then make lint
+    - if [ ${ENABLE_LINT} == "1" ]; then make lint; fi
     - make coverage
 
 after_success:

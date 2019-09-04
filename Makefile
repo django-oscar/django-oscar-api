@@ -34,7 +34,11 @@ publish_release_testpypi: build_release
 publish_release: build_release
 	twine upload dist/*
 
-lint:
+lint.installed:
+	pip install -e .[lint]
+	touch $@
+
+lint: lint.installed
 	flake8 setup.py oscarapi/
 
 black:
