@@ -10,7 +10,7 @@ matrix:
 
     - { python: "3.5", env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"}
     - { python: "3.6", env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"}
-    - { python: "3.7", env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"}
+    - { python: "3.7", env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1' ENABLE_LINT=1"}
 
     - { python: "3.7", env: "DJANGO='Django>=2.2,<3' OSCAR='https://github.com/django-oscar/django-oscar/archive/master.tar.gz"}
 
@@ -28,7 +28,7 @@ install:
     - pip freeze
 
 script:
-    - make lint
+    - if [ ${ENABLE_LINT} == "1" ]; then make lint
     - make coverage
 
 after_success:
