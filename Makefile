@@ -39,7 +39,7 @@ lint.installed:
 	touch $@
 
 lint: lint.installed
-	flake8 setup.py oscarapi/
+	black --check --exclude "/migrations/" oscarapi/
 
 black:
 	black --exclude "/migrations/" oscarapi/
