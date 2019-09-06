@@ -3,7 +3,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
 
-from oscar.core.loading import get_model, get_class
+from oscar.core.loading import get_model
 
 from oscarapi.serializers.utils import OscarHyperlinkedModelSerializer
 from oscarapi.utils.categories import create_from_full_slug
@@ -15,7 +15,7 @@ ProductClass = get_model("catalogue", "ProductClass")
 ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
 Option = get_model("catalogue", "Option")
 StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
-BaseProductSerializer, BaseCategorySerializer, ProductImageSerializer, ProductAttributeSerializer, OptionSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+BaseProductSerializer, BaseCategorySerializer, ProductImageSerializer, ProductAttributeSerializer, OptionSerializer = get_api_classes(
     "serializers.product",
     [
         "BaseProductSerializer",

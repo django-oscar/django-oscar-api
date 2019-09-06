@@ -34,7 +34,7 @@ ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
 AttributeOption = get_model("catalogue", "AttributeOption")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
-AttributeValueField, CategoryField, SingleValueSlugRelatedField = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+AttributeValueField, CategoryField, SingleValueSlugRelatedField = get_api_classes(
     "serializers.fields",
     ["AttributeValueField", "CategoryField", "SingleValueSlugRelatedField"],
 )
@@ -312,9 +312,7 @@ class BaseProductSerializer(OscarModelSerializer):
     )
     categories = CategoryField(many=True, required=False)
     product_class = serializers.SlugRelatedField(
-        slug_field="slug",
-        queryset=ProductClass.objects,
-        allow_null=True,
+        slug_field="slug", queryset=ProductClass.objects, allow_null=True
     )
     options = OptionSerializer(many=True, required=False)
     recommended_products = serializers.HyperlinkedRelatedField(

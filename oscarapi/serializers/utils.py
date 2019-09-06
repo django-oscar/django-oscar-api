@@ -96,7 +96,7 @@ class DelayUniqueSerializerMixin(object):
 class UpdateListSerializer(serializers.ListSerializer):
     """
     This serializer can be used to implement updates to nested serializers.
-    
+
     It will try to match existing objects based on the presence of a primary
     key in the submitted data, or the fields specified by name in ``Meta.lookup_fields``
     """

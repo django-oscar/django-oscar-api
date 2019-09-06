@@ -5,23 +5,23 @@ from oscar.core.loading import get_class, get_model
 from oscar.core.utils import get_default_currency
 
 __all__ = (
-    'apply_offers',
-    'assign_basket_strategy',
-    'prepare_basket',
-    'get_basket',
-    'get_basket_id_from_session',
-    'get_anonymous_basket',
-    'get_user_basket',
-    'store_basket_in_session',
-    'flush_and_delete_basket',
-    'request_allows_access_to',
-    'save_line_with_default_currency',
+    "apply_offers",
+    "assign_basket_strategy",
+    "prepare_basket",
+    "get_basket",
+    "get_basket_id_from_session",
+    "get_anonymous_basket",
+    "get_user_basket",
+    "store_basket_in_session",
+    "flush_and_delete_basket",
+    "request_allows_access_to",
+    "save_line_with_default_currency",
 )
 
-Basket = get_model('basket', 'Basket')
-Line = get_model('basket', 'Line')
-LineAttribute = get_model('basket', 'LineAttribute')
-Applicator = get_class('offer.applicator', 'Applicator')
+Basket = get_model("basket", "Basket")
+Line = get_model("basket", "Line")
+LineAttribute = get_model("basket", "LineAttribute")
+Applicator = get_class("offer.applicator", "Applicator")
 Selector = None
 
 
@@ -38,13 +38,12 @@ def assign_basket_strategy(basket, request):
     #       require this module to be loaded.
     global Selector
 
-    if hasattr(request, 'strategy'):
+    if hasattr(request, "strategy"):
         basket.strategy = request.strategy
     else:  # in management commands, the request might not be available.
         if Selector is None:
-            Selector = get_class('partner.strategy', 'Selector')
-        basket.strategy = Selector().strategy(
-            request=request, user=request.user)
+            Selector = get_class("partner.strategy", "Selector")
+        basket.strategy = Selector().strategy(request=request, user=request.user)
 
     apply_offers(request, basket)
 

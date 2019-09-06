@@ -1,8 +1,5 @@
 from django.conf import settings
-from oscar.core.loading import (
-    _pluck_classes,
-    _import_module,
-)
+from oscar.core.loading import _pluck_classes, _import_module
 
 OSCARAPI_OVERRIDE_MODULES = getattr(settings, "OSCARAPI_OVERRIDE_MODULES", [])
 

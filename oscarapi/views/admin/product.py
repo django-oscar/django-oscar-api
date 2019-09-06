@@ -43,6 +43,7 @@ class ProductAdminList(generics.UpdateAPIView, generics.ListCreateAPIView):
     be unique, you MUST add another unique field or specify a unique together
     constraint. And you have to send that data along.
     """
+
     serializer_class = AdminProductSerializer
     queryset = Product.objects.get_queryset()
     permission_classes = (APIAdminPermission,)

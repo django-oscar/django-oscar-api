@@ -1,1 +1,1 @@
-default_app_config = 'oscarapi.apps.OscarAPIConfig'
+default_app_config = "oscarapi.apps.OscarAPIConfig"

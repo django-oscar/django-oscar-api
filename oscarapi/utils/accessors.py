@@ -4,7 +4,7 @@ from rest_framework.fields import empty
 def destructure(dictionary, *keys):
     """
     Select sub-dictionary
-    
+
     >>> d = {"henk": 1, "klaas": 2, "hent": 7}
     >>> destructure(d, "klaas")
     {'klaas': 2}
@@ -60,7 +60,7 @@ def getitems(dictionary, *keys):
 def select(obj, *attrs):
     """
     Select attributes of object
-    
+
     >>> from argparse import Namespace
     >>> d = Namespace(henk=1, klaas=2, hent=7)
     >>> select(d, "klaas")

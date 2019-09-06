@@ -8,19 +8,19 @@ from rest_framework import exceptions
 
 from oscar.core.loading import get_class
 
-Selector = get_class('partner.strategy', 'Selector')
+Selector = get_class("partner.strategy", "Selector")
 
 
 def login_and_upgrade_session(request, user):
     "Upgrade anonymous session to authenticated session"
-    parsed_session_uri = getattr(request, 'parsed_session_uri', None)
+    parsed_session_uri = getattr(request, "parsed_session_uri", None)
 
     if parsed_session_uri is not None:
 
-        assert(parsed_session_uri['type'] == 'ANON')
+        assert parsed_session_uri["type"] == "ANON"
 
         # change anonymous session to authenticated
-        parsed_session_uri['type'] = "AUTH"
+        parsed_session_uri["type"] = "AUTH"
         session_id = session_id_from_parsed_session_uri(parsed_session_uri)
 
         # wipe out old anonymous session without creating a new one
@@ -32,9 +32,8 @@ def login_and_upgrade_session(request, user):
 
         # Mark the new session as owned by the user we are logging in.
         request.session[auth.SESSION_KEY] = user.pk
-        if hasattr(user, 'get_session_auth_hash'):  # django 1.7
-            request.session[auth.HASH_SESSION_KEY] = \
-                user.get_session_auth_hash()
+        if hasattr(user, "get_session_auth_hash"):  # django 1.7
+            request.session[auth.HASH_SESSION_KEY] = user.get_session_auth_hash()
 
     # now login so the session can be used for authentication purposes.
     auth.login(request, user)
@@ -42,8 +41,7 @@ def login_and_upgrade_session(request, user):
 
 
 def session_id_from_parsed_session_uri(parsed_session_uri):
-    session_id_base = u"SID:%(type)s:%(realm)s:%(session_id)s" % (
-        parsed_session_uri)
+    session_id_base = u"SID:%(type)s:%(realm)s:%(session_id)s" % (parsed_session_uri)
     combined = session_id_base + settings.SECRET_KEY
     return hashlib.sha1(combined.encode()).hexdigest()
 

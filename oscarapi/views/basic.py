@@ -10,7 +10,7 @@ from oscarapi.basket.operations import (
     assign_basket_strategy,
     editable_baskets,
     get_anonymous_basket,
-    prepare_basket
+    prepare_basket,
 )
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
@@ -58,6 +58,7 @@ class BasketList(generics.ListAPIView):
     """
     Retrieve all baskets that belong to the current (authenticated) user.
     """
+
     serializer_class = BasketSerializer
     queryset = editable_baskets()
 

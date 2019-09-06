@@ -126,8 +126,8 @@ class AddProductView(APIView):
             basket.add_product(product, quantity=quantity, options=options)
 
             signals.basket_addition.send(
-                sender=self, product=product, user=request.user,
-                request=request)
+                sender=self, product=product, user=request.user, request=request
+            )
 
             operations.apply_offers(request, basket)
             ser = self.serializer_class(basket, context={"request": request})

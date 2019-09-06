@@ -33,3 +33,13 @@ publish_release_testpypi: build_release
 
 publish_release: build_release
 	twine upload dist/*
+
+lint.installed:
+	pip install -e .[lint]
+	touch $@
+
+lint: lint.installed
+	black --check --exclude "/migrations/" oscarapi/
+
+black:
+	black --exclude "/migrations/" oscarapi/
