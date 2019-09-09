@@ -2,6 +2,23 @@
 Changelog
 =========
 
+2.0.0 (2019-09-09)
+-------------------
+Features:
+ * `#156 <https://github.com/django-oscar/django-oscar-api/pull/156>`_ Added Oscar 2.0 compatibility, see notes below
+ * `#185 <https://github.com/django-oscar/django-oscar-api/pull/185>`_ Added a hook to implement a custom entity value handler
+
+This release adds Oscar 2.0 support. This release is not backwards compatible with Oscar 1.6.x and below and requires code changes.
+
+Noticeable changes:
+ - This release drops support for Oscar < 2.0
+ - This release drops support for python 2.7 and requires python >= 3.5
+ - This release drops support for Django 1.11 and requires Django 2.1.x or 2.2.x
+ - This release drops support for Django Rest Framework < 3.9
+ - `PutIsPatchMixin` has been removed, so `PUT` and `PATCH` act like they should
+ - Removed the `RESTApiApplication` Oscar app and added an `OscarAPIConfig` Django AppConfig
+
+
 1.6.2 (2019-08-26)
 -------------------
 Fixed:
