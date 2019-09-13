@@ -9,7 +9,7 @@ from six.moves.urllib.request import urlopen
 from django.conf import settings
 from django.db import IntegrityError
 from django.utils.translation import ugettext as _
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 
 from rest_framework import serializers, relations
@@ -92,8 +92,12 @@ class AttributeValueField(serializers.Field):
         # this field always needs the full object
         kwargs["source"] = "*"
         kwargs["error_messages"] = {
-            "no_such_option": _("Option {value} does not exist."),
+            "no_such_option": _("{code}: Option {value} does not exist."),
             "invalid": _("Wrong type, {error}."),
+            "attribute_validation_error": _(
+                "Error assigning `{value}` to {code}, {error}."
+            ),
+            "attribute_required": _("Attribute {code} is required."),
             "attribute_missing": _(
                 "No attribute exist with code={code}, "
                 "please define it in the product_class first."
@@ -131,7 +135,7 @@ class AttributeValueField(serializers.Field):
                 )
 
             if attribute.required and value is None:
-                self.fail("required")
+                self.fail("attribute_required", code=code)
 
             # some of these attribute types need special processing, or their
             # validation will fail
@@ -139,14 +143,14 @@ class AttributeValueField(serializers.Field):
                 internal_value = attribute.option_group.options.get(option=value)
             elif attribute.type == attribute.MULTI_OPTION:
                 if attribute.required and not value:
-                    self.fail("required")
+                    self.fail("attribute_required", code=code)
                 internal_value = attribute.option_group.options.filter(option__in=value)
                 if len(value) != internal_value.count():
                     non_existing = set(value) - set(
                         internal_value.values_list("option", flat=True)
                     )
                     non_existing_as_error = ",".join(sorted(non_existing))
-                    self.fail("no_such_option", value=non_existing_as_error)
+                    self.fail("no_such_option", value=non_existing_as_error, code=code)
             elif attribute.type == attribute.DATE:
                 date_field = serializers.DateField()
                 internal_value = date_field.to_internal_value(value)
@@ -160,7 +164,19 @@ class AttributeValueField(serializers.Field):
             try:
                 attribute.validate_value(internal_value)
             except TypeError as e:
-                self.fail("invalid", error=e)
+                self.fail(
+                    "attribute_validation_error",
+                    code=code,
+                    value=internal_value,
+                    error=e,
+                )
+            except ValidationError as e:
+                self.fail(
+                    "attribute_validation_error",
+                    code=code,
+                    value=internal_value,
+                    error=",".join(e.messages),
+                )
 
             return {"value": internal_value, "attribute": attribute}
         except ProductAttribute.DoesNotExist:
@@ -173,8 +189,8 @@ class AttributeValueField(serializers.Field):
                 self.fail("child_without_parent")
             else:
                 self.fail("attribute_missing", **data)
-        except ObjectDoesNotExist as e:
-            self.fail("no_such_option", value=value)
+        except ObjectDoesNotExist:
+            self.fail("no_such_option", value=value, code=code)
         except KeyError as e:
             field_name, = e.args
             raise FieldError(
