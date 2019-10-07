@@ -71,9 +71,7 @@ class OrderLineDetail(generics.RetrieveAPIView):
     serializer_class = OrderLineSerializer
 
     def get_queryset(self):
-        pk = self.kwargs.get("pk")
-        user = self.request.user
-        return super().get_queryset().filter(order__user=user)
+        return super().get_queryset().filter(order__user=self.request.user)
 
 
 class OrderLineAttributeDetail(generics.RetrieveAPIView):
