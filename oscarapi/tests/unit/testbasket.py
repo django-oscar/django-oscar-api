@@ -1070,12 +1070,18 @@ class BasketTest(APITest):
             self.response.assertStatusEqual(406)
 
         with self.subTest("Sequential requests"):
-            for _ in range(2):
-                self.response = self.post(
-                    "api-basket-add-product",
-                    url="http://testserver/api/products/1/",
-                    quantity=20,
-                )
+            self.response = self.post(
+                "api-basket-add-product",
+                url="http://testserver/api/products/1/",
+                quantity=20,
+            )
+            self.response.assertStatusEqual(200)
+
+            self.response = self.post(
+                "api-basket-add-product",
+                url="http://testserver/api/products/1/",
+                quantity=20,
+            )
             self.response.assertStatusEqual(406)
 
     def test_adjust_basket_line_quantity(self):
