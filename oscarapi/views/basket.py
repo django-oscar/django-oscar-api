@@ -96,13 +96,16 @@ class AddProductView(APIView):
         if not availability.is_available_to_buy:
             return False, availability.message
 
+        current_qty = basket.product_quantity(product)
+        desired_qty = current_qty + quantity
+
         # check if we can buy this quantity
-        allowed, message = availability.is_purchase_permitted(quantity)
+        allowed, message = availability.is_purchase_permitted(desired_qty)
         if not allowed:
             return False, message
 
         # check if there is a limit on amount
-        allowed, message = basket.is_quantity_allowed(quantity)
+        allowed, message = basket.is_quantity_allowed(desired_qty)
         if not allowed:
             return False, message
         return True, None

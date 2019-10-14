@@ -1061,12 +1061,28 @@ class BasketTest(APITest):
         """Test if an anonymous user cannot add more products to his
             basket when stock is not sufficient
         """
-        self.response = self.post(
-            "api-basket-add-product",
-            url="http://testserver/api/products/1/",
-            quantity=25,
-        )
-        self.response.assertStatusEqual(406)
+        with self.subTest("Single request"):
+            self.response = self.post(
+                "api-basket-add-product",
+                url="http://testserver/api/products/1/",
+                quantity=25,
+            )
+            self.response.assertStatusEqual(406)
+
+        with self.subTest("Sequential requests"):
+            self.response = self.post(
+                "api-basket-add-product",
+                url="http://testserver/api/products/1/",
+                quantity=20,
+            )
+            self.response.assertStatusEqual(200)
+
+            self.response = self.post(
+                "api-basket-add-product",
+                url="http://testserver/api/products/1/",
+                quantity=20,
+            )
+            self.response.assertStatusEqual(406)
 
     def test_adjust_basket_line_quantity(self):
         """Test if we can update the quantity of a line"""
