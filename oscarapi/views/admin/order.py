@@ -37,6 +37,10 @@ class OrderLineAdminList(generics.ListAPIView):
     queryset = OrderLine.objects.get_queryset()
     permission_classes = (APIAdminPermission,)
 
+    def get_queryset(self):
+        pk = self.kwargs.get("pk")
+        return super().get_queryset().filter(order_id=pk)
+
 
 class OrderLineAdminDetail(generics.RetrieveDestroyAPIView):
     serializer_class = AdminOrderLineSerializer

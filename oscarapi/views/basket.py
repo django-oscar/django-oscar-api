@@ -285,14 +285,11 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
     serializer_class = BasketLineSerializer
     queryset = Line.objects.all()
 
-    def get(
-        self, request, pk, format=None
-    ):  # pylint: disable=redefined-builtin,arguments-differ
-        basket = self.check_basket_permission(request, basket_pk=pk)
-        prepped_basket = operations.assign_basket_strategy(basket, request)
-        self.queryset = prepped_basket.all_lines()
-
-        return super(LineList, self).get(request, format)
+    def get_queryset(self):
+        basket_pk = self.kwargs.get("pk")
+        basket = self.check_basket_permission(self.request, basket_pk=basket_pk)
+        prepped_basket = operations.assign_basket_strategy(basket, self.request)
+        return prepped_basket.all_lines()
 
     def post(
         self, request, pk, format=None

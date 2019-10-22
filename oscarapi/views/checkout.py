@@ -60,18 +60,18 @@ class OrderLineList(generics.ListAPIView):
     queryset = OrderLine.objects.all()
     serializer_class = OrderLineSerializer
 
-    def get(self, request, pk, format=None):
-        self.queryset = self.queryset.filter(order__id=pk, order__user=request.user)
-        return super(OrderLineList, self).get(request, format)
+    def get_queryset(self):
+        pk = self.kwargs.get("pk")
+        user = self.request.user
+        return super().get_queryset().filter(order_id=pk, order__user=user)
 
 
 class OrderLineDetail(generics.RetrieveAPIView):
     queryset = OrderLine.objects.all()
     serializer_class = OrderLineSerializer
 
-    def get(self, request, pk, format=None):
-        self.queryset = self.queryset.filter(order__id=pk, order__user=request.user)
-        return super(OrderLineDetail, self).get(request, format)
+    def get_queryset(self):
+        return super().get_queryset().filter(order__user=self.request.user)
 
 
 class OrderLineAttributeDetail(generics.RetrieveAPIView):
