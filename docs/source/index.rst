@@ -31,7 +31,7 @@ Installation
 ------------
 Please see the installation instructions of `Oscar`_ to install Oscar and how to create your own project. Then you can install Oscar API by simply typing:
 
-.. _`Oscar`: https://django-oscar.readthedocs.io/en/releases-1.1/internals/getting_started.html
+.. _`Oscar`: https://django-oscar.readthedocs.io
 
 .. code-block:: bash
 
