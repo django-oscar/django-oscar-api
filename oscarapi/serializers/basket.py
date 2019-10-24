@@ -9,13 +9,15 @@ from oscar.core.loading import get_model
 
 from oscarapi.basket import operations
 from oscarapi.utils.settings import overridable
-from oscarapi.serializers.fields import DrillDownHyperlinkedIdentityField
+from oscarapi.serializers.fields import (
+    DrillDownHyperlinkedIdentityField,
+    DrillDownHyperlinkedRelatedField,
+)
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
 )
 from oscarapi.serializers.fields import TaxIncludedDecimalField
-
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +157,12 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     )
     warning = serializers.CharField(
         read_only=True, required=False, source="get_warning"
+    )
+
+    stockrecord = DrillDownHyperlinkedRelatedField(
+        view_name="product-stockrecord-detail",
+        extra_url_kwargs={"product_pk": "product.id"},
+        queryset=StockRecord.objects.all(),
     )
 
     class Meta:
