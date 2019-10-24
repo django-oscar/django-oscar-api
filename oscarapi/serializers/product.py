@@ -13,6 +13,8 @@ from oscarapi.utils.settings import overridable
 from oscarapi.utils.files import file_hash
 from oscarapi.utils.exists import find_existing_attribute_option_group
 from oscarapi.utils.accessors import getitems
+
+from oscarapi.serializers.fields import DrillDownHyperlinkedIdentityField
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
@@ -29,6 +31,7 @@ ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
 ProductImage = get_model("catalogue", "ProductImage")
 Option = get_model("catalogue", "Option")
 Partner = get_model("partner", "Partner")
+StockRecord = get_model("partner", "StockRecord")
 ProductClass = get_model("catalogue", "ProductClass")
 ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
@@ -38,7 +41,6 @@ AttributeValueField, CategoryField, SingleValueSlugRelatedField = get_api_classe
     "serializers.fields",
     ["AttributeValueField", "CategoryField", "SingleValueSlugRelatedField"],
 )
-StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
 
 
 class AttributeOptionGroupSerializer(OscarHyperlinkedModelSerializer):
@@ -305,6 +307,17 @@ class RecommmendedProductSerializer(OscarModelSerializer):
         fields = overridable("OSCARAPI_RECOMMENDED_PRODUCT_FIELDS", default=("url",))
 
 
+class ProductStockRecordSerializer(OscarModelSerializer):
+    url = DrillDownHyperlinkedIdentityField(
+        view_name="product-stockrecord-detail",
+        extra_url_kwargs={"product_pk": "product.id"},
+    )
+
+    class Meta:
+        model = StockRecord
+        fields = "__all__"
+
+
 class BaseProductSerializer(OscarModelSerializer):
     "Base class shared by admin and public serializer"
     attributes = ProductAttributeValueSerializer(
@@ -407,6 +420,10 @@ class ProductSerializer(PublicProductSerializer):
     images = ProductImageSerializer(many=True, required=False)
     children = ChildProductserializer(many=True, required=False)
 
+    stockrecords = serializers.HyperlinkedIdentityField(
+        view_name="product-stockrecords", read_only=True
+    )
+
     class Meta(PublicProductSerializer.Meta):
         fields = overridable(
             "OSCARAPI_PRODUCTDETAIL_FIELDS",
@@ -426,6 +443,7 @@ class ProductSerializer(PublicProductSerializer):
                 "images",
                 "price",
                 "availability",
+                "stockrecords",
                 "options",
                 "children",
             ),

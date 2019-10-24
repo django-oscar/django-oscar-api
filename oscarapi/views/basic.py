@@ -35,9 +35,8 @@ Range = get_model("offer", "Range")
 
 Selector = get_class("partner.strategy", "Selector")
 CountrySerializer = get_api_class("serializers.checkout", "CountrySerializer")
-BasketSerializer, LineAttributeSerializer, StockRecordSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
-    "serializers.basket",
-    ["BasketSerializer", "LineAttributeSerializer", "StockRecordSerializer"],
+BasketSerializer, LineAttributeSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+    "serializers.basket", ["BasketSerializer", "LineAttributeSerializer"]
 )
 RangeSerializer, OptionSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
     "serializers.product", ["RangeSerializer", "OptionSerializer"]

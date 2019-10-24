@@ -194,12 +194,6 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         return super(BasketLineSerializer, self).to_representation(line)
 
 
-class StockRecordSerializer(OscarModelSerializer):
-    class Meta:
-        model = StockRecord
-        fields = "__all__"
-
-
 class VoucherAddSerializer(serializers.Serializer):
     vouchercode = serializers.CharField(max_length=128, required=True)
 
