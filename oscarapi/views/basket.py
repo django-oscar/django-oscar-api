@@ -273,7 +273,7 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
             "line_reference": "234_345",
             "product": "http://127.0.0.1:8000/oscarapi/products/209/",
             "stockrecord":
-                "http://127.0.0.1:8000/oscarapi/stockrecords/100/",
+                "http://127.0.0.1:8000/ooscarapi/products/209/stockercords/1/",
             "quantity": 3,
             "price_currency": "EUR",
             "price_excl_tax": "100.0",
@@ -304,7 +304,6 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
                 _("Target basket inconsistent %s != %s")
                 % (url_basket.pk, data_basket.pk)
             )
-
         return super(LineList, self).post(request, format=format)
 
 
