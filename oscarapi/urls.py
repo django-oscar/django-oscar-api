@@ -249,7 +249,7 @@ admin_urlpatterns = [
     path(
         "admin/stockrecords/<int:pk>/",
         StockRecordDetail.as_view(),
-        name="stockrecord-detail",
+        name="admin-stockrecord-detail",
     ),
     path("admin/partners/", PartnerList.as_view(), name="partner-list"),
     path("admin/partners/<int:pk>/", PartnerDetail.as_view(), name="partner-detail"),

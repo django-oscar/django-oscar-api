@@ -19,7 +19,7 @@ from oscarapi.serializers.product import (
     ProductLinkSerializer,
     ProductAttributeValueSerializer,
 )
-from oscarapi.serializers.basket import StockRecordSerializer
+from oscarapi.serializers.admin.partner import AdminStockRecordSerializer
 from oscarapi.serializers.admin.product import AdminProductSerializer
 from oscarapi.serializers.product import AttributeOptionGroupSerializer
 
@@ -293,10 +293,10 @@ class _ProductSerializerTest(TestCase):
         )
 
 
-class StockRecordSerializerTest(_ProductSerializerTest):
+class AdminStockRecordSerializerTest(_ProductSerializerTest):
     def test_stockrecord_save(self):
-        "The StockRecordSerializer should be able to save stuff"
-        ser = StockRecordSerializer(
+        "The AdminStockRecordSerializer should be able to save stuff"
+        ser = AdminStockRecordSerializer(
             data={
                 "product": 1,
                 "partner": "http://testserver/api/admin/partners/1/",

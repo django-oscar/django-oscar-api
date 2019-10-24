@@ -14,7 +14,9 @@ Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
 ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
 Option = get_model("catalogue", "Option")
-StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
+AdminStockRecordSerializer = get_api_class(
+    "serializers.admin.partner", "AdminStockRecordSerializer"
+)
 BaseProductSerializer, BaseCategorySerializer, ProductImageSerializer, ProductAttributeSerializer, OptionSerializer = get_api_classes(
     "serializers.product",
     [
@@ -29,7 +31,7 @@ BaseProductSerializer, BaseCategorySerializer, ProductImageSerializer, ProductAt
 
 class AdminProductSerializer(BaseProductSerializer):
     url = serializers.HyperlinkedIdentityField(view_name="admin-product-detail")
-    stockrecords = StockRecordSerializer(many=True, required=False)
+    stockrecords = AdminStockRecordSerializer(many=True, required=False)
     images = ProductImageSerializer(many=True, required=False)
     children = serializers.HyperlinkedRelatedField(
         view_name="admin-product-detail",
