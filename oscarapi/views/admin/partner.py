@@ -3,7 +3,9 @@ from oscar.core.loading import get_model
 from rest_framework import generics
 
 APIAdminPermission = get_api_class("permissions", "APIAdminPermission")
-StockRecordSerializer = get_api_class("serializers.basket", "StockRecordSerializer")
+AdminStockRecordSerializer = get_api_class(
+    "serializers.admin.partner", "AdminStockRecordSerializer"
+)
 PartnerSerializer = get_api_class("serializers.product", "PartnerSerializer")
 StockRecord = get_model("partner", "StockRecord")
 Partner = get_model("partner", "Partner")
@@ -11,7 +13,7 @@ Partner = get_model("partner", "Partner")
 
 class StockRecordDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = StockRecord.objects.all()
-    serializer_class = StockRecordSerializer
+    serializer_class = AdminStockRecordSerializer
     permission_classes = (APIAdminPermission,)
 
 

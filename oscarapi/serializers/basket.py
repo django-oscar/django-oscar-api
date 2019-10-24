@@ -13,10 +13,8 @@ from oscarapi.serializers.fields import DrillDownHyperlinkedIdentityField
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
-    UpdateListSerializer,
 )
 from oscarapi.serializers.fields import TaxIncludedDecimalField
-from oscarapi.serializers.utils import DelayUniqueSerializerMixin
 
 
 logger = logging.getLogger(__name__)
@@ -196,17 +194,10 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         return super(BasketLineSerializer, self).to_representation(line)
 
 
-class StockRecordSerializer(
-    DelayUniqueSerializerMixin, OscarHyperlinkedModelSerializer
-):
-    product = serializers.PrimaryKeyRelatedField(
-        many=False, required=False, queryset=Product.objects
-    )
-
+class StockRecordSerializer(OscarModelSerializer):
     class Meta:
         model = StockRecord
         fields = "__all__"
-        list_serializer_class = UpdateListSerializer
 
 
 class VoucherAddSerializer(serializers.Serializer):
