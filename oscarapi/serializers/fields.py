@@ -12,6 +12,7 @@ from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 
+from rest_framework.relations import PKOnlyObject
 from rest_framework import serializers, relations
 from rest_framework.fields import get_attribute
 
@@ -43,17 +44,15 @@ class TaxIncludedDecimalField(serializers.DecimalField):
         return self.excl_tax_value
 
 
-class DrillDownHyperlinkedIdentityField(relations.HyperlinkedIdentityField):
+class DrillDownHyperlinkedMixin:
     def __init__(self, *args, **kwargs):
         try:
             self.extra_url_kwargs = kwargs.pop("extra_url_kwargs")
         except KeyError:
-            msg = (
-                "DrillDownHyperlinkedIdentityField requires 'extra_url_kwargs' argument"
-            )
+            msg = "DrillDownHyperlink Fields require an 'extra_url_kwargs' argument"
             raise ValueError(msg)
 
-        super(DrillDownHyperlinkedIdentityField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def get_extra_url_kwargs(self, obj):
         return {
@@ -77,6 +76,21 @@ class DrillDownHyperlinkedIdentityField(relations.HyperlinkedIdentityField):
         kwargs = {self.lookup_url_kwarg: lookup_value}
         kwargs.update(self.get_extra_url_kwargs(obj))
         return self.reverse(view_name, kwargs=kwargs, request=request, format=format)
+
+
+class DrillDownHyperlinkedIdentityField(
+    DrillDownHyperlinkedMixin, relations.HyperlinkedIdentityField
+):
+    pass
+
+
+class DrillDownHyperlinkedRelatedField(
+    DrillDownHyperlinkedMixin, relations.HyperlinkedRelatedField
+):
+    def use_pk_only_optimization(self):
+        # we always want the full object so the mixin can filter on the attributes
+        # specified with get_extra_url_kwargs
+        return False
 
 
 class AttributeValueField(serializers.Field):
