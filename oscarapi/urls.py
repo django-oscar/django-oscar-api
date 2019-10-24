@@ -59,6 +59,8 @@ LoginView = get_api_class("views.login", "LoginView")
 (
     ProductList,
     ProductDetail,
+    ProductStockRecords,
+    ProductStockRecordDetail,
     ProductPrice,
     ProductAvailability,
     CategoryList,
@@ -68,6 +70,8 @@ LoginView = get_api_class("views.login", "LoginView")
     [
         "ProductList",
         "ProductDetail",
+        "ProductStockRecords",
+        "ProductStockRecordDetail",
         "ProductPrice",
         "ProductAvailability",
         "CategoryList",
@@ -178,6 +182,16 @@ urlpatterns = [
         "products/<int:pk>/availability/",
         ProductAvailability.as_view(),
         name="product-availability",
+    ),
+    path(
+        "products/<int:pk>/stockrecords/",
+        ProductStockRecords.as_view(),
+        name="product-stockrecords",
+    ),
+    path(
+        "products/<int:product_pk>/stockrecords/<int:pk>/",
+        ProductStockRecordDetail.as_view(),
+        name="product-stockrecord-detail",
     ),
     path("options/", OptionList.as_view(), name="option-list"),
     path("options/<int:pk>/", OptionDetail.as_view(), name="option-detail"),
