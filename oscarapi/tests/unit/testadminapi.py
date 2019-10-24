@@ -1,11 +1,14 @@
+import sys
+
 from importlib import reload as reload_module
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory
 from django.urls import reverse
 
+from oscarapi import urls
 from oscarapi.tests.utils import APITest
 
-from oscarapi import urls
 from oscarapi.permissions import APIAdminPermission
 
 User = get_user_model()
@@ -15,6 +18,7 @@ class BlockAdminApiTest(APITest):
     def test_root_view(self):
         "The admin api views should not be in the root view when OSCARAPI_BLOCK_ADMIN_API_ACCESS is True"
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
+            self.reload_modules([urls, sys.modules[settings.ROOT_URLCONF]])
             self.response = self.get(reverse("api-root"))
             self.response.assertStatusEqual(200)
             # so the admin api is not shown in the root view as we are not logged in as staff user
@@ -27,6 +31,7 @@ class BlockAdminApiTest(APITest):
             self.assertIn("admin", self.response.data)
 
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=True):
+            self.reload_modules([urls, sys.modules[settings.ROOT_URLCONF]])
             self.response = self.get(reverse("api-root"))
             self.response.assertStatusEqual(200)
             # so the admin api is not shown in the root view
@@ -41,13 +46,14 @@ class BlockAdminApiTest(APITest):
     def test_urlconf(self):
         "The admin api urls should not be registered when OSCARAPI_BLOCK_ADMIN_API_ACCESS is True"
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
+            self.reload_modules([urls, sys.modules[settings.ROOT_URLCONF]])
             urlpattern_names = [url.name for url in urls.urlpatterns]
 
             for pattern in urls.admin_urlpatterns:
                 self.assertIn(pattern.name, urlpattern_names)
 
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=True):
-            reload_module(urls)
+            self.reload_modules([urls, sys.modules[settings.ROOT_URLCONF]])
             urlpattern_names = [url.name for url in urls.urlpatterns]
 
             for pattern in urls.admin_urlpatterns:
