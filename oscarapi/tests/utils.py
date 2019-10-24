@@ -1,3 +1,5 @@
+from importlib import reload as reload_module
+
 import json
 from re import match
 
@@ -113,6 +115,11 @@ class APITest(TestCase):
     @response.setter
     def response(self, response):
         self._response = ParsedResponse(response, self)
+
+    @staticmethod
+    def reload_modules(modules=[]):
+        for module in modules:
+            reload_module(module)
 
 
 class ParsedResponse(object):
