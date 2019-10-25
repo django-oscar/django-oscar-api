@@ -16,7 +16,10 @@ from oscarapi.serializers.utils import (
     OscarHyperlinkedModelSerializer,
     OscarModelSerializer,
 )
-from oscarapi.serializers.fields import TaxIncludedDecimalField
+from oscarapi.serializers.fields import (
+    DrillDownHyperlinkedRelatedField,
+    TaxIncludedDecimalField,
+)
 
 
 OrderPlacementMixin = get_class("checkout.mixins", "OrderPlacementMixin")
@@ -26,6 +29,7 @@ BillingAddress = get_model("order", "BillingAddress")
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
 OrderLineAttribute = get_model("order", "LineAttribute")
+StockRecord = get_model("partner", "StockRecord")
 
 Basket = get_model("basket", "Basket")
 Country = get_model("address", "Country")
@@ -133,6 +137,11 @@ class OrderLineSerializer(OscarHyperlinkedModelSerializer):
     )
     price_excl_tax_excl_discounts = serializers.DecimalField(
         decimal_places=2, max_digits=12, source="line_price_before_discounts_excl_tax"
+    )
+    stockrecord = DrillDownHyperlinkedRelatedField(
+        view_name="product-stockrecord-detail",
+        extra_url_kwargs={"product_pk": "product.id"},
+        queryset=StockRecord.objects.all(),
     )
 
     class Meta:
