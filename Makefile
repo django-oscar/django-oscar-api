@@ -15,10 +15,12 @@ sandbox: install
 	python sandbox/manage.py loaddata product productcategory productattribute productclass productattributevalue category option attributeoptiongroup attributeoption stockrecord partner voucher country
 
 test:
-	python sandbox/manage.py test oscarapi --settings=sandbox.settings
+	python sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_true
+	python sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_false
 
 coverage:
-	coverage run sandbox/manage.py test oscarapi --settings=sandbox.settings
+	coverage run sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_true
+	coverage run sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_false
 	coverage report -m
 	coverage xml -i
 
