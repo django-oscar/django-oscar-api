@@ -4,6 +4,7 @@ import datetime
 import json
 from copy import deepcopy
 from os.path import dirname, join
+from unittest import skipIf
 
 from django.conf import settings
 from django.urls import reverse
@@ -1295,6 +1296,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.categories.count(), 3)
 
 
+@skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
 class TestProductAdmin(APITest):
     fixtures = [
         "product",
@@ -1441,6 +1443,7 @@ class TestAttributeOptionGroupSerializer(APITest):
         "productimage",
     ]
 
+    @skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
     def test_put(self):
         self.login("admin", "admin")
         url = reverse("admin-attributeoptiongroup-detail", args=(1,))
@@ -1454,6 +1457,7 @@ class TestAttributeOptionGroupSerializer(APITest):
             self.response["options"], ["Large", "Medium", "Small", "Rokeol"]
         )
 
+    @skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
     def test_remove(self):
         self.test_put()
         url = reverse("admin-attributeoptiongroup-detail", args=(1,))
@@ -1535,6 +1539,7 @@ class TestProductClassSerializer(APITest):
             option.options.values_list("option", flat=True), ["Large", "Small"]
         )
 
+    @skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
     def test_post_product_class(self):
         self.login("admin", "admin")
         self.assertEqual(ProductClass.objects.count(), 3)
@@ -1545,6 +1550,7 @@ class TestProductClassSerializer(APITest):
         self.response.assertStatusEqual(201)
         self.assertEqual(ProductClass.objects.count(), 4)
 
+    @skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
     def test_put_add_options(self):
         "We should be able to options with put"
         self.login("admin", "admin")
@@ -1570,6 +1576,7 @@ class TestProductClassSerializer(APITest):
         self.assertEqual(pc.options.count(), 1)
         self.assertEqual(len(self.response["options"]), 1)
 
+    @skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
     def test_put_add_attributes(self):
         "We should be able to add attributes with put"
         self.test_put_add_options()
@@ -1588,6 +1595,7 @@ class TestProductClassSerializer(APITest):
             find_existing_attribute_option_group("Sizes", ["Large", "Small"])
         )
 
+    @skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
     def test_option_group(self):
         "Updating an options group should create new options groups when needed"
         self.assertEqual(AttributeOptionGroup.objects.count(), 1)
@@ -1645,6 +1653,7 @@ class TestProductClassSerializer(APITest):
         )
 
 
+@skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
 class AdminCategoryApiTest(APITest):
     fixtures = [
         "product",
