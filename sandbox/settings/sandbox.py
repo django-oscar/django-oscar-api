@@ -61,7 +61,10 @@ INSTALLED_APPS = [
     'oscar.apps.dashboard.shipping',
     'oscarapi',
     'rest_framework',
-    'widget_tweaks',
+     'widget_tweaks',
+    'haystack',
+    'treebeard',
+    'django_tables2'
 ]
 
 LANGUAGE_CODE = 'en-us'
