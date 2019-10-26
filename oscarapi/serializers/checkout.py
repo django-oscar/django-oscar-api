@@ -140,7 +140,7 @@ class OrderLineSerializer(OscarHyperlinkedModelSerializer):
     )
     stockrecord = DrillDownHyperlinkedRelatedField(
         view_name="product-stockrecord-detail",
-        extra_url_kwargs={"product_pk": "product.id"},
+        extra_url_kwargs={"product_pk": "product_id"},
         queryset=StockRecord.objects.all(),
     )
 
