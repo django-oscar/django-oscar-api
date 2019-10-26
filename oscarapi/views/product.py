@@ -83,7 +83,7 @@ class ProductStockRecords(generics.ListAPIView):
 
     def get_queryset(self):
         product_pk = self.kwargs.get("pk")
-        return super().get_queryset().filter(product__pk=product_pk)
+        return super().get_queryset().filter(product_id=product_pk)
 
 
 class ProductStockRecordDetail(generics.RetrieveAPIView):
