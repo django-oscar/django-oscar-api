@@ -28,17 +28,15 @@ To use the Oscar API application in an Oscar E-commerce site, follow these
 steps:
 
 1. Install the `django-oscar-api` package (``pip install django-oscar-api``).
+
 2. Add oscarapi and restframework to INSTALLED_APPS.
     .. code-block:: python
-    
+
        INSTALLED_APPS = [
         ...
         'rest_framework',
         'oscarapi',
        ]
-  Note: If you don't have restframework you can install it using ::
-
-    pip install djangorestframework
 
 3. Add the application's urls to your urlconf
 
