@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
+from decimal import Decimal
 from mock import patch
 
+from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.test.client import RequestFactory
 
 from oscar.core.loading import get_model
 
 from rest_framework.response import Response
 from oscarapi.tests.utils import APITest
 
+from oscarapi.serializers.checkout import CheckoutSerializer
 
 Basket = get_model("basket", "Basket")
+User = get_user_model()
 
 
-class CheckOutTest(APITest):
+class CheckoutTest(APITest):
     fixtures = [
         "product",
         "productcategory",
@@ -50,6 +55,28 @@ class CheckOutTest(APITest):
                 "title": "Mr",
             },
         }
+
+    def test_checkout_serializer_validation(self):
+        self.login(username="nobody", password="nobody")
+
+        # first create a basket and a checkout payload
+        response = self.post(
+            "api-basket-add-product",
+            url="http://testserver/api/products/1/",
+            quantity=5,
+        )
+        basket = response.data
+        payload = self._get_common_payload(basket["url"])
+
+        # create a request and user for the serializer
+        rf = RequestFactory()
+        request = rf.post("/checkout", **payload)
+        request.user = User.objects.get(username="nobody")
+
+        serializer = CheckoutSerializer(data=payload, context={"request": request})
+        self.assertTrue(serializer.is_valid())
+        # see https://github.com/django-oscar/django-oscar-api/issues/188
+        self.assertEqual(serializer.validated_data["total"], Decimal("50.00"))
 
     def test_checkout(self):
         """Test if an order can be placed as an authenticated user with session based auth."""

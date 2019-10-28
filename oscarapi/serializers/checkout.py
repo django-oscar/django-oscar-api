@@ -295,7 +295,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
                 raise serializers.ValidationError(message)
 
         # update attrs with validated data.
-        attrs["total"] = total
+        attrs["order_total"] = total
         attrs["shipping_method"] = shipping_method
         attrs["shipping_charge"] = shipping_charge
         attrs["basket"] = basket
@@ -325,7 +325,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
                 shipping_method=validated_data.get("shipping_method"),
                 shipping_charge=validated_data.get("shipping_charge"),
                 billing_address=billing_address,
-                order_total=validated_data.get("total"),
+                order_total=validated_data.get("order_total"),
                 guest_email=validated_data.get("guest_email") or "",
             )
         except ValueError as e:
