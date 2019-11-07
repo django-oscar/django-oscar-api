@@ -41,7 +41,10 @@ ShippingAddress = get_model("order", "ShippingAddress")
     ],
 )
 AddProductSerializer = get_api_class("serializers.product", "AddProductSerializer")
-ShippingAddressSerializer, ShippingMethodSerializer = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
+(
+    ShippingAddressSerializer,
+    ShippingMethodSerializer,
+) = get_api_classes(  # pylint: disable=unbalanced-tuple-unpacking
     "serializers.checkout", ["ShippingAddressSerializer", "ShippingMethodSerializer"]
 )
 

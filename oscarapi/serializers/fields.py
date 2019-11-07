@@ -206,7 +206,7 @@ class AttributeValueField(serializers.Field):
         except ObjectDoesNotExist:
             self.fail("no_such_option", value=value, code=code)
         except KeyError as e:
-            field_name, = e.args
+            (field_name,) = e.args
             raise FieldError(
                 detail={field_name: self.error_messages["required"]}, code="required"
             )

@@ -17,7 +17,13 @@ Option = get_model("catalogue", "Option")
 AdminStockRecordSerializer = get_api_class(
     "serializers.admin.partner", "AdminStockRecordSerializer"
 )
-BaseProductSerializer, BaseCategorySerializer, ProductImageSerializer, ProductAttributeSerializer, OptionSerializer = get_api_classes(
+(
+    BaseProductSerializer,
+    BaseCategorySerializer,
+    ProductImageSerializer,
+    ProductAttributeSerializer,
+    OptionSerializer,
+) = get_api_classes(
     "serializers.product",
     [
         "BaseProductSerializer",

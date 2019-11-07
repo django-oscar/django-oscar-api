@@ -10,7 +10,11 @@ Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
 OrderLineAttribute = get_model("order", "LineAttribute")
 
-AdminOrderSerializer, AdminOrderLineSerializer, AdminOrderLineAttributeSerializer = get_api_classes(  # noqa
+(
+    AdminOrderSerializer,
+    AdminOrderLineSerializer,
+    AdminOrderLineAttributeSerializer,
+) = get_api_classes(  # noqa
     "serializers.admin.order",
     [
         "AdminOrderSerializer",

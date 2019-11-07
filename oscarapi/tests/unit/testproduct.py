@@ -1160,7 +1160,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
     def test_modify_options(self):
         self.test_add_options()
         product = Product.objects.get(pk=1)
-        opt, = product.options
+        (opt,) = product.options
         self.assertEqual(opt.name, "Opdruk")
         self.assertEqual(len(product.options), 1)
         ser = AdminProductSerializer(
@@ -1175,7 +1175,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
         self.assertEqual(obj.pk, 1, "product should be the same as passed as instance")
-        opt, = obj.options
+        (opt,) = obj.options
         self.assertEqual(opt.name, "Wous")
         self.assertEqual(Option.objects.count(), 1)
 

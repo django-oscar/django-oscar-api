@@ -12,7 +12,11 @@ ProductAttributeSerializer, AttributeOptionGroupSerializer = get_api_classes(
     "serializers.product",
     ["ProductAttributeSerializer", "AttributeOptionGroupSerializer"],
 )
-AdminProductSerializer, AdminCategorySerializer, AdminProductClassSerializer, = get_api_classes(
+(
+    AdminProductSerializer,
+    AdminCategorySerializer,
+    AdminProductClassSerializer,
+) = get_api_classes(
     "serializers.admin.product",
     [
         "AdminProductSerializer",

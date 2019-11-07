@@ -54,7 +54,7 @@ setup(
     # mark test target to require extras.
     extras_require={
         "dev": ["coverage", "mock", "twine", "wheel"],
-        "lint": ["black"],
+        "lint": ["black>=19.10b0"],
         "docs": ["sphinx", "sphinx_rtd_theme"],
     },
 )
