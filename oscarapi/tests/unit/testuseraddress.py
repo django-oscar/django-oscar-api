@@ -133,7 +133,7 @@ class UserAddressTest(APITest):
         self.assertEqual(len(self.response.data), 0)
 
     def test_address_security(self):
-        "Make sure we can't access adresses of other users"
+        "Make sure we can't access addresses of other users"
         # first login as the first user
         self.login("nobody", "nobody")
 

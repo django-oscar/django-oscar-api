@@ -60,7 +60,7 @@ def get_session(session_id, raise_on_create=False):
         # if we get an expired session from django,
         # the session key will change after calling load.
         # since the whole point of get_session is to retrieve a session
-        # with axactly the key specified, we have to clear the expired
+        # with exactly the key specified, we have to clear the expired
         # sessions and then get a new session.
         session.load()
         if session.session_key != session_id:

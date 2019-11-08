@@ -225,7 +225,7 @@ class BasketTest(APITest):
         self.response = self.client.get(basket_lines)
         self.response.assertStatusEqual(200)
 
-        # try to acces somebody else's basket (hihi).
+        # try to access somebody else's basket (hihi).
         url = reverse("basket-detail", args=(1,))
         self.response = self.client.get(url)
         self.response.assertStatusEqual(
@@ -303,7 +303,7 @@ class BasketTest(APITest):
         )
         self.response.assertStatusEqual(200)
 
-        # try to acces somebody else's basket (hihi).
+        # try to access somebody else's basket (hihi).
         url = reverse("basket-detail", args=(1,))
         self.response = self.client.get(
             url, HTTP_SESSION_ID="SID:AUTH:testserver:nobody"
@@ -338,7 +338,7 @@ class BasketTest(APITest):
         )
         self.response.assertStatusEqual(200)
 
-        # try to acces somebody else's basket (hihi).
+        # try to access somebody else's basket (hihi).
         url = reverse("basket-detail", args=(1,))
         self.response = self.client.get(
             url, HTTP_SESSION_ID="SID:AUTH:testserver:admin"
@@ -441,7 +441,7 @@ class BasketTest(APITest):
         self.response = self.delete(url)
         self.response.assertStatusEqual(403)
 
-        # try adding lines to someone elses basket
+        # try adding lines to someone else's basket
         line_data = {
             "basket": "http://testserver/api/baskets/%s/" % nobody_basket_id,
             "line_reference": "234_345",
@@ -457,7 +457,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(403)
 
     def test_basket_write_permissions_authenticated(self):
-        "An authenticated user should not be able to change someone elses basket"
+        "An authenticated user should not be able to change someone else's basket"
 
         # now try for authenticated user.
         self.login("nobody", "nobody")
@@ -540,7 +540,7 @@ class BasketTest(APITest):
         self.response = self.delete(url)
         self.response.assertStatusEqual(403)
 
-        # try adding lines to someone elses basket
+        # try adding lines to someone else's basket
         line_data = {
             "basket": "http://testserver/api/baskets/%s/" % somebody_basket_id,
             "line_reference": "234_345",
@@ -653,7 +653,7 @@ class BasketTest(APITest):
         self.response = self.delete(url, session_id="nobody", authenticated=True)
         self.response.assertStatusEqual(403)
 
-        # try adding lines to someone elses basket
+        # try adding lines to someone else's basket
         line_data = {
             "basket": "http://testserver/api/baskets/%s/" % somebody_basket_id,
             "line_reference": "234_345",
@@ -671,7 +671,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(403)
 
     def test_basket_write_permissions_admin(self):
-        "An admin user can not change someone elses basket."
+        "An admin user can not change someone else's basket."
 
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             # now try for authenticated user.
@@ -751,7 +751,7 @@ class BasketTest(APITest):
             self.response = self.put(url, status="Saved")
             self.response.assertStatusEqual(403)
 
-            # try adding lines to someone elses basket
+            # try adding lines to someone else's basket
             line_data = {
                 "basket": "http://testserver/api/baskets/%s/" % somebody_basket_id,
                 "line_reference": "234_345",
@@ -771,7 +771,7 @@ class BasketTest(APITest):
             self.response.assertStatusEqual(403)
 
     def test_basket_write_permissions_header_admin(self):
-        "An admin user can not change someone elses basket, even when authenticating with session header."
+        "An admin user can not change someone else's basket, even when authenticating with session header."
 
         # now try for authenticated user.
         self.hlogin("admin", "admin", session_id="admin")
@@ -864,7 +864,7 @@ class BasketTest(APITest):
         )
         self.response.assertStatusEqual(403)
 
-        # try adding lines to someone elses basket
+        # try adding lines to someone else's basket
         line_data = {
             "basket": "http://testserver/api/baskets/%s/" % somebody_basket_id,
             "line_reference": "234_345",
@@ -962,7 +962,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(404)
 
     def test_basket_line_permissions_header(self):
-        "A user's Basket lines can not be viewed by another user in any way, even with header authetication"
+        "A user's Basket lines can not be viewed by another user in any way, even with header authentication"
         self.hlogin("nobody", "nobody", session_id="nobody")
         self.response = self.get("api-basket", session_id="nobody", authenticated=True)
         self.response.assertStatusEqual(200)
@@ -992,7 +992,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(404)
 
     def test_frozen_basket_can_not_be_accessed(self):
-        "Prove that frozen baskets can nolonger be accessed by the user."
+        "Prove that frozen baskets can no longer be accessed by the user."
         self.login("nobody", "nobody")
         self.response = self.get("api-basket")
         self.response.assertStatusEqual(200)
@@ -1007,7 +1007,7 @@ class BasketTest(APITest):
         self.response.assertStatusEqual(404)
 
     def test_frozen_basket_can_not_be_accessed_header(self):
-        "Prove that frozen baskets can nolonger be accessed by the user, even with header authentication"
+        "Prove that frozen baskets can no longer be accessed by the user, even with header authentication"
         self.hlogin("nobody", "nobody", session_id="nobody")
         self.response = self.get("api-basket", session_id="nobody", authenticated=True)
         self.response.assertStatusEqual(200)
@@ -1048,7 +1048,7 @@ class BasketTest(APITest):
             self.response.assertStatusEqual(406)
 
     def test_total_prices_anonymous(self):
-        "Test if the prices calcualted by the basket are ok"
+        "Test if the prices calculated by the basket are ok"
         self.response = self.post(
             "api-basket-add-product",
             url="http://testserver/api/products/1/",

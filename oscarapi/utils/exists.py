@@ -77,7 +77,7 @@ def bound_unique_together_get_or_create(bound_queryset, datum):
     keys = set(datum.keys())
     for unique_pair in QuerySetModel._meta.unique_together:
         overlap = keys & set(unique_pair)
-        # one of the items in the unique specification should be allready
+        # one of the items in the unique specification should be already
         # bound in the queryset (used in a filter). So we need to look
         # for a unique spec that has overlap with the data keys, but has 1
         # key missing (which is the bound key)

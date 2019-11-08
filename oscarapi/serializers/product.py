@@ -232,7 +232,7 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
 
     def save(self, **kwargs):
         """
-        Since there is a unique contraint, sometimes we want to update instead
+        Since there is a unique constraint, sometimes we want to update instead
         of creating a new object (because an integrity error would occur due
         to the constraint on attribute and product). If instance is set, the
         update method will be used instead of the create method.

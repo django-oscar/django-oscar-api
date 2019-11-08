@@ -196,7 +196,7 @@ class ProductTest(APITest):
         self.response.assertValueEqual("title", "Oscar T-shirt")
 
     def test_product_attribute_entity(self):
-        "Entity attribute tyoe should be supported by means of json method"
+        "Entity attribute type should be supported by means of json method"
         self.response = self.get(reverse("product-detail", args=(4,)))
         self.response.assertStatusEqual(200)
 
@@ -1102,7 +1102,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
     @mock.patch("oscarapi.serializers.fields.urlopen")
     def test_modify_images(self, urlopen):
-        "The serializer should automatically detect that an image allready exists and update it"
+        "The serializer should automatically detect that an image already exists and update it"
         urlopen.return_value = open(
             join(dirname(__file__), "testdata", "image.jpg"), "rb"
         )

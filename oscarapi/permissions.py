@@ -24,7 +24,7 @@ class APIAdminPermission(DjangoModelPermissions):
     The permission for all the admin api views. You only get admin api access when:
     - OSCARAPI_BLOCK_ADMIN_API_ACCESS is false
     - you are a staff user (is_staff)
-    - you have any of the model persmissons needed (view / add / change / delete)
+    - you have any of the model permissions needed (view / add / change / delete)
 
     Feel free to customize!
     """
