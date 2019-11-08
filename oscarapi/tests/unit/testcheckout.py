@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from decimal import Decimal
 from mock import patch
 
@@ -382,7 +381,7 @@ class CheckoutTest(APITest):
 
     def test_checkout_creates_an_order(self):
         """After checkout has been done, a user should have gained an order object."""
-        # first create an anoymous order
+        # first create an anonymous order
         self.test_anonymous_checkout()
 
         # and now an order for the user nobody

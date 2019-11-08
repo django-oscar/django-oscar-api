@@ -56,7 +56,7 @@ class ProductAdminList(generics.UpdateAPIView, generics.ListCreateAPIView):
         """
         Returns the object the view is displaying.
 
-        Tries to extract a uniquely indentifying query from the posted data
+        Tries to extract a uniquely identifying query from the posted data
         """
         try:
             automatic_filter = construct_id_filter(Product, self.request.data)

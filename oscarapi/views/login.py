@@ -25,11 +25,11 @@ class LoginView(APIView):
     DELETE:
     Log the user out by destroying the session.
     Anonymous users will have their cart destroyed as well, because there is
-    no way to reach it anymoore
+    no way to reach it anymore
 
     POST(username, password):
     1. The user will be authenticated. The next steps will only be
-       performed is login is succesful. Logging in logged in users results in
+       performed is login is successful. Logging in logged in users results in
        405.
     2. The anonymous cart will be merged with the private cart associated with
        that authenticated user.

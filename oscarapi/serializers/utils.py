@@ -31,7 +31,7 @@ class OscarSerializer(object):
     def __init__(self, *args, **kwargs):
         """
         Allow the serializer to be initiated with only a subset of the
-        speccified fields
+        specified fields
         """
         fields = kwargs.pop("fields", None)
         super(OscarSerializer, self).__init__(*args, **kwargs)
@@ -129,7 +129,7 @@ class UpdateListSerializer(serializers.ListSerializer):
         except manager.model.DoesNotExist:
             pass
         except manager.model.MultipleObjectsReturned as e:
-            logger.error("Multiple objects on unique contrained items, freaky %s", e)
+            logger.error("Multiple objects on unique constrained items, freaky %s", e)
             logger.exception(e)
 
         # fallback to manually specified lookup_fields

@@ -12,7 +12,6 @@ from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 
-from rest_framework.relations import PKOnlyObject
 from rest_framework import serializers, relations
 from rest_framework.fields import get_attribute
 

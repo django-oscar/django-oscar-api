@@ -27,7 +27,7 @@ def create_from_sequence(bits, create):
                 )
         except Category.MultipleObjectsReturned:
             raise ValueError(
-                ("There are more than one categories with slug " "%s at depth=1") % slug
+                "There are more than one categories with slug " "%s at depth=1" % slug
             )
         return [root]
     else:
