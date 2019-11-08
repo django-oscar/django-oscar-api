@@ -8,7 +8,7 @@ from rest_framework.fields import empty
 from oscar.core.loading import get_model
 
 from oscarapi.utils.exists import bound_unique_together_get_or_create_multiple
-from oscarapi.utils.loading import get_api_classes, get_api_class
+from oscarapi.utils.loading import get_api_classes
 from oscarapi.utils.settings import overridable
 from oscarapi.utils.files import file_hash
 from oscarapi.utils.exists import find_existing_attribute_option_group

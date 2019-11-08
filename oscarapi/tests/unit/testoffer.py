@@ -1,7 +1,3 @@
-import json
-from django.conf import settings
-from django.urls import reverse
-
 from oscar.core.loading import get_model
 
 from oscarapi.tests.utils import APITest
