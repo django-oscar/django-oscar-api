@@ -1,22 +1,49 @@
 language: python
-
+os: linux
 dist: xenial
 
-matrix:
+stages:
+  - lint
+  - test
+
+jobs:
   fast_finish: true
+
   include:
-    - { python: "3.7", env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1' ENABLE_LINT=1"}
+    - stage: lint
+      python: 3.7
+      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"
+      script: make lint
 
-    - { python: "3.5", env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>=2.0,<2.1'"}
-    - { python: "3.6", env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>=2.0,<2.1'"}
-    - { python: "3.7", env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>=2.0,<2.1'"}
+    - stage: test
+      python: 3.5
+      env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>=2.0,<2.1'"
+      script: make coverage
+    - stage: test
+      python: 3.6
+      env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>=2.0,<2.1'"
+      script: make coverage
+    - stage: test
+      python: 3.7
+      env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>=2.0,<2.1'"
+      script: make coverage
+    - stage: test
+      python: 3.5
+      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"
+      script: make coverage
+    - stage: test
+      python: 3.6
+      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"
+      script: make coverage
+    - stage: test
+      python: 3.7
+      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"
+      script: make coverage
 
-    - { python: "3.5", env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"}
-    - { python: "3.6", env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"}
-    - { python: "3.7", env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"}
-
-    - { python: "3.7", env: "DJANGO='Django>=2.2,<3' OSCAR='https://github.com/django-oscar/django-oscar/archive/master.tar.gz"}
-
+    - stage: test
+      python: 3.7
+      env: "DJANGO='Django>=2.2,<3' OSCAR='https://github.com/django-oscar/django-oscar/archive/master.tar.gz'"
+      script: make coverage
 
   allow_failures:
     - env: "DJANGO='Django>=2.2,<3' OSCAR='https://github.com/django-oscar/django-oscar/archive/master.tar.gz'"
@@ -30,9 +57,6 @@ install:
     - pip install $OSCAR $DJANGO
     - make install
     - pip freeze
-
-script:
-    - if [ ${ENABLE_LINT} == "1" ]; then make lint; else  make coverage; fi
 
 after_success:
   - codecov
