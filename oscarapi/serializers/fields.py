@@ -126,7 +126,7 @@ class AttributeValueField(serializers.Field):
         # return all the data because this field uses everything
         return dictionary
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data):  # noqa
         assert "product" in data or "product_class" in data or "parent" in data
 
         try:
