@@ -41,7 +41,7 @@ lint.installed:
 	touch $@
 
 lint: lint.installed
-	black --check --exclude "/migrations/" oscarapi/
+	flake8 oscarapi/
 
 black:
 	black --exclude "/migrations/" oscarapi/

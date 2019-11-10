@@ -117,7 +117,7 @@ class APITest(TestCase):
         self._response = ParsedResponse(response, self)
 
     @staticmethod
-    def reload_modules(modules=[]):
+    def reload_modules(modules=()):
         for module in modules:
             reload_module(module)
 
@@ -137,7 +137,7 @@ class ParsedResponse(object):
         self.status_code = response.status_code
         try:
             self.body = response.data
-        except Exception as e:
+        except Exception:
             self.body = None
 
     def __getattr__(self, name):
@@ -156,7 +156,7 @@ class ParsedResponse(object):
         self.t.assertEqual(self[value_name], value, message)
 
     def assertObjectIdEqual(self, value_name, value, message=None):
-        pattern = ".*?%s.*?/(?P<object_id>\d+)/?" % reverse("api-root")
+        pattern = r".*?%s.*?/(?P<object_id>\d+)/?" % reverse("api-root")
         m = match(pattern, self[value_name])
         if m:
             object_id = int(m.groupdict()["object_id"])
