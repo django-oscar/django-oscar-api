@@ -2,15 +2,15 @@ import logging
 import operator
 
 from os.path import basename, join
-from io import BytesIO
-from six.moves.urllib.parse import urlsplit
-from six.moves.urllib.request import urlopen
+from urllib.parse import urlsplit, parse_qs
+from urllib.request import urlretrieve
 
 from django.conf import settings
 from django.db import IntegrityError
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
+from django.utils.functional import cached_property
 
 from rest_framework import serializers, relations
 from rest_framework.fields import get_attribute
@@ -259,6 +259,53 @@ class SingleValueSlugRelatedField(serializers.SlugRelatedField):
         return {self.slug_field: data}
 
 
+class LazyRemoteFile(File):
+    """
+    This file will defer downloading untill the file data is accessed.
+
+    It will also try to parsed a sha1 hash from the url, and store it as an
+    attribute, so the file_hash function will use it. You can use this feature
+    to avoid unnescessary downloading of files. Just compute the hash on the
+    client side and send it along in the url like this::
+
+        http://example.com/image.jpg?sha1=751499a82438277cb3cfb5db268bd41696739b3b
+
+    It will only download if not allready available locally.
+    """
+
+    def __init__(self, url, name=None, mode="rb"):
+        parsed_url = urlsplit(url)
+        self.mode = mode
+        self.name = name
+        self.size = 1
+        self.url = url
+
+        # compute a hash if available
+        sha1_hash = next(iter(parse_qs(parsed_url.query).get("sha1", [])), None)
+        if sha1_hash:
+            self.sha1 = sha1_hash
+
+    def read(self, size=-1):
+        return self.file.read(size)
+
+    @cached_property
+    def file(self):
+        local_filename, _ = urlretrieve(self.url, self.name)
+        return open(local_filename, self.mode)
+
+    def __str__(self):
+        return self.url or ""
+
+    def __bool__(self):
+        return bool(self.url)
+
+    def open(self, mode="rb"):
+        if not self.closed:
+            self.seek(0)
+
+        return self
+
+
 class ImageUrlField(serializers.ImageField):
     def __init__(self, **kwargs):
         super(ImageUrlField, self).__init__(**kwargs)
@@ -274,10 +321,8 @@ class ImageUrlField(serializers.ImageField):
                 if (
                     host != parsed_url.netloc
                 ):  # we are only downloading files from a foreign server
-                    # it is a foreign image, download it
-                    response = urlopen(data)
-                    image_file_like = BytesIO(response.read())
-                    file_object = File(image_file_like, name=basename(parsed_url.path))
+                    # download only when needed
+                    return LazyRemoteFile(data, name=basename(parsed_url.path))
                 else:
                     location = parsed_url.path
                     path = join(
