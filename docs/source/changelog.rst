@@ -2,6 +2,20 @@
 Changelog
 =========
 
+2.0.1 (2019-11-22)
+------------------
+This is a bugfix release for version 2.0.0.
+
+Fixed:
+ * `#187 <https://github.com/django-oscar/django-oscar-api/pull/187>`_ Have more informative validation errors when using the ``AttributeValueField``
+ * `#190 <https://github.com/django-oscar/django-oscar-api/pull/190>`_ Fix broken ``Orderline`` Admin API view, improved ``BasketView`` queryset
+ * `#191 <https://github.com/django-oscar/django-oscar-api/pull/191>`_ Fix quantity validation in ``AddProductView`` (laevilgenius)
+ * `#194 <https://github.com/django-oscar/django-oscar-api/pull/194>`_ Do not change the "total" field type from Decimal to Price in the ``CheckouSerializer``
+ * `#195 <https://github.com/django-oscar/django-oscar-api/pull/195>`_ Fix broken API views when the Admin API is disabled. This adds a new ``StockRecord`` view for products
+ * `#197 <https://github.com/django-oscar/django-oscar-api/pull/197>`_ Fix typos in README (Patil2099)
+ * `#198 <https://github.com/django-oscar/django-oscar-api/pull/198>`_ Fix unused imports and typos (Samitnuk)
+
+
 2.0.0 (2019-09-09)
 -------------------
 Features:
