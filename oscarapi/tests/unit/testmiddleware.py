@@ -1,9 +1,14 @@
+from mock import MagicMock
+
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.urls import reverse
 from django.test import RequestFactory, TestCase
 
 from oscarapi.middleware import (
+    ApiBasketMiddleWare,
     ApiGatewayMiddleWare,
     HeaderSessionMiddleware,
     parse_session_id,
@@ -111,4 +116,30 @@ class HeaderSessionMiddlewareTest(TestCase):
         self.assertEqual(
             response.content,
             b'{"reason": "Can not accept cookie with realm example.com on realm testserver"}',
+        )
+
+
+class ApiBasketMiddleWareTest(TestCase):
+    rf = RequestFactory()
+
+    def test_correct_cookie_key(self):
+        basket_url = reverse("api-basket")
+        mock_response = MagicMock()
+        mock_response.set_cookie = MagicMock()
+
+        request = self.rf.get(basket_url)
+        request.user = AnonymousUser()
+
+        # this is the easiest way to have a "real" session object in the request
+        SessionMiddleware().process_request(request)
+        request.cookies_to_delete = ["just-a-cookie", "another-cookies"]
+
+        # see https://github.com/django-oscar/django-oscar-api/issues/205
+        middleware = ApiBasketMiddleWare(get_response=mock_response)
+        expected_cookie_key = middleware.get_cookie_key(request)
+
+        response = middleware(request)
+
+        self.assertEqual(
+            response.set_cookie.call_args_list[0][0][0], expected_cookie_key
         )
