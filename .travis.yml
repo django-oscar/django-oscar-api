@@ -54,8 +54,6 @@ jobs:
     - env: "DJANGO='Django>=2.2,<3' OSCAR='https://github.com/django-oscar/django-oscar/archive/master.tar.gz'"
 
 before_install:
-    - sudo add-apt-repository ppa:jonathonf/backports -y
-    - sudo apt-get update -q && sudo apt-get install -y sqlite3
     - pip install codecov
 
 install:
