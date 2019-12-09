@@ -6,6 +6,11 @@ stages:
   - lint
   - test
 
+addons:
+  apt:
+    packages:
+      - sqlite3
+
 jobs:
   fast_finish: true
 
