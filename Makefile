@@ -24,6 +24,12 @@ coverage:
 	coverage report -m
 	coverage xml -i
 
+docker-build:
+	 docker build -t oscarapi/test .
+
+docker-coverage: docker-build
+	 docker run -ti -v $(CURDIR):/opt -w /opt oscarapi/test bash -c "make install && pip install 'Django<3' && /usr/bin/make coverage"
+
 docs: install
 	cd docs && make clean && make html
 
