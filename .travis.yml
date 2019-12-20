@@ -1,15 +1,10 @@
 language: python
 os: linux
-dist: xenial
+dist: bionic
 
 stages:
   - lint
   - test
-
-addons:
-  apt:
-    packages:
-      - sqlite3
 
 jobs:
   fast_finish: true
