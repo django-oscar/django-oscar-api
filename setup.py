@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 
 setup(
     # package name in pypi

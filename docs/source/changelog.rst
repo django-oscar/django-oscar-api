@@ -2,6 +2,14 @@
 Changelog
 =========
 
+2.0.2 (2019-12-20)
+------------------
+This is a bugfix release for version 2.0.1.
+
+Fixed:
+ * `#207 <https://github.com/django-oscar/django-oscar-api/pull/207>`_ Added a sane and clear error message when construct_id_filter does not construct a useful filter.
+
+
 2.0.1 (2019-11-22)
 ------------------
 This is a bugfix release for version 2.0.0.
