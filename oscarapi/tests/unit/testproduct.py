@@ -1386,6 +1386,22 @@ class TestProductAdmin(APITest):
         self.response = self.post("admin-product-list", **data)
         self.response.assertStatusEqual(201)
 
+    def test_patch_product(self):
+        self.login("admin", "admin")
+        self.response = self.put(
+            "admin-product-list",
+            **{"upc": 1234, "product_class": "t-shirt", "slug": "oscar-t-shirt-henk"}
+        )
+        self.response.assertStatusEqual(200)
+
+    def test_put_product_ambiguous(self):
+        self.login("admin", "admin")
+        self.response = self.put(
+            "admin-product-list",
+            **{"product_class": "t-shirt", "slug": "oscar-t-shirt-henk"}
+        )
+        self.response.assertStatusEqual(404)
+
     def test_put_child(self):
         self.login("admin", "admin")
         url = reverse("admin-product-detail", args=(2,))
