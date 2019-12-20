@@ -30,7 +30,7 @@ docker-build:
 docker-coverage: docker-build
 	 docker run -ti -v $(CURDIR):/opt -w /opt oscarapi/test bash -c "make install && pip install 'Django<3' && /usr/bin/make coverage"
 
-docs:
+docs: install
 	pip install -r docs/requirements.txt
 	cd docs && make clean && make html
 
