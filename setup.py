@@ -55,6 +55,6 @@ setup(
     extras_require={
         "dev": ["coverage", "mock", "twine", "wheel"],
         "lint": ["flake8", "flake8-black", "flake8-bugbear", "black>=19.10b0"],
-        "docs": ["sphinx", "sphinx_rtd_theme"],
+        "docs": ["sphinx", "sphinx_rtd_theme", "Django<3"],
     },
 )
