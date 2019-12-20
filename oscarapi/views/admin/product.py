@@ -55,9 +55,14 @@ class ProductAdminList(generics.UpdateAPIView, generics.ListCreateAPIView):
         """
         try:
             automatic_filter = construct_id_filter(Product, self.request.data)
-            obj = Product.objects.get(automatic_filter)
-            self.check_object_permissions(self.request, obj)
-            return obj
+            if automatic_filter:
+                obj = Product.objects.get(automatic_filter)
+                self.check_object_permissions(self.request, obj)
+                return obj
+            else:
+                raise NotFound(
+                    "Not enough info to identify %s." % Product._meta.object_name
+                )
         except Product.DoesNotExist:
             raise Http404("No %s matches the given query." % Product._meta.object_name)
 
