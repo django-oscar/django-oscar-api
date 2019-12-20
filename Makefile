@@ -8,7 +8,7 @@ clean:
 	rm -Rf build/
 
 install:
-	pip install -e .[dev,docs]
+	pip install -e .[dev]
 
 sandbox: install
 	python sandbox/manage.py migrate
@@ -30,7 +30,8 @@ docker-build:
 docker-coverage: docker-build
 	 docker run -ti -v $(CURDIR):/opt -w /opt oscarapi/test bash -c "make install && pip install 'Django<3' && /usr/bin/make coverage"
 
-docs: install
+docs:
+	pip install -r docs/requirements.txt
 	cd docs && make clean && make html
 
 build_release: clean
