@@ -286,7 +286,7 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
     def get_queryset(self):
         basket_pk = self.kwargs.get("pk")
         basket = self.check_basket_permission(self.request, basket_pk=basket_pk)
-        prepped_basket = operations.assign_basket_strategy(basket, request)
+        prepped_basket = operations.assign_basket_strategy(basket, self.request)
         return prepped_basket.all_lines()
 
     def post(
