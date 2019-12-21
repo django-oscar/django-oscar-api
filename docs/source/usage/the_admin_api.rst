@@ -22,4 +22,72 @@ The *Admin API* is also accessible in the browsable API when your logged in user
 .. image:: ../images/admin-api.png
    :alt: The Admin API
 
+Example add an image
+--------------------
 
+To add an image to an exiting product and change nothing else, it is best to use
+the ``PATCH`` http method. This will let you send incomplete information to
+the api, and update only what is being sent.
+
+The are 2 methods to update and existing product, depending on whether you
+know the current api url or you only know the product ``upc``.
+
+Suppose we know the full url then it can be done like this::
+
+    session.post(
+        "http://127.0.0.1:8000/oscarapi/admin/products/1/",
+        json={
+            "images": [{
+                "original": "http://permanentmarkers.nl/images/logo.png",
+                "caption": "hai",
+                "display_order": 0
+            }]
+        }
+    )
+
+The api will download the image from that url and add it to the list.
+
+Suppose you don't know the url in the api, you'd have to know some unique attribute,
+for example the upc. You can just use the product list api and if you send
+enough data to uniquely identify the product, it will succeed::
+
+    session.post(
+        "http://127.0.0.1:8000/oscarapi/admin/products/",
+        json={
+            "upc": "1_5_1",
+            "images": [{
+                "original": "http://permanentmarkers.nl/images/logo.png",
+                "caption": "hai",
+                "display_order": 0
+            }]
+        }
+    )
+
+That will also work, you can even try to paste the bodies into the browsable
+html api and it will update your product and add the image. The second method
+makes the api very suitable for integration with external parties, you can just
+send updates and forget about it, no need to search for the product first or
+whatever.
+
+An optimization
+---------------
+
+Suppose you want to integrate with an external system and want to send you data
+in a fire and forget way. If you have a lot of images, the api will need to
+download the images every time, to check if they are know images or new images
+to determine if there is anything to update. That is a lot of useless traffic.
+
+To remedy that, you can send the sha1 hash of the image along with it as a get
+parameter. oscarapi will not even try to download it if the image is known::
+
+    session.post(
+        "http://127.0.0.1:8000/oscarapi/admin/products/",
+        json={
+            "upc": "1_5_1",
+            "images": [{
+                "original": "http://permanentmarkers.nl/images/logo.png?sha1=751499a82438277cb3cfb5db268bd41696739b3b",
+                "caption": "hai",
+                "display_order": 0
+            }]
+        }
+    )
