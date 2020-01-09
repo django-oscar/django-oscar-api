@@ -13,6 +13,8 @@ from django.utils.timezone import make_aware
 
 from oscar.core.loading import get_model
 
+from rest_framework import exceptions
+
 from oscarapi.utils.exists import find_existing_attribute_option_group
 from oscarapi.tests.utils import APITest
 from oscarapi.serializers.fields import CategoryField
@@ -1101,6 +1103,33 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
 
+    def test_add_broken_image(self):
+        product = Product.objects.get(pk=3)
+        self.assertEqual(product.images.count(), 0)
+
+        request = self.factory.get("%simages/nao-robot.jpg" % settings.STATIC_URL)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "images": [
+                    {
+                        "original": "https://example.com/image-that-does-not-exist-at-all.png",
+                        "caption": "HA! IK HEET HARRIE",
+                    }
+                ],
+            },
+            instance=product,
+            context={"request": request},
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        with self.assertRaises(exceptions.ValidationError):
+            obj = ser.save()
+
+        product.refresh_from_db()
+        self.assertEqual(product.images.count(), 0)
+
     @mock.patch("oscarapi.serializers.fields.urlretrieve")
     def test_modify_images(self, urlretrieve):
         "The serializer should automatically detect that an image already exists and update it"
@@ -1482,6 +1511,20 @@ class TestProductAdmin(APITest):
             "implementation"
         )
         self.assertEqual(str(e.exception), msg)
+
+    def test_image_error(self):
+        self.login("admin", "admin")
+        url = reverse("admin-product-detail", args=(2,))
+        data = deepcopy(self.child)
+        data["images"] = [{"original": "https://example.com/testdata/image.jpg"}]
+        self.response = self.put(url, **data)
+        self.response.assertStatusEqual(400)
+        self.assertEqual(
+            self.response.data,
+            [
+                "Error when downloading image https://example.com/testdata/image.jpg, 404: Not Found"
+            ],
+        )
 
 
 class TestAttributeOptionGroupSerializer(APITest):
