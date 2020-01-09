@@ -4,13 +4,13 @@ import operator
 from os.path import basename, join
 from urllib.parse import urlsplit, parse_qs
 from urllib.request import urlretrieve
+from urllib.error import HTTPError
 from django.conf import settings
 from django.db import IntegrityError
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.utils.functional import cached_property
-
 from rest_framework import serializers, relations
 from rest_framework.fields import get_attribute
 
@@ -298,7 +298,12 @@ class LazyRemoteFile(File):
             self.sha1 = sha1_hash
 
     def read(self, size=-1):
-        return self.file.read(size)
+        try:
+            return self.file.read(size)
+        except HTTPError as e:
+            raise serializers.ValidationError(
+                "Error when downloading image %s, %s: %s" % (self.url, e.code, e.reason)
+            )
 
     @cached_property
     def file(self):
