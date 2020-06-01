@@ -65,6 +65,7 @@ class ProductDetail(generics.RetrieveAPIView):
 
 class ProductPrice(generics.RetrieveAPIView):
     queryset = Product.objects.all()
+    serializer_class = PriceSerializer
 
     def get(
         self, request, pk=None, format=None
@@ -93,6 +94,7 @@ class ProductStockRecordDetail(generics.RetrieveAPIView):
 
 class ProductAvailability(generics.RetrieveAPIView):
     queryset = Product.objects.all()
+    serializer_class = AvailabilitySerializer
 
     def get(
         self, request, pk=None, format=None
