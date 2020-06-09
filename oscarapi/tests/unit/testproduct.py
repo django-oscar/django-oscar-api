@@ -296,6 +296,7 @@ class _ProductSerializerTest(TestCase):
         )
 
 
+@skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
 class AdminStockRecordSerializerTest(_ProductSerializerTest):
     def test_stockrecord_save(self):
         "The AdminStockRecordSerializer should be able to save stuff"
@@ -818,6 +819,7 @@ class CategoryFieldTest(_ProductSerializerTest):
         )
 
 
+@skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
 class AdminProductSerializerTest(_ProductSerializerTest):
     def test_create_product(self):
         "Products should be created by the serializer if needed"
