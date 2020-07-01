@@ -59,7 +59,9 @@ class BasketView(APIView):
 
     serializer_class = BasketSerializer
 
-    def get(self, request, format=None):  # pylint: disable=redefined-builtin
+    def get(
+        self, request, format=None, *args, **kwargs
+    ):  # pylint: disable=redefined-builtin
         basket = operations.get_basket(request)
         ser = self.serializer_class(basket, context={"request": request})
         return Response(ser.data)
@@ -113,7 +115,9 @@ class AddProductView(APIView):
             return False, message
         return True, None
 
-    def post(self, request, format=None):  # pylint: disable=redefined-builtin
+    def post(
+        self, request, format=None, *args, **kwargs
+    ):  # pylint: disable=redefined-builtin
         p_ser = self.add_product_serializer_class(
             data=request.data, context={"request": request}
         )
@@ -158,7 +162,9 @@ class AddVoucherView(APIView):
     add_voucher_serializer_class = VoucherAddSerializer
     serializer_class = VoucherSerializer
 
-    def post(self, request, format=None):  # pylint: disable=redefined-builtin
+    def post(
+        self, request, format=None, *args, **kwargs
+    ):  # pylint: disable=redefined-builtin
         v_ser = self.add_voucher_serializer_class(
             data=request.data, context={"request": request}
         )
@@ -238,7 +244,9 @@ class ShippingMethodView(APIView):
         )
         return Response(ser.data)
 
-    def get(self, request, format=None):  # pylint: disable=redefined-builtin
+    def get(
+        self, request, format=None, *args, **kwargs
+    ):  # pylint: disable=redefined-builtin
         """
         Get the available shipping methods and their cost for this order.
 
@@ -247,7 +255,9 @@ class ShippingMethodView(APIView):
         """
         return self._get(request, format=format)
 
-    def post(self, request, format=None):  # pylint: disable=redefined-builtin
+    def post(
+        self, request, format=None, *args, **kwargs
+    ):  # pylint: disable=redefined-builtin
         s_ser = self.serializer_class(data=request.data, context={"request": request})
         if s_ser.is_valid():
             shipping_address = ShippingAddress(**s_ser.validated_data)
@@ -295,7 +305,7 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
         return prepped_basket.all_lines()
 
     def post(
-        self, request, pk, format=None
+        self, request, pk, format=None, *args, **kwargs
     ):  # pylint: disable=redefined-builtin,arguments-differ
         data_basket = self.get_data_basket(request.data, format)
         self.check_basket_permission(request, basket=data_basket)

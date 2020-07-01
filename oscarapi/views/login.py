@@ -49,7 +49,7 @@ class LoginView(APIView):
 
     serializer_class = LoginSerializer
 
-    def get(self, request, format=None):
+    def get(self, request, format=None, *args, **kwargs):
         if settings.DEBUG:
             if request.user.is_authenticated:
                 ser = UserSerializer(request.user, many=False)
@@ -62,7 +62,7 @@ class LoginView(APIView):
         "Hook to enforce rules when merging baskets."
         basket.merge(anonymous_basket)
 
-    def post(self, request, format=None):
+    def post(self, request, format=None, *args, **kwargs):
         ser = self.serializer_class(data=request.data)
         if ser.is_valid():
 
