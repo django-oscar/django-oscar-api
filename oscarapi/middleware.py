@@ -131,21 +131,18 @@ class ApiGatewayMiddleWare(IsApiRequest):
         if self.is_api_request(request):
             key = authentication.get_authorization_header(request)
             key = key.decode(HTTP_HEADER_ENCODING)
-            if models.ApiKey.objects.filter(key=key).exists():
-                return None
-
-            logger.error(
-                "Invalid credentials provided for %s:%s by %s"
-                % (
-                    request.method,
-                    request.path,
-                    request.META.get("REMOTE_ADDR", "<unknown>"),
+            if not models.ApiKey.objects.filter(key=key).exists():
+                logger.error(
+                    "Invalid credentials provided for %s:%s by %s"
+                    % (
+                        request.method,
+                        request.path,
+                        request.META.get("REMOTE_ADDR", "<unknown>"),
+                    )
                 )
-            )
-            raise PermissionDenied()
+                raise PermissionDenied()
 
-        response = self.get_response(request)
-        return response
+        return self.get_response(request)
 
 
 class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):

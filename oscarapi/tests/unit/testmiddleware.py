@@ -1,4 +1,5 @@
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
 from django.urls import reverse
 from django.test import RequestFactory, TestCase
 
@@ -43,7 +44,8 @@ class ApiGatewayMiddleWareTest(TestCase):
 
         # valid Authorization header
         request = self.rf.get(basket_url, HTTP_AUTHORIZATION="testapikey")
-        self.assertIsNone(ApiGatewayMiddleWare("response")(request))
+        response = ApiGatewayMiddleWare(lambda request: HttpResponse())(request)
+        self.assertEqual(response.status_code, 200)
 
     def test_parse_session_id(self):
         dummy_request = DummyRequest()
