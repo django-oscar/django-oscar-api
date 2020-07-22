@@ -67,7 +67,7 @@ This identifier will be hashed to fit in 40 bytes to yield the final session key
 The ``thread`` and ``count`` values, while allowed will be ignored and not
 included when hashing. When upgrading a user from anonymous to authenticated, a
 new session id will be generated, by replacing ``ANON`` in the original session
-id with ``AUTH`` and performing the hashing again, example: 
+id with ``AUTH`` and performing the hashing again, example:
 
 ``SID:AUTH:www.example.com:82d7ac3f-135c-4b12-a296-ff3c4701307d``.
 
@@ -111,7 +111,7 @@ uniquely identify a user, in the same way as a user name.
 
 Gateway MiddleWare
 ==================
-Protects the usage of your API with an authentication token (we call it an ApiKey). To use this, add this as the first middleware in MIDDLEWARE_CLASSES in your ``settings.py``.
+Protects the usage of your API with an authentication token (we call it an ApiKey). To use this, add this as the first middleware in the MIDDLEWARE setting in your ``settings.py``.
 
 .. autoclass:: oscarapi.middleware.ApiGatewayMiddleWare
 
