@@ -43,7 +43,9 @@ def ADMIN_APIS(r, f):
 
 
 @api_view(("GET",))
-def api_root(request, format=None):  # pylint: disable=redefined-builtin
+def api_root(
+    request, format=None, *args, **kwargs
+):  # pylint: disable=redefined-builtin
     """
     GET:
     Display all available urls.

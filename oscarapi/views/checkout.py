@@ -130,7 +130,7 @@ class CheckoutView(views.APIView):
     order_serializer_class = OrderSerializer
     serializer_class = CheckoutSerializer
 
-    def post(self, request, format=None):
+    def post(self, request, format=None, *args, **kwargs):
         # TODO: Make it possible to create orders with options.
         # at the moment, no options are passed to this method, which means they
         # are also not created.

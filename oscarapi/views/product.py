@@ -68,7 +68,7 @@ class ProductPrice(generics.RetrieveAPIView):
     serializer_class = PriceSerializer
 
     def get(
-        self, request, pk=None, format=None
+        self, request, pk=None, *args, **kwargs
     ):  # pylint: disable=redefined-builtin,arguments-differ
         product = self.get_object()
         strategy = Selector().strategy(request=request, user=request.user)
@@ -97,7 +97,7 @@ class ProductAvailability(generics.RetrieveAPIView):
     serializer_class = AvailabilitySerializer
 
     def get(
-        self, request, pk=None, format=None
+        self, request, pk=None, *args, **kwargs
     ):  # pylint: disable=redefined-builtin,arguments-differ
         product = self.get_object()
         strategy = Selector().strategy(request=request, user=request.user)
