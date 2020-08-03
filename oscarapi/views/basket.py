@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 
 from oscar.apps.basket import signals
@@ -320,7 +319,7 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         basket_pk = self.kwargs.get("basket_pk")
-        basket = get_object_or_404(operations.editable_baskets(), pk=basket_pk)
+        basket = generics.get_object_or_404(operations.editable_baskets(), pk=basket_pk)
         prepped_basket = operations.prepare_basket(basket, self.request)
         if operations.request_allows_access_to_basket(self.request, prepped_basket):
             return prepped_basket.all_lines()
