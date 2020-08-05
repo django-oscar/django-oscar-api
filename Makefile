@@ -52,3 +52,6 @@ lint: lint.installed
 
 black:
 	black --exclude "/migrations/" oscarapi/
+
+uwsgi:
+	@cd sandbox && uwsgi --ini uwsgi.ini
