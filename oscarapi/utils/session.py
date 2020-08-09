@@ -3,10 +3,8 @@ from importlib import import_module
 
 from django.conf import settings
 from django.contrib import auth
-
-from rest_framework import exceptions
-
 from oscar.core.loading import get_class
+from rest_framework import exceptions
 
 Selector = get_class("partner.strategy", "Selector")
 

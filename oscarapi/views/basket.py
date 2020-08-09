@@ -1,9 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
-
 from oscar.apps.basket import signals
 from oscar.core.loading import get_model, get_class
-
 from rest_framework import status, generics, exceptions
 from rest_framework.response import Response
 from rest_framework.views import APIView

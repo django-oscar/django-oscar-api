@@ -1,8 +1,6 @@
 import functools
 
-
 from oscar.core.loading import get_class, get_model
-
 from rest_framework import generics
 
 from oscarapi import permissions
@@ -13,7 +11,6 @@ from oscarapi.basket.operations import (
     prepare_basket,
 )
 from oscarapi.utils.loading import get_api_classes, get_api_class
-
 from .utils import QuerySetList
 
 __all__ = (

@@ -1,26 +1,24 @@
 import warnings
 
-from django.db import IntegrityError
-
 from django.conf import settings
+from django.db import IntegrityError
 from django.urls import reverse, NoReverseMatch
 from django.utils.translation import gettext as _
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 from rest_framework import exceptions, serializers
 
-from oscarapi.utils.loading import get_api_classes
 from oscarapi.basket.operations import assign_basket_strategy
-from oscarapi.utils.settings import overridable
-from oscarapi.serializers.utils import (
-    OscarHyperlinkedModelSerializer,
-    OscarModelSerializer,
-)
 from oscarapi.serializers.fields import (
     DrillDownHyperlinkedRelatedField,
     TaxIncludedDecimalField,
 )
-
+from oscarapi.serializers.utils import (
+    OscarHyperlinkedModelSerializer,
+    OscarModelSerializer,
+)
+from oscarapi.utils.loading import get_api_classes
+from oscarapi.utils.settings import overridable
 
 OrderPlacementMixin = get_class("checkout.mixins", "OrderPlacementMixin")
 OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")

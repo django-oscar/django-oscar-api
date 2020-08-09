@@ -1,16 +1,14 @@
 from decimal import Decimal
-from mock import patch
 
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 from django.test.client import RequestFactory
-
+from django.urls import reverse
+from mock import patch
 from oscar.core.loading import get_model
-
 from rest_framework.response import Response
-from oscarapi.tests.utils import APITest
 
 from oscarapi.serializers.checkout import CheckoutSerializer
+from oscarapi.tests.utils import APITest
 
 Basket = get_model("basket", "Basket")
 User = get_user_model()

@@ -1,23 +1,22 @@
 import logging
 import operator
-
 from os.path import basename, join
+from urllib.error import HTTPError
 from urllib.parse import urlsplit, parse_qs
 from urllib.request import urlretrieve
-from urllib.error import HTTPError
+
 from django.conf import settings
-from django.db import IntegrityError
-from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
+from django.db import IntegrityError
 from django.utils.functional import cached_property
+from django.utils.translation import ugettext as _
+from oscar.core.loading import get_model, get_class
 from rest_framework import serializers, relations
 from rest_framework.fields import get_attribute
 
-from oscar.core.loading import get_model, get_class
-
-from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.exists import bound_unique_together_get_or_create
+from oscarapi.utils.loading import get_api_class
 from .exceptions import FieldError
 
 logger = logging.getLogger(__name__)

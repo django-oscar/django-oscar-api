@@ -1,11 +1,9 @@
 from django.core.exceptions import ValidationError
-
 from oscar.core.loading import get_model
-
-from oscarapi import permissions
-
 from rest_framework import exceptions, generics
 from rest_framework.relations import HyperlinkedRelatedField
+
+from oscarapi import permissions
 
 __all__ = ("BasketPermissionMixin",)
 

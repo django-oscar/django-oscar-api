@@ -1,9 +1,7 @@
 from django.db import transaction
-
+from oscar.core.loading import get_model
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
-
-from oscar.core.loading import get_model
 
 from oscarapi.serializers.utils import OscarHyperlinkedModelSerializer
 from oscarapi.utils.categories import create_from_full_slug

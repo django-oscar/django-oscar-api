@@ -1,7 +1,8 @@
-from mock import patch
-from oscarapi.tests.utils import APITest
-import oscarapi.utils.loading as loading
 from django.contrib.auth import get_user_model
+from mock import patch
+
+import oscarapi.utils.loading as loading
+from oscarapi.tests.utils import APITest
 
 User = get_user_model()
 

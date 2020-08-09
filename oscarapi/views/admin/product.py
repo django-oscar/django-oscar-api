@@ -1,11 +1,11 @@
 # pylint: disable=unbalanced-tuple-unpacking
 from django.http import Http404
+from oscar.core.loading import get_model
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
-from oscar.core.loading import get_model
-from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.exists import construct_id_filter
+from oscarapi.utils.loading import get_api_classes, get_api_class
 
 APIAdminPermission = get_api_class("permissions", "APIAdminPermission")
 ProductAttributeSerializer, AttributeOptionGroupSerializer = get_api_classes(

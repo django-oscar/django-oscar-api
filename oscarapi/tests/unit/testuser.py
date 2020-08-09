@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 
 from oscarapi.tests.utils import APITest
 
-
 User = get_user_model()
 
 

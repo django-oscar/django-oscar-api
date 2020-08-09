@@ -1,8 +1,6 @@
 from django.utils.translation import ugettext as _
-
-from rest_framework.exceptions import NotFound
-
 from oscar.core.loading import get_model
+from rest_framework.exceptions import NotFound
 
 Category = get_model("catalogue", "category")
 

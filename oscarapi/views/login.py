@@ -1,13 +1,13 @@
 from django.conf import settings
+from oscar.core.loading import get_model
 from rest_framework import status
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from oscarapi.utils.session import login_and_upgrade_session
-from oscarapi.utils.loading import get_api_classes
 from oscarapi.basket import operations
-from oscar.core.loading import get_model
+from oscarapi.utils.loading import get_api_classes
+from oscarapi.utils.session import login_and_upgrade_session
 
 LoginSerializer, UserSerializer = get_api_classes(
     "serializers.login", ["LoginSerializer", "UserSerializer"]

@@ -1,11 +1,10 @@
 from oscar.core.loading import get_model
-
 from rest_framework import generics, response, status, views
 
 from oscarapi.basket.operations import request_allows_access_to_basket
 from oscarapi.permissions import IsOwner
-from oscarapi.utils.loading import get_api_classes
 from oscarapi.signals import oscarapi_post_checkout
+from oscarapi.utils.loading import get_api_classes
 from oscarapi.views.utils import parse_basket_from_hyperlink
 
 Order = get_model("order", "Order")

@@ -1,31 +1,28 @@
-import mock
-import decimal
 import datetime
+import decimal
 import json
 from copy import deepcopy
 from os.path import dirname, join
 from unittest import skipIf
 
+import mock
 from django.conf import settings
-from django.urls import reverse
 from django.test import TestCase, RequestFactory
+from django.urls import reverse
 from django.utils.timezone import make_aware
-
 from oscar.core.loading import get_model
-
 from rest_framework import exceptions
 
-from oscarapi.utils.exists import find_existing_attribute_option_group
-from oscarapi.tests.utils import APITest
+from oscarapi.serializers.admin.partner import AdminStockRecordSerializer
+from oscarapi.serializers.admin.product import AdminProductSerializer
 from oscarapi.serializers.fields import CategoryField
+from oscarapi.serializers.product import AttributeOptionGroupSerializer
 from oscarapi.serializers.product import (
     ProductLinkSerializer,
     ProductAttributeValueSerializer,
 )
-from oscarapi.serializers.admin.partner import AdminStockRecordSerializer
-from oscarapi.serializers.admin.product import AdminProductSerializer
-from oscarapi.serializers.product import AttributeOptionGroupSerializer
-
+from oscarapi.tests.utils import APITest
+from oscarapi.utils.exists import find_existing_attribute_option_group
 
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")

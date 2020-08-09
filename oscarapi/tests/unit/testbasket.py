@@ -1,15 +1,12 @@
 import json
 
-from mock import patch
-
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-
+from mock import patch
 from oscar.core.loading import get_model
 
 from oscarapi.basket.operations import get_basket, get_user_basket
 from oscarapi.tests.utils import APITest
-
 
 Basket = get_model("basket", "Basket")
 Product = get_model("catalogue", "Product")

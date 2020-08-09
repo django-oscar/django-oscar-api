@@ -1,13 +1,11 @@
-from importlib import reload as reload_module
-
 import json
+from importlib import reload as reload_module
 from re import match
 
 from django.contrib.auth import get_user_model
-from django.urls import reverse, NoReverseMatch
 from django.http import SimpleCookie
 from django.test import TestCase
-
+from django.urls import reverse, NoReverseMatch
 
 User = get_user_model()
 

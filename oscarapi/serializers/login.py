@@ -3,7 +3,6 @@ from rest_framework import serializers
 
 from oscarapi.utils.settings import overridable
 
-
 User = get_user_model()
 
 

@@ -1,6 +1,6 @@
+from oscar.core.loading import get_model
 from rest_framework import serializers
 
-from oscar.core.loading import get_model
 from oscarapi.serializers.utils import (
     DelayUniqueSerializerMixin,
     OscarHyperlinkedModelSerializer,

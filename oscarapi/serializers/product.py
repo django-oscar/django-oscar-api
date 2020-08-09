@@ -1,18 +1,10 @@
 import logging
 from copy import deepcopy
-from django.utils.translation import ugettext as _
 
+from django.utils.translation import ugettext as _
+from oscar.core.loading import get_model
 from rest_framework import serializers
 from rest_framework.fields import empty
-
-from oscar.core.loading import get_model
-
-from oscarapi.utils.exists import bound_unique_together_get_or_create_multiple
-from oscarapi.utils.loading import get_api_classes
-from oscarapi.utils.settings import overridable
-from oscarapi.utils.files import file_hash
-from oscarapi.utils.exists import find_existing_attribute_option_group
-from oscarapi.utils.accessors import getitems
 
 from oscarapi.serializers.fields import DrillDownHyperlinkedIdentityField
 from oscarapi.serializers.utils import (
@@ -21,7 +13,12 @@ from oscarapi.serializers.utils import (
     UpdateListSerializer,
     UpdateForwardManyToManySerializer,
 )
-
+from oscarapi.utils.accessors import getitems
+from oscarapi.utils.exists import bound_unique_together_get_or_create_multiple
+from oscarapi.utils.exists import find_existing_attribute_option_group
+from oscarapi.utils.files import file_hash
+from oscarapi.utils.loading import get_api_classes
+from oscarapi.utils.settings import overridable
 from .exceptions import FieldError
 
 logger = logging.getLogger(__name__)

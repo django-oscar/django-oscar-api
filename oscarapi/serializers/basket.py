@@ -1,23 +1,22 @@
 import logging
 from decimal import Decimal
 
-from django.utils.translation import ugettext as _
 from django.contrib.auth import get_user_model
+from django.utils.translation import ugettext as _
+from oscar.core.loading import get_model
 from rest_framework import serializers
 
-from oscar.core.loading import get_model
-
 from oscarapi.basket import operations
-from oscarapi.utils.settings import overridable
 from oscarapi.serializers.fields import (
     DrillDownHyperlinkedIdentityField,
     DrillDownHyperlinkedRelatedField,
 )
+from oscarapi.serializers.fields import TaxIncludedDecimalField
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
 )
-from oscarapi.serializers.fields import TaxIncludedDecimalField
+from oscarapi.utils.settings import overridable
 
 logger = logging.getLogger(__name__)
 

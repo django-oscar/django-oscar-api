@@ -1,6 +1,6 @@
 from django.core.exceptions import PermissionDenied
-from django.urls import reverse
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 
 from oscarapi.middleware import (
     ApiGatewayMiddleWare,

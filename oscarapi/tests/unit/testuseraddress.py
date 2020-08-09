@@ -1,8 +1,8 @@
 from copy import deepcopy
 
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 from django.db.transaction import atomic
+from django.urls import reverse
 
 from oscarapi.tests.utils import APITest
 

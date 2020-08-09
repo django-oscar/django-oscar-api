@@ -1,6 +1,7 @@
-from oscarapi.utils.loading import get_api_class
 from oscar.core.loading import get_model
 from rest_framework import generics
+
+from oscarapi.utils.loading import get_api_class
 
 APIAdminPermission = get_api_class("permissions", "APIAdminPermission")
 AdminStockRecordSerializer = get_api_class(

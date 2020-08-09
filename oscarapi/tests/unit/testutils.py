@@ -1,5 +1,6 @@
 from django.test import TestCase
 from oscar.core.loading import get_model
+
 from oscarapi.utils import exists
 
 Product = get_model("catalogue", "Product")

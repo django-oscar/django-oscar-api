@@ -6,9 +6,8 @@ from django.test import RequestFactory
 from django.urls import reverse
 
 from oscarapi import urls
-from oscarapi.tests.utils import APITest
-
 from oscarapi.permissions import APIAdminPermission
+from oscarapi.tests.utils import APITest
 
 User = get_user_model()
 

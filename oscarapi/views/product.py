@@ -1,8 +1,7 @@
 # pylint: disable=unbalanced-tuple-unpacking
+from oscar.core.loading import get_class, get_model
 from rest_framework import generics
 from rest_framework.response import Response
-
-from oscar.core.loading import get_class, get_model
 
 from oscarapi.utils.categories import find_from_full_slug
 from oscarapi.utils.loading import get_api_classes, get_api_class

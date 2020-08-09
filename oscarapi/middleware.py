@@ -6,24 +6,20 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import PermissionDenied
 from django.http.response import HttpResponse
 from django.utils.translation import ugettext as _
-
 from oscar.core.loading import get_class
-
 from rest_framework import HTTP_HEADER_ENCODING
-from rest_framework import exceptions
 from rest_framework import authentication
+from rest_framework import exceptions
 
+from oscarapi import models
 from oscarapi.basket.operations import (
     request_allows_access_to_basket,
     store_basket_in_session,
     get_basket,
 )
-
 from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.request import get_domain
 from oscarapi.utils.session import session_id_from_parsed_session_uri, get_session
-from oscarapi import models
-
 
 BasketMiddleware = get_class("basket.middleware", "BasketMiddleware")
 IsApiRequest = get_api_class("utils.request", "IsApiRequest")
