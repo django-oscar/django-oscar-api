@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from oscar.apps.basket import signals
 from oscar.core.loading import get_model, get_class
@@ -57,7 +56,7 @@ class BasketView(APIView):
 
     serializer_class = BasketSerializer
 
-    def get(self, request, format=None):  # pylint: disable=redefined-builtin
+    def get(self, request, *args, **kwargs):  # pylint: disable=redefined-builtin
         basket = operations.get_basket(request)
         ser = self.serializer_class(basket, context={"request": request})
         return Response(ser.data)
@@ -111,7 +110,7 @@ class AddProductView(APIView):
             return False, message
         return True, None
 
-    def post(self, request, format=None):  # pylint: disable=redefined-builtin
+    def post(self, request, *args, **kwargs):  # pylint: disable=redefined-builtin
         p_ser = self.add_product_serializer_class(
             data=request.data, context={"request": request}
         )
@@ -156,7 +155,7 @@ class AddVoucherView(APIView):
     add_voucher_serializer_class = VoucherAddSerializer
     serializer_class = VoucherSerializer
 
-    def post(self, request, format=None):  # pylint: disable=redefined-builtin
+    def post(self, request, *args, **kwargs):  # pylint: disable=redefined-builtin
         v_ser = self.add_voucher_serializer_class(
             data=request.data, context={"request": request}
         )
@@ -221,9 +220,7 @@ class ShippingMethodView(APIView):
     serializer_class = ShippingAddressSerializer
     shipping_method_serializer_class = ShippingMethodSerializer
 
-    def _get(
-        self, request, shipping_address=None, format=None
-    ):  # pylint: disable=redefined-builtin
+    def _get(self, request, shipping_address=None):  # pylint: disable=redefined-builtin
         basket = operations.get_basket(request)
         shiping_methods = Repository().get_shipping_methods(
             basket=basket,
@@ -236,20 +233,20 @@ class ShippingMethodView(APIView):
         )
         return Response(ser.data)
 
-    def get(self, request, format=None):  # pylint: disable=redefined-builtin
+    def get(self, request, *args, **kwargs):  # pylint: disable=redefined-builtin
         """
         Get the available shipping methods and their cost for this order.
 
         GET:
         A list of shipping method details and the prices.
         """
-        return self._get(request, format=format)
+        return self._get(request)
 
-    def post(self, request, format=None):  # pylint: disable=redefined-builtin
+    def post(self, request, *args, **kwargs):  # pylint: disable=redefined-builtin
         s_ser = self.serializer_class(data=request.data, context={"request": request})
         if s_ser.is_valid():
             shipping_address = ShippingAddress(**s_ser.validated_data)
-            return self._get(request, format=format, shipping_address=shipping_address)
+            return self._get(request, shipping_address=shipping_address)
 
         return Response(s_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -293,7 +290,7 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
         return prepped_basket.all_lines()
 
     def post(
-        self, request, pk, format=None
+        self, request, pk, format=None, *args, **kwargs
     ):  # pylint: disable=redefined-builtin,arguments-differ
         data_basket = self.get_data_basket(request.data, format)
         self.check_basket_permission(request, basket=data_basket)
@@ -320,7 +317,7 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         basket_pk = self.kwargs.get("basket_pk")
-        basket = get_object_or_404(operations.editable_baskets(), pk=basket_pk)
+        basket = generics.get_object_or_404(operations.editable_baskets(), pk=basket_pk)
         prepped_basket = operations.prepare_basket(basket, self.request)
         if operations.request_allows_access_to_basket(self.request, prepped_basket):
             return prepped_basket.all_lines()
