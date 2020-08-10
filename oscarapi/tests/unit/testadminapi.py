@@ -3,7 +3,7 @@ import sys
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory
-from django.urls import reverse
+from django.urls import reverse, URLResolver
 
 from oscarapi import urls
 from oscarapi.tests.utils import APITest
@@ -46,17 +46,20 @@ class BlockAdminApiTest(APITest):
         "The admin api urls should not be registered when OSCARAPI_BLOCK_ADMIN_API_ACCESS is True"
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=False):
             self.reload_modules([urls, sys.modules[settings.ROOT_URLCONF]])
-            urlpattern_names = [url.name for url in urls.urlpatterns]
+            # we assume here that the last mountpoint is the admin api url resolver
+            url_entry = urls.urlpatterns[-1]
+            self.assertIsInstance(url_entry, URLResolver)
+
+            urlpattern_names = [url.name for url in url_entry.url_patterns]
 
             for pattern in urls.admin_urlpatterns:
                 self.assertIn(pattern.name, urlpattern_names)
 
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=True):
             self.reload_modules([urls, sys.modules[settings.ROOT_URLCONF]])
-            urlpattern_names = [url.name for url in urls.urlpatterns]
-
-            for pattern in urls.admin_urlpatterns:
-                self.assertNotIn(pattern.name, urlpattern_names)
+            # we assume here that the last mountpoint is the admin api url resolver
+            url_entry = urls.urlpatterns[-1]
+            self.assertNotIsInstance(url_entry, URLResolver)
 
     def test_api_admin_permission(self):
         permission = APIAdminPermission()
