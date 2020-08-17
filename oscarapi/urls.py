@@ -1,6 +1,6 @@
 # pylint: disable=unbalanced-tuple-unpacking
 from django.conf import settings
-from django.conf.urls import url
+from django.conf.urls import include, url
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from oscarapi.utils.loading import get_api_classes, get_api_class
@@ -236,87 +236,87 @@ urlpatterns = [
 ]
 
 admin_urlpatterns = [
-    url(r"^admin/products/$", ProductAdminList.as_view(), name="admin-product-list"),
+    url(r"^products/$", ProductAdminList.as_view(), name="admin-product-list"),
     url(
-        r"^admin/products/(?P<pk>[0-9]+)/$",
+        r"^products/(?P<pk>[0-9]+)/$",
         ProductAdminDetail.as_view(),
         name="admin-product-detail",
     ),
     url(
-        r"^admin/productclasses/$",
+        r"^productclasses/$",
         ProductClassAdminList.as_view(),
         name="admin-productclass-list",
     ),
     url(
-        r"^admin/productclasses/(?P<slug>[-\w]+)/$",
+        r"^productclasses/(?P<slug>[-\w]+)/$",
         ProductClassAdminDetail.as_view(),
         name="admin-productclass-detail",
     ),
     url(
-        r"^admin/categories/$", CategoryAdminList.as_view(), name="admin-category-list"
+        r"^categories/$", CategoryAdminList.as_view(), name="admin-category-list"
     ),
     url(
-        r"^admin/categories/(?P<pk>[0-9]+)/$",
+        r"^categories/(?P<pk>[0-9]+)/$",
         CategoryAdminDetail.as_view(),
         name="admin-category-detail",
     ),
     url(
-        r"^admin/categories/(?P<breadcrumbs>.*)/$",
+        r"^categories/(?P<breadcrumbs>.*)/$",
         CategoryAdminList.as_view(),
         name="admin-category-child-list",
     ),
     url(
-        r"^admin/productattributes/$",
+        r"^productattributes/$",
         ProductAttributeAdminList.as_view(),
         name="admin-productattribute-list",
     ),
     url(
-        r"^admin/stockrecords/(?P<pk>[0-9]+)/$",
+        r"^stockrecords/(?P<pk>[0-9]+)/$",
         StockRecordDetail.as_view(),
         name="stockrecord-detail",
     ),
-    url(r"^admin/partners/$", PartnerList.as_view(), name="partner-list"),
-    url(r"^admin/partners/(?P<pk>[0-9]+)/$", PartnerDetail.as_view(), name="partner-detail"),
+    url(r"^partners/$", PartnerList.as_view(), name="partner-list"),
+    url(r"^partners/(?P<pk>[0-9]+)/$", PartnerDetail.as_view(), name="partner-detail"),
     url(
-        r"^admin/productattributes/(?P<pk>[0-9]+)/$",
+        r"^productattributes/(?P<pk>[0-9]+)/$",
         ProductAttributeAdminDetail.as_view(),
         name="admin-productattribute-detail",
     ),
     url(
-        r"^admin/attributeoptiongroups/$",
+        r"^attributeoptiongroups/$",
         AttributeOptionGroupAdminList.as_view(),
         name="admin-attributeoptiongroup-list",
     ),
     url(
-        r"^admin/attributeoptiongroups/(?P<pk>[0-9]+)/$",
+        r"^attributeoptiongroups/(?P<pk>[0-9]+)/$",
         AttributeOptionGroupAdminDetail.as_view(),
         name="admin-attributeoptiongroup-detail",
     ),
-    url(r"^admin/orders/$", OrderAdminList.as_view(), name="admin-order-list"),
+    url(r"^orders/$", OrderAdminList.as_view(), name="admin-order-list"),
     url(
-        r"^admin/orders/(?P<pk>[0-9]+)/$",
+        r"^orders/(?P<pk>[0-9]+)/$",
         OrderAdminDetail.as_view(),
         name="admin-order-detail",
     ),
     url(
-        r"^admin/orders/(?P<pk>[0-9]+)/lines/$",
+        r"^orders/(?P<pk>[0-9]+)/lines/$",
         OrderLineAdminList.as_view(),
         name="admin-order-lines-list",
     ),
     url(
-        r"^admin/orderlines/(?P<pk>[0-9]+)/$",
+        r"^orderlines/(?P<pk>[0-9]+)/$",
         OrderLineAdminDetail.as_view(),
         name="admin-order-lines-detail",
     ),
     url(
-        r"^admin/orderlineattributes/(?P<pk>[0-9]+)/$",
+        r"^orderlineattributes/(?P<pk>[0-9]+)/$",
         OrderLineAttributeAdminDetail.as_view(),
         name="admin-order-lineattributes-detail",
     ),
-    url(r"^admin/users/$", UserList.as_view(), name="user-list"),
+    url(r"^users/$", UserList.as_view(), name="user-list"),
 ]
 
 if not getattr(settings, "OSCARAPI_BLOCK_ADMIN_API_ACCESS", True):
-    urlpatterns = urlpatterns + admin_urlpatterns
+    urlpatterns.append(url(r"^admin/", include(admin_urlpatterns)))
 
 urlpatterns = format_suffix_patterns(urlpatterns)
