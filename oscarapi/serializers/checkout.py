@@ -171,6 +171,8 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
     billing_address = InlineBillingAddressSerializer(
         many=False, required=False)
 
+    email = serializers.CharField()
+
     payment_url = serializers.SerializerMethodField()
     offer_discounts = serializers.SerializerMethodField()
     voucher_discounts = serializers.SerializerMethodField()
@@ -200,7 +202,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
             'owner', 'billing_address', 'currency', 'total_incl_tax',
             'total_excl_tax', 'shipping_incl_tax', 'shipping_excl_tax',
             'shipping_address', 'shipping_method', 'shipping_code', 'status',
-            'guest_email', 'date_placed', 'payment_url', 'offer_discounts',
+            'email', 'date_placed', 'payment_url', 'offer_discounts',
             'voucher_discounts')
         )
 
