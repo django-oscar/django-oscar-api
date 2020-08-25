@@ -171,6 +171,8 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
     billing_address = InlineBillingAddressSerializer(
         many=False, required=False)
 
+    email = serializers.EmailField(read_only=True)
+
     payment_url = serializers.SerializerMethodField()
     offer_discounts = serializers.SerializerMethodField()
     voucher_discounts = serializers.SerializerMethodField()
@@ -195,13 +197,30 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
 
     class Meta:
         model = Order
-        fields = overridable('OSCARAPI_ORDER_FIELDS', default=(
-            'number', 'basket', 'url', 'lines',
-            'owner', 'billing_address', 'currency', 'total_incl_tax',
-            'total_excl_tax', 'shipping_incl_tax', 'shipping_excl_tax',
-            'shipping_address', 'shipping_method', 'shipping_code', 'status',
-            'guest_email', 'date_placed', 'payment_url', 'offer_discounts',
-            'voucher_discounts')
+        fields = overridable(
+            "OSCARAPI_ORDER_FIELDS",
+            default=(
+                "number",
+                "basket",
+                "url",
+                "lines",
+                "owner",
+                "billing_address",
+                "currency",
+                "total_incl_tax",
+                "total_excl_tax",
+                "shipping_incl_tax",
+                "shipping_excl_tax",
+                "shipping_address",
+                "shipping_method",
+                "shipping_code",
+                "status",
+                "email",
+                "date_placed",
+                "payment_url",
+                "offer_discounts",
+                "voucher_discounts",
+            ),
         )
 
 
