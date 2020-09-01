@@ -230,7 +230,9 @@ urlpatterns = [
 admin_urlpatterns = [
     path("products/", ProductAdminList.as_view(), name="admin-product-list"),
     path(
-        "products/<int:pk>/", ProductAdminDetail.as_view(), name="admin-product-detail",
+        "products/<int:pk>/",
+        ProductAdminDetail.as_view(),
+        name="admin-product-detail",
     ),
     path(
         "productclasses/",

@@ -1037,7 +1037,7 @@ class BasketTest(APITest):
 
     def test_add_product_limit_basket(self):
         """Test if an anonymous user cannot add more than two products to his
-            basket when amount of baskets is limited
+        basket when amount of baskets is limited
         """
         with self.settings(OSCAR_MAX_BASKET_QUANTITY_THRESHOLD=2):
             self.response = self.post(
@@ -1059,7 +1059,7 @@ class BasketTest(APITest):
 
     def test_add_product_above_stock(self):
         """Test if an anonymous user cannot add more products to his
-            basket when stock is not sufficient
+        basket when stock is not sufficient
         """
         with self.subTest("Single request"):
             self.response = self.post(
