@@ -4,9 +4,6 @@ dist: xenial
 
 matrix:
   include:
-    - { python: "2.7", env: "DJANGO='Django>=1.11,<2.0' OSCAR='django-oscar>1.5,<1.6'" }
-    - { python: "2.7", env: "DJANGO='Django>=1.11,<2.0' OSCAR='django-oscar>1.6,<1.7'" }
-
     - { python: "3.5", env: "DJANGO='Django>=1.11,<2.0' OSCAR='django-oscar>1.5,<1.6'" }
     - { python: "3.5", env: "DJANGO='Django>=1.11,<2.0' OSCAR='django-oscar>1.6,<1.7'" }
     - { python: "3.5", env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>1.6,<1.7'" }
