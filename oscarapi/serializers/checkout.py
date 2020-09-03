@@ -251,11 +251,15 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     shipping_address = ShippingAddressSerializer(many=False, required=False)
     billing_address = BillingAddressSerializer(many=False, required=False)
 
+    @property
+    def request(self):
+        return self.context["request"]
+
     def get_initial_order_status(self, basket):
         return overridable("OSCARAPI_INITIAL_ORDER_STATUS", default="new")
 
     def validate(self, attrs):
-        request = self.context["request"]
+        request = self.request
 
         if request.user.is_anonymous:
             if not settings.OSCAR_ALLOW_ANON_CHECKOUT:
@@ -314,7 +318,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
         try:
             basket = validated_data.get("basket")
             order_number = self.generate_order_number(basket)
-            request = self.context["request"]
+            request = self.request
 
             if "shipping_address" in validated_data:
                 shipping_address = ShippingAddress(**validated_data["shipping_address"])
