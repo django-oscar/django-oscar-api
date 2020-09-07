@@ -265,7 +265,7 @@ admin_urlpatterns = [
         StockRecordDetail.as_view(),
         name="admin-stockrecord-detail",
     ),
-    path("partners/", PartnerList.as_view(), name="partner-list"),
+    path("partners/", PartnerList.as_view(), name="admin-partner-list"),
     path("partners/<int:pk>/", PartnerDetail.as_view(), name="partner-detail"),
     path(
         "productattributes/<int:pk>/",
@@ -299,7 +299,7 @@ admin_urlpatterns = [
         OrderLineAttributeAdminDetail.as_view(),
         name="admin-order-lineattributes-detail",
     ),
-    path("users/", UserList.as_view(), name="user-list"),
+    path("users/", UserList.as_view(), name="admin-user-list"),
 ]
 
 if not getattr(settings, "OSCARAPI_BLOCK_ADMIN_API_ACCESS", True):
