@@ -345,6 +345,7 @@ class CheckoutTest(APITest):
         basket = response.data
 
         payload = self._get_common_payload(basket["url"])
+        del payload['guest_email']
 
         with self.settings(OSCAR_ALLOW_ANON_CHECKOUT=True):
             response = self.post("api-checkout", **payload)
