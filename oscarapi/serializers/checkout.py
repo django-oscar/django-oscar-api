@@ -187,6 +187,8 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
     shipping_address = InlineShippingAddressSerializer(many=False, required=False)
     billing_address = InlineBillingAddressSerializer(many=False, required=False)
 
+    email = serializers.EmailField(read_only=True)
+
     payment_url = serializers.SerializerMethodField()
     offer_discounts = serializers.SerializerMethodField()
     voucher_discounts = serializers.SerializerMethodField()
@@ -231,7 +233,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
                 "shipping_method",
                 "shipping_code",
                 "status",
-                "guest_email",
+                "email",
                 "date_placed",
                 "payment_url",
                 "offer_discounts",
