@@ -50,11 +50,6 @@ class BlockAdminApiTest(APITest):
             url_entry = urls.urlpatterns[-1]
             self.assertIsInstance(url_entry, URLResolver)
 
-            urlpattern_names = [url.name for url in url_entry.url_patterns]
-
-            for pattern in urls.admin_urlpatterns:
-                self.assertIn(pattern.name, urlpattern_names)
-
         with self.settings(OSCARAPI_BLOCK_ADMIN_API_ACCESS=True):
             self.reload_modules([urls, sys.modules[settings.ROOT_URLCONF]])
             # we assume here that the last mountpoint is the admin api url resolver
