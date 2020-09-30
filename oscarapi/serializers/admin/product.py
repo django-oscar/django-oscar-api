@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.template.defaultfilters import slugify
 
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
@@ -168,10 +169,11 @@ class AdminCategorySerializer(BaseCategorySerializer):
         lookup_field="full_slug",
         lookup_url_kwarg="breadcrumbs",
     )
+    slug = serializers.SlugField(required=False)
 
     def create(self, validated_data):
         breadcrumbs = self.context.get("breadcrumbs", None)
-        slug = validated_data["slug"]
+        slug = validated_data.get("slug", slugify(validated_data['name']))
 
         if breadcrumbs is None:
             breadcrumbs = slug
