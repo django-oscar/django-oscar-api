@@ -45,6 +45,7 @@ class AdminProductSerializer(BaseProductSerializer):
         required=False,
         queryset=Product.objects.filter(structure=Product.CHILD),
     )
+    slug = serializers.SlugField(required=False)
 
     class Meta(BaseProductSerializer.Meta):
         exclude = ("product_options",)
