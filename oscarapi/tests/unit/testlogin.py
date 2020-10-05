@@ -212,6 +212,13 @@ class LoginTest(APITest):
         self.response.assertStatusEqual(200)
         self.response.assertValueEqual("username", "nobody")
 
+        with self.settings(OSCARAPI_EXPOSE_USER_DETAILS=False):
+            self.response = self.get(
+                "api-login", session_id="nobody", authenticated=True
+            )
+            self.assertEqual(self.response.status_code, 204)
+            self.assertIsNone(self.response.data)
+
 
 class SessionTest(APITest):
     def test_get_session(self):
