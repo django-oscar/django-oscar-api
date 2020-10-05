@@ -6,7 +6,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
 api_root = get_api_class("views.root", "api_root")
-LoginView = get_api_class("views.login", "LoginView")
+(LoginView, UserDetail) = get_api_classes("views.login", ["LoginView", "UserDetail"])
 (
     BasketView,
     AddProductView,
@@ -26,7 +26,6 @@ LoginView = get_api_class("views.login", "LoginView")
     ],
 )
 
-(UserList, UserDetail) = get_api_classes("views.admin.user", ["UserList", "UserDetail"])
 (StockRecordDetail, PartnerList, PartnerDetail) = get_api_classes(
     "views.admin.partner", ["StockRecordDetail", "PartnerList", "PartnerDetail"]
 )
@@ -144,6 +143,10 @@ LoginView = get_api_class("views.login", "LoginView")
         "OrderLineAdminDetail",
         "OrderLineAttributeAdminDetail",
     ],
+)
+
+(UserAdminList, UserAdminDetail) = get_api_classes(
+    "views.admin.user", ["UserAdminList", "UserAdminDetail"]
 )
 
 
@@ -299,7 +302,8 @@ admin_urlpatterns = [
         OrderLineAttributeAdminDetail.as_view(),
         name="admin-order-lineattributes-detail",
     ),
-    path("users/", UserList.as_view(), name="admin-user-list"),
+    path("users/", UserAdminList.as_view(), name="admin-user-list"),
+    path("users/<int:pk>/", UserAdminDetail.as_view(), name="admin-user-detail"),
 ]
 
 if not getattr(settings, "OSCARAPI_BLOCK_ADMIN_API_ACCESS", True):

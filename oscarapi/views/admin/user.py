@@ -4,23 +4,23 @@ from rest_framework import generics
 
 
 APIAdminPermission = get_api_class("permissions", "APIAdminPermission")
-UserSerializer = get_api_class("serializers.login", "UserSerializer")
+AdminUserSerializer = get_api_class("serializers.admin.user", "AdminUserSerializer")
 User = get_user_model()
 
 
-class UserList(generics.ListCreateAPIView):
+class UserAdminList(generics.ListCreateAPIView):
     """
     List of all users, either frontend or admin users.
-    The fields shown in this view can be changed using the ``OSCARAPI_USER_FIELDS``
+    The fields shown in this view can be changed using the ``OSCARAPI_ADMIN_USER_FIELDS``
     setting
     """
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = AdminUserSerializer
     permission_classes = (APIAdminPermission,)
 
 
-class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+class UserAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = AdminUserSerializer
     permission_classes = (APIAdminPermission,)
