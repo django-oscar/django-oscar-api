@@ -1834,6 +1834,20 @@ class AdminCategoryApiTest(APITest):
 
         self.response.assertStatusEqual(201)
         self.assertEqual(Category.objects.count(), 2)
+        
+        # Create category without a slug
+        self.response = self.post(
+            "admin-category-list",
+            **{
+                "name": "blubbie blob",
+                "description": "brop",
+                "image": "https://example.com/testdata/image.jpg",
+            }
+        )
+
+        self.response.assertStatusEqual(201)
+        self.assertEqual(Category.objects.count(), 3)
+        self.assertEqual(Category.objects.last().slug, "blubbie-blob", "Category slug not created automatically")
 
     def test_create_or_update_root_category(self):
         self.test_create_root_category()  # pylint: disable=no-value-for-parameter
