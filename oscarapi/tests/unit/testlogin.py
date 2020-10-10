@@ -1,6 +1,9 @@
+from unittest.mock import patch
+
 from importlib import import_module
 
 from django.conf import settings
+from django.core import mail
 
 from oscarapi.tests.utils import APITest
 from oscarapi.utils.session import get_session, session_id_from_parsed_session_uri
@@ -266,3 +269,74 @@ class SessionTest(APITest):
         session["touched"] = "writesomethingelse"
         session.save()
         self.assertEqual(session.session_key, "session2")
+
+
+class RegistrationTest(APITest):
+    def test_registration_disabled(self):
+        with self.settings(OSCARAPI_ENABLE_REGISTRATION=False):
+            self.response = self.post(
+                "api-register",
+                email="someone@email.com",
+                password1="V3rYS3cr3t!",
+                password2="V3rYS3cr3t!",
+            )
+            self.response.assertStatusEqual(401)
+
+    def test_registration_success(self):
+        email = "someone@email.com"
+
+        self.response = self.post(
+            "api-register",
+            email=email,
+            password1="V3rYS3cr3t!",
+            password2="V3rYS3cr3t!",
+        )
+        self.response.assertStatusEqual(201)
+        self.assertEqual(self.response.body, email)
+
+    def test_registration_existing_user(self):
+        email = "nobody@nobody.niks"
+
+        self.response = self.post(
+            "api-register",
+            email=email,
+            password1="V3rYS3cr3t!",
+            password2="V3rYS3cr3t!",
+        )
+        self.response.assertStatusEqual(400)
+        self.assertIn("non_field_errors", self.response.body, email)
+
+    def test_registration_passwords_do_not_match(self):
+        email = "someone@email.com"
+
+        self.response = self.post(
+            "api-register",
+            email=email,
+            password1="V3rYS3cr3t!",
+            password2="i-am-different",
+        )
+        self.response.assertStatusEqual(400)
+        self.assertIn("non_field_errors", self.response.body, email)
+
+    def test_registration_passwords_do_not_validate(self):
+        email = "someone@email.com"
+
+        self.response = self.post(
+            "api-register", email=email, password1="123", password2="123"
+        )
+        self.response.assertStatusEqual(400)
+        self.assertIn("non_field_errors", self.response.body, email)
+
+    @patch("oscarapi.views.login.user_registered.send")
+    def test_registration_signal_send(self, mock):
+        self.test_registration_success()
+        self.assertTrue(mock.called)
+
+    def test_registration_email_send(self):
+        self.test_registration_success()
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_registration_email_disabled(self):
+        with self.settings(OSCAR_SEND_REGISTRATION_EMAIL=False):
+            self.test_registration_success()
+        self.assertEqual(len(mail.outbox), 0)

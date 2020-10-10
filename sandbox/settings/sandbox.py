@@ -2,9 +2,25 @@ import os
 
 ALLOWED_HOSTS = []
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 9,
+        },
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+]
 
-OSCARAPI_BLOCK_ADMIN_API_ACCESS = False
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 DATABASES = {
     'default': {
@@ -14,6 +30,8 @@ DATABASES = {
 }
 
 DEBUG = True
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 HAYSTACK_CONNECTIONS = {
     'default': {
@@ -193,5 +211,7 @@ USE_L10N = True
 USE_TZ = True
 
 OSCARAPI_EXPOSE_USER_DETAILS = True
+OSCARAPI_BLOCK_ADMIN_API_ACCESS = False
+OSCARAPI_ENABLE_REGISTRATION = True
 
 from oscar.defaults import *  # noqa
