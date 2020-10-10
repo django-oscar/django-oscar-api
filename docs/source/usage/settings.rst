@@ -19,6 +19,13 @@ Default: ``False``
 
 The ``Login`` view (``GET``) and the ``owner`` field in the ``BasketSerializer``and ``CheckoutSerializer`` expose user details, like username and email address. With this setting you can enable/disable this behaviour.
 
+
+``OSCARAPI_ENABLE_REGISTRATION``
+--------------------------------
+Default: ``False``
+
+Enables the ``register`` endpoint so it's possible to create new user accounts.
+
 Serializer settings
 ===================
 

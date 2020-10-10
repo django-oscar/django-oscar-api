@@ -1,14 +1,14 @@
 ============================
-Example Usage: checkout flow
+Example Usage: Customer Flow
 ============================
 When you browse through the API (see also the :ref:`django-oscar-sandbox` section), most of the things are already pretty clear in terms how you can communicate with the API. In the following examples we use the python `requests`_ package to demonstate how the API works.
 
 .. _`requests`: http://docs.python-requests.org/
 
-
-Get the basket
---------------
-First get our basket and see the response:
+Start a session
+----------------
+In the following examples we use a session object to interact with the API. The session objects stores and
+sends cookies automatically for us so the following gets you started for the examples shown here:
 
 .. code-block:: python
 
@@ -16,6 +16,13 @@ First get our basket and see the response:
 
     # this will persist the session cookies automatically for us
     session = requests.Session()
+
+
+Get the basket
+--------------
+First get our basket and see the response:
+
+.. code-block:: python
 
     response = session.get('http://localhost:8000/api/basket/')
     print(response.content)
@@ -258,7 +265,7 @@ single call with all information needed. Note that we are doing an anonymous
 checkout here, so we need to set the `guest_email` field. (Make sure that
 ``OSCAR_ALLOW_ANON_CHECKOUT`` is set to ``True`` in your ``settings.py``).
 If you don't support anonymous checkouts you will have to login the user first
-(see login example below).
+(see the :ref:`register-user-label` and :ref:`login-user-label` sections).
 
 .. code-block:: python
 
@@ -433,7 +440,6 @@ If you don't support anonymous checkouts you will have to login the user first
 
 .. _`django oscar api checkout`: https://gitlab.com/thelabnyc/django-oscar/django-oscar-api-checkout
 
-
 .. _login-user-label:
 
 Login the user
@@ -476,7 +482,20 @@ When the authentication was succesful, your will receive a new (authenticated) s
         "voucher_discounts": []
     }
 
+.. _register-user-label:
 
+Register a new user
+-------------------
+Oscar API ships with a registration endpoint to create new accounts. The endpoint can be enabled using the ``OSCARAPI_ENABLE_REGISTRATION`` setting.
 
+.. code-block:: python
 
+    data = {
+        "email": "my@emailaddress.com",
+        "password1": "V3rYS3cr3t",
+        "password2": "V3rYS3cr3t"
+    }
+    response = session.post('http://localhost:8000/api/register/', json=data)
 
+When the creation of the user was succesful it will return a 201 HTTP Response. Aftter this you cam login the user
+with the login endpoint, see :ref:`login-user-label`.
