@@ -7,14 +7,18 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from oscar.apps.customer.signals import user_registered
+from oscar.core.loading import get_class, get_model
+
 from oscarapi.utils.session import login_and_upgrade_session
 from oscarapi.utils.loading import get_api_classes
 from oscarapi.basket import operations
-from oscar.core.loading import get_model
 
-LoginSerializer, UserSerializer = get_api_classes(
-    "serializers.login", ["LoginSerializer", "UserSerializer"]
+
+LoginSerializer, UserSerializer, RgisterUserSerializer = get_api_classes(
+    "serializers.login", ["LoginSerializer", "UserSerializer", "RgisterUserSerializer"]
 )
+RegisterUserMixin = get_class("customer.mixins", "RegisterUserMixin")
 
 Basket = get_model("basket", "Basket")
 User = get_user_model()
@@ -46,7 +50,7 @@ class LoginView(APIView):
        (only when the request contained the session header as well).
 
     GET:
-    Get the details of the logged in user. Can be disabled with the
+    Get the details of the logged in user. Can be enabled/disabled with the
     OSCARAPI_EXPOSE_USER_DETAILS setting. If more details are needed,
     use the ``OSCARAPI_USER_FIELDS`` setting to change the fields the
     ``UserSerializer`` will render.
@@ -128,3 +132,42 @@ class UserDetail(generics.RetrieveAPIView):
         if getattr(settings, "OSCARAPI_EXPOSE_USER_DETAILS", False):
             return super().get(request, *args, **kwargs)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RegistrationView(APIView, RegisterUserMixin):
+    """
+    API for registering users
+
+    POST(email, password1, password2):
+    {
+        "email": "user@my-domain.com",
+        "password1": "MyVerySecretPassword123"
+        "password2": "MyVerySecretPassword123"
+    }
+
+    Will create a new user when the user with the specific email does
+    not exist (HTTP_201_CREATED). It will also send a user_registered signal.
+
+    It won't login the newly created user, You can do this with the login API.
+    """
+
+    serializer_class = RgisterUserSerializer
+
+    def post(self, request, *args, **kwargs):
+        if not getattr(settings, "OSCARAPI_ENABLE_REGISTRATION", False):
+            return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
+
+        ser = self.serializer_class(data=request.data)
+
+        if ser.is_valid():
+            # create the user
+            user = ser.save()
+
+            if getattr(settings, "OSCAR_SEND_REGISTRATION_EMAIL", False):
+                self.send_registration_email(user)
+            # send the same signal as oscar is sending
+            user_registered.send(sender=self, request=request, user=user)
+
+            return Response(user.email, status=status.HTTP_201_CREATED)
+
+        return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
