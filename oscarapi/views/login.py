@@ -45,10 +45,11 @@ class LoginView(APIView):
     6. A response will be issued containing the new session id as a header
        (only when the request contained the session header as well).
 
-    GET (enabled in DEBUG mode only):
-    Get the details of the logged in user.
-    If more details are needed, use the ``OSCARAPI_USER_FIELDS`` setting to change
-    the fields the ``UserSerializer`` will render.
+    GET:
+    Get the details of the logged in user. Can be disabled with the
+    OSCARAPI_EXPOSE_USER_DETAILS setting. If more details are needed,
+    use the ``OSCARAPI_USER_FIELDS`` setting to change the fields the
+    ``UserSerializer`` will render.
     """
 
     serializer_class = LoginSerializer
