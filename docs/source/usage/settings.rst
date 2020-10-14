@@ -15,7 +15,7 @@ Useful in production websites wehere you want to make sure that the admin api is
 
 ``OSCARAPI_EXPOSE_USER_DETAILS``
 -----------------------------------
-Default: ``True``
+Default: ``False``
 
 The ``Login`` view (``GET``) and the ``owner`` field in the ``BasketSerializer``and ``CheckoutSerializer`` expose user details, like username and email address. With this setting you can enable/disable this behaviour.
 

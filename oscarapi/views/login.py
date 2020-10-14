@@ -56,7 +56,7 @@ class LoginView(APIView):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            if getattr(settings, "OSCARAPI_EXPOSE_USER_DETAILS", True):
+            if getattr(settings, "OSCARAPI_EXPOSE_USER_DETAILS", False):
                 ser = UserSerializer(request.user, many=False)
                 return Response(ser.data)
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -125,6 +125,6 @@ class UserDetail(generics.RetrieveAPIView):
         return User.objects.filter(pk=self.request.user.pk)
 
     def get(self, request, *args, **kwargs):
-        if getattr(settings, "OSCARAPI_EXPOSE_USER_DETAILS", True):
+        if getattr(settings, "OSCARAPI_EXPOSE_USER_DETAILS", False):
             return super().get(request, *args, **kwargs)
         return Response(status=status.HTTP_204_NO_CONTENT)
