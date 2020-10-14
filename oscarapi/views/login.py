@@ -1,6 +1,9 @@
 from django.conf import settings
-from rest_framework import status
+from django.contrib.auth import get_user_model
+
+from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -14,8 +17,9 @@ LoginSerializer, UserSerializer = get_api_classes(
 )
 
 Basket = get_model("basket", "Basket")
+User = get_user_model()
 
-__all__ = ("LoginView",)
+__all__ = ("LoginView", "UserDetail")
 
 
 class LoginView(APIView):
@@ -41,21 +45,21 @@ class LoginView(APIView):
     6. A response will be issued containing the new session id as a header
        (only when the request contained the session header as well).
 
-    GET (enabled in DEBUG mode only):
-    Get the details of the logged in user.
-    If more details are needed, use the ``OSCARAPI_USER_FIELDS`` setting to change
-    the fields the ``UserSerializer`` will render.
+    GET:
+    Get the details of the logged in user. Can be disabled with the
+    OSCARAPI_EXPOSE_USER_DETAILS setting. If more details are needed,
+    use the ``OSCARAPI_USER_FIELDS`` setting to change the fields the
+    ``UserSerializer`` will render.
     """
 
     serializer_class = LoginSerializer
 
     def get(self, request, *args, **kwargs):
-        if settings.DEBUG:
-            if request.user.is_authenticated:
+        if request.user.is_authenticated:
+            if getattr(settings, "OSCARAPI_EXPOSE_USER_DETAILS", False):
                 ser = UserSerializer(request.user, many=False)
                 return Response(ser.data)
             return Response(status=status.HTTP_204_NO_CONTENT)
-
         raise MethodNotAllowed("GET")
 
     def merge_baskets(self, anonymous_basket, basket):
@@ -111,3 +115,16 @@ class LoginView(APIView):
         request.session = None
 
         return Response("")
+
+
+class UserDetail(generics.RetrieveAPIView):
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return User.objects.filter(pk=self.request.user.pk)
+
+    def get(self, request, *args, **kwargs):
+        if getattr(settings, "OSCARAPI_EXPOSE_USER_DETAILS", False):
+            return super().get(request, *args, **kwargs)
+        return Response(status=status.HTTP_204_NO_CONTENT)

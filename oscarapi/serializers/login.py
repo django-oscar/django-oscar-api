@@ -13,10 +13,13 @@ def field_length(fieldname):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    date_joined = serializers.DateTimeField(read_only=True)
+
     class Meta:
         model = User
         fields = overridable(
-            "OSCARAPI_USER_FIELDS", default=(User.USERNAME_FIELD, "id", "date_joined")
+            "OSCARAPI_USER_FIELDS",
+            default=(User.USERNAME_FIELD, "email", "date_joined"),
         )
 
 
