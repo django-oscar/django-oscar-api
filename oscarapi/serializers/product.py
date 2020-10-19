@@ -476,7 +476,7 @@ class AddProductSerializer(serializers.Serializer):  # pylint: disable=abstract-
     Serializes and validates an add to basket request.
     """
 
-    quantity = serializers.IntegerField(required=True)
+    quantity = serializers.IntegerField(required=True, min_value=1)
     url = serializers.HyperlinkedRelatedField(
         view_name="product-detail", queryset=Product.objects, required=True
     )
