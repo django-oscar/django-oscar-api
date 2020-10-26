@@ -173,7 +173,7 @@ class AdminCategorySerializer(BaseCategorySerializer):
 
     def create(self, validated_data):
         breadcrumbs = self.context.get("breadcrumbs", None)
-        slug = validated_data.get("slug", slugify(validated_data['name']))
+        slug = validated_data.get("slug", slugify(validated_data["name"]))
 
         if breadcrumbs is None:
             breadcrumbs = slug
