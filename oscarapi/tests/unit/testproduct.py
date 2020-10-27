@@ -1855,13 +1855,13 @@ class AdminCategoryApiTest(APITest):
 
     def test_create_or_update_root_category(self):
         self.test_create_root_category()  # pylint: disable=no-value-for-parameter
-        self.assertEqual(Category.objects.count(), 2)
+        self.assertEqual(Category.objects.count(), 3)
 
         self.response = self.post(
             "admin-category-list",
             **{"name": "blubbie", "slug": "blub", "description": "Klakaa"}
         )
 
-        self.assertEqual(Category.objects.count(), 2)
+        self.assertEqual(Category.objects.count(), 3)
         self.response.assertStatusEqual(201)
         self.assertEqual(self.response["description"], "Klakaa")
