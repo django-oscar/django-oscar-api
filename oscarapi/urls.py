@@ -6,7 +6,9 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
 api_root = get_api_class("views.root", "api_root")
-(LoginView, UserDetail) = get_api_classes("views.login", ["LoginView", "UserDetail"])
+(LoginView, UserDetail, RegistrationView) = get_api_classes(
+    "views.login", ["LoginView", "UserDetail", "RegistrationView"]
+)
 (
     BasketView,
     AddProductView,
@@ -149,9 +151,9 @@ api_root = get_api_class("views.root", "api_root")
     "views.admin.user", ["UserAdminList", "UserAdminDetail"]
 )
 
-
 urlpatterns = [
     path("", api_root, name="api-root"),
+    path("register/", RegistrationView.as_view(), name="api-register"),
     path("login/", LoginView.as_view(), name="api-login"),
     path("basket/", BasketView.as_view(), name="api-basket"),
     path(

@@ -12,6 +12,7 @@ __all__ = ("api_root",)
 
 def PUBLIC_APIS(r, f):
     return [
+        ("register", reverse("api-register", request=r, format=f)),
         ("login", reverse("api-login", request=r, format=f)),
         ("basket", reverse("api-basket", request=r, format=f)),
         ("basket-add-product", reverse("api-basket-add-product", request=r, format=f)),
