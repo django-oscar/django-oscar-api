@@ -12,41 +12,52 @@ jobs:
   include:
     - stage: lint
       python: 3.7
-      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"
+      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.1,<2.2'"
       script: make lint
 
     - stage: test
-      python: 3.5
-      env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>=2.0,<2.1'"
-      script: make coverage
-    - stage: test
       python: 3.6
-      env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>=2.0,<2.1'"
-      script: make coverage
-    - stage: test
-      python: 3.7
-      env: "DJANGO='Django>=2.1,<2.2' OSCAR='django-oscar>=2.0,<2.1'"
-      script: make coverage
-    - stage: test
-      python: 3.5
-      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"
-      script: make coverage
-    - stage: test
-      python: 3.6
-      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"
-      script: make coverage
-    - stage: test
-      python: 3.7
-      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.0,<2.1'"
+      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.1,<2.2'"
       script: make coverage
 
     - stage: test
       python: 3.7
-      env: "DJANGO='Django>=2.2,<3' OSCAR='https://github.com/django-oscar/django-oscar/archive/master.tar.gz'"
+      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.1,<2.2'"
+      script: make coverage
+
+    - stage: test
+      python: 3.8
+      env: "DJANGO='Django>=2.2,<3' OSCAR='django-oscar>=2.1,<2.2'"
+      script: make coverage
+
+    - stage: test
+      python: 3.6
+      env: "DJANGO='Django>=3,<3.1' OSCAR='django-oscar>=2.1,<2.2'"
+      script: make coverage
+
+    - stage: test
+      python: 3.7
+      env: "DJANGO='Django>=3,<3.1' OSCAR='django-oscar>=2.1,<2.2'"
+      script: make coverage
+
+    - stage: test
+      python: 3.8
+      env: "DJANGO='Django>=3,<3.1' OSCAR='django-oscar>=2.1,<2.2'"
+      script: make coverage
+
+    - stage: test
+      python: 3.8
+      env: "DJANGO='Django>=3,<3.1' OSCAR='https://github.com/django-oscar/django-oscar/archive/master.tar.gz'"
+      script: make coverage
+
+    - stage: test
+      python: 3.8
+      env: "DJANGO='Django>=3.1,<3.2' OSCAR='https://github.com/django-oscar/django-oscar/archive/master.tar.gz'"
       script: make coverage
 
   allow_failures:
-    - env: "DJANGO='Django>=2.2,<3' OSCAR='https://github.com/django-oscar/django-oscar/archive/master.tar.gz'"
+    - env: "DJANGO='Django>=3,<3.1' OSCAR='https://github.com/django-oscar/django-oscar/archive/master.tar.gz'"
+    - env: "DJANGO='Django>=3.1,<3.2' OSCAR='https://github.com/django-oscar/django-oscar/archive/master.tar.gz'"
 
 before_install:
     - pip install codecov

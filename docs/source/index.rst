@@ -13,9 +13,9 @@ This package provides a RESTful API for `django-oscar`_, it's based on `django-r
 
 Requirements:
 -------------
-- Ppython 3.5 / 3.6 / 3.7
-- Oscar >= 2.0.0
-- Django 2.1 / 2.2
+- Ppython 3.6 / 3.7 / 3.8
+- Oscar >= 2.1
+- Django 2.2 / 3.0
 - Django Rest Framework >= 3.9
 
 This version of Oscar API dropped support for Python 2 and Django 1.11 completely.
