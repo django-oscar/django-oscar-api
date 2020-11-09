@@ -29,6 +29,7 @@ BillingAddress = get_model("order", "BillingAddress")
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
 OrderLineAttribute = get_model("order", "LineAttribute")
+Surcharge = get_model("order", "Surcharge")
 StockRecord = get_model("partner", "StockRecord")
 
 Basket = get_model("basket", "Basket")
@@ -173,6 +174,15 @@ class OrderVoucherOfferSerializer(OrderOfferDiscountSerializer):
     voucher = VoucherSerializer(required=False)
 
 
+class InlineSurchargeSerializer(OscarModelSerializer):
+    class Meta:
+        model = Surcharge
+        fields = overridable(
+            "OSCARAPI_SURCHARGE_FIELDS",
+            default=("name", "code", "incl_tax", "excl_tax"),
+        )
+
+
 class OrderSerializer(OscarHyperlinkedModelSerializer):
     """
     The order serializer tries to have the same kind of structure as the
@@ -192,6 +202,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
     payment_url = serializers.SerializerMethodField()
     offer_discounts = serializers.SerializerMethodField()
     voucher_discounts = serializers.SerializerMethodField()
+    surcharges = InlineSurchargeSerializer(many=True)
 
     def get_offer_discounts(self, obj):
         qs = obj.basket_discounts.filter(offer_id__isnull=False)
@@ -238,6 +249,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
                 "payment_url",
                 "offer_discounts",
                 "voucher_discounts",
+                "surcharges",
             ),
         )
 
