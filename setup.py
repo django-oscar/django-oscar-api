@@ -53,7 +53,7 @@ setup(
     ],
     # mark test target to require extras.
     extras_require={
-        "dev": ["coverage", "mock", "twine", "wheel"],
+        "dev": ["coverage", "mock", "twine", "wheel", "easy_thumbnails"],
         "lint": ["flake8", "flake8-black", "flake8-bugbear", "black>=19.10b0"],
     },
 )

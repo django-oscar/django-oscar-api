@@ -83,7 +83,8 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'haystack',
     'treebeard',
-    'django_tables2'
+    'django_tables2',
+    'easy_thumbnails'
 ]
 
 LANGUAGE_CODE = 'en-us'
@@ -216,3 +217,5 @@ OSCARAPI_BLOCK_ADMIN_API_ACCESS = False
 OSCARAPI_ENABLE_REGISTRATION = True
 
 from oscar.defaults import *  # noqa
+
+OSCAR_THUMBNAILER = 'oscar.core.thumbnails.EasyThumbnails'
