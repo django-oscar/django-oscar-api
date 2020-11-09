@@ -1,4 +1,4 @@
-.PHONY: clean install sandbox test coverage docs build_release, publish_release_testpypi publish_release
+.PHONY: clean install sandbox test coverage docker-build docker-coverage docs build_release, publish_release_testpypi publish_release
 
 clean:
 	find . -name '*.pyc' -delete
@@ -28,7 +28,7 @@ docker-build:
 	 docker build -t oscarapi/test .
 
 docker-coverage: docker-build
-	 docker run -ti -v $(CURDIR):/opt -w /opt oscarapi/test bash -c "make install && pip install 'Django<3' && /usr/bin/make coverage"
+	 docker run -ti -v $(CURDIR):/opt -w /opt oscarapi/test bash -c "pip install 'Django<3.1' && make install && /usr/bin/make coverage"
 
 docs: install
 	pip install -r docs/requirements.txt
