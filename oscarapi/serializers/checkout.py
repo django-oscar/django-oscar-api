@@ -202,7 +202,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
     payment_url = serializers.SerializerMethodField()
     offer_discounts = serializers.SerializerMethodField()
     voucher_discounts = serializers.SerializerMethodField()
-    surcharges = InlineSurchargeSerializer(many=True)
+    surcharges = InlineSurchargeSerializer(many=True, required=False)
 
     def get_offer_discounts(self, obj):
         qs = obj.basket_discounts.filter(offer_id__isnull=False)
