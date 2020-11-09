@@ -12,7 +12,7 @@ install:
 
 sandbox: install
 	python sandbox/manage.py migrate
-	python sandbox/manage.py loaddata product productcategory productattribute productclass productattributevalue category option attributeoptiongroup attributeoption stockrecord partner voucher country
+	python sandbox/manage.py loaddata attributeoption country orderanditemcharges productattribute productclass voucher attributeoptiongroup offer partner productattributevalue productimage category option product productcategory stockrecord
 
 test:
 	python sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_true
