@@ -184,6 +184,7 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
                 "basket",
                 "stockrecord",
                 "date_created",
+                "date_updated",
             ),
         )
 
