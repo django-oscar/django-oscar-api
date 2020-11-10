@@ -13,12 +13,10 @@ This package provides a RESTful API for `django-oscar`_, it's based on `django-r
 
 Requirements:
 -------------
-- Ppython 3.6 / 3.7 / 3.8
+- Python 3.6 / 3.7 / 3.8
 - Oscar >= 2.1
 - Django 2.2 / 3.0
-- Django Rest Framework >= 3.9
-
-This version of Oscar API dropped support for Python 2 and Django 1.11 completely.
+- Django REST Framework >= 3.9
 
 See `Travis`_ for the current tested platforms.
 
@@ -51,7 +49,7 @@ Or you could add ``django-oscar-api`` to your project dependencies.
 Use out-of-the-box
 ------------------
 
-You can use the oscarapi application in an oscar ecommerce site without any customization. See for more information: :doc:`/usage/outofthebox`
+You can use the oscarapi application in an django-oscar E-ccmmerce site without any customization. See for more information: :doc:`/topics/outofthebox`
 
 
 .. _django-oscar-sandbox:
@@ -76,21 +74,21 @@ Now you can browse the API at http://localhost:8000/api. Here you can actually u
 But I want to customise the standard serializers / views!
 ---------------------------------------------------------
 
-Probably you want this, because you already extended or changed Oscar's functionality by forking it's apps right? See :doc:`/usage/customizing_oscarapi` for this.
+Probably you want this, because you already extended or changed django-oscar's functionality by forking it's apps right? See :doc:`/topics/customizing_oscarapi` for this.
 
 
 .. toctree::
    :hidden:
    :maxdepth: 1
 
-   usage/outofthebox
-   usage/communicate_with_the_api
-   usage/customizing_oscarapi
-   usage/the_admin_api
-   usage/middleware
-   usage/settings
-   usage/permissions
-   usage/signals
+   topics/outofthebox
+   topics/communicate_with_the_api
+   topics/customizing_oscarapi
+   topics/the_admin_api
+   topics/middleware
+   topics/settings
+   topics/permissions
+   topics/signals
    changelog.rst
 
 .. Indices and tables

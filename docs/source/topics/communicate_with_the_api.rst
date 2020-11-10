@@ -1,6 +1,6 @@
-============================
-Example Usage: Customer Flow
-============================
+========================
+Communicate with the API
+========================
 When you browse through the API (see also the :ref:`django-oscar-sandbox` section), most of the things are already pretty clear in terms how you can communicate with the API. In the following examples we use the python `requests`_ package to demonstate how the API works.
 
 .. _`requests`: http://docs.python-requests.org/
@@ -432,7 +432,7 @@ If you don't support anonymous checkouts you will have to login the user first
       }
 
 .. note::
-    In the checkout view of Oscar, the function ``handle_successful_order`` is called after placing an order. This sends the order confirmation message, flushes your session and sends the ``post_checkout`` signal. The Oscar API checkout view is not calling this method by design. If you would like to send a confirmation message (or other stuff you need to do) after placing an order you can subscribe to the ``oscarapi_post_checkout`` signal, see :doc:`/usage/signals`.
+    In the checkout view of Oscar, the function ``handle_successful_order`` is called after placing an order. This sends the order confirmation message, flushes your session and sends the ``post_checkout`` signal. The Oscar API checkout view is not calling this method by design. If you would like to send a confirmation message (or other stuff you need to do) after placing an order you can subscribe to the ``oscarapi_post_checkout`` signal, see :doc:`/topics/signals`.
 
 .. note::
     An extension on top of django-oscar-api providing a more flexible checkout API with a pluggable payment methods

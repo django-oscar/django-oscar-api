@@ -75,8 +75,8 @@ Fixed:
  * `#168 <https://github.com/django-oscar/django-oscar-api/pull/168>`_ Serializers consistency improvements (samitnuk)
 
 Features:
- * `#157 <https://github.com/django-oscar/django-oscar-api/pull/157>`_ introduced ``get_api_class`` and ``get_api_classes`` for easier customisation of Oscar API. See the `Updated documentation <https://django-oscar-api.readthedocs.io/en/latest/usage/customizing_oscarapi.html>`_ about this topic.
- * `#158 <https://github.com/django-oscar/django-oscar-api/pull/158>`_ introduced the *Admin API* which makes it possible to manage Oscar entities via the API. Think of Product / Productclass / Category creation and managing. See the `Admin API documentation <https://django-oscar-api.readthedocs.io/en/latest/usage/the_admin_api.html>`_ about this topic.
+ * `#157 <https://github.com/django-oscar/django-oscar-api/pull/157>`_ introduced ``get_api_class`` and ``get_api_classes`` for easier customisation of Oscar API. See the `Updated documentation <https://django-oscar-api.readthedocs.io/en/latest/topics/customizing_oscarapi.html>`_ about this topic.
+ * `#158 <https://github.com/django-oscar/django-oscar-api/pull/158>`_ introduced the *Admin API* which makes it possible to manage Oscar entities via the API. Think of Product / Productclass / Category creation and managing. See the `Admin API documentation <https://django-oscar-api.readthedocs.io/en/latest/topics/the_admin_api.html>`_ about this topic.
 
 Some noticable features and changes of `#158 <https://github.com/django-oscar/django-oscar-api/pull/158>`_:
  * `#126 <https://github.com/django-oscar/django-oscar-api/pull/126>`_ Added a *Category API*

@@ -42,6 +42,6 @@ Middleware and mixed usage
 
 There are some middleware classes shipped with Oscar API which can be useful for your project. For example, we have seen in practice that it can be useful to mix plain Oscar and the API (fill your basket with the API and use plain Oscar views for checkout).
 
-See the :doc:`/usage/middleware` section for more information.
+See the :doc:`/topics/middleware` section for more information.
 
 
