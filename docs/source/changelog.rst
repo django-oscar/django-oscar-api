@@ -2,7 +2,7 @@
 Changelog
 =========
 
-2.1.0 (2020-11-11)
+2.1.0 (2020-11-13)
 ------------------
 This release adds support for Oscar 2.1 and includes various new features and fixes. Supported Django versions are 2.2 and 3.0, and supported Python versions are 3.6, 3.7 and 3.8.
 
