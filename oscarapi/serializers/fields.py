@@ -2,6 +2,7 @@ import logging
 import operator
 
 from os.path import basename, join
+from http.client import InvalidURL
 from urllib.parse import urlsplit, parse_qs
 from urllib.request import urlretrieve
 from urllib.error import HTTPError
@@ -18,6 +19,7 @@ from oscar.core.loading import get_model, get_class
 
 from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.exists import bound_unique_together_get_or_create
+from oscarapi.utils.url import cleanup_url
 from .exceptions import FieldError
 
 logger = logging.getLogger(__name__)
@@ -294,7 +296,11 @@ class LazyRemoteFile(File):
 
     @cached_property
     def file(self):
-        local_filename, _ = urlretrieve(self.url, self.name)
+        try:
+            local_filename, _ = urlretrieve(self.url, self.name)
+        except InvalidURL:
+            local_filename, _ = urlretrieve(cleanup_url(self.url), self.name)
+
         return open(local_filename, self.mode)
 
     def __str__(self):

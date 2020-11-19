@@ -5,7 +5,7 @@ import json
 from copy import deepcopy
 from six import string_types
 from os.path import dirname, join
-
+from http.client import InvalidURL
 from django.conf import settings
 from django.urls import reverse
 from django.test import TestCase, RequestFactory
@@ -1168,6 +1168,54 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
         self.assertEqual(image.original.name, "images/products/2019/05/image.jpg")
+
+    @mock.patch("oscarapi.serializers.fields.urlretrieve")
+    def test_modify_images_crappy_url(self, urlretrieve):
+        urlretrieve.side_effect = [
+            InvalidURL(
+                "This url really sucks"
+            ),
+            (
+                join(dirname(__file__), "testdata", "image.jpg"),
+                [],
+            )
+        ]
+
+        product = Product.objects.get(pk=1)
+        self.assertEqual(product.images.count(), 1)
+
+        image = product.images.get()
+        self.assertEqual(image.original.name, "images/products/2019/05/image.jpg")
+        self.assertEqual(image.caption, "I'm a cow")
+
+        request = self.factory.get("%simages/nao-robot.jpg" % settings.STATIC_URL)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "images": [
+                    {
+                        "original": "https://example.com/testdata/a shit image image.jpg",
+                        "caption": "HA! IK HEET HoRRIE",
+                    }
+                ],
+            },
+            instance=product,
+            context={"request": request},
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.pk, 1, "product should be the same as passed as instance")
+        self.assertEqual(obj.images.count(), 1)
+        image = obj.images.get()
+        self.assertEqual(image.caption, "HA! IK HEET HoRRIE")
+        self.assertEqual(image.original.name, "images/products/2019/05/image.jpg")
+        self.assertEqual(urlretrieve.call_count, 2, "urlretrieve should have been called twice")
+        urlretrieve.assert_has_calls([
+            mock.call("https://example.com/testdata/a shit image image.jpg", "a shit image image.jpg"),
+            mock.call("https://example.com/testdata/a%20shit%20image%20image.jpg", 'a shit image image.jpg'),
+        ])
 
     @mock.patch("oscarapi.serializers.fields.urlretrieve")
     def test_modify_images_with_hash(self, urlretrieve):
