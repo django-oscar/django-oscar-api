@@ -15,8 +15,8 @@ from oscarapi.utils.loading import get_api_classes
 from oscarapi.basket import operations
 
 
-LoginSerializer, UserSerializer, RgisterUserSerializer = get_api_classes(
-    "serializers.login", ["LoginSerializer", "UserSerializer", "RgisterUserSerializer"]
+LoginSerializer, UserSerializer, RegisterUserSerializer = get_api_classes(
+    "serializers.login", ["LoginSerializer", "UserSerializer", "RegisterUserSerializer"]
 )
 RegisterUserMixin = get_class("customer.mixins", "RegisterUserMixin")
 
@@ -151,7 +151,7 @@ class RegistrationView(APIView, RegisterUserMixin):
     It won't login the newly created user, You can do this with the login API.
     """
 
-    serializer_class = RgisterUserSerializer
+    serializer_class = RegisterUserSerializer
 
     def post(self, request, *args, **kwargs):
         if not getattr(settings, "OSCARAPI_ENABLE_REGISTRATION", False):

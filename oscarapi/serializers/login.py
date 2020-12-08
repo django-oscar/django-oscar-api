@@ -47,7 +47,7 @@ class LoginSerializer(serializers.Serializer):
         return attrs
 
 
-class RgisterUserSerializer(serializers.Serializer):
+class RegisterUserSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=field_length("email"), required=True)
     password1 = serializers.CharField(
         max_length=field_length("password"),
