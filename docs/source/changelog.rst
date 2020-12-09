@@ -1,6 +1,13 @@
 =========
 Changelog
 =========
+2.1.1 (2020-12-09)
+------------------
+A minor bugfix release to fix a typo in the `RegisterUserSerializer` definition.
+
+Fixed:
+ * `#255 <https://github.com/django-oscar/django-oscar-api/pull/255>`_ Fix misspelled serializer name (farooqaaa)
+
 
 2.1.0 (2020-11-13)
 ------------------
