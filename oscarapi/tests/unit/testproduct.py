@@ -2,9 +2,11 @@ import mock
 import decimal
 import datetime
 import json
+
 from copy import deepcopy
 from os.path import dirname, join
 from unittest import skipIf
+from urllib.error import HTTPError
 
 from django.conf import settings
 from django.urls import reverse
@@ -1105,7 +1107,16 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
 
-    def test_add_broken_image(self):
+    @mock.patch("oscarapi.serializers.fields.urlretrieve")
+    def test_add_broken_image(self, urlretrieve):
+        urlretrieve.side_effect = HTTPError(
+            url="https://example.com/testdata/image.jpg",
+            code=404,
+            msg="Not Found",
+            hdrs={},
+            fp=None,
+        )
+
         product = Product.objects.get(pk=3)
         self.assertEqual(product.images.count(), 0)
 
@@ -1515,7 +1526,16 @@ class TestProductAdmin(APITest):
         )
         self.assertEqual(str(e.exception), msg)
 
-    def test_image_error(self):
+    @mock.patch("oscarapi.serializers.fields.urlretrieve")
+    def test_image_error(self, urlretrieve):
+        urlretrieve.side_effect = HTTPError(
+            url="https://example.com/testdata/image.jpg",
+            code=404,
+            msg="Not Found",
+            hdrs={},
+            fp=None,
+        )
+
         self.login("admin", "admin")
         url = reverse("admin-product-detail", args=(2,))
         data = deepcopy(self.child)
