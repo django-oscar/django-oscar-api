@@ -171,7 +171,8 @@ class InlineSurchargeSerializer(OscarModelSerializer):
     class Meta:
         model = Surcharge
         fields = overridable(
-            "OSCARAPI_SURCHARGE_FIELDS", default=("name", "incl_tax", "excl_tax")
+            "OSCARAPI_SURCHARGE_FIELDS",
+            default=("name", "code", "incl_tax", "excl_tax")
         )
 
 

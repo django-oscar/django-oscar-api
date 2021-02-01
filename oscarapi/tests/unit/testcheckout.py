@@ -373,7 +373,6 @@ class CheckOutTest(APITest):
             "the order url from a line is the same as the one created",
         )
 
-    @patch("oscarapi.signals.oscarapi_post_checkout.send")
     def test_order_api_surcharges(self):
         """Surcharges should be shown in the API when they are applied"""
         # and now an order for the user nobody
