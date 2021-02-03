@@ -902,10 +902,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
         self.assertEqual(obj.product_class.slug, "t-shirt")
 
-        # reset the annoying attr object, it stinks!!
-        obj.attr.__dict__ = {}
-        obj.attr.product = obj
-        obj.attr.initiate_attributes()
         self.assertEqual(
             obj.attribute_values.count(),
             1,
@@ -961,9 +957,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
             2,
             "One old attribute is also present on the new product class, so should not be deleted",
         )
-        obj.attr.__dict__ = {}
-        obj.attr.product = obj
-        obj.attr.initiate_attributes()
         self.assertEqual(str(obj.attr.size), "Large")
         self.assertEqual(obj.attr.text, "I am some kind of text")
         with self.assertRaises(AttributeError):
