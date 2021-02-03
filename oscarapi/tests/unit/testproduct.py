@@ -308,9 +308,7 @@ class AdminStockRecordSerializerTest(_ProductSerializerTest):
                 "partner": "http://testserver/api/admin/partners/1/",
                 "partner_sku": "henk",
                 "price_currency": "EUR",
-                "price_excl_tax": 20,
-                "price_retail": 36,
-                "cost_price": 11,
+                "price": 20,
                 "num_in_stock": 34,
                 "low_stock_threshold": 4,
             }
@@ -321,9 +319,7 @@ class AdminStockRecordSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.product.get_title(), "Oscar T-shirt")
         self.assertEqual(obj.partner.name, "Book partner")
         self.assertEqual(obj.price_currency, "EUR")
-        self.assertEqual(obj.price_excl_tax, decimal.Decimal("20.00"))
-        self.assertEqual(obj.price_retail, decimal.Decimal("36.00"))
-        self.assertEqual(obj.cost_price, decimal.Decimal("11.00"))
+        self.assertEqual(obj.price, decimal.Decimal("20.00"))
         self.assertEqual(obj.num_in_stock, 34)
         self.assertEqual(obj.low_stock_threshold, 4)
         self.assertEqual(obj.num_allocated, None)

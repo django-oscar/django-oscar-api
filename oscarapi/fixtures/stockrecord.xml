@@ -5,11 +5,7 @@
         <field to="partner.partner" name="partner" rel="ManyToOneRel">1</field>
         <field type="CharField" name="partner_sku">clf-large</field>
         <field type="CharField" name="price_currency">EUR</field>
-        <field type="DecimalField" name="price_excl_tax">10</field>
-        <field type="DecimalField" name="price_retail">12.10</field>
-        <field type="DecimalField" name="cost_price">
-            <None/>
-        </field>
+        <field type="DecimalField" name="price">10</field>
         <field type="PositiveIntegerField" name="num_in_stock">20</field>
         <field type="IntegerField" name="num_allocated">
             <None/>
@@ -25,11 +21,7 @@
         <field to="partner.partner" name="partner" rel="ManyToOneRel">1</field>
         <field type="CharField" name="partner_sku">clf-med</field>
         <field type="CharField" name="price_currency">EUR</field>
-        <field type="DecimalField" name="price_excl_tax">10</field>
-        <field type="DecimalField" name="price_retail">12.10</field>
-        <field type="DecimalField" name="cost_price">
-            <None/>
-        </field>
+        <field type="DecimalField" name="price">10</field>
         <field type="PositiveIntegerField" name="num_in_stock">20</field>
         <field type="IntegerField" name="num_allocated">
             <None/>
