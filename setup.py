@@ -15,6 +15,7 @@ setup(
         "Framework :: Django",
         "Framework :: Django :: 2.2",
         "Framework :: Django :: 3.0",
+        "Framework :: Django :: 3.1",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: Unix",
@@ -23,9 +24,10 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Software Development :: Libraries :: Application Frameworks",
     ],
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     keywords="",
     author="Lars van de Kerkhof, Martijn Jacobs",
     author_email="lars@permanentmarkers.nl, martijn@devopsconsulting.nl",
@@ -47,7 +49,7 @@ setup(
     # specify dependencies
     install_requires=[
         "setuptools",
-        "django-oscar>=2.1",
+        "django-oscar>=3.0",
         "Django>=2.2.13",  # CVE-2020-9402
         "djangorestframework>=3.9",  # first version to support Django 2.2
     ],
