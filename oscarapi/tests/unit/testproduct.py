@@ -1219,7 +1219,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [{"name": "Opdruk", "code": "opdruk", "type": "Optional"}],
+                "options": [{"name": "Opdruk", "code": "opdruk", "type": "text"}],
             },
             instance=product,
         )
@@ -1240,7 +1240,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [{"name": "Wous", "code": "opdruk", "type": "Optional"}],
+                "options": [{"name": "Wous", "code": "opdruk", "type": "text"}],
             },
             instance=product,
         )
@@ -1262,7 +1262,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [{"name": "Opdruk", "code": "opdruk", "type": "Optional"}],
+                "options": [{"name": "Opdruk", "code": "opdruk", "type": "text"}],
             },
             instance=product,
         )
