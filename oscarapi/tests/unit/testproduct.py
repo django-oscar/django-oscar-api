@@ -1000,7 +1000,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "stockrecords": [
                     {
                         "partner_sku": "keiko",
-                        "price_excl_tax": "53.67",
+                        "price": "53.67",
                         "partner": "http://testserver/api/admin/partners/1/",
                     }
                 ],
@@ -1019,7 +1019,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         product = Product.objects.get(pk=1)
         self.assertEqual(product.stockrecords.count(), 1)
         stockrecord = product.stockrecords.get()
-        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("10"))
+        self.assertEqual(stockrecord.price, decimal.Decimal("10"))
 
         ser = AdminProductSerializer(
             data={
@@ -1029,7 +1029,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "stockrecords": [
                     {
                         "partner_sku": "clf-large",
-                        "price_excl_tax": "53.67",
+                        "price": "53.67",
                         "partner": "http://testserver/api/admin/partners/1/",
                     }
                 ],
@@ -1042,14 +1042,14 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.pk, 1, "product should be the same as passed as instance")
         self.assertEqual(obj.stockrecords.count(), 1)
         stockrecord.refresh_from_db()
-        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("53.67"))
+        self.assertEqual(stockrecord.price, decimal.Decimal("53.67"))
 
     def test_add_stockrecords_error(self):
         "It should not be possible to have multiple stockrecords with same sku for the same partner"
         product = Product.objects.get(pk=1)
         self.assertEqual(product.stockrecords.count(), 1)
         stockrecord = product.stockrecords.get()
-        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("10"))
+        self.assertEqual(stockrecord.price, decimal.Decimal("10"))
 
         ser = AdminProductSerializer(
             data={
@@ -1059,7 +1059,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "stockrecords": [
                     {
                         "partner_sku": "clf-med",
-                        "price_excl_tax": "53.67",
+                        "price": "53.67",
                         "partner": "http://testserver/api/admin/partners/1/",
                     }
                 ],
@@ -1458,7 +1458,7 @@ class TestProductAdmin(APITest):
             {
                 "partner_sku": "henk-het-kind",
                 "price_currency": "EUR",
-                "price_excl_tax": "110.00",
+                "price": "110.00",
                 "partner": "http://127.0.0.1:8000/api/admin/partners/1/",
             }
         ]
