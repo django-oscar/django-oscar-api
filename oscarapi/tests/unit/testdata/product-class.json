@@ -96,7 +96,8 @@
     {
       "code": "horloge",
       "name": "horloge",
-      "type": "Required",
+      "type": "text",
+      "required": true,
       "help_text": "Wil je een horloge erbij?"
     }
   ],

@@ -308,9 +308,7 @@ class AdminStockRecordSerializerTest(_ProductSerializerTest):
                 "partner": "http://testserver/api/admin/partners/1/",
                 "partner_sku": "henk",
                 "price_currency": "EUR",
-                "price_excl_tax": 20,
-                "price_retail": 36,
-                "cost_price": 11,
+                "price": 20,
                 "num_in_stock": 34,
                 "low_stock_threshold": 4,
             }
@@ -321,9 +319,7 @@ class AdminStockRecordSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.product.get_title(), "Oscar T-shirt")
         self.assertEqual(obj.partner.name, "Book partner")
         self.assertEqual(obj.price_currency, "EUR")
-        self.assertEqual(obj.price_excl_tax, decimal.Decimal("20.00"))
-        self.assertEqual(obj.price_retail, decimal.Decimal("36.00"))
-        self.assertEqual(obj.cost_price, decimal.Decimal("11.00"))
+        self.assertEqual(obj.price, decimal.Decimal("20.00"))
         self.assertEqual(obj.num_in_stock, 34)
         self.assertEqual(obj.low_stock_threshold, 4)
         self.assertEqual(obj.num_allocated, None)
@@ -358,7 +354,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(str(obj.value), "Large")
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(str(p.attr.size), "Large")
 
     def test_productattributevalueserializer_option_error(self):
@@ -393,7 +389,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, "Donec placerat. Nullam nibh dolor.")
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.text, "Donec placerat. Nullam nibh dolor.")
 
     def test_productattributevalueserializer_text_error(self):
@@ -421,7 +417,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 4)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.integer, 4)
 
         ser = ProductAttributeValueSerializer(
@@ -463,7 +459,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, False)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.boolean, False)
 
     def test_productattributevalueserializer_boolean_error(self):
@@ -523,7 +519,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 7.78)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.float, 7.78)
 
         ser = ProductAttributeValueSerializer(
@@ -533,7 +529,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 7)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.float, 7)
 
         ser = ProductAttributeValueSerializer(
@@ -543,7 +539,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 7.78)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.float, 7.78)
 
     def test_productattributevalueserializer_float_error(self):
@@ -593,7 +589,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, "<p>koe</p>")
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.html, "<p>koe</p>")
 
     def test_productattributevalueserializer_html_error(self):
@@ -627,7 +623,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, new_date)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.date, new_date)
 
         ser = ProductAttributeValueSerializer(
@@ -643,7 +639,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, new_date)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.date, new_date)
 
     def test_productattributevalueserializer_date_error(self):
@@ -694,7 +690,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, new_date)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.datetime, new_date)
 
     def test_productattributevalueserializer_datetime_error(self):
@@ -741,7 +737,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual([str(o) for o in obj.value], ["Large"])
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual([str(o) for o in p.attr.multioption], ["Large"])
 
     def test_productattributevalueserializer_multioption_error(self):
@@ -906,10 +902,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
         self.assertEqual(obj.product_class.slug, "t-shirt")
 
-        # reset the annoying attr object, it stinks!!
-        obj.attr.__dict__ = {}
-        obj.attr.product = obj
-        obj.attr.initiate_attributes()
         self.assertEqual(
             obj.attribute_values.count(),
             1,
@@ -965,9 +957,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
             2,
             "One old attribute is also present on the new product class, so should not be deleted",
         )
-        obj.attr.__dict__ = {}
-        obj.attr.product = obj
-        obj.attr.initiate_attributes()
         self.assertEqual(str(obj.attr.size), "Large")
         self.assertEqual(obj.attr.text, "I am some kind of text")
         with self.assertRaises(AttributeError):
@@ -1004,7 +993,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "stockrecords": [
                     {
                         "partner_sku": "keiko",
-                        "price_excl_tax": "53.67",
+                        "price": "53.67",
                         "partner": "http://testserver/api/admin/partners/1/",
                     }
                 ],
@@ -1023,7 +1012,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         product = Product.objects.get(pk=1)
         self.assertEqual(product.stockrecords.count(), 1)
         stockrecord = product.stockrecords.get()
-        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("10"))
+        self.assertEqual(stockrecord.price, decimal.Decimal("10"))
 
         ser = AdminProductSerializer(
             data={
@@ -1033,7 +1022,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "stockrecords": [
                     {
                         "partner_sku": "clf-large",
-                        "price_excl_tax": "53.67",
+                        "price": "53.67",
                         "partner": "http://testserver/api/admin/partners/1/",
                     }
                 ],
@@ -1046,14 +1035,14 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.pk, 1, "product should be the same as passed as instance")
         self.assertEqual(obj.stockrecords.count(), 1)
         stockrecord.refresh_from_db()
-        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("53.67"))
+        self.assertEqual(stockrecord.price, decimal.Decimal("53.67"))
 
     def test_add_stockrecords_error(self):
         "It should not be possible to have multiple stockrecords with same sku for the same partner"
         product = Product.objects.get(pk=1)
         self.assertEqual(product.stockrecords.count(), 1)
         stockrecord = product.stockrecords.get()
-        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("10"))
+        self.assertEqual(stockrecord.price, decimal.Decimal("10"))
 
         ser = AdminProductSerializer(
             data={
@@ -1063,7 +1052,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "stockrecords": [
                     {
                         "partner_sku": "clf-med",
-                        "price_excl_tax": "53.67",
+                        "price": "53.67",
                         "partner": "http://testserver/api/admin/partners/1/",
                     }
                 ],
@@ -1230,7 +1219,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [{"name": "Opdruk", "code": "opdruk", "type": "Optional"}],
+                "options": [{"name": "Opdruk", "code": "opdruk", "type": "text"}],
             },
             instance=product,
         )
@@ -1251,7 +1240,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [{"name": "Wous", "code": "opdruk", "type": "Optional"}],
+                "options": [{"name": "Wous", "code": "opdruk", "type": "text"}],
             },
             instance=product,
         )
@@ -1273,7 +1262,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [{"name": "Opdruk", "code": "opdruk", "type": "Optional"}],
+                "options": [{"name": "Opdruk", "code": "opdruk", "type": "text"}],
             },
             instance=product,
         )
@@ -1462,7 +1451,7 @@ class TestProductAdmin(APITest):
             {
                 "partner_sku": "henk-het-kind",
                 "price_currency": "EUR",
-                "price_excl_tax": "110.00",
+                "price": "110.00",
                 "partner": "http://127.0.0.1:8000/api/admin/partners/1/",
             }
         ]

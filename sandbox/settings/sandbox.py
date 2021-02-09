@@ -138,9 +138,8 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False
         },
-        # Third party
-        'south': {
-            'level': 'INFO',
+        'oscar': {
+            'level': 'WARNING'
         },
         'sorl.thumbnail': {
             'level': 'ERROR',

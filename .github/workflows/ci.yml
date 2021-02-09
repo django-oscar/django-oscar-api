@@ -35,7 +35,7 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
         django-version: [2.2, 3.0, 3.1]
-        oscar-version: [2.1]
+        oscar-version: [3.0]
     steps:
       - name: Download src dir
         uses: actions/download-artifact@v2
