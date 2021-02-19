@@ -1,4 +1,4 @@
-.PHONY: clean install sandbox test coverage docs build_release, publish_release_testpypi publish_release
+.PHONY: clean install sandbox test coverage docker-build docker-coverage docs build_release, publish_release_testpypi publish_release
 
 clean:
 	find . -name '*.pyc' -delete
@@ -12,7 +12,7 @@ install:
 
 sandbox: install
 	python sandbox/manage.py migrate
-	python sandbox/manage.py loaddata product productcategory productattribute productclass productattributevalue category option attributeoptiongroup attributeoption stockrecord partner voucher country
+	python sandbox/manage.py loaddata attributeoption country orderanditemcharges productattribute productclass voucher attributeoptiongroup offer partner productattributevalue productimage category option product productcategory stockrecord
 
 test:
 	python sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_true
@@ -28,7 +28,7 @@ docker-build:
 	 docker build -t oscarapi/test .
 
 docker-coverage: docker-build
-	 docker run -ti -v $(CURDIR):/opt -w /opt oscarapi/test bash -c "make install && pip install 'Django<3' && /usr/bin/make coverage"
+	 docker run -ti -v $(CURDIR):/opt -w /opt oscarapi/test bash -c "pip install 'Django<3.1' && make install && /usr/bin/make coverage"
 
 docs: install
 	pip install -r docs/requirements.txt
@@ -52,3 +52,6 @@ lint: lint.installed
 
 black:
 	black --exclude "/migrations/" oscarapi/
+
+uwsgi:
+	@cd sandbox && uwsgi --ini uwsgi.ini

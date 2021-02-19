@@ -1,6 +1,9 @@
+from unittest.mock import patch
+
 from importlib import import_module
 
 from django.conf import settings
+from django.core import mail
 
 from oscarapi.tests.utils import APITest
 from oscarapi.utils.session import get_session, session_id_from_parsed_session_uri
@@ -22,18 +25,17 @@ class LoginTest(APITest):
         )
 
         # check authentication worked
-        with self.settings(DEBUG=True, OSCARAPI_USER_FIELDS=("username", "id")):
+        with self.settings(OSCARAPI_USER_FIELDS=("username", "email")):
             response = self.get("api-login", session_id="koe", authenticated=True)
             parsed_response = response.data
 
             self.assertEqual(parsed_response["username"], "nobody")
-            self.assertEqual(parsed_response["id"], 2)
+            self.assertEqual(parsed_response["email"], "nobody@nobody.niks")
 
         # note that this shows that we can move a session from one user to the
         # other! This is the responsibility of the client application!
         with self.settings(
             OSCARAPI_BLOCK_ADMIN_API_ACCESS=False,
-            DEBUG=True,
             OSCARAPI_USER_FIELDS=("username", "id"),
         ):
             response = self.post(
@@ -54,7 +56,12 @@ class LoginTest(APITest):
 
             self.assertEqual(response.status_code, 200)
             self.assertEqual(parsed_response["username"], "admin")
-            self.assertEqual(parsed_response["id"], 1)
+            self.assertEqual(parsed_response["email"], "admin@admin.admin")
+
+            with self.settings(OSCARAPI_EXPOSE_USER_DETAILS=False):
+                response = self.get("api-login", session_id="koe", authenticated=True)
+                self.assertEqual(response.status_code, 204)
+                self.assertIsNone(response.data)
 
     def test_failed_login_with_header(self):
         "Failed login should not upgrade to an authenticated session"
@@ -72,10 +79,9 @@ class LoginTest(APITest):
         )
 
         # check authentication didn't work
-        with self.settings(DEBUG=True, OSCARAPI_USER_FIELDS=("username", "id")):
+        with self.settings(OSCARAPI_USER_FIELDS=("username", "email")):
             response = self.get("api-login")
-            self.assertFalse(response.content)
-            self.assertEqual(response.status_code, 204)
+            self.assertEqual(response.status_code, 405)
 
     def test_login_without_header(self):
         "It should be possible to login using the normal cookie session"
@@ -87,19 +93,18 @@ class LoginTest(APITest):
         self.assertNotIn("Session-Id", response)
 
         # check authentication worked
-        with self.settings(DEBUG=True, OSCARAPI_USER_FIELDS=("username", "id")):
+        with self.settings(OSCARAPI_USER_FIELDS=("username", "email")):
             response = self.get("api-login")
             parsed_response = response.data
 
             self.assertEqual(parsed_response["username"], "nobody")
-            self.assertEqual(parsed_response["id"], 2)
+            self.assertEqual(parsed_response["email"], "nobody@nobody.niks")
 
         # using cookie sessions it is not possible to pass 1 session to another
         # user
         with self.settings(
             OSCARAPI_BLOCK_ADMIN_API_ACCESS=False,
-            DEBUG=True,
-            OSCARAPI_USER_FIELDS=("username", "id"),
+            OSCARAPI_USER_FIELDS=("username", "email"),
         ):
             response = self.post("api-login", username="admin", password="admin")
 
@@ -112,7 +117,12 @@ class LoginTest(APITest):
             parsed_response = response.data
 
             self.assertEqual(parsed_response["username"], "nobody")
-            self.assertEqual(parsed_response["id"], 2)
+            self.assertEqual(parsed_response["email"], "nobody@nobody.niks")
+
+            with self.settings(OSCARAPI_EXPOSE_USER_DETAILS=False):
+                response = self.get("api-login")
+                self.assertEqual(response.status_code, 204)
+                self.assertIsNone(response.data)
 
     def test_logged_in_users_can_not_login_again_via_the_api(self):
         "It should not be possible to move a cookie session to a header session"
@@ -165,7 +175,7 @@ class LoginTest(APITest):
             }
             session_id = session_id_from_parsed_session_uri(parsed_session_uri)
             self.assertTrue(session.exists(session_id))
-            self.assertEqual(response.status_code, 204)
+            self.assertEqual(response.status_code, 405)
 
             # delete the session
             response = self.delete("api-login", session_id="koe")
@@ -188,14 +198,29 @@ class LoginTest(APITest):
             self.assertFalse(session.exists(session_id))
 
             response = self.get("api-login")
-
-            self.assertEqual(response.status_code, 204)
+            self.assertEqual(response.status_code, 405)
 
     def test_can_not_start_authenticated_sessions_unauthenticated(self):
         "While anonymous session will just be started when not existing yet, authenticated ones can only be created by loggin in"
         with self.settings(DEBUG=True, SESSION_SAVE_EVERY_REQUEST=True):
             response = self.get("api-login", session_id="koe", authenticated=True)
             self.assertEqual(response.status_code, 401)
+
+    def test_header_login_does_not_cause_regular_login(self):
+        "Prove that there is not a bug in the test client that logs a user in when doing hlogin."
+        self.hlogin("nobody", "nobody", session_id="nobody")
+        self.response = self.get("api-login")
+        self.response.assertStatusEqual(405)
+        self.response = self.get("api-login", session_id="nobody", authenticated=True)
+        self.response.assertStatusEqual(200)
+        self.response.assertValueEqual("username", "nobody")
+
+        with self.settings(OSCARAPI_EXPOSE_USER_DETAILS=False):
+            self.response = self.get(
+                "api-login", session_id="nobody", authenticated=True
+            )
+            self.assertEqual(self.response.status_code, 204)
+            self.assertIsNone(self.response.data)
 
 
 class SessionTest(APITest):
@@ -244,3 +269,74 @@ class SessionTest(APITest):
         session["touched"] = "writesomethingelse"
         session.save()
         self.assertEqual(session.session_key, "session2")
+
+
+class RegistrationTest(APITest):
+    def test_registration_disabled(self):
+        with self.settings(OSCARAPI_ENABLE_REGISTRATION=False):
+            self.response = self.post(
+                "api-register",
+                email="someone@email.com",
+                password1="V3rYS3cr3t!",
+                password2="V3rYS3cr3t!",
+            )
+            self.response.assertStatusEqual(401)
+
+    def test_registration_success(self):
+        email = "someone@email.com"
+
+        self.response = self.post(
+            "api-register",
+            email=email,
+            password1="V3rYS3cr3t!",
+            password2="V3rYS3cr3t!",
+        )
+        self.response.assertStatusEqual(201)
+        self.assertEqual(self.response.body, email)
+
+    def test_registration_existing_user(self):
+        email = "nobody@nobody.niks"
+
+        self.response = self.post(
+            "api-register",
+            email=email,
+            password1="V3rYS3cr3t!",
+            password2="V3rYS3cr3t!",
+        )
+        self.response.assertStatusEqual(400)
+        self.assertIn("non_field_errors", self.response.body, email)
+
+    def test_registration_passwords_do_not_match(self):
+        email = "someone@email.com"
+
+        self.response = self.post(
+            "api-register",
+            email=email,
+            password1="V3rYS3cr3t!",
+            password2="i-am-different",
+        )
+        self.response.assertStatusEqual(400)
+        self.assertIn("non_field_errors", self.response.body, email)
+
+    def test_registration_passwords_do_not_validate(self):
+        email = "someone@email.com"
+
+        self.response = self.post(
+            "api-register", email=email, password1="123", password2="123"
+        )
+        self.response.assertStatusEqual(400)
+        self.assertIn("non_field_errors", self.response.body, email)
+
+    @patch("oscarapi.views.login.user_registered.send")
+    def test_registration_signal_send(self, mock):
+        self.test_registration_success()
+        self.assertTrue(mock.called)
+
+    def test_registration_email_send(self):
+        self.test_registration_success()
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_registration_email_disabled(self):
+        with self.settings(OSCAR_SEND_REGISTRATION_EMAIL=False):
+            self.test_registration_success()
+        self.assertEqual(len(mail.outbox), 0)

@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.template.defaultfilters import slugify
 
 from rest_framework import serializers
 from rest_framework.exceptions import APIException
@@ -157,8 +158,10 @@ class AdminProductSerializer(BaseProductSerializer):
                         attribute_value.save()
                     else:
                         attribute_value.delete()
-
-            return instance
+            # return a refreshed instance so we are sure all attributes are reloaded
+            # from the database again when accessed. The behaviour of the AttributeConatainer
+            # was changed in Oscar 3
+            return instance._meta.model.objects.get(pk=instance.pk)
 
 
 class AdminCategorySerializer(BaseCategorySerializer):
@@ -168,10 +171,11 @@ class AdminCategorySerializer(BaseCategorySerializer):
         lookup_field="full_slug",
         lookup_url_kwarg="breadcrumbs",
     )
+    slug = serializers.SlugField(required=False)
 
     def create(self, validated_data):
         breadcrumbs = self.context.get("breadcrumbs", None)
-        slug = validated_data["slug"]
+        slug = validated_data.get("slug", slugify(validated_data["name"]))
 
         if breadcrumbs is None:
             breadcrumbs = slug

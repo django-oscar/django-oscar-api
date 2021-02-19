@@ -1,6 +1,33 @@
 =========
 Changelog
 =========
+2.1.1 (2020-12-09)
+------------------
+A minor bugfix release to fix a typo in the `RegisterUserSerializer` definition.
+
+Fixed:
+ * `#255 <https://github.com/django-oscar/django-oscar-api/pull/255>`_ Fix misspelled serializer name (farooqaaa)
+
+
+2.1.0 (2020-11-13)
+------------------
+This release adds support for Oscar 2.1 and includes various new features and fixes. Supported Django versions are 2.2 and 3.0, and supported Python versions are 3.6, 3.7 and 3.8.
+
+Features:
+ * `#202 <https://github.com/django-oscar/django-oscar-api/pull/202>`_ Defer downloading of image data until the file data is accessed
+ * `#219 <https://github.com/django-oscar/django-oscar-api/pull/219>`_ Allow DRF Versioning schemes. You need to accept ``*args`` and ``**kwargs`` in your view overrides.
+ * `#238 <https://github.com/django-oscar/django-oscar-api/pull/239>`_ The Order serializer replaced the ``guest_email`` with an ``email`` field which is used for both anonymous and user associated orders (viggo-devries)
+ * `#244 <https://github.com/django-oscar/django-oscar-api/pull/244>`_ Added separate User serializers for the regular and admin API, introduced the ``OSCARAPI_EXPOSE_USER_DETAILS`` setting to control the exposure of user details
+ * `#246 <https://github.com/django-oscar/django-oscar-api/pull/246>`_ Added a user registration endpoint. It can be enabled/disabled with the ``OSCARAPI_ENABLE_REGISTRATION`` setting
+ * `#251 <https://github.com/django-oscar/django-oscar-api/pull/251>`_ Also serialize ``Surcharge`` objects in the Order serializer (Surcharges are introduced in Oscar 2.1)
+
+Fixed:
+ * `#213 <https://github.com/django-oscar/django-oscar-api/pull/213>`_ Fix OpenAPI integration (mazur-work)
+ * `#221 <https://github.com/django-oscar/django-oscar-api/pull/221>`_ Fix APIGatewayMiddleware handling of valid API keys (solarissmoke)
+ * `#228 <https://github.com/django-oscar/django-oscar-api/pull/228>`_ BasketLineDetail: Use DRF get_object_or_404 (jayvdb)
+ * `#230 <https://github.com/django-oscar/django-oscar-api/pull/230>`_ Mount the Admin API on the /admin endpoint with ``path()``
+ * `#234 <https://github.com/django-oscar/django-oscar-api/pull/234>`_ Make all Admin API url endpoints prefixed consistently with ``admin-``
+
 
 2.0.2 (2019-12-20)
 ------------------
@@ -75,8 +102,8 @@ Fixed:
  * `#168 <https://github.com/django-oscar/django-oscar-api/pull/168>`_ Serializers consistency improvements (samitnuk)
 
 Features:
- * `#157 <https://github.com/django-oscar/django-oscar-api/pull/157>`_ introduced ``get_api_class`` and ``get_api_classes`` for easier customisation of Oscar API. See the `Updated documentation <https://django-oscar-api.readthedocs.io/en/latest/usage/customizing_oscarapi.html>`_ about this topic.
- * `#158 <https://github.com/django-oscar/django-oscar-api/pull/158>`_ introduced the *Admin API* which makes it possible to manage Oscar entities via the API. Think of Product / Productclass / Category creation and managing. See the `Admin API documentation <https://django-oscar-api.readthedocs.io/en/latest/usage/the_admin_api.html>`_ about this topic.
+ * `#157 <https://github.com/django-oscar/django-oscar-api/pull/157>`_ introduced ``get_api_class`` and ``get_api_classes`` for easier customisation of Oscar API. See the `Updated documentation <https://django-oscar-api.readthedocs.io/en/latest/topics/customizing_oscarapi.html>`_ about this topic.
+ * `#158 <https://github.com/django-oscar/django-oscar-api/pull/158>`_ introduced the *Admin API* which makes it possible to manage Oscar entities via the API. Think of Product / Productclass / Category creation and managing. See the `Admin API documentation <https://django-oscar-api.readthedocs.io/en/latest/topics/the_admin_api.html>`_ about this topic.
 
 Some noticable features and changes of `#158 <https://github.com/django-oscar/django-oscar-api/pull/158>`_:
  * `#126 <https://github.com/django-oscar/django-oscar-api/pull/126>`_ Added a *Category API*

@@ -29,6 +29,7 @@ BillingAddress = get_model("order", "BillingAddress")
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")
 OrderLineAttribute = get_model("order", "LineAttribute")
+Surcharge = get_model("order", "Surcharge")
 StockRecord = get_model("partner", "StockRecord")
 
 Basket = get_model("basket", "Basket")
@@ -173,6 +174,15 @@ class OrderVoucherOfferSerializer(OrderOfferDiscountSerializer):
     voucher = VoucherSerializer(required=False)
 
 
+class InlineSurchargeSerializer(OscarModelSerializer):
+    class Meta:
+        model = Surcharge
+        fields = overridable(
+            "OSCARAPI_SURCHARGE_FIELDS",
+            default=("name", "code", "incl_tax", "excl_tax"),
+        )
+
+
 class OrderSerializer(OscarHyperlinkedModelSerializer):
     """
     The order serializer tries to have the same kind of structure as the
@@ -187,9 +197,12 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
     shipping_address = InlineShippingAddressSerializer(many=False, required=False)
     billing_address = InlineBillingAddressSerializer(many=False, required=False)
 
+    email = serializers.EmailField(read_only=True)
+
     payment_url = serializers.SerializerMethodField()
     offer_discounts = serializers.SerializerMethodField()
     voucher_discounts = serializers.SerializerMethodField()
+    surcharges = InlineSurchargeSerializer(many=True, required=False)
 
     def get_offer_discounts(self, obj):
         qs = obj.basket_discounts.filter(offer_id__isnull=False)
@@ -231,11 +244,12 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
                 "shipping_method",
                 "shipping_code",
                 "status",
-                "guest_email",
+                "email",
                 "date_placed",
                 "payment_url",
                 "offer_discounts",
                 "voucher_discounts",
+                "surcharges",
             ),
         )
 
@@ -251,11 +265,15 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     shipping_address = ShippingAddressSerializer(many=False, required=False)
     billing_address = BillingAddressSerializer(many=False, required=False)
 
+    @property
+    def request(self):
+        return self.context["request"]
+
     def get_initial_order_status(self, basket):
         return overridable("OSCARAPI_INITIAL_ORDER_STATUS", default="new")
 
     def validate(self, attrs):
-        request = self.context["request"]
+        request = self.request
 
         if request.user.is_anonymous:
             if not settings.OSCAR_ALLOW_ANON_CHECKOUT:
@@ -314,7 +332,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
         try:
             basket = validated_data.get("basket")
             order_number = self.generate_order_number(basket)
-            request = self.context["request"]
+            request = self.request
 
             if "shipping_address" in validated_data:
                 shipping_address = ShippingAddress(**validated_data["shipping_address"])

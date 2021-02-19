@@ -12,6 +12,7 @@ __all__ = ("api_root",)
 
 def PUBLIC_APIS(r, f):
     return [
+        ("register", reverse("api-register", request=r, format=f)),
         ("login", reverse("api-login", request=r, format=f)),
         ("basket", reverse("api-basket", request=r, format=f)),
         ("basket-add-product", reverse("api-basket-add-product", request=r, format=f)),
@@ -37,8 +38,8 @@ def ADMIN_APIS(r, f):
         ("products", reverse("admin-product-list", request=r, format=f)),
         ("categories", reverse("admin-category-list", request=r, format=f)),
         ("orders", reverse("admin-order-list", request=r, format=f)),
-        ("partners", reverse("partner-list", request=r, format=f)),
-        ("users", reverse("user-list", request=r, format=f)),
+        ("partners", reverse("admin-partner-list", request=r, format=f)),
+        ("users", reverse("admin-user-list", request=r, format=f)),
     ]
 
 

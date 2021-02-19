@@ -13,6 +13,18 @@ Default: ``True``
 
 Useful in production websites wehere you want to make sure that the admin api is not exposed at all.
 
+``OSCARAPI_EXPOSE_USER_DETAILS``
+-----------------------------------
+Default: ``False``
+
+The ``Login`` view (``GET``) and the ``owner`` field in the ``BasketSerializer`` and ``CheckoutSerializer`` expose user details, like username and email address. With this setting you can enable/disable this behaviour.
+
+``OSCARAPI_ENABLE_REGISTRATION``
+--------------------------------
+Default: ``False``
+
+Enables the ``register`` endpoint so it's possible to create new user accounts.
+
 Serializer settings
 ===================
 
@@ -53,6 +65,7 @@ Checkout serializers
 
 .. autoclass:: oscarapi.serializers.checkout.OrderSerializer
 .. autoclass:: oscarapi.serializers.checkout.OrderLineSerializer
+.. autoclass:: oscarapi.serializers.checkout.InlineSurchargeSerializer
 .. autoclass:: oscarapi.serializers.checkout.UserAddressSerializer
 
 Login serializers

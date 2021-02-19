@@ -14,6 +14,7 @@ from oscarapi.serializers.checkout import CheckoutSerializer
 
 Basket = get_model("basket", "Basket")
 User = get_user_model()
+Order = get_model("order", "Order")
 
 
 class CheckoutTest(APITest):
@@ -96,9 +97,8 @@ class CheckoutTest(APITest):
         response = self.post("api-checkout", **payload)
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(
-            response.data["guest_email"],
-            "",
-            "Guest email should be blank since user was authenticated",
+            response.data["email"],
+            "nobody@nobody.niks",
         )
         self.assertEqual(
             Basket.objects.get(pk=basket["id"]).status,
@@ -131,9 +131,8 @@ class CheckoutTest(APITest):
         )
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(
-            response.data["guest_email"],
-            "",
-            "Guest email should be blank since user was authenticated",
+            response.data["email"],
+            "nobody@nobody.niks",
         )
         self.assertEqual(
             Basket.objects.get(pk=basket["id"]).status,
@@ -372,7 +371,7 @@ class CheckoutTest(APITest):
             payload["guest_email"] = "henk@example.com"
             response = self.post("api-checkout", **payload)
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.data["guest_email"], "henk@example.com")
+            self.assertEqual(response.data["email"], "henk@example.com")
             self.assertEqual(
                 Basket.objects.get(pk=basket["id"]).status,
                 "Frozen",
@@ -405,6 +404,29 @@ class CheckoutTest(APITest):
             order_url,
             "the order url from a line is the same as the one created",
         )
+
+    def test_order_api_surcharges(self):
+        """Surcharges should be shown in the API when they are applied"""
+        # and now an order for the user nobody
+        self.login(username="nobody", password="nobody")
+        self.test_checkout()
+        self.response = self.get("order-list")
+        self.assertEqual(len(self.response), 1, "An order should have been created.")
+
+        order_url = self.response.data[0]["url"]
+        order = Order.objects.get(number=self.response.data[0]["number"])
+        order.surcharges.create(
+            name="Surcharge", code="surcharge", excl_tax=10.00, incl_tax=10.00
+        )
+
+        self.response = self.get(order_url)
+        self.assertEqual(
+            len(self.response["surcharges"]), 1, "The order should have one surcharge."
+        )
+        self.assertEqual(self.response["surcharges"][0]["code"], "surcharge")
+        self.assertEqual(self.response["surcharges"][0]["name"], "Surcharge")
+        self.assertEqual(self.response["surcharges"][0]["excl_tax"], "10.00")
+        self.assertEqual(self.response["surcharges"][0]["incl_tax"], "10.00")
 
     @patch("oscarapi.signals.oscarapi_post_checkout.send")
     def test_post_checkout_signal_send(self, mock):

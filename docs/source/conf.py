@@ -66,7 +66,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Django Osar API'
-copyright = u'2015, 2016 Django Oscar'
+copyright = u'2015-2020 jango Oscar'
 author = u'Lars van de Kerkhof, Martijn Jacobs'
 
 # The version info for the project you're documenting, acts as replacement for

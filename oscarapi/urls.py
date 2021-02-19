@@ -1,12 +1,14 @@
 # pylint: disable=unbalanced-tuple-unpacking
 from django.conf import settings
-from django.urls import path, re_path
+from django.urls import include, path, re_path
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
 api_root = get_api_class("views.root", "api_root")
-LoginView = get_api_class("views.login", "LoginView")
+(LoginView, UserDetail, RegistrationView) = get_api_classes(
+    "views.login", ["LoginView", "UserDetail", "RegistrationView"]
+)
 (
     BasketView,
     AddProductView,
@@ -26,7 +28,6 @@ LoginView = get_api_class("views.login", "LoginView")
     ],
 )
 
-(UserList, UserDetail) = get_api_classes("views.admin.user", ["UserList", "UserDetail"])
 (StockRecordDetail, PartnerList, PartnerDetail) = get_api_classes(
     "views.admin.partner", ["StockRecordDetail", "PartnerList", "PartnerDetail"]
 )
@@ -146,9 +147,13 @@ LoginView = get_api_class("views.login", "LoginView")
     ],
 )
 
+(UserAdminList, UserAdminDetail) = get_api_classes(
+    "views.admin.user", ["UserAdminList", "UserAdminDetail"]
+)
 
 urlpatterns = [
     path("", api_root, name="api-root"),
+    path("register/", RegistrationView.as_view(), name="api-register"),
     path("login/", LoginView.as_view(), name="api-login"),
     path("basket/", BasketView.as_view(), name="api-basket"),
     path(
@@ -228,83 +233,82 @@ urlpatterns = [
 ]
 
 admin_urlpatterns = [
-    path("admin/products/", ProductAdminList.as_view(), name="admin-product-list"),
+    path("products/", ProductAdminList.as_view(), name="admin-product-list"),
     path(
-        "admin/products/<int:pk>/",
+        "products/<int:pk>/",
         ProductAdminDetail.as_view(),
         name="admin-product-detail",
     ),
     path(
-        "admin/productclasses/",
+        "productclasses/",
         ProductClassAdminList.as_view(),
         name="admin-productclass-list",
     ),
     path(
-        "admin/productclasses/<slug:slug>/",
+        "productclasses/<slug:slug>/",
         ProductClassAdminDetail.as_view(),
         name="admin-productclass-detail",
     ),
-    path("admin/categories/", CategoryAdminList.as_view(), name="admin-category-list"),
+    path("categories/", CategoryAdminList.as_view(), name="admin-category-list"),
     path(
-        "admin/categories/<int:pk>/",
+        "categories/<int:pk>/",
         CategoryAdminDetail.as_view(),
         name="admin-category-detail",
     ),
     re_path(
-        r"^admin/categories/(?P<breadcrumbs>.*)/$",
+        r"^categories/(?P<breadcrumbs>.*)/$",
         CategoryAdminList.as_view(),
         name="admin-category-child-list",
     ),
     path(
-        "admin/productattributes/",
+        "productattributes/",
         ProductAttributeAdminList.as_view(),
         name="admin-productattribute-list",
     ),
     path(
-        "admin/stockrecords/<int:pk>/",
+        "stockrecords/<int:pk>/",
         StockRecordDetail.as_view(),
         name="admin-stockrecord-detail",
     ),
-    path("admin/partners/", PartnerList.as_view(), name="partner-list"),
-    path("admin/partners/<int:pk>/", PartnerDetail.as_view(), name="partner-detail"),
+    path("partners/", PartnerList.as_view(), name="admin-partner-list"),
+    path("partners/<int:pk>/", PartnerDetail.as_view(), name="partner-detail"),
     path(
-        "admin/productattributes/<int:pk>/",
+        "productattributes/<int:pk>/",
         ProductAttributeAdminDetail.as_view(),
         name="admin-productattribute-detail",
     ),
     path(
-        "admin/attributeoptiongroups/",
+        "attributeoptiongroups/",
         AttributeOptionGroupAdminList.as_view(),
         name="admin-attributeoptiongroup-list",
     ),
     path(
-        "admin/attributeoptiongroups/<int:pk>/",
+        "attributeoptiongroups/<int:pk>/",
         AttributeOptionGroupAdminDetail.as_view(),
         name="admin-attributeoptiongroup-detail",
     ),
-    path("admin/orders/", OrderAdminList.as_view(), name="admin-order-list"),
+    path("orders/", OrderAdminList.as_view(), name="admin-order-list"),
+    path("orders/<int:pk>/", OrderAdminDetail.as_view(), name="admin-order-detail"),
     path(
-        "admin/orders/<int:pk>/", OrderAdminDetail.as_view(), name="admin-order-detail"
-    ),
-    path(
-        "admin/orders/<int:pk>/lines/",
+        "orders/<int:pk>/lines/",
         OrderLineAdminList.as_view(),
         name="admin-order-lines-list",
     ),
     path(
-        "admin/orderlines/<int:pk>/",
+        "orderlines/<int:pk>/",
         OrderLineAdminDetail.as_view(),
         name="admin-order-lines-detail",
     ),
     path(
-        "admin/orderlineattributes/<int:pk>/",
+        "orderlineattributes/<int:pk>/",
         OrderLineAttributeAdminDetail.as_view(),
         name="admin-order-lineattributes-detail",
     ),
-    path("admin/users/", UserList.as_view(), name="user-list"),
+    path("users/", UserAdminList.as_view(), name="admin-user-list"),
+    path("users/<int:pk>/", UserAdminDetail.as_view(), name="admin-user-detail"),
 ]
 
 if not getattr(settings, "OSCARAPI_BLOCK_ADMIN_API_ACCESS", True):
-    urlpatterns = urlpatterns + admin_urlpatterns
+    urlpatterns.append(path("admin/", include(admin_urlpatterns)))
 
 urlpatterns = format_suffix_patterns(urlpatterns)

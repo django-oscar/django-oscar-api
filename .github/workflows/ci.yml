@@ -1,0 +1,59 @@
+name: CI
+on: [push]
+
+defaults:
+  run:
+    working-directory: ./src
+
+jobs:
+  run-linting:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v2
+      with:
+        path: ./src
+    - name: Setup Python 3.6
+      uses: actions/setup-python@v2
+      with:
+         python-version: '3.6'
+    - name: Install all dependencies
+      run: make install
+    - name: Run all linting
+      run: make lint
+    - name: Upload src dir as artefact
+      uses: actions/upload-artifact@v2
+      with:
+        name: src
+        path: ./src
+
+  run-tests:
+    needs: run-linting
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9]
+        django-version: [2.2, 3.0, 3.1]
+        oscar-version: [3.0]
+    steps:
+      - name: Download src dir
+        uses: actions/download-artifact@v2
+        with:
+          name: src
+          path: ./src
+      - name: Setup Python 3.x
+        uses: actions/setup-python@v2
+        with:
+           python-version: ${{ matrix.python-version }}
+      - name: Install all dependencies
+        run: |
+          pip install "django~=${{ matrix.django-version }}.0"
+          pip install "django-oscar~=${{ matrix.oscar-version }}.0"
+          make install
+      - name: Run the testsuite
+        run: make coverage
+      - name: Upload coverage to codecov
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true

@@ -2,9 +2,11 @@ import mock
 import decimal
 import datetime
 import json
+
 from copy import deepcopy
 from os.path import dirname, join
 from unittest import skipIf
+from urllib.error import HTTPError
 
 from django.conf import settings
 from django.urls import reverse
@@ -296,6 +298,7 @@ class _ProductSerializerTest(TestCase):
         )
 
 
+@skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
 class AdminStockRecordSerializerTest(_ProductSerializerTest):
     def test_stockrecord_save(self):
         "The AdminStockRecordSerializer should be able to save stuff"
@@ -305,9 +308,7 @@ class AdminStockRecordSerializerTest(_ProductSerializerTest):
                 "partner": "http://testserver/api/admin/partners/1/",
                 "partner_sku": "henk",
                 "price_currency": "EUR",
-                "price_excl_tax": 20,
-                "price_retail": 36,
-                "cost_price": 11,
+                "price": 20,
                 "num_in_stock": 34,
                 "low_stock_threshold": 4,
             }
@@ -318,9 +319,7 @@ class AdminStockRecordSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.product.get_title(), "Oscar T-shirt")
         self.assertEqual(obj.partner.name, "Book partner")
         self.assertEqual(obj.price_currency, "EUR")
-        self.assertEqual(obj.price_excl_tax, decimal.Decimal("20.00"))
-        self.assertEqual(obj.price_retail, decimal.Decimal("36.00"))
-        self.assertEqual(obj.cost_price, decimal.Decimal("11.00"))
+        self.assertEqual(obj.price, decimal.Decimal("20.00"))
         self.assertEqual(obj.num_in_stock, 34)
         self.assertEqual(obj.low_stock_threshold, 4)
         self.assertEqual(obj.num_allocated, None)
@@ -355,7 +354,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(str(obj.value), "Large")
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(str(p.attr.size), "Large")
 
     def test_productattributevalueserializer_option_error(self):
@@ -390,7 +389,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, "Donec placerat. Nullam nibh dolor.")
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.text, "Donec placerat. Nullam nibh dolor.")
 
     def test_productattributevalueserializer_text_error(self):
@@ -418,7 +417,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 4)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.integer, 4)
 
         ser = ProductAttributeValueSerializer(
@@ -460,7 +459,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, False)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.boolean, False)
 
     def test_productattributevalueserializer_boolean_error(self):
@@ -520,7 +519,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 7.78)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.float, 7.78)
 
         ser = ProductAttributeValueSerializer(
@@ -530,7 +529,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 7)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.float, 7)
 
         ser = ProductAttributeValueSerializer(
@@ -540,7 +539,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 7.78)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.float, 7.78)
 
     def test_productattributevalueserializer_float_error(self):
@@ -590,7 +589,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, "<p>koe</p>")
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.html, "<p>koe</p>")
 
     def test_productattributevalueserializer_html_error(self):
@@ -624,7 +623,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, new_date)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.date, new_date)
 
         ser = ProductAttributeValueSerializer(
@@ -640,7 +639,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, new_date)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.date, new_date)
 
     def test_productattributevalueserializer_date_error(self):
@@ -691,7 +690,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, new_date)
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual(p.attr.datetime, new_date)
 
     def test_productattributevalueserializer_datetime_error(self):
@@ -738,7 +737,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual([str(o) for o in obj.value], ["Large"])
 
-        p.attr.initiate_attributes()
+        p = Product.objects.get(pk=p.pk)
         self.assertEqual([str(o) for o in p.attr.multioption], ["Large"])
 
     def test_productattributevalueserializer_multioption_error(self):
@@ -818,6 +817,7 @@ class CategoryFieldTest(_ProductSerializerTest):
         )
 
 
+@skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
 class AdminProductSerializerTest(_ProductSerializerTest):
     def test_create_product(self):
         "Products should be created by the serializer if needed"
@@ -902,10 +902,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
         self.assertEqual(obj.product_class.slug, "t-shirt")
 
-        # reset the annoying attr object, it stinks!!
-        obj.attr.__dict__ = {}
-        obj.attr.product = obj
-        obj.attr.initiate_attributes()
         self.assertEqual(
             obj.attribute_values.count(),
             1,
@@ -961,9 +957,6 @@ class AdminProductSerializerTest(_ProductSerializerTest):
             2,
             "One old attribute is also present on the new product class, so should not be deleted",
         )
-        obj.attr.__dict__ = {}
-        obj.attr.product = obj
-        obj.attr.initiate_attributes()
         self.assertEqual(str(obj.attr.size), "Large")
         self.assertEqual(obj.attr.text, "I am some kind of text")
         with self.assertRaises(AttributeError):
@@ -1000,7 +993,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "stockrecords": [
                     {
                         "partner_sku": "keiko",
-                        "price_excl_tax": "53.67",
+                        "price": "53.67",
                         "partner": "http://testserver/api/admin/partners/1/",
                     }
                 ],
@@ -1019,7 +1012,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         product = Product.objects.get(pk=1)
         self.assertEqual(product.stockrecords.count(), 1)
         stockrecord = product.stockrecords.get()
-        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("10"))
+        self.assertEqual(stockrecord.price, decimal.Decimal("10"))
 
         ser = AdminProductSerializer(
             data={
@@ -1029,7 +1022,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "stockrecords": [
                     {
                         "partner_sku": "clf-large",
-                        "price_excl_tax": "53.67",
+                        "price": "53.67",
                         "partner": "http://testserver/api/admin/partners/1/",
                     }
                 ],
@@ -1042,14 +1035,14 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.pk, 1, "product should be the same as passed as instance")
         self.assertEqual(obj.stockrecords.count(), 1)
         stockrecord.refresh_from_db()
-        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("53.67"))
+        self.assertEqual(stockrecord.price, decimal.Decimal("53.67"))
 
     def test_add_stockrecords_error(self):
         "It should not be possible to have multiple stockrecords with same sku for the same partner"
         product = Product.objects.get(pk=1)
         self.assertEqual(product.stockrecords.count(), 1)
         stockrecord = product.stockrecords.get()
-        self.assertEqual(stockrecord.price_excl_tax, decimal.Decimal("10"))
+        self.assertEqual(stockrecord.price, decimal.Decimal("10"))
 
         ser = AdminProductSerializer(
             data={
@@ -1059,7 +1052,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "stockrecords": [
                     {
                         "partner_sku": "clf-med",
-                        "price_excl_tax": "53.67",
+                        "price": "53.67",
                         "partner": "http://testserver/api/admin/partners/1/",
                     }
                 ],
@@ -1103,7 +1096,16 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
 
-    def test_add_broken_image(self):
+    @mock.patch("oscarapi.serializers.fields.urlretrieve")
+    def test_add_broken_image(self, urlretrieve):
+        urlretrieve.side_effect = HTTPError(
+            url="https://example.com/testdata/image.jpg",
+            code=404,
+            msg="Not Found",
+            hdrs={},
+            fp=None,
+        )
+
         product = Product.objects.get(pk=3)
         self.assertEqual(product.images.count(), 0)
 
@@ -1217,7 +1219,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [{"name": "Opdruk", "code": "opdruk", "type": "Optional"}],
+                "options": [{"name": "Opdruk", "code": "opdruk", "type": "text"}],
             },
             instance=product,
         )
@@ -1238,7 +1240,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [{"name": "Wous", "code": "opdruk", "type": "Optional"}],
+                "options": [{"name": "Wous", "code": "opdruk", "type": "text"}],
             },
             instance=product,
         )
@@ -1260,7 +1262,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "product_class": "t-shirt",
                 "slug": "oscar-t-shirt",
                 "description": "Henk",
-                "options": [{"name": "Opdruk", "code": "opdruk", "type": "Optional"}],
+                "options": [{"name": "Opdruk", "code": "opdruk", "type": "text"}],
             },
             instance=product,
         )
@@ -1449,7 +1451,7 @@ class TestProductAdmin(APITest):
             {
                 "partner_sku": "henk-het-kind",
                 "price_currency": "EUR",
-                "price_excl_tax": "110.00",
+                "price": "110.00",
                 "partner": "http://127.0.0.1:8000/api/admin/partners/1/",
             }
         ]
@@ -1513,7 +1515,16 @@ class TestProductAdmin(APITest):
         )
         self.assertEqual(str(e.exception), msg)
 
-    def test_image_error(self):
+    @mock.patch("oscarapi.serializers.fields.urlretrieve")
+    def test_image_error(self, urlretrieve):
+        urlretrieve.side_effect = HTTPError(
+            url="https://example.com/testdata/image.jpg",
+            code=404,
+            msg="Not Found",
+            hdrs={},
+            fp=None,
+        )
+
         self.login("admin", "admin")
         url = reverse("admin-product-detail", args=(2,))
         data = deepcopy(self.child)
@@ -1835,15 +1846,33 @@ class AdminCategoryApiTest(APITest):
         self.response.assertStatusEqual(201)
         self.assertEqual(Category.objects.count(), 2)
 
+        # Create category without a slug
+        self.response = self.post(
+            "admin-category-list",
+            **{
+                "name": "blubbie blob",
+                "description": "brop",
+                "image": "https://example.com/testdata/image.jpg",
+            }
+        )
+
+        self.response.assertStatusEqual(201)
+        self.assertEqual(Category.objects.count(), 3)
+        self.assertEqual(
+            Category.objects.last().slug,
+            "blubbie-blob",
+            "Category slug not created automatically",
+        )
+
     def test_create_or_update_root_category(self):
         self.test_create_root_category()  # pylint: disable=no-value-for-parameter
-        self.assertEqual(Category.objects.count(), 2)
+        self.assertEqual(Category.objects.count(), 3)
 
         self.response = self.post(
             "admin-category-list",
             **{"name": "blubbie", "slug": "blub", "description": "Klakaa"}
         )
 
-        self.assertEqual(Category.objects.count(), 2)
+        self.assertEqual(Category.objects.count(), 3)
         self.response.assertStatusEqual(201)
         self.assertEqual(self.response["description"], "Klakaa")
