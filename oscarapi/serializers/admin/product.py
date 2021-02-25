@@ -158,10 +158,9 @@ class AdminProductSerializer(BaseProductSerializer):
                         attribute_value.save()
                     else:
                         attribute_value.delete()
-            # return a refreshed instance so we are sure all attributes are reloaded
-            # from the database again when accessed. The behaviour of the AttributeConatainer
-            # was changed in Oscar 3
-            return instance._meta.model.objects.get(pk=instance.pk)
+            # Refresh all attributes first before returning the updated instance
+            instance.attr.refresh()
+            return instance
 
 
 class AdminCategorySerializer(BaseCategorySerializer):
