@@ -49,7 +49,7 @@ setup(
     # specify dependencies
     install_requires=[
         "setuptools",
-        "django-oscar>=3.0",
+        "django-oscar>=3.0.2",  # https://github.com/django-oscar/django-oscar/commit/0995c5d2c76469da47f214f1133f86f512bb5514
         "Django>=2.2.13",  # CVE-2020-9402
         "djangorestframework>=3.9",  # first version to support Django 2.2
     ],
