@@ -1458,7 +1458,7 @@ class TestProductAdmin(APITest):
         self.response = self.post("admin-product-list", **data)
         self.response.assertStatusEqual(201)
 
-    def test_patch_product(self):
+    def test_put_product_more_attrs(self):
         self.login("admin", "admin")
         self.response = self.put(
             "admin-product-list",
