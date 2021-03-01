@@ -354,7 +354,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(str(obj.value), "Large")
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual(str(p.attr.size), "Large")
 
     def test_productattributevalueserializer_option_error(self):
@@ -389,7 +389,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, "Donec placerat. Nullam nibh dolor.")
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual(p.attr.text, "Donec placerat. Nullam nibh dolor.")
 
     def test_productattributevalueserializer_text_error(self):
@@ -417,7 +417,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 4)
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual(p.attr.integer, 4)
 
         ser = ProductAttributeValueSerializer(
@@ -459,7 +459,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, False)
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual(p.attr.boolean, False)
 
     def test_productattributevalueserializer_boolean_error(self):
@@ -519,7 +519,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 7.78)
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual(p.attr.float, 7.78)
 
         ser = ProductAttributeValueSerializer(
@@ -529,7 +529,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 7)
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual(p.attr.float, 7)
 
         ser = ProductAttributeValueSerializer(
@@ -539,7 +539,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, 7.78)
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual(p.attr.float, 7.78)
 
     def test_productattributevalueserializer_float_error(self):
@@ -589,7 +589,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, "<p>koe</p>")
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual(p.attr.html, "<p>koe</p>")
 
     def test_productattributevalueserializer_html_error(self):
@@ -623,7 +623,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, new_date)
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual(p.attr.date, new_date)
 
         ser = ProductAttributeValueSerializer(
@@ -639,7 +639,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, new_date)
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual(p.attr.date, new_date)
 
     def test_productattributevalueserializer_date_error(self):
@@ -690,7 +690,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.value, new_date)
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual(p.attr.datetime, new_date)
 
     def test_productattributevalueserializer_datetime_error(self):
@@ -737,7 +737,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual([str(o) for o in obj.value], ["Large"])
 
-        p = Product.objects.get(pk=p.pk)
+        p.attr.refresh()
         self.assertEqual([str(o) for o in p.attr.multioption], ["Large"])
 
     def test_productattributevalueserializer_multioption_error(self):
@@ -1127,7 +1127,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         with self.assertRaises(exceptions.ValidationError):
-            obj = ser.save()
+            ser.save()
 
         product.refresh_from_db()
         self.assertEqual(product.images.count(), 0)
@@ -1458,7 +1458,7 @@ class TestProductAdmin(APITest):
         self.response = self.post("admin-product-list", **data)
         self.response.assertStatusEqual(201)
 
-    def test_patch_product(self):
+    def test_put_product_more_attrs(self):
         self.login("admin", "admin")
         self.response = self.put(
             "admin-product-list",
