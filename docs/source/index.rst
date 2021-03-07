@@ -13,14 +13,14 @@ This package provides a RESTful API for `django-oscar`_, it's based on `django-r
 
 Requirements:
 -------------
-- Python 3.6 / 3.7 / 3.8
-- Oscar >= 2.1
-- Django 2.2 / 3.0
+- Python 3.6 / 3.7 / 3.8 / 3.9
+- Oscar >= 3.0
+- Django 2.2 / 3.0 / 3.1
 - Django REST Framework >= 3.9
 
-See `Travis`_ for the current tested platforms.
+See `Github Actions`_ for the current tested platforms.
 
-.. _`travis`: https://travis-ci.org/django-oscar/django-oscar-api
+.. _`Github Actions`: https://github.com/django-oscar/django-oscar-api/blob/master/.github/workflows/ci.yml
 
 
 .. _django-oscar-api-installation:
