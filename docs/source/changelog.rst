@@ -1,6 +1,14 @@
 =========
 Changelog
 =========
+3.0.0 (2021-03-09)
+------------------
+This release adds Oscar 3 support. Supported Django versions are 2.2, 3.0 and 3.1, and supported Python versions are 3.6, 3.7, 3.8 and 3.9
+
+Features:
+ * `#261 <https://github.com/django-oscar/django-oscar-api/pull/261>`_ Added django-oscar version 3 support
+
+
 2.1.1 (2020-12-09)
 ------------------
 A minor bugfix release to fix a typo in the `RegisterUserSerializer` definition.
