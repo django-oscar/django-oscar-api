@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Django Osar API documentation build configuration file, created by
+# Django Ossar API documentation build configuration file, created by
 # sphinx-quickstart on Wed Dec 23 16:04:47 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -65,8 +65,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Django Osar API'
-copyright = u'2015-2020 jango Oscar'
+project = u'Django Ossar API'
+copyright = u'2015-2021 Django Oscar'
 author = u'Lars van de Kerkhof, Martijn Jacobs'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -245,7 +245,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'DjangoOsarAPI.tex', u'Django Osar API Documentation',
+  (master_doc, 'DjangoOsarAPI.tex', u'Django Ossar API Documentation',
    u'Lars van de Kerkhof, Martijn Jacobs', 'manual'),
 ]
 
@@ -275,7 +275,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'djangoosarapi', u'Django Osar API Documentation',
+    (master_doc, 'djangoosarapi', u'Django Ossar API Documentation',
      [author], 1)
 ]
 
@@ -289,7 +289,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'DjangoOsarAPI', u'Django Osar API Documentation',
+  (master_doc, 'DjangoOsarAPI', u'Django Ossar API Documentation',
    author, 'DjangoOsarAPI', 'One line description of project.',
    'Miscellaneous'),
 ]
