@@ -49,7 +49,7 @@ Or you could add ``django-oscar-api`` to your project dependencies.
 Use out-of-the-box
 ------------------
 
-You can use the oscarapi application in an django-oscar E-ccmmerce site without any customization. See for more information: :doc:`/topics/outofthebox`
+You can use the oscarapi application in an django-oscar E-commerce site without any customization. See for more information: :doc:`/topics/outofthebox`
 
 
 .. _django-oscar-sandbox:
