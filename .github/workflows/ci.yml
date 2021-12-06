@@ -51,6 +51,8 @@ jobs:
           pip install "django~=${{ matrix.django-version }}.0"
           pip install "django-oscar~=${{ matrix.oscar-version }}.0"
           make install
+      - name: Show all versions
+        run: pip list
       - name: Run the testsuite
         run: make coverage
       - name: Upload coverage to codecov
