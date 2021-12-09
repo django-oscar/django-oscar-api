@@ -294,7 +294,7 @@ class _ProductSerializerTest(TestCase):
     def assertErrorStartsWith(self, ser, name, errorstring):
         self.assertTrue(
             ser.errors[name][0].startswith(errorstring),
-            "Error does not start with %s" % errorstring,
+            "Error '%s' does not start with '%s" % (ser.errors[name][0], errorstring),
         )
 
 
@@ -554,29 +554,30 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         self.assertErrorStartsWith(
             ser,
             "value",
-            "Error assigning `{}` to float, float() argument must be a string or a number",
+            "Error assigning `{}` to float",
         )
 
         ser = ProductAttributeValueSerializer(
             data={"name": "Float", "code": "float", "value": object, "product": 3}
         )
         self.assertFalse(
-            ser.is_valid(), "This should not be valid, a dict is not a float"
+            ser.is_valid(), "This should not be valid, an object is not a float"
         )
         self.assertErrorStartsWith(
             ser,
             "value",
-            "Error assigning `<class 'object'>` to float, float() argument must be a string or a number",
+            "Error assigning `<class 'object'>` to float",
         )
 
         ser = ProductAttributeValueSerializer(
-            data={"name": "Float", "code": "float", "value": "kak", "product": 3}
+            data={"name": "Float", "code": "float", "value": "my value", "product": 3}
         )
         self.assertFalse(
-            ser.is_valid(), "This should not be valid, a dict is not a float"
+            ser.is_valid(), "This should not be valid, a string is not a float"
         )
         self.assertDictEqual(
-            ser.errors, {"value": ["Error assigning `kak` to float, Must be a float."]}
+            ser.errors,
+            {"value": ["Error assigning `my value` to float, Must be a float."]},
         )
 
     def test_productattributevalueserializer_html(self):

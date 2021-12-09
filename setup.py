@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-__version__ = "3.0.0"
+__version__ = "3.1.0"
 
 setup(
     # package name in pypi
@@ -16,6 +16,7 @@ setup(
         "Framework :: Django :: 2.2",
         "Framework :: Django :: 3.0",
         "Framework :: Django :: 3.1",
+        "Framework :: Django :: 3.2",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Operating System :: Unix",
@@ -25,6 +26,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Software Development :: Libraries :: Application Frameworks",
     ],
     python_requires=">=3.6",
@@ -50,7 +52,7 @@ setup(
     install_requires=[
         "setuptools",
         "django-oscar>=3.0",
-        "Django>=2.2.13",  # CVE-2020-9402
+        "Django>=2.2.24",  # CVE-2021-33203
         "djangorestframework>=3.9",  # first version to support Django 2.2
     ],
     # mark test target to require extras.
