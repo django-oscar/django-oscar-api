@@ -6,7 +6,7 @@ Changelog
 This release adds (verifies) Oscar 3.1 support. Supported Django versions are 2.2, 3.0, 3.1 and 3.2, and supported Python versions are 3.6, 3.7, 3.8, 3.9 and 3.10
 
 Features:
- * `#273 <https://github.com/django-oscar/django-oscar-api/pull/273>`_ Added django-oscar version 3.1 support
+ * `#275 <https://github.com/django-oscar/django-oscar-api/pull/273>`_ Added django-oscar version 3.1 support
 
 
 3.0.0 (2021-03-09)
