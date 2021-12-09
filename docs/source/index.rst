@@ -11,8 +11,8 @@ This package provides a RESTful API for `django-oscar`_, it's based on `django-r
 .. _`the source code`: https://github.com/django-oscar/django-oscar-api
 
 
-Requirements:
--------------
+Requirements
+------------
 - Python 3.6 / 3.7 / 3.8 / 3.9 / 3.10
 - Oscar >= 3.0
 - Django 2.2 / 3.0 / 3.1 / 3.2
@@ -77,8 +77,9 @@ But I want to customise the standard serializers / views!
 Probably you want this, because you already extended or changed django-oscar's functionality by forking it's apps right? See :doc:`/topics/customizing_oscarapi` for this.
 
 
+All topics
+-----------
 .. toctree::
-   :hidden:
    :maxdepth: 1
 
    topics/outofthebox

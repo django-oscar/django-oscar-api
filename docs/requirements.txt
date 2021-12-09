@@ -1,4 +1,4 @@
 Django<4
 django-oscar<3.2
 sphinx
-sphinx_rtd_theme
+sphinx-wagtail-theme
