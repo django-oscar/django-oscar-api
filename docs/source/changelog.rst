@@ -280,12 +280,12 @@ Fixes:
   * #86 Add missing Meta.fields attribute to work the default first level of api endpoints. (jklapuch)
 
 Features:
-  * Updated the documentation and added a demosite to explain how to override a view/serializer
+  * Updated the documentation and added a demo site to explain how to override a view/serializer
 
 1.0.9 (2016-10-24)
 ------------------
 Fixes:
-  * RestFramework will nolonger complain about "Creating a ModelSerializer
+  * RestFramework will no longer complain about "Creating a ModelSerializer
     without either the 'fields' attribute or the 'exclude' attribute has been
     deprecated since 3.3.0, and is now disallowed. Add an explicit
     fields = '__all__' to the LineAttributeSerializer serializer."

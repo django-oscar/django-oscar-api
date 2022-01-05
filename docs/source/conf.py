@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Django Ossar API documentation build configuration file, created by
+# Django Oscar API documentation build configuration file, created by
 # sphinx-quickstart on Wed Dec 23 16:04:47 2015.
 #
 # This file is execfile()d with the current directory set to its

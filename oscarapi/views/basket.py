@@ -150,7 +150,7 @@ class AddVoucherView(APIView):
         "vouchercode": "kjadjhgadjgh7667"
     }
 
-    Will return 200 and the voucher as json if succesful.
+    Will return 200 and the voucher as json if successful.
     If unsuccessful, will return 406 with the error.
     """
 
