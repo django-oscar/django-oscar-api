@@ -1,7 +1,7 @@
 ========================
 Communicate with the API
 ========================
-When you browse through the API (see also the :ref:`django-oscar-sandbox` section), most of the things are already pretty clear in terms how you can communicate with the API. In the following examples we use the python `requests`_ package to demonstate how the API works.
+When you browse through the API (see also the :ref:`django-oscar-sandbox` section), most of the things are already pretty clear in terms how you can communicate with the API. In the following examples we use the python `requests`_ package to demonstrate how the API works.
 
 .. _`requests`: http://docs.python-requests.org/
 
@@ -44,7 +44,7 @@ First get our basket and see the response:
     }
 
 .. note::
-    We need to re-send the cookies (wich include the `django session id`) to make sure we get the same basket again, this is the reason we use ``requests.Session()``. Otherwise we would get a new basket each request. So it's important to keep a track of sessions in your application. You can also use an alternative session middleware like the :ref:`header-session-label`.
+    We need to re-send the cookies (which include the `django session id`) to make sure we get the same basket again, this is the reason we use ``requests.Session()``. Otherwise we would get a new basket each request. So it's important to keep a track of sessions in your application. You can also use an alternative session middleware like the :ref:`header-session-label`.
 
 .. code-block:: python
 
@@ -458,7 +458,7 @@ When you don't support anonymous checkouts you will need to login first. Oscar A
     Custom User models with a different username field are supported. In Oscar API this field will be mapped to the
     corresponding username field.
 
-When the authentication was succesful, your will receive a new (authenticated) sessionid, and the anonymous basket has been automatically merged with a (previous stored) basket of this specific user. You can see now that the owner is set in the basket:
+When the authentication was successful, your will receive a new (authenticated) sessionid, and the anonymous basket has been automatically merged with a (previous stored) basket of this specific user. You can see now that the owner is set in the basket:
 
 .. code-block:: python
 
@@ -497,5 +497,5 @@ Oscar API ships with a registration endpoint to create new accounts. The endpoin
     }
     response = session.post('http://localhost:8000/api/register/', json=data)
 
-When the creation of the user was succesful it will return a 201 HTTP Response. Aftter this you cam login the user
+When the creation of the user was successful it will return a 201 HTTP Response. After this you can login the user
 with the login endpoint, see :ref:`login-user-label`.

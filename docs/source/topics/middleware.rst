@@ -1,7 +1,7 @@
 ====================
 Oscar API Middleware
 ====================
-Oscar API ships with some useful middelware classes for session management, to restrict access to your API and make sure that you can mix an Oscar stand-alone website and the API.
+Oscar API ships with some useful middleware classes for session management, to restrict access to your API and make sure that you can mix an Oscar stand-alone website and the API.
 
 Basket Middleware
 =================
@@ -15,7 +15,7 @@ regular oscar views (also for anonymous users).
 Header Session Middleware
 =========================
 
-This middleware is very useful when sessions are managed by an external website which commuicates with Oscar API.
+This middleware is very useful when sessions are managed by an external website which communicates with Oscar API.
 
 .. class:: oscarapi.middleware.HeaderSessionMiddleware
 
@@ -87,7 +87,7 @@ uniquely identify a user, in the same way as a user name.
 
     The above measures ensure the following behaviour:
 
-    1. Anonymous sessions can be resumed indefinately, preventing loss of shopping
+    1. Anonymous sessions can be resumed indefinitely, preventing loss of shopping
        basket content.
     2. Differentiating Session Identification URI's between anonymous users and
        authenticated users prevents accidental retrieval of a private shopping basket
@@ -99,7 +99,7 @@ uniquely identify a user, in the same way as a user name.
 .. note::
 
     Note that guessing the ``identifier`` of an authenticated or anonymous user and
-    therefor hijacking the session, is nomore difficult then guessing the session id
+    therefore hijacking the session, is no more difficult then guessing the session id
     stored in a cookie for a web application.
 
     Also note that the identifier, which is in the Session Identification URI, not

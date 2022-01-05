@@ -11,7 +11,7 @@ Main settings
 -----------------------------------
 Default: ``True``
 
-Useful in production websites wehere you want to make sure that the admin api is not exposed at all.
+Useful in production websites where you want to make sure that the admin api is not exposed at all.
 
 ``OSCARAPI_EXPOSE_USER_DETAILS``
 -----------------------------------
