@@ -2,6 +2,8 @@ import mock
 import decimal
 import datetime
 import json
+import tempfile
+import shutil
 
 from copy import deepcopy
 from os.path import dirname, join
@@ -9,8 +11,10 @@ from unittest import skipIf
 from urllib.error import HTTPError
 
 from django.conf import settings
+from django.core.files import File
+from django.core.exceptions import SuspiciousFileOperation
 from django.urls import reverse
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, override_settings
 from django.utils.timezone import make_aware
 
 from oscar.core.loading import get_model
@@ -1096,6 +1100,77 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.images.count(), 1)
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_add_images_from_same_host(self):
+        # Copy our fixture image to our temporary media folder
+        shutil.copy2(
+            join(dirname(__file__), "testdata", "image.jpg"), settings.MEDIA_ROOT
+        )
+
+        product = Product.objects.get(pk=3)
+        self.assertEqual(product.images.count(), 0)
+
+        request = self.factory.get("%simages/nao-robot.jpg" % settings.STATIC_URL)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "images": [
+                    {
+                        "original": "https://testserver/%s/image.jpg"
+                        % settings.MEDIA_ROOT,
+                        "caption": "HA! IK HEET HARRIE",
+                    }
+                ],
+            },
+            instance=product,
+            context={"request": request},
+        )
+        self.assertTrue(ser.is_valid())
+        obj = ser.save()
+        self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
+        self.assertEqual(obj.images.count(), 1)
+        image = obj.images.get()
+        self.assertEqual(image.caption, "HA! IK HEET HARRIE")
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    @mock.patch("oscarapi.serializers.fields.ImageUrlField.to_internal_value")
+    def test_add_images_from_same_host_without_file_name(self, to_internal_value):
+        # Copy our fixture image to our temporary media folder
+        shutil.copy2(
+            join(dirname(__file__), "testdata", "image.jpg"), settings.MEDIA_ROOT
+        )
+
+        # Setting return value to be File without a name argument.
+        to_internal_value.return_value = File(
+            open(join(settings.MEDIA_ROOT, "image.jpg"), "rb")
+        )
+
+        product = Product.objects.get(pk=3)
+        self.assertEqual(product.images.count(), 0)
+
+        request = self.factory.get("%simages/nao-robot.jpg" % settings.STATIC_URL)
+
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "images": [
+                    {
+                        "original": "https://testserver/%s/image.jpg"
+                        % settings.MEDIA_ROOT,
+                        "caption": "HA! IK HEET HARRIE",
+                    }
+                ],
+            },
+            instance=product,
+            context={"request": request},
+        )
+        self.assertTrue(ser.is_valid())
+        with self.assertRaises(SuspiciousFileOperation):
+            obj = ser.save()
 
     @mock.patch("oscarapi.serializers.fields.urlretrieve")
     def test_add_broken_image(self, urlretrieve):
