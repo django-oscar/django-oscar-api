@@ -372,7 +372,7 @@ class PublicProductSerializer(BaseProductSerializer):
         return super(PublicProductSerializer, self).get_field_names({}, info)
 
 
-class ChildProductserializer(PublicProductSerializer):
+class ChildProductSerializer(PublicProductSerializer):
     "Serializer for child products"
     parent = serializers.HyperlinkedRelatedField(
         view_name="product-detail",
@@ -418,7 +418,7 @@ class ProductSerializer(PublicProductSerializer):
     )
 
     images = ProductImageSerializer(many=True, required=False)
-    children = ChildProductserializer(many=True, required=False)
+    children = ChildProductSerializer(many=True, required=False)
 
     stockrecords = serializers.HyperlinkedIdentityField(
         view_name="product-stockrecords", read_only=True
