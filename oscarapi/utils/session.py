@@ -41,7 +41,7 @@ def login_and_upgrade_session(request, user):
 
 
 def session_id_from_parsed_session_uri(parsed_session_uri):
-    session_id_base = u"SID:%(type)s:%(realm)s:%(session_id)s" % (parsed_session_uri)
+    session_id_base = "SID:%(type)s:%(realm)s:%(session_id)s" % (parsed_session_uri)
     combined = session_id_base + settings.SECRET_KEY
     return hashlib.sha1(combined.encode()).hexdigest()
 

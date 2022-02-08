@@ -283,7 +283,7 @@ class CheckoutTest(APITest):
         self.response = self.post("api-checkout", **payload)
         self.response.assertStatusEqual(200)
         self.assertEqual(
-            self.response.data["shipping_address"]["line1"], u"Ї ❤ chǼractɇɌȘ"
+            self.response.data["shipping_address"]["line1"], "Ї ❤ chǼractɇɌȘ"
         )
 
     def test_checkout_empty_basket(self):
