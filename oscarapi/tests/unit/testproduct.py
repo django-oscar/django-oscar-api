@@ -2,6 +2,8 @@ import mock
 import decimal
 import datetime
 import json
+import tempfile
+import shutil
 
 from copy import deepcopy
 from os.path import dirname, join
@@ -10,7 +12,7 @@ from urllib.error import HTTPError
 
 from django.conf import settings
 from django.urls import reverse
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, override_settings
 from django.utils.timezone import make_aware
 
 from oscar.core.loading import get_model
@@ -1091,6 +1093,40 @@ class AdminProductSerializerTest(_ProductSerializerTest):
             context={"request": request},
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
+        self.assertEqual(obj.images.count(), 1)
+        image = obj.images.get()
+        self.assertEqual(image.caption, "HA! IK HEET HARRIE")
+
+    @override_settings(MEDIA_ROOT=tempfile.gettempdir())
+    def test_add_local_image(self):
+        # Copy our fixture image to our temporary media folder
+        shutil.copy2(
+            join(dirname(__file__), "testdata", "image.jpg"), settings.MEDIA_ROOT
+        )
+
+        product = Product.objects.get(pk=3)
+        self.assertEqual(product.images.count(), 0)
+
+        request = self.factory.get("%simages/nao-robot.jpg" % settings.STATIC_URL)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "images": [
+                    {
+                        "original": "https://testserver/%s/image.jpg"
+                        % settings.MEDIA_ROOT,
+                        "caption": "HA! IK HEET HARRIE",
+                    }
+                ],
+            },
+            instance=product,
+            context={"request": request},
+        )
+        self.assertTrue(ser.is_valid())
         obj = ser.save()
         self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
         self.assertEqual(obj.images.count(), 1)
