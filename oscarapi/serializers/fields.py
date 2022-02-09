@@ -345,7 +345,7 @@ class ImageUrlField(serializers.ImageField):
                     path = join(
                         settings.MEDIA_ROOT, location.replace(settings.MEDIA_URL, "", 1)
                     )
-                    file_object = File(open(path, "rb"))
+                    file_object = File(open(path, "rb"), name=basename(parsed_url.path))
 
                 return super(ImageUrlField, self).to_internal_value(file_object)
 
