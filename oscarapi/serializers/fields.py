@@ -3,7 +3,7 @@ import operator
 import shutil
 import tempfile
 
-from os.path import basename, join
+from os.path import basename, join, splitext
 from urllib.parse import urlsplit, parse_qs
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
@@ -318,13 +318,21 @@ class LazyRemoteFile(File):
         )
         request = Request(self.url, headers=headers)
 
-        # Save downloaded images to tmp folder instead of project root.
-        path = join(tempfile.mkdtemp(), self.name)
+        _, ext = splitext(self.name)
 
-        with urlopen(request) as response, open(path, "wb") as local_file:
-            shutil.copyfileobj(response, local_file)
+        # Try to keep file in memory, but do not exceed FILE_UPLOAD_MAX_MEMORY_SIZE
+        result_file = tempfile.SpooledTemporaryFile(
+            max_size=settings.FILE_UPLOAD_MAX_MEMORY_SIZE,
+            mode="wb",
+            suffix=".upload" + ext,
+            dir=settings.FILE_UPLOAD_TEMP_DIR,
+        )
+        response = urlopen(request)
+        # copy the response into a file so it can be read multiple times
+        shutil.copyfileobj(response, result_file)
 
-        return open(path, self.mode)
+        result_file.seek(0)
+        return result_file
 
     def __str__(self):
         return self.url or ""
