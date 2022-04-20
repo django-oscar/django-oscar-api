@@ -1,9 +1,11 @@
 import logging
 import operator
+import shutil
+import tempfile
 
 from os.path import basename, join
 from urllib.parse import urlsplit, parse_qs
-from urllib.request import urlretrieve
+from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 from django.conf import settings
 from django.db import IntegrityError
@@ -18,6 +20,7 @@ from oscar.core.loading import get_model, get_class
 
 from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.exists import bound_unique_together_get_or_create
+from oscarapi.utils.settings import overridable
 from .exceptions import FieldError
 
 logger = logging.getLogger(__name__)
@@ -307,8 +310,21 @@ class LazyRemoteFile(File):
 
     @cached_property
     def file(self):
-        local_filename, _ = urlretrieve(self.url, self.name)
-        return open(local_filename, self.mode)
+        headers = overridable(
+            "OSCARAPI_LAZY_REMOTE_FILE_REQUEST_HEADERS",
+            default={
+                "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36"
+            },
+        )
+        request = Request(self.url, headers=headers)
+
+        # Save downloaded images to tmp folder instead of project root.
+        path = join(tempfile.mkdtemp(), self.name)
+
+        with urlopen(request) as response, open(path, "wb") as local_file:
+            shutil.copyfileobj(response, local_file)
+
+        return open(path, self.mode)
 
     def __str__(self):
         return self.url or ""
