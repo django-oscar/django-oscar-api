@@ -1065,12 +1065,12 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
         self.assertFalse(ser.is_valid(), "This test should fail the uniqueness test.")
 
-    @mock.patch("oscarapi.serializers.fields.urlretrieve")
-    def test_add_images(self, urlretrieve):
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_add_images(self, urlopen):
         "Adding images should work just fine"
-        urlretrieve.return_value = (
+        urlopen.return_value = open(
             join(dirname(__file__), "testdata", "image.jpg"),
-            [],
+            "rb",
         )
 
         product = Product.objects.get(pk=3)
@@ -1133,9 +1133,9 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
 
-    @mock.patch("oscarapi.serializers.fields.urlretrieve")
-    def test_add_broken_image(self, urlretrieve):
-        urlretrieve.side_effect = HTTPError(
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_add_broken_image(self, urlopen):
+        urlopen.side_effect = HTTPError(
             url="https://example.com/testdata/image.jpg",
             code=404,
             msg="Not Found",
@@ -1169,12 +1169,12 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         product.refresh_from_db()
         self.assertEqual(product.images.count(), 0)
 
-    @mock.patch("oscarapi.serializers.fields.urlretrieve")
-    def test_modify_images(self, urlretrieve):
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_modify_images(self, urlopen):
         "The serializer should automatically detect that an image already exists and update it"
-        urlretrieve.return_value = (
+        urlopen.return_value = open(
             join(dirname(__file__), "testdata", "image.jpg"),
-            [],
+            "rb",
         )
 
         product = Product.objects.get(pk=1)
@@ -1208,10 +1208,10 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
         self.assertEqual(image.original.name, "images/products/2019/05/image.jpg")
 
-    @mock.patch("oscarapi.serializers.fields.urlretrieve")
-    def test_modify_images_with_hash(self, urlretrieve):
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_modify_images_with_hash(self, urlopen):
         "When a hash is included in the url, the serializer should not try to download an image that is allready present locally."
-        urlretrieve.return_value.side_effect = Exception(
+        urlopen.return_value.side_effect = Exception(
             "Should not be called because hash was set"
         )
 
@@ -1552,9 +1552,9 @@ class TestProductAdmin(APITest):
         )
         self.assertEqual(str(e.exception), msg)
 
-    @mock.patch("oscarapi.serializers.fields.urlretrieve")
-    def test_image_error(self, urlretrieve):
-        urlretrieve.side_effect = HTTPError(
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_image_error(self, urlopen):
+        urlopen.side_effect = HTTPError(
             url="https://example.com/testdata/image.jpg",
             code=404,
             msg="Not Found",
@@ -1817,11 +1817,10 @@ class AdminCategoryApiTest(APITest):
         "productimage",
     ]
 
-    @mock.patch("oscarapi.serializers.fields.urlretrieve")
-    def test_create_category_and_ancestors(self, urlretrieve):
-        urlretrieve.return_value = (
-            join(dirname(__file__), "testdata", "image.jpg"),
-            [],
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_create_category_and_ancestors(self, urlopen):
+        urlopen.return_value = open(
+            join(dirname(__file__), "testdata", "image.jpg"), "rb"
         )
 
         self.login("admin", "admin")
@@ -1860,11 +1859,11 @@ class AdminCategoryApiTest(APITest):
         self.response.assertStatusEqual(201)
         self.assertEqual(self.response["description"], "Klak")
 
-    @mock.patch("oscarapi.serializers.fields.urlretrieve")
-    def test_create_root_category(self, urlretrieve):
-        urlretrieve.return_value = (
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_create_root_category(self, urlopen):
+        urlopen.return_value = open(
             join(dirname(__file__), "testdata", "image.jpg"),
-            [],
+            "rb",
         )
 
         self.login("admin", "admin")
