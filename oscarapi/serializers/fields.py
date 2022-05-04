@@ -18,6 +18,7 @@ from rest_framework.fields import get_attribute
 
 from oscar.core.loading import get_model, get_class
 
+from oscarapi import version
 from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.exists import bound_unique_together_get_or_create
 from oscarapi.utils.settings import overridable
@@ -312,9 +313,7 @@ class LazyRemoteFile(File):
     def file(self):
         headers = overridable(
             "OSCARAPI_LAZY_REMOTE_FILE_REQUEST_HEADERS",
-            default={
-                "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36"
-            },
+            default={"User-Agent": f"django-osscar-api/{version}"},
         )
         request = Request(self.url, headers=headers)
 
