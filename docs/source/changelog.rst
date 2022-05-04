@@ -1,6 +1,20 @@
 =========
 Changelog
 =========
+
+3.1.1 (2022-05-04)
+------------------
+This release adds a minor feature to the admin api for setting request headers and containts some fixes.
+
+Features:
+ * `#288 <https://github.com/django-oscar/django-oscar-api/pull/288>`_ Added ``OSCARAPI_LAZY_REMOTE_FILE_REQUEST_HEADERS`` setting, see :ref:`main-settings-label` (joeyjurjens)
+
+Fixes:
+  * `#278 <https://github.com/django-oscar/django-oscar-api/pull/278>`_ Fixed everal typo's in the documentation (nakarinh14)
+  * `#282 <https://github.com/django-oscar/django-oscar-api/pull/282>`_ Renamed ChildProductserializer to ChildProductSerializer (raghavdasila)
+  * `#283 <https://github.com/django-oscar/django-oscar-api/pull/283>`_ Fixed issue when downloading images in the admin api locally (joeyjurjens)
+
+
 3.1.0 (2021-12-06)
 ------------------
 This release adds (verifies) Oscar 3.1 support. Supported Django versions are 2.2, 3.0, 3.1 and 3.2, and supported Python versions are 3.6, 3.7, 3.8, 3.9 and 3.10

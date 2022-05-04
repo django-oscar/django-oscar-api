@@ -25,6 +25,18 @@ Default: ``False``
 
 Enables the ``register`` endpoint so it's possible to create new user accounts.
 
+``OSCARAPI_LAZY_REMOTE_FILE_REQUEST_HEADERS``
+---------------------------------------------
+Default:
+
+.. code-block:: python
+
+    default={
+        "User-Agent": "django-oscar-api/<version>"
+    }
+
+Changes the headers for the admin api when downloading images.
+
 Serializer settings
 ===================
 
