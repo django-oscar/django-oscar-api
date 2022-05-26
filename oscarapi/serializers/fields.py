@@ -313,7 +313,7 @@ class LazyRemoteFile(File):
     def file(self):
         headers = overridable(
             "OSCARAPI_LAZY_REMOTE_FILE_REQUEST_HEADERS",
-            default={"User-Agent": f"django-osscar-api/{version}"},
+            default={"User-Agent": f"django-oscar-api/{version}"},
         )
         request = Request(self.url, headers=headers)
 
