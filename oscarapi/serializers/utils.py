@@ -13,15 +13,13 @@ from .fields import ImageUrlField
 logger = logging.getLogger(__name__)
 
 
-def expand_field_mapping(extra_fields):
-    # This doesn't make a copy
-    field_mapping = serializers.ModelSerializer.serializer_field_mapping
-    field_mapping.update(extra_fields)
-    return field_mapping
+def expand_field_mapping(extra_mapping):
+    field_mapping = serializers.ModelSerializer.serializer_field_mapping.copy()
+    return {**field_mapping, **extra_mapping}
 
 
 class OscarSerializer(object):
-    field_mapping = expand_field_mapping(
+    serializer_field_mapping = expand_field_mapping(
         {
             oscar.models.fields.NullCharField: serializers.CharField,
             models.ImageField: ImageUrlField,
