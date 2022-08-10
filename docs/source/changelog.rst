@@ -2,6 +2,14 @@
 Changelog
 =========
 
+3.1.2 (2022-09-09)
+------------------
+This release fixes a nasty bug which implicitly monkeypatched  ``ImageField`` from DRF.
+
+Fixes:
+  * `#287 <https://github.com/django-oscar/django-oscar-api/issues/287>`_ Do not monkeypatch DRF ImageField
+
+
 3.1.1 (2022-05-04)
 ------------------
 This release adds a minor feature to the admin api for setting request headers and containts some fixes.
