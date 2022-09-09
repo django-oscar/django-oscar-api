@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+    <head>
+        <title>OscarAPI Login Example</title>
+        <meta charset="utf-8">
+        <script type="text/javascript">
+            const base_url = "http://localhost:8000/"
+
+            const login = (username, password, csrftoken) => {
+                return fetch(base_url + "api/login/", {
+                    method:"POST",
+                    credentials: "include",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "X-CSRFToken": csrftoken,
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                })
+            }
+
+            const basket = () => {
+                return fetch(base_url + "api/basket/", {
+                    method:"GET",
+                    credentials: "include",
+                    headers: {
+                      "Content-Type": "application/json"
+                    }
+                })
+            }
+
+            window.addEventListener('DOMContentLoaded',function () {
+                document.querySelector("#login").onclick = () => {
+                    const username = document.querySelector("#username").value
+                    const password = document.querySelector("#password").value
+                    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
+
+                    login(username, password, csrftoken).then((response) => {
+                        if(response.status === 200) {
+                            return basket()
+                        }
+                        return response
+                    })
+                    .then((response) => response.json())
+                    .then((result) => {
+                        document.querySelector("#output").innerHTML = JSON.stringify(result, null, 4);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
+                }
+
+                document.querySelector("#fetch-basket").onclick = () => {
+                    basket()
+                    .then((response) => response.json())
+                    .then((result) => {
+                        document.querySelector("#output").innerHTML = JSON.stringify(result, null, 4);
+                    })
+                }
+              })
+        </script>
+
+        <style type="text/css">
+          pre.output {
+              display:  block;
+              border:  solid 1px #eeeeee;
+              height:  100%;
+          }
+        </style>
+   </head>
+   <body>
+       {% csrf_token %}
+
+       <p>username: <input type="text" id="username"></p>
+       <p>password: <input type="password" id="password"></p>
+
+       <p>
+           <button id="login">Login</button>
+           <button id="fetch-basket">Fetch Basket</button>
+       </p>
+
+       <pre class="output" id="output">Please login by filling out the form above, or fetch the basket with the "Fetch Basket" button.</pre>
+   </body>
+</html>
