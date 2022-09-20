@@ -107,6 +107,7 @@ class HeaderSessionMiddleware(SessionMiddleware, IsApiRequest):
             self.is_api_request(request)
             and getattr(request, "session", None) is not None
             and hasattr(request, "parsed_session_uri")
+            and request.session.session_key is not None
         ):
             session_key = request.session.session_key
             parsed_session_key = session_id_from_parsed_session_uri(
