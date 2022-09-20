@@ -73,8 +73,6 @@ window.addEventListener('DOMContentLoaded',function () {
     }
 
     document.querySelector("#logout").onclick = () => {
-        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value
-
         logout()
         .then((response) => response.json())
         .then((result) => {
