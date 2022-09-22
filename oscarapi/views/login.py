@@ -114,9 +114,7 @@ class LoginView(APIView):
             if basket:
                 operations.flush_and_delete_basket(basket)
 
-        request.session.clear()
-        request.session.delete()
-        request.session = None
+        request.session.flush()
 
         return Response("")
 
