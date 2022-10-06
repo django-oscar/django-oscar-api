@@ -2,7 +2,6 @@ from django.conf import settings
 from oscar.core.loading import _pluck_classes, _import_module
 
 
-
 def oscarapi_class_loader(module_label, classnames, module_prefix="oscarapi"):
     """Oscarapi uses a bit simpler method of overrides"""
     default_module_name = "%s.%s" % (module_prefix, module_label)
