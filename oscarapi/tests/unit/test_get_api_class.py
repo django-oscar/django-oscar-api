@@ -21,7 +21,7 @@ class ApiOverrideTest(APITest):
         )
 
         # now get the serializer again, but with the OSCARAPI_OVERRIDE_MODULES
-        with patch.object(loading, "OSCARAPI_OVERRIDE_MODULES", ["oscarapi.tests"]):
+        with self.settings(OSCARAPI_OVERRIDE_MODULES=["oscarapi.tests"]):
             my_login_serializer = self.get_login_serializer()
             login_data = my_login_serializer(instance=user).data
             self.assertIn(
