@@ -1455,7 +1455,50 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         obj = ser.save()
         self.assertEqual(obj.categories.count(), 3)
 
-    def test_modify_child_attributes(self):
+    def test_update_child_with_attributes(self):
+        self.assertEqual(
+            ProductAttributeValue.objects.filter(product_id=1).count(),
+            1,
+            "The parent has 1 attributes",
+        )
+        child_product = Product.objects.get(pk=2)
+
+        # establish baseline
+        self.assertEqual(
+            ProductAttributeValue.objects.filter(product=child_product).count(),
+            0,
+            "The child has no attributes",
+        )
+        self.assertEqual(child_product.parent_id, 1)
+        self.assertIsNone(child_product.product_class)
+        self.assertEqual(child_product.upc, "child-1234")
+        self.assertEqual(child_product.slug, "oscar-t-shirt-child")
+        self.assertNotEqual(child_product.title, "Barrie is eigenlijk ook henk")
+
+        # change only the product title
+        ser = AdminProductSerializer(
+            data={
+                "parent": 1,
+                "product_class": None,
+                "upc": "child-1234",
+                "slug": "oscar-t-shirt-child",
+                "title": "Barrie is eigenlijk ook henk",
+                "attributes": [],
+            },
+            instance=child_product,
+            partial=True,
+        )
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        ser.save()
+        child_product.refresh_from_db()
+        self.assertEqual(child_product.title, "Barrie is eigenlijk ook henk")
+        self.assertEqual(
+            ProductAttributeValue.objects.filter(product=child_product).count(),
+            0,
+            "The child has no attributes",
+        )
+
+    def test_update_child_attributes(self):
         self.assertEqual(
             ProductAttributeValue.objects.filter(product_id=1).count(),
             1,
@@ -1474,16 +1517,18 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(child_product.slug, "oscar-t-shirt-child")
         self.assertNotEqual(child_product.title, "Barrie is eigenlijk ook henk")
 
-        # change only the product title
+        # change the product title and add an attribute
         ser = AdminProductSerializer(
             data={
+                "parent": 1,
                 "product_class": None,
                 "upc": "child-1234",
                 "slug": "oscar-t-shirt-child",
                 "title": "Barrie is eigenlijk ook henk",
-                "attributes": [],
+                "attributes": [{"code": "text", "value": "reten"}],
             },
             instance=child_product,
+            partial=True,
         )
         self.assertTrue(ser.is_valid(), str(ser.errors))
         ser.save()
@@ -1491,8 +1536,72 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(child_product.title, "Barrie is eigenlijk ook henk")
         self.assertEqual(
             ProductAttributeValue.objects.filter(product=child_product).count(),
+            1,
+            "The child has now  1 attributes",
+        )
+
+    def test_update_attributes_to_parent_and_child(self):
+        parent_product = Product.objects.get(pk=1)
+        self.assertEqual(
+            ProductAttributeValue.objects.filter(product=parent_product).count(),
+            1,
+            "The parent has 1 attributes",
+        )
+        ser = AdminProductSerializer(
+            data={
+                "parent": None,
+                "product_class": "t-shirt",
+                "upc": "1234",
+                "slug": "oscar-t-shirt",
+                "title": "Oscar is not a t-shirt",
+                "attributes": [{"code": "text", "value": "Lots of text on the parent"}],
+            },
+            instance=parent_product,
+            partial=True,
+        )
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        ser.save()
+        parent_product.refresh_from_db()
+        self.assertEqual(
+            ProductAttributeValue.objects.filter(product=parent_product).count(),
+            2,
+            "The parent now has 2 attributes",
+        )
+
+        child_product = Product.objects.get(pk=2)
+
+        # establish baseline
+        self.assertEqual(
+            ProductAttributeValue.objects.filter(product=child_product).count(),
             0,
             "The child has no attributes",
+        )
+        self.assertIsNone(child_product.product_class)
+        self.assertEqual(child_product.upc, "child-1234")
+        self.assertEqual(child_product.slug, "oscar-t-shirt-child")
+        self.assertNotEqual(child_product.title, "Barrie is eigenlijk ook henk")
+
+        # change only the product title
+        ser = AdminProductSerializer(
+            data={
+                "parent": 1,
+                "product_class": None,
+                "upc": "child-1234",
+                "slug": "oscar-t-shirt-child",
+                "title": "Barrie is eigenlijk ook henk",
+                "attributes": [{"code": "size", "value": "Large"}],
+            },
+            instance=child_product,
+            partial=True,
+        )
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        ser.save()
+        child_product.refresh_from_db()
+        self.assertEqual(child_product.title, "Barrie is eigenlijk ook henk")
+        self.assertEqual(
+            ProductAttributeValue.objects.filter(product=child_product).count(),
+            1,
+            "The child has now  1 attributes",
         )
 
 
