@@ -33,6 +33,7 @@ from oscarapi.serializers.product import AttributeOptionGroupSerializer
 
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
+ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")
 Category = get_model("catalogue", "Category")
 Option = get_model("catalogue", "Option")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
@@ -1453,6 +1454,46 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
         self.assertEqual(obj.categories.count(), 3)
+
+    def test_modify_child_attributes(self):
+        self.assertEqual(
+            ProductAttributeValue.objects.filter(product_id=1).count(),
+            1,
+            "The parent has 1 attributes",
+        )
+        child_product = Product.objects.get(pk=2)
+
+        # establish baseline
+        self.assertEqual(
+            ProductAttributeValue.objects.filter(product=child_product).count(),
+            0,
+            "The child has no attributes",
+        )
+        self.assertIsNone(child_product.product_class)
+        self.assertEqual(child_product.upc, "child-1234")
+        self.assertEqual(child_product.slug, "oscar-t-shirt-child")
+        self.assertNotEqual(child_product.title, "Barrie is eigenlijk ook henk")
+
+        # change only the product title
+        ser = AdminProductSerializer(
+            data={
+                "product_class": None,
+                "upc": "child-1234",
+                "slug": "oscar-t-shirt-child",
+                "title": "Barrie is eigenlijk ook henk",
+                "attributes": [],
+            },
+            instance=child_product,
+        )
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        ser.save()
+        child_product.refresh_from_db()
+        self.assertEqual(child_product.title, "Barrie is eigenlijk ook henk")
+        self.assertEqual(
+            ProductAttributeValue.objects.filter(product=child_product).count(),
+            0,
+            "The child has no attributes",
+        )
 
 
 @skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
