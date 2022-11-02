@@ -42,7 +42,7 @@ the :ref:`login-user-label` example.
 The following actions will be performed when a user logs in:
 
 1. The user will be authenticated with the REST API. The next steps will only be
-   performed is login is successful.
+   performed if login is successful.
 2. The anonymous cart will be merged with the private cart associated with that
    authenticated user.
 3. A new session will be started, this session identifies the authenticated user
