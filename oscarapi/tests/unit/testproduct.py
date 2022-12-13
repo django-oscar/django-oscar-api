@@ -783,6 +783,56 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
             ser.errors, {"value": ["multioption: Option geit,kip does not exist."]}
         )
 
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_productattributevalueserializer_image(self, urlopen):
+        urlopen.return_value = open(
+            join(dirname(__file__), "testdata", "image.jpg"),
+            "rb",
+        )
+
+        p = Product.objects.get(pk=3)
+        request = self.factory.get("%simages/nao-robot.jpg" % settings.STATIC_URL)
+
+        ser = ProductAttributeValueSerializer(
+            data={
+                "name": "Image",
+                "code": "image",
+                "value": "https://example.com/testdata/image.jpg",
+                "product": 3,
+            },
+            context={"request": request},
+        )
+
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
+        p.refresh_from_db()
+        self.assertTrue(p.attribute_values.filter(attribute__code="image").exists())
+
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_productattributevalueserializer_file(self, urlopen):
+        urlopen.return_value = open(
+            join(dirname(__file__), "testdata", "test.pdf"),
+            "rb",
+        )
+
+        p = Product.objects.get(pk=3)
+        request = self.factory.get("%simages/nao-robot.jpg" % settings.STATIC_URL)
+
+        ser = ProductAttributeValueSerializer(
+            data={
+                "name": "File",
+                "code": "file",
+                "value": "https://example.com/testdata/test.pdf",
+                "product": 3,
+            },
+            context={"request": request},
+        )
+
+        self.assertTrue(ser.is_valid(), str(ser.errors))
+        obj = ser.save()
+        p.refresh_from_db()
+        self.assertTrue(p.attribute_values.filter(attribute__code="file").exists())
+
 
 class CategoryFieldTest(_ProductSerializerTest):
     def test_write(self):
