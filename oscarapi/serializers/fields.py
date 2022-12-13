@@ -175,6 +175,10 @@ class AttributeValueField(serializers.Field):
                 internal_value = date_field.to_internal_value(value)
             elif attribute.type == attribute.ENTITY:
                 internal_value = entity_internal_value(attribute, value)
+            elif attribute.type in [attribute.IMAGE, attribute.FILE]:
+                image_field = ImageUrlField()
+                image_field._context = self.context
+                internal_value = image_field.to_internal_value(value)
 
             # the rest of the attribute types don't need special processing
             try:
