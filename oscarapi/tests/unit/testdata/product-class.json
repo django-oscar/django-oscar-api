@@ -1,6 +1,7 @@
 {
   "attributes": [
     {
+      "product_class": "testtype",
       "option_group": null,
       "name": "boolean",
       "code": "boolean",
@@ -8,6 +9,7 @@
       "required": true
     },
     {
+      "product_class": "testtype",
       "option_group": null,
       "name": "date",
       "code": "date",
@@ -15,6 +17,7 @@
       "required": true
     },
     {
+      "product_class": "testtype",
       "option_group": null,
       "name": "datetime",
       "code": "datetime",
@@ -22,6 +25,7 @@
       "required": true
     },
     {
+      "product_class": "testtype",
       "option_group": null,
       "name": "file",
       "code": "file",
@@ -29,6 +33,7 @@
       "required": true
     },
     {
+      "product_class": "testtype",
       "option_group": null,
       "name": "float",
       "code": "float",
@@ -36,6 +41,7 @@
       "required": true
     },
     {
+      "product_class": "testtype",
       "option_group": null,
       "name": "html",
       "code": "html",
@@ -43,6 +49,7 @@
       "required": true
     },
     {
+      "product_class": "testtype",
       "option_group": null,
       "name": "image",
       "code": "image",
@@ -50,6 +57,7 @@
       "required": true
     },
     {
+      "product_class": "testtype",
       "option_group": null,
       "name": "integer",
       "code": "integer",
@@ -57,6 +65,7 @@
       "required": true
     },
     {
+      "product_class": "testtype",
       "option_group": {
         "options": [
           "Large",
@@ -71,6 +80,7 @@
       "required": true
     },
     {
+      "product_class": "testtype",
       "option_group": {
         "options": [
           "Large",
@@ -85,6 +95,7 @@
       "required": true
     },
     {
+      "product_class": "testtype",
       "option_group": null,
       "name": "text",
       "code": "text",
@@ -104,5 +115,6 @@
   "name": "TestType",
   "slug": "testtype",
   "requires_shipping": true,
-  "track_stock": true
+  "track_stock": true,
+  "product_clas": "testtype"
 }
