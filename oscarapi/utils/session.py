@@ -16,7 +16,6 @@ def login_and_upgrade_session(request, user):
     parsed_session_uri = getattr(request, "parsed_session_uri", None)
 
     if parsed_session_uri is not None:
-
         assert parsed_session_uri["type"] == "ANON"
 
         # change anonymous session to authenticated

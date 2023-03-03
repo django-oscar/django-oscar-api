@@ -73,7 +73,6 @@ class LoginView(APIView):
     def post(self, request, *args, **kwargs):
         ser = self.serializer_class(data=request.data)
         if ser.is_valid():
-
             anonymous_basket = operations.get_anonymous_basket(request)
 
             user = ser.instance

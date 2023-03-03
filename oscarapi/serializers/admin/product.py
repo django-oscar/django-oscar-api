@@ -60,7 +60,6 @@ class AdminProductSerializer(BaseProductSerializer):
         children = validated_data.pop("children", None)
 
         with transaction.atomic():  # it is all or nothing!
-
             # update instance
             self.instance = (  # pylint:disable=attribute-defined-outside-init
                 instance
@@ -90,7 +89,6 @@ class AdminProductSerializer(BaseProductSerializer):
         children = validated_data.pop("children", None)
 
         with transaction.atomic():  # it is all or nothing!
-
             # update instance
             instance = super(AdminProductSerializer, self).update(
                 instance, validated_data

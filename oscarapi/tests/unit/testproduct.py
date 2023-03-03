@@ -1826,7 +1826,7 @@ class TestProductClassSerializer(APITest):
                 "code": "my_new_multioption",
                 "type": "multi_option",
                 "required": True,
-                "product_class": "testtype"
+                "product_class": "testtype",
             }
         ]
         url = reverse("admin-productclass-detail", args=("testtype",))

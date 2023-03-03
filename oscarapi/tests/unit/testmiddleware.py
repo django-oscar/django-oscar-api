@@ -16,7 +16,6 @@ class DummyRequest:
 
 
 class ApiGatewayMiddleWareTest(TestCase):
-
     rf = RequestFactory()
 
     def setUp(self):
