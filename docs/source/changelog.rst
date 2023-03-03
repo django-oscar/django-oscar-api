@@ -2,6 +2,11 @@
 Changelog
 =========
 
+3.2.0 (2023-03-03)
+------------------
+This release is compatible with Oscar 3.2 . Supported Django versions are 3.2, and supported Python versions are 3.7, 3.8, 3.9, 3.10 and 3.11. This is my (maerteijn) last release as maintainer of OscarAPI.
+
+
 3.1.2 (2022-09-09)
 ------------------
 This release fixes a nasty bug which implicitly monkeypatched  ``ImageField`` from DRF.
