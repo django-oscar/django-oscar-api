@@ -23,7 +23,6 @@ class UtilsExistTest(TestCase):
     ]
 
     def _test_construct_id_filter(self, model, data):
-
         query = exists.construct_id_filter(model, data)
         qs = model.objects.filter(query)
         self.assertEqual(qs.count(), 1)

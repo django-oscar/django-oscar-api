@@ -221,7 +221,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
                 "which redirects to the payment provider and sets up the "
                 "callbacks."
             )
-            warnings.warn(msg)
+            warnings.warn(msg, stacklevel=2)
             return msg
 
     class Meta:

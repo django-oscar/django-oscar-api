@@ -1741,9 +1741,7 @@ class TestProductClassSerializer(APITest):
     def test_post_product_class(self):
         self.login("admin", "admin")
         self.assertEqual(ProductClass.objects.count(), 3)
-        data = deepcopy(self.data)  # remove some of the attributes
-        data["name"] = "henk"
-        data["slug"] = "henk"
+        data = {"name": "henk", "slug": "henk"}
         self.response = self.post("admin-productclass-list", **data)
         self.response.assertStatusEqual(201)
         self.assertEqual(ProductClass.objects.count(), 4)
@@ -1768,6 +1766,7 @@ class TestProductClassSerializer(APITest):
 
         data = deepcopy(self.data)  # remove some of the attributes
         data["attributes"] = data["attributes"][:1]
+        data["attributes"][0]["code"] = "my_new_code"
         self.response = self.put(url, **data)
         self.response.assertStatusEqual(200)
         self.assertEqual(len(self.response["attributes"]), 1)
@@ -1824,9 +1823,10 @@ class TestProductClassSerializer(APITest):
                     "name": "Sizes",
                 },
                 "name": "multioption",
-                "code": "multioption",
+                "code": "my_new_multioption",
                 "type": "multi_option",
                 "required": True,
+                "product_class": "testtype",
             }
         ]
         url = reverse("admin-productclass-detail", args=("testtype",))
@@ -1839,7 +1839,7 @@ class TestProductClassSerializer(APITest):
         self.assertIsNotNone(
             find_existing_attribute_option_group("Sizes", ["Large", "Small", "Extreme"])
         )
-        self.assertIsNone(
+        self.assertIsNotNone(
             find_existing_attribute_option_group(
                 "Sizes", ["Large", "Small", "Humongous"]
             )
