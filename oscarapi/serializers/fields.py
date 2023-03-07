@@ -326,7 +326,7 @@ class LazyRemoteFile(File):
         # Try to keep file in memory, but do not exceed FILE_UPLOAD_MAX_MEMORY_SIZE
         result_file = tempfile.SpooledTemporaryFile(
             max_size=settings.FILE_UPLOAD_MAX_MEMORY_SIZE,
-            mode="wb",
+            mode="w+b",
             suffix=".upload" + ext,
             dir=settings.FILE_UPLOAD_TEMP_DIR,
         )
