@@ -1150,6 +1150,50 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
 
+    @mock.patch("oscarapi.serializers.fields.urlopen")
+    def test_add_multiple_images(self, urlopen):
+        "Adding images should work just fine"
+        urlopen.return_value = open(
+            join(dirname(__file__), "testdata", "image.jpg"),
+            "rb",
+        )
+
+        product = Product.objects.get(pk=3)
+        self.assertEqual(product.images.count(), 0)
+
+        request = self.factory.get("%simages/nao-robot.jpg" % settings.STATIC_URL)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "oscar-t-shirt",
+                "description": "Henk",
+                "images": [
+                    {
+                        "original": "https://example.com/testdata/image.jpg",
+                        "caption": "HA! IK HEET HARRIE 1",
+                    },
+                    {
+                        "original": "https://example.com/testdata/image.jpg",
+                        "caption": "HA! IK HEET HARRIE 2",
+                    },
+                    {
+                        "original": "https://example.com/testdata/image.jpg",
+                        "caption": "HA! IK HEET HARRIE 3",
+                    },
+                    {
+                        "original": "https://example.com/testdata/image.jpg",
+                        "caption": "HA! IK HEET HARRIE 4",
+                    },
+                ],
+            },
+            instance=product,
+            context={"request": request},
+        )
+        self.assertTrue(ser.is_valid(raise_exception=True), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.pk, 3, "product should be the same as passed as instance")
+        self.assertEqual(obj.images.count(), 4)
+
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_add_local_image(self):
         # Copy our fixture image to our temporary media folder
