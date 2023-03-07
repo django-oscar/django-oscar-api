@@ -1150,6 +1150,10 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
 
+    @override_settings(FILE_UPLOAD_MAX_MEMORY_SIZE=1)
+    def test_add_image_over_max_size_limit(self):
+        self.test_add_images()
+
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
     def test_add_local_image(self):
         # Copy our fixture image to our temporary media folder
