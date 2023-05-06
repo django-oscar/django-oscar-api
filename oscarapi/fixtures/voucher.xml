@@ -21,14 +21,14 @@
     <field type="CharField" name="redirect_url"></field>
     <field type="DateTimeField" name="date_created">2015-11-27T15:38:48.134807+00:00</field>
   </object>
-  <object pk="1" model="offer.benefit">
+  <object pk="2" model="offer.benefit">
     <field to="offer.range" name="range" rel="ManyToOneRel">1</field>
     <field type="CharField" name="type">Absolute</field>
     <field type="DecimalField" name="value">5.00</field>
     <field type="PositiveIntegerField" name="max_affected_items"><None></None></field>
     <field type="CharField" name="proxy_class"></field>
   </object>
-  <object pk="1" model="offer.condition">
+  <object pk="2" model="offer.condition">
     <field to="offer.range" name="range" rel="ManyToOneRel">1</field>
     <field type="CharField" name="type">Count</field>
     <field type="DecimalField" name="value">1.00</field>
