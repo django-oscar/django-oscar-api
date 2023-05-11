@@ -50,7 +50,8 @@ setup(
         "setuptools",
         "django-oscar>=3.2",
         "Django>=3.2",
-        "djangorestframework>=3.9"
+        "djangorestframework>=3.9",
+        "djangorestframework-bulk>=0.2.1"
     ],
     # mark test target to require extras.
     extras_require={

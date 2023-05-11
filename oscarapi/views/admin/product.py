@@ -1,9 +1,13 @@
 # pylint: disable=unbalanced-tuple-unpacking
+import rest_framework_bulk
+
 from django.http import Http404
+
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
 from oscar.core.loading import get_model
+
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.exists import construct_id_filter
 
@@ -32,7 +36,7 @@ ProductClass = get_model("catalogue", "ProductClass")
 AttributeOptionGroup = get_model("catalogue", "AttributeOptionGroup")
 
 
-class ProductAdminList(generics.UpdateAPIView, generics.ListCreateAPIView):
+class ProductAdminList(rest_framework_bulk.ListBulkCreateUpdateDestroyAPIView):
     """
     Use this api for synchronizing data from another datasource.
 

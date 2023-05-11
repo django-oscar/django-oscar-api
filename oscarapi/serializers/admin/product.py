@@ -1,3 +1,5 @@
+import rest_framework_bulk
+
 from django.db import transaction
 from django.template.defaultfilters import slugify
 
@@ -36,7 +38,9 @@ AdminStockRecordSerializer = get_api_class(
 )
 
 
-class AdminProductSerializer(BaseProductSerializer):
+class AdminProductSerializer(
+    rest_framework_bulk.BulkSerializerMixin, BaseProductSerializer
+):
     url = serializers.HyperlinkedIdentityField(view_name="admin-product-detail")
     stockrecords = AdminStockRecordSerializer(many=True, required=False)
     images = ProductImageSerializer(many=True, required=False)
@@ -49,6 +53,7 @@ class AdminProductSerializer(BaseProductSerializer):
 
     class Meta(BaseProductSerializer.Meta):
         exclude = ("product_options",)
+        list_serializer_class = rest_framework_bulk.BulkListSerializer
 
     def create(self, validated_data):
         attribute_values = validated_data.pop("attribute_values", None)
