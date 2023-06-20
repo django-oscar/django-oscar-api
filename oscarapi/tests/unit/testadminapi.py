@@ -1,10 +1,10 @@
 from unittest import skipIf, skipUnless
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory
 from django.urls import reverse, NoReverseMatch
 
+from oscarapi import settings
 from oscarapi import urls
 from oscarapi.tests.utils import APITest
 
@@ -13,7 +13,7 @@ from oscarapi.permissions import APIAdminPermission
 User = get_user_model()
 
 
-@skipUnless(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is disabled")
+@skipUnless(settings.BLOCK_ADMIN_API_ACCESS, "Admin API is disabled")
 class AdminAPIDisabledTest(APITest):
     def test_root_view(self):
         "The admin api views should not be in the root view"
@@ -56,7 +56,7 @@ class AdminAPIDisabledTest(APITest):
         )
 
 
-@skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is enabled")
+@skipIf(settings.BLOCK_ADMIN_API_ACCESS, "Admin API is enabled")
 class AdminAPIEnabledTest(APITest):
     def test_root_view(self):
         "The admin api views should be available in the root view"

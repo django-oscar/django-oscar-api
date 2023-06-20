@@ -1,8 +1,8 @@
 # pylint: disable=unbalanced-tuple-unpacking
-from django.conf import settings
 from django.urls import include, path, re_path
 from rest_framework.urlpatterns import format_suffix_patterns
 
+from oscarapi import settings
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
 api_root = get_api_class("views.root", "api_root")
@@ -308,7 +308,7 @@ admin_urlpatterns = [
     path("users/<int:pk>/", UserAdminDetail.as_view(), name="admin-user-detail"),
 ]
 
-if not getattr(settings, "OSCARAPI_BLOCK_ADMIN_API_ACCESS", True):
+if not settings.BLOCK_ADMIN_API_ACCESS:
     urlpatterns.append(path("admin/", include(admin_urlpatterns)))
 
 urlpatterns = format_suffix_patterns(urlpatterns)

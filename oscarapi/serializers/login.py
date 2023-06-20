@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model, authenticate, password_validation
 from rest_framework import serializers
 
-from oscarapi.utils.settings import overridable
+from oscarapi import settings
 
 
 User = get_user_model()
@@ -19,10 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = overridable(
-            "OSCARAPI_USER_FIELDS",
-            default=(User.USERNAME_FIELD, "email", "date_joined"),
-        )
+        fields = settings.USER_FIELDS
 
 
 class LoginSerializer(serializers.Serializer):

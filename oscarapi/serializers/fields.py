@@ -7,7 +7,7 @@ from os.path import basename, join, splitext
 from urllib.parse import urlsplit, parse_qs
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
-from django.conf import settings
+from django.conf import settings as django_settings
 from django.db import IntegrityError
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -18,10 +18,9 @@ from rest_framework.fields import get_attribute
 
 from oscar.core.loading import get_model, get_class
 
-from oscarapi import version
+from oscarapi import settings
 from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.exists import bound_unique_together_get_or_create
-from oscarapi.utils.settings import overridable
 from .exceptions import FieldError
 
 logger = logging.getLogger(__name__)
@@ -315,20 +314,17 @@ class LazyRemoteFile(File):
 
     @cached_property
     def file(self):
-        headers = overridable(
-            "OSCARAPI_LAZY_REMOTE_FILE_REQUEST_HEADERS",
-            default={"User-Agent": f"django-oscar-api/{version}"},
-        )
+        headers = settings.LAZY_REMOTE_FILE_REQUEST_HEADERS
         request = Request(self.url, headers=headers)
 
         _, ext = splitext(self.name)
 
         # Try to keep file in memory, but do not exceed FILE_UPLOAD_MAX_MEMORY_SIZE
         result_file = tempfile.SpooledTemporaryFile(
-            max_size=settings.FILE_UPLOAD_MAX_MEMORY_SIZE,
+            max_size=django_settings.FILE_UPLOAD_MAX_MEMORY_SIZE,
             mode="w+b",
             suffix=".upload" + ext,
-            dir=settings.FILE_UPLOAD_TEMP_DIR,
+            dir=django_settings.FILE_UPLOAD_TEMP_DIR,
         )
         response = urlopen(request)
         # copy the response into a file so it can be read multiple times
@@ -370,7 +366,8 @@ class ImageUrlField(serializers.ImageField):
                 else:
                     location = parsed_url.path
                     path = join(
-                        settings.MEDIA_ROOT, location.replace(settings.MEDIA_URL, "", 1)
+                        django_settings.MEDIA_ROOT,
+                        location.replace(django_settings.MEDIA_URL, "", 1),
                     )
                     file_object = File(open(path, "rb"), name=basename(parsed_url.path))
 
