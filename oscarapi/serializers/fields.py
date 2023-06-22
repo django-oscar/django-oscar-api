@@ -1,11 +1,8 @@
 import logging
 import operator
-import shutil
-import tempfile
 
-from os.path import basename, join, splitext
+from os.path import basename, join
 from urllib.parse import urlsplit, parse_qs
-from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 from django.conf import settings as django_settings
 from django.db import IntegrityError
@@ -28,6 +25,7 @@ ProductAttribute = get_model("catalogue", "ProductAttribute")
 Category = get_model("catalogue", "Category")
 create_from_breadcrumbs = get_class("catalogue.categories", "create_from_breadcrumbs")
 entity_internal_value = get_api_class("serializers.hooks", "entity_internal_value")
+RetrieveFileMixin = get_api_class(settings.FILE_DOWNLOADER_MODULE, "RetrieveFileMixin")
 attribute_details = operator.itemgetter("code", "value")
 
 
@@ -278,7 +276,7 @@ class SingleValueSlugRelatedField(serializers.SlugRelatedField):
         return {self.slug_field: data}
 
 
-class LazyRemoteFile(File):
+class LazyRemoteFile(RetrieveFileMixin, File):
     """
     This file will defer downloading untill the file data is accessed.
 
@@ -314,24 +312,7 @@ class LazyRemoteFile(File):
 
     @cached_property
     def file(self):
-        headers = settings.LAZY_REMOTE_FILE_REQUEST_HEADERS
-        request = Request(self.url, headers=headers)
-
-        _, ext = splitext(self.name)
-
-        # Try to keep file in memory, but do not exceed FILE_UPLOAD_MAX_MEMORY_SIZE
-        result_file = tempfile.SpooledTemporaryFile(
-            max_size=django_settings.FILE_UPLOAD_MAX_MEMORY_SIZE,
-            mode="w+b",
-            suffix=".upload" + ext,
-            dir=django_settings.FILE_UPLOAD_TEMP_DIR,
-        )
-        response = urlopen(request)
-        # copy the response into a file so it can be read multiple times
-        shutil.copyfileobj(response, result_file)
-
-        result_file.seek(0)
-        return result_file
+        return self.retrieve_file()
 
     def __str__(self):
         return self.url or ""

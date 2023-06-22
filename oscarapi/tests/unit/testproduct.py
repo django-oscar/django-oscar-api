@@ -784,7 +784,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
             ser.errors, {"value": ["multioption: Option geit,kip does not exist."]}
         )
 
-    @mock.patch("oscarapi.serializers.fields.urlopen")
+    @mock.patch("oscarapi.utils.download.urlopen")
     def test_productattributevalueserializer_image(self, urlopen):
         urlopen.return_value = open(
             join(dirname(__file__), "testdata", "image.jpg"),
@@ -809,7 +809,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         p.refresh_from_db()
         self.assertTrue(p.attribute_values.filter(attribute__code="image").exists())
 
-    @mock.patch("oscarapi.serializers.fields.urlopen")
+    @mock.patch("oscarapi.utils.download.urlopen")
     def test_productattributevalueserializer_file(self, urlopen):
         urlopen.return_value = open(
             join(dirname(__file__), "testdata", "test.pdf"),
@@ -1116,7 +1116,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
         self.assertFalse(ser.is_valid(), "This test should fail the uniqueness test.")
 
-    @mock.patch("oscarapi.serializers.fields.urlopen")
+    @mock.patch("oscarapi.utils.download.urlopen")
     def test_add_images(self, urlopen):
         "Adding images should work just fine"
         urlopen.return_value = open(
@@ -1188,7 +1188,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         image = obj.images.get()
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
 
-    @mock.patch("oscarapi.serializers.fields.urlopen")
+    @mock.patch("oscarapi.utils.download.urlopen")
     def test_add_broken_image(self, urlopen):
         urlopen.side_effect = HTTPError(
             url="https://example.com/testdata/image.jpg",
@@ -1224,7 +1224,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         product.refresh_from_db()
         self.assertEqual(product.images.count(), 0)
 
-    @mock.patch("oscarapi.serializers.fields.urlopen")
+    @mock.patch("oscarapi.utils.download.urlopen")
     def test_modify_images(self, urlopen):
         "The serializer should automatically detect that an image already exists and update it"
         urlopen.return_value = open(
@@ -1263,7 +1263,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(image.caption, "HA! IK HEET HARRIE")
         self.assertEqual(image.original.name, "images/products/2019/05/image.jpg")
 
-    @mock.patch("oscarapi.serializers.fields.urlopen")
+    @mock.patch("oscarapi.utils.download.urlopen")
     def test_modify_images_with_hash(self, urlopen):
         "When a hash is included in the url, the serializer should not try to download an image that is allready present locally."
         urlopen.return_value.side_effect = Exception(
@@ -1756,7 +1756,7 @@ class TestProductAdmin(APITest):
         )
         self.assertEqual(str(e.exception), msg)
 
-    @mock.patch("oscarapi.serializers.fields.urlopen")
+    @mock.patch("oscarapi.utils.download.urlopen")
     def test_image_error(self, urlopen):
         urlopen.side_effect = HTTPError(
             url="https://example.com/testdata/image.jpg",
@@ -2021,7 +2021,7 @@ class AdminCategoryApiTest(APITest):
         "productimage",
     ]
 
-    @mock.patch("oscarapi.serializers.fields.urlopen")
+    @mock.patch("oscarapi.utils.download.urlopen")
     def test_create_category_and_ancestors(self, urlopen):
         urlopen.return_value = open(
             join(dirname(__file__), "testdata", "image.jpg"), "rb"
@@ -2063,7 +2063,7 @@ class AdminCategoryApiTest(APITest):
         self.response.assertStatusEqual(201)
         self.assertEqual(self.response["description"], "Klak")
 
-    @mock.patch("oscarapi.serializers.fields.urlopen")
+    @mock.patch("oscarapi.utils.download.urlopen")
     def test_create_root_category(self, urlopen):
         urlopen.return_value = open(
             join(dirname(__file__), "testdata", "image.jpg"),

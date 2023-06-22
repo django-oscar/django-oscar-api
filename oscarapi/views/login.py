@@ -1,5 +1,5 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.conf import settings as django_settings
 
 from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from oscar.apps.customer.signals import user_registered
 from oscar.core.loading import get_class, get_model
 
+from oscarapi import settings
 from oscarapi.utils.session import login_and_upgrade_session
 from oscarapi.utils.loading import get_api_classes
 from oscarapi.basket import operations
@@ -60,7 +61,7 @@ class LoginView(APIView):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            if getattr(settings, "OSCARAPI_EXPOSE_USER_DETAILS", False):
+            if settings.EXPOSE_USER_DETAILS:
                 ser = UserSerializer(request.user, many=False)
                 return Response(ser.data)
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -126,7 +127,7 @@ class UserDetail(generics.RetrieveAPIView):
         return User.objects.filter(pk=self.request.user.pk)
 
     def get(self, request, *args, **kwargs):
-        if getattr(settings, "OSCARAPI_EXPOSE_USER_DETAILS", False):
+        if settings.EXPOSE_USER_DETAILS:
             return super().get(request, *args, **kwargs)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -151,7 +152,7 @@ class RegistrationView(APIView, RegisterUserMixin):
     serializer_class = RegisterUserSerializer
 
     def post(self, request, *args, **kwargs):
-        if not getattr(settings, "OSCARAPI_ENABLE_REGISTRATION", False):
+        if not settings.ENABLE_REGISTRATION:
             return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
 
         ser = self.serializer_class(data=request.data)
@@ -160,7 +161,7 @@ class RegistrationView(APIView, RegisterUserMixin):
             # create the user
             user = ser.save()
 
-            if getattr(settings, "OSCAR_SEND_REGISTRATION_EMAIL", False):
+            if django_settings.OSCAR_SEND_REGISTRATION_EMAIL:
                 self.send_registration_email(user)
             # send the same signal as oscar is sending
             user_registered.send(sender=self, request=request, user=user)
