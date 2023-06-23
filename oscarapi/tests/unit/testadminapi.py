@@ -71,6 +71,20 @@ class AdminAPIEnabledTest(APITest):
         self.response.assertStatusEqual(200)
         self.assertIn("admin", self.response.data)
 
+        # Make sure all admin api's are in the list
+        admin_apis = [
+            "productclasses",
+            "products",
+            "categories",
+            "orders",
+            "partners",
+            "users",
+            "attributeoptiongroups",
+        ]
+
+        for api in admin_apis:
+            self.assertIn(api, self.response.data["admin"])
+
     def test_urlconf(self):
         "The admin api urls should be reversable"
         # let's check that by reversing the first one

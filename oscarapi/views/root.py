@@ -40,6 +40,10 @@ def ADMIN_APIS(r, f):
         ("orders", reverse("admin-order-list", request=r, format=f)),
         ("partners", reverse("admin-partner-list", request=r, format=f)),
         ("users", reverse("admin-user-list", request=r, format=f)),
+        (
+            "attributeoptiongroups",
+            reverse("admin-attributeoptiongroup-list", request=r, format=f),
+        ),
     ]
 
 
