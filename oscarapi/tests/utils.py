@@ -137,7 +137,8 @@ class ParsedResponse(object):
         self.status_code = response.status_code
         try:
             self.body = response.data
-        except Exception:
+        # pylint: disable=bare-except
+        except:
             self.body = None
 
     def __getattr__(self, name):

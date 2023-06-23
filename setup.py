@@ -8,7 +8,7 @@ setup(
     # extract version from module.
     version=__version__,
     description="REST API module for django-oscar",
-    long_description=open("README.rst").read(),
+    long_description=open("README.rst", encoding="utf-8").read(),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Web Environment",
@@ -55,6 +55,6 @@ setup(
     # mark test target to require extras.
     extras_require={
         "dev": ["coverage", "mock", "twine", "wheel", "easy_thumbnails"],
-        "lint": ["flake8", "flake8-black", "flake8-bugbear", "black>=23.1.0"],
+        "lint": ["pylint", "pylint-django", "black>=23.1.0"],
     },
 )

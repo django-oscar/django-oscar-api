@@ -1,3 +1,4 @@
+# pylint: disable=W0223
 from django.core.exceptions import ValidationError
 
 from django.contrib.auth import get_user_model, authenticate, password_validation
@@ -75,7 +76,7 @@ class RegisterUserSerializer(serializers.Serializer):
         # this is a separate method so it's easy to override
         return User.objects.create_user(username=email, email=email, password=password)
 
-    def save(self):
+    def save(self, *args, **kwargs):
         email = self.validated_data["email"]
         password = self.validated_data["password1"]
         return self.create_user(email, password)

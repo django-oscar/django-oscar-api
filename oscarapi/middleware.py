@@ -134,12 +134,10 @@ class ApiGatewayMiddleWare(IsApiRequest):
             key = key.decode(HTTP_HEADER_ENCODING)
             if not models.ApiKey.objects.filter(key=key).exists():
                 logger.error(
-                    "Invalid credentials provided for %s:%s by %s"
-                    % (
-                        request.method,
-                        request.path,
-                        request.META.get("REMOTE_ADDR", "<unknown>"),
-                    )
+                    "Invalid credentials provided for %s:%s by %s",
+                    request.method,
+                    request.path,
+                    request.META.get("REMOTE_ADDR", "<unknown>"),
                 )
                 raise PermissionDenied()
 

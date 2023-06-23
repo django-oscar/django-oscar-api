@@ -1,3 +1,5 @@
+# pylint: disable=W0632
+
 from django.db import transaction
 from django.template.defaultfilters import slugify
 

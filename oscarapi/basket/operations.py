@@ -22,7 +22,7 @@ Basket = get_model("basket", "Basket")
 Line = get_model("basket", "Line")
 LineAttribute = get_model("basket", "LineAttribute")
 Applicator = get_class("offer.applicator", "Applicator")
-Selector = None
+Selector = get_class("partner.strategy", "Selector")
 
 
 def apply_offers(request, basket):
@@ -33,16 +33,9 @@ def apply_offers(request, basket):
 
 
 def assign_basket_strategy(basket, request):
-    # fixes too early import of Selector
-    # TODO: check if this is still true, now the basket models nolonger
-    #       require this module to be loaded.
-    global Selector
-
     if hasattr(request, "strategy"):
         basket.strategy = request.strategy
     else:  # in management commands, the request might not be available.
-        if Selector is None:
-            Selector = get_class("partner.strategy", "Selector")
         basket.strategy = Selector().strategy(request=request, user=request.user)
 
     apply_offers(request, basket)

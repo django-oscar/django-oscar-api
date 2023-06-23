@@ -45,12 +45,12 @@ publish_release: build_release
 
 lint.installed:
 	pip install -e .[lint]
-	touch $@
 
 lint: lint.installed
-	flake8 oscarapi/
+	black --check --exclude "migrations/*" oscarapi/
+	pylint setup.py oscarapi/
 
-black:
+black: install_lint
 	black --exclude "/migrations/" oscarapi/
 
 uwsgi:

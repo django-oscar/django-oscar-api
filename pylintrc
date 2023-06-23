@@ -1,0 +1,11 @@
+[MASTER]
+jobs = 1
+load-plugins = pylint_django
+score = n
+ignore = migrations
+
+[MESSAGES CONTROL]
+disable = R,C,W5103,W0707,E5110
+
+[TYPECHECK]
+ignored-classes = responses

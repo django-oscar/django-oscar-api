@@ -47,6 +47,7 @@ def ADMIN_APIS(r, f):
     ]
 
 
+# pylint: disable=W1113
 @api_view(("GET",))
 def api_root(
     request, format=None, *args, **kwargs
