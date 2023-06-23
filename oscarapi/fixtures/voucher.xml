@@ -6,8 +6,8 @@
     <field type="TextField" name="description"></field>
     <field type="CharField" name="offer_type">Voucher</field>
     <field type="CharField" name="status">Open</field>
-    <field to="offer.condition" name="condition" rel="ManyToOneRel">1</field>
-    <field to="offer.benefit" name="benefit" rel="ManyToOneRel">1</field>
+    <field to="offer.condition" name="condition" rel="ManyToOneRel">2</field>
+    <field to="offer.benefit" name="benefit" rel="ManyToOneRel">2</field>
     <field type="IntegerField" name="priority">0</field>
     <field type="DateTimeField" name="start_datetime"><None></None></field>
     <field type="DateTimeField" name="end_datetime"><None></None></field>
