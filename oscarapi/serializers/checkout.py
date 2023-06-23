@@ -203,7 +203,9 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
     surcharges = InlineSurchargeSerializer(many=True, required=False)
 
     def get_offer_discounts(self, obj):
-        qs = obj.basket_discounts.filter(offer_id__isnull=False)
+        qs = obj.basket_discounts.filter(
+            offer_id__isnull=False, voucher_id__isnull=True
+        )
         return OrderOfferDiscountSerializer(qs, many=True).data
 
     def get_voucher_discounts(self, obj):
