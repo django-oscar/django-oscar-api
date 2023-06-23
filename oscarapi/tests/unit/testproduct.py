@@ -1152,6 +1152,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
     @override_settings(FILE_UPLOAD_MAX_MEMORY_SIZE=1)
     def test_add_image_over_max_size_limit(self):
+        # pylint: disable=no-value-for-parameter
         self.test_add_images()
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
