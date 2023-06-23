@@ -54,7 +54,10 @@ jobs:
       - name: Show all versions
         run: pip list
       - name: Run the testsuite
-        run: make coverage
+        run: |
+          pwd
+          pip freeze
+          make coverage
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v1
         with:
