@@ -49,8 +49,8 @@ jobs:
           make install
       - name: Run the testsuite
         run: |
-      	  coverage run --parallel sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_true
-      	  coverage run --parallel sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_false
+          coverage run --parallel sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_true
+          coverage run --parallel sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_false
       - name: Upload coverage to codecov
         uses: codecov/codecov-action@v1
         with:
