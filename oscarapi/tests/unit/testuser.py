@@ -1,3 +1,4 @@
+from mock import patch
 from django.contrib.auth import get_user_model
 from django.test import override_settings
 from django.urls import reverse
@@ -58,13 +59,14 @@ class UserDetailTest(APITest):
         self.response = self.get(url)
         self.response.assertStatusEqual(404)
 
-    @override_settings(OSCARAPI_EXPOSE_USER_DETAILS=False)
+    # @override_settings(OSCARAPI_EXPOSE_USER_DETAILS=False)
     def test_expose_user_detail_not_allowed(self):
         "The user nobody can not retrieve it's own user details (disabled)"
-        self.login("nobody", "nobody")
-        user = User.objects.get(username="nobody")
-        url = reverse("user-detail", args=(user.id,))
+        with patch("oscarapi.views.login.settings", EXPOSE_USER_DETAILS=False):
+            self.login("nobody", "nobody")
+            user = User.objects.get(username="nobody")
+            url = reverse("user-detail", args=(user.id,))
 
-        self.response = self.get(url)
-        self.response.assertStatusEqual(204)
-        self.assertIsNone(self.response.data)
+            self.response = self.get(url)
+            self.response.assertStatusEqual(204)
+            self.assertIsNone(self.response.data)

@@ -7,8 +7,8 @@ from rest_framework import serializers
 
 from oscar.core.loading import get_model
 
+from oscarapi import settings
 from oscarapi.basket import operations
-from oscarapi.utils.settings import overridable
 from oscarapi.serializers.fields import (
     DrillDownHyperlinkedIdentityField,
     DrillDownHyperlinkedRelatedField,
@@ -33,10 +33,7 @@ Product = get_model("catalogue", "Product")
 class VoucherSerializer(OscarModelSerializer):
     class Meta:
         model = Voucher
-        fields = overridable(
-            "OSCARAPI_VOUCHER_FIELDS",
-            default=("name", "code", "start_datetime", "end_datetime"),
-        )
+        fields = settings.VOUCHER_FIELDS
 
 
 class OfferDiscountSerializer(
@@ -85,25 +82,7 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Basket
-        fields = overridable(
-            "OSCARAPI_BASKET_FIELDS",
-            default=(
-                "id",
-                "owner",
-                "status",
-                "lines",
-                "url",
-                "total_excl_tax",
-                "total_excl_tax_excl_discounts",
-                "total_incl_tax",
-                "total_incl_tax_excl_discounts",
-                "total_tax",
-                "currency",
-                "voucher_discounts",
-                "offer_discounts",
-                "is_tax_known",
-            ),
-        )
+        fields = settings.BASKET_FIELDS
 
 
 class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
@@ -167,26 +146,7 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
 
     class Meta:
         model = Line
-        fields = overridable(
-            "OSCARAPI_BASKETLINE_FIELDS",
-            default=(
-                "url",
-                "product",
-                "quantity",
-                "attributes",
-                "price_currency",
-                "price_excl_tax",
-                "price_incl_tax",
-                "price_incl_tax_excl_discounts",
-                "price_excl_tax_excl_discounts",
-                "is_tax_known",
-                "warning",
-                "basket",
-                "stockrecord",
-                "date_created",
-                "date_updated",
-            ),
-        )
+        fields = settings.BASKETLINE_FIELDS
 
     def to_representation(self, obj):
         # This override is needed to reflect offer discounts or strategy

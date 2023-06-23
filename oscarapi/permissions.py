@@ -1,5 +1,3 @@
-from django.conf import settings
-
 from rest_framework.permissions import (
     BasePermission,
     IsAuthenticated,
@@ -7,6 +5,7 @@ from rest_framework.permissions import (
 )
 
 from oscarapi.basket.operations import request_allows_access_to
+from oscarapi import settings
 
 
 class IsOwner(IsAuthenticated):
@@ -41,10 +40,7 @@ class APIAdminPermission(DjangoModelPermissions):
 
     @staticmethod
     def disallowed_by_setting_and_request(request):
-        return (
-            getattr(settings, "OSCARAPI_BLOCK_ADMIN_API_ACCESS", True)
-            or not request.user.is_staff
-        )
+        return settings.BLOCK_ADMIN_API_ACCESS or not request.user.is_staff
 
     def has_permission(self, request, view):
         if self.disallowed_by_setting_and_request(request):

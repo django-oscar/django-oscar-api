@@ -4,6 +4,8 @@ Oscar API Settings
 
 .. _main-settings-label:
 
+.. automodule:: oscarapi.settings
+
 Main settings
 =============
 
@@ -12,6 +14,7 @@ Main settings
 Default: ``True``
 
 Useful in production websites where you want to make sure that the admin api is not exposed at all.
+:const:`oscarapi.settings.BLOCK_ADMIN_API_ACCESS`
 
 ``OSCARAPI_EXPOSE_USER_DETAILS``
 -----------------------------------
@@ -40,7 +43,9 @@ Changes the headers for the admin api when downloading images.
 Serializer settings
 ===================
 
-Most of the model serializers in Oscar API have a default set of fields to use in the REST API. If you customized the Oscar models you can reflect this customization by adding settings for this serializer.
+Most of the model serializers in Oscar API have a default set of fields to use
+in the REST API. If you customized the Oscar models you can reflect this
+customization by adding settings for this serializer.
 
 For example, the ``RecommendedProduct`` serializer is defined as following:
 
@@ -51,10 +56,7 @@ For example, the ``RecommendedProduct`` serializer is defined as following:
 
         class Meta:
             model = Product
-            fields = overridable(
-                'OSCARAPI_RECOMMENDED_PRODUCT_FIELDS',
-                default=('url',)
-            )
+            fields = settings.RECOMMENDED_PRODUCT_FIELDS
 
 When you add the following section to your ``settings.py`` you will add the 'title' field as well:
 
@@ -62,6 +64,8 @@ When you add the following section to your ``settings.py`` you will add the 'tit
 
     OSCARAPI_RECOMMENDED_PRODUCT_FIELDS = ('url', 'title')
 
+Note that you need to prefix the settings with ``OSCARAPI_`` to make them work
+in your django settings file.
 
 The following serializers have customizable field settings:
 

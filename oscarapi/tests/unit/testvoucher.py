@@ -74,3 +74,20 @@ class VoucherTest(APITest):
 
         self.response = self.post("api-basket-add-voucher", vouchercode="testvoucher")
         self.response.assertStatusEqual(200)
+
+
+class VoucherWithOfferTest(APITest):
+    fixtures = [
+        "productcategory",
+        "productclass",
+        "product",
+        "category",
+        "partner",
+        "productattribute",
+        "productattributevalue",
+        "stockrecord",
+        "offer",
+        "attributeoption",
+        "voucher",
+        "attributeoptiongroup",
+    ]

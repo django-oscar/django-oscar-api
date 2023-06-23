@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 
 from rest_framework import serializers
 
-from oscarapi.utils.settings import overridable
+from oscarapi import settings
 
 User = get_user_model()
 
@@ -13,7 +13,4 @@ class AdminUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = overridable(
-            "OSCARAPI_ADMIN_USER_FIELDS",
-            default=("url", User.USERNAME_FIELD, "email", "date_joined"),
-        )
+        fields = settings.ADMIN_USER_FIELDS

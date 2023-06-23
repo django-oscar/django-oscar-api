@@ -9,7 +9,7 @@ from oscar.core.loading import get_model
 
 from oscarapi.utils.exists import bound_unique_together_get_or_create_multiple
 from oscarapi.utils.loading import get_api_classes
-from oscarapi.utils.settings import overridable
+from oscarapi import settings
 from oscarapi.utils.files import file_hash
 from oscarapi.utils.exists import find_existing_attribute_option_group
 from oscarapi.utils.accessors import getitems
@@ -188,7 +188,7 @@ class OptionSerializer(OscarHyperlinkedModelSerializer):
 
     class Meta:
         model = Option
-        fields = overridable("OSCARAPI_OPTION_FIELDS", default="__all__")
+        fields = settings.OPTION_FIELDS
         list_serializer_class = UpdateForwardManyToManySerializer
 
 
@@ -258,10 +258,7 @@ class ProductAttributeValueSerializer(OscarModelSerializer):
     class Meta:
         model = ProductAttributeValue
         list_serializer_class = ProductAttributeValueListSerializer
-        fields = overridable(
-            "OSCARAPI_PRODUCT_ATTRIBUTE_VALUE_FIELDS",
-            default=("name", "value", "code", "product"),
-        )
+        fields = settings.PRODUCT_ATTRIBUTE_VALUE_FIELDS
 
 
 class ProductImageUpdateListSerializer(UpdateListSerializer):
@@ -304,7 +301,7 @@ class RecommmendedProductSerializer(OscarModelSerializer):
 
     class Meta:
         model = Product
-        fields = overridable("OSCARAPI_RECOMMENDED_PRODUCT_FIELDS", default=("url",))
+        fields = settings.RECOMMENDED_PRODUCT_FIELDS
 
 
 class ProductStockRecordSerializer(OscarModelSerializer):
@@ -383,28 +380,7 @@ class ChildProductSerializer(PublicProductSerializer):
     description = serializers.CharField(source="parent.description")
 
     class Meta(PublicProductSerializer.Meta):
-        fields = overridable(
-            "OSCARAPI_CHILDPRODUCTDETAIL_FIELDS",
-            default=(
-                "url",
-                "upc",
-                "id",
-                "title",
-                "structure",
-                # 'parent', 'description', 'images', are not included by default, but
-                # easily enabled by overriding OSCARAPI_CHILDPRODUCTDETAIL_FIELDS
-                # in your settings file
-                "date_created",
-                "date_updated",
-                "recommended_products",
-                "attributes",
-                "categories",
-                "product_class",
-                "price",
-                "availability",
-                "options",
-            ),
-        )
+        fields = settings.CHILDPRODUCTDETAIL_FIELDS
 
 
 class ProductSerializer(PublicProductSerializer):
@@ -425,29 +401,7 @@ class ProductSerializer(PublicProductSerializer):
     )
 
     class Meta(PublicProductSerializer.Meta):
-        fields = overridable(
-            "OSCARAPI_PRODUCTDETAIL_FIELDS",
-            default=(
-                "url",
-                "upc",
-                "id",
-                "title",
-                "description",
-                "structure",
-                "date_created",
-                "date_updated",
-                "recommended_products",
-                "attributes",
-                "categories",
-                "product_class",
-                "images",
-                "price",
-                "availability",
-                "stockrecords",
-                "options",
-                "children",
-            ),
-        )
+        fields = settings.PRODUCTDETAIL_FIELDS
 
 
 class ProductLinkSerializer(ProductSerializer):
@@ -459,9 +413,7 @@ class ProductLinkSerializer(ProductSerializer):
     """
 
     class Meta(PublicProductSerializer.Meta):
-        fields = overridable(
-            "OSCARAPI_PRODUCT_FIELDS", default=("url", "id", "upc", "title")
-        )
+        fields = settings.PRODUCT_FIELDS
 
 
 class OptionValueSerializer(serializers.Serializer):  # pylint: disable=abstract-method

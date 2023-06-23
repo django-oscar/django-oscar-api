@@ -25,7 +25,7 @@ class LoginTest(APITest):
         )
 
         # check authentication worked
-        with self.settings(OSCARAPI_USER_FIELDS=("username", "email")):
+        with patch("oscarapi.settings", USER_FIELDS=("username", "email")):
             response = self.get("api-login", session_id="koe", authenticated=True)
             parsed_response = response.data
 
@@ -34,9 +34,10 @@ class LoginTest(APITest):
 
         # note that this shows that we can move a session from one user to the
         # other! This is the responsibility of the client application!
-        with self.settings(
-            OSCARAPI_BLOCK_ADMIN_API_ACCESS=False,
-            OSCARAPI_USER_FIELDS=("username", "id"),
+        with patch(
+            "oscarapi.settings",
+            BLOCK_ADMIN_API_ACCESS=False,
+            USER_FIELDS=("username", "id"),
         ):
             response = self.post(
                 "api-login", username="admin", password="admin", session_id="koe"
@@ -58,7 +59,7 @@ class LoginTest(APITest):
             self.assertEqual(parsed_response["username"], "admin")
             self.assertEqual(parsed_response["email"], "admin@admin.admin")
 
-            with self.settings(OSCARAPI_EXPOSE_USER_DETAILS=False):
+            with patch("oscarapi.views.login.settings", EXPOSE_USER_DETAILS=False):
                 response = self.get("api-login", session_id="koe", authenticated=True)
                 self.assertEqual(response.status_code, 204)
                 self.assertIsNone(response.data)
@@ -79,7 +80,7 @@ class LoginTest(APITest):
         )
 
         # check authentication didn't work
-        with self.settings(OSCARAPI_USER_FIELDS=("username", "email")):
+        with patch("oscarapi.settings", USER_FIELDS=("username", "email")):
             response = self.get("api-login")
             self.assertEqual(response.status_code, 405)
 
@@ -93,7 +94,7 @@ class LoginTest(APITest):
         self.assertNotIn("Session-Id", response)
 
         # check authentication worked
-        with self.settings(OSCARAPI_USER_FIELDS=("username", "email")):
+        with patch("oscarapi.settings", USER_FIELDS=("username", "email")):
             response = self.get("api-login")
             parsed_response = response.data
 
@@ -102,9 +103,10 @@ class LoginTest(APITest):
 
         # using cookie sessions it is not possible to pass 1 session to another
         # user
-        with self.settings(
-            OSCARAPI_BLOCK_ADMIN_API_ACCESS=False,
-            OSCARAPI_USER_FIELDS=("username", "email"),
+        with patch(
+            "oscarapi.settings",
+            BLOCK_ADMIN_API_ACCESS=False,
+            USER_FIELDS=("username", "email"),
         ):
             response = self.post("api-login", username="admin", password="admin")
 
@@ -119,7 +121,7 @@ class LoginTest(APITest):
             self.assertEqual(parsed_response["username"], "nobody")
             self.assertEqual(parsed_response["email"], "nobody@nobody.niks")
 
-            with self.settings(OSCARAPI_EXPOSE_USER_DETAILS=False):
+            with patch("oscarapi.views.login.settings", EXPOSE_USER_DETAILS=False):
                 response = self.get("api-login")
                 self.assertEqual(response.status_code, 204)
                 self.assertIsNone(response.data)
@@ -215,7 +217,7 @@ class LoginTest(APITest):
         self.response.assertStatusEqual(200)
         self.response.assertValueEqual("username", "nobody")
 
-        with self.settings(OSCARAPI_EXPOSE_USER_DETAILS=False):
+        with patch("oscarapi.views.login.settings", EXPOSE_USER_DETAILS=False):
             self.response = self.get(
                 "api-login", session_id="nobody", authenticated=True
             )
@@ -273,7 +275,7 @@ class SessionTest(APITest):
 
 class RegistrationTest(APITest):
     def test_registration_disabled(self):
-        with self.settings(OSCARAPI_ENABLE_REGISTRATION=False):
+        with patch("oscarapi.views.login.settings", ENABLE_REGISTRATION=False):
             self.response = self.post(
                 "api-register",
                 email="someone@email.com",

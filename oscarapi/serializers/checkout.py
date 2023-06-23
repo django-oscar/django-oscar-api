@@ -2,13 +2,14 @@ import warnings
 
 from django.db import IntegrityError
 
-from django.conf import settings
+from django.conf import settings as django_settings
 from django.urls import reverse, NoReverseMatch
 from django.utils.translation import gettext as _
 from oscar.core import prices
 from oscar.core.loading import get_class, get_model
 from rest_framework import exceptions, serializers
 
+from oscarapi import settings
 from oscarapi.utils.loading import get_api_classes
 from oscarapi.basket.operations import assign_basket_strategy
 from oscarapi.utils.settings import overridable
@@ -45,7 +46,7 @@ VoucherSerializer, OfferDiscountSerializer = get_api_classes(
 
 class PriceSerializer(serializers.Serializer):
     currency = serializers.CharField(
-        max_length=12, default=settings.OSCAR_DEFAULT_CURRENCY, required=False
+        max_length=12, default=django_settings.OSCAR_DEFAULT_CURRENCY, required=False
     )
     excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12, required=True)
     incl_tax = TaxIncludedDecimalField(
@@ -177,10 +178,7 @@ class OrderVoucherOfferSerializer(OrderOfferDiscountSerializer):
 class InlineSurchargeSerializer(OscarModelSerializer):
     class Meta:
         model = Surcharge
-        fields = overridable(
-            "OSCARAPI_SURCHARGE_FIELDS",
-            default=("name", "code", "incl_tax", "excl_tax"),
-        )
+        fields = settings.SURCHARGE_FIELDS
 
 
 class OrderSerializer(OscarHyperlinkedModelSerializer):
@@ -226,32 +224,7 @@ class OrderSerializer(OscarHyperlinkedModelSerializer):
 
     class Meta:
         model = Order
-        fields = overridable(
-            "OSCARAPI_ORDER_FIELDS",
-            default=(
-                "number",
-                "basket",
-                "url",
-                "lines",
-                "owner",
-                "billing_address",
-                "currency",
-                "total_incl_tax",
-                "total_excl_tax",
-                "shipping_incl_tax",
-                "shipping_excl_tax",
-                "shipping_address",
-                "shipping_method",
-                "shipping_code",
-                "status",
-                "email",
-                "date_placed",
-                "payment_url",
-                "offer_discounts",
-                "voucher_discounts",
-                "surcharges",
-            ),
-        )
+        fields = settings.ORDER_FIELDS
 
 
 class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
@@ -270,13 +243,13 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
         return self.context["request"]
 
     def get_initial_order_status(self, basket):
-        return overridable("OSCARAPI_INITIAL_ORDER_STATUS", default="new")
+        return settings.INITIAL_ORDER_STATUS
 
     def validate(self, attrs):
         request = self.request
 
         if request.user.is_anonymous:
-            if not settings.OSCAR_ALLOW_ANON_CHECKOUT:
+            if not django_settings.OSCAR_ALLOW_ANON_CHECKOUT:
                 message = _("Anonymous checkout forbidden")
                 raise serializers.ValidationError(message)
 
@@ -409,25 +382,4 @@ class UserAddressSerializer(OscarModelSerializer):
 
     class Meta:
         model = UserAddress
-        fields = overridable(
-            "OSCARAPI_USERADDRESS_FIELDS",
-            default=(
-                "id",
-                "title",
-                "first_name",
-                "last_name",
-                "line1",
-                "line2",
-                "line3",
-                "line4",
-                "state",
-                "postcode",
-                "search_text",
-                "phone_number",
-                "notes",
-                "is_default_for_shipping",
-                "is_default_for_billing",
-                "country",
-                "url",
-            ),
-        )
+        fields = settings.USERADDRESS_FIELDS
