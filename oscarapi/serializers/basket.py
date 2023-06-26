@@ -1,3 +1,4 @@
+# pylint: disable=W0223
 import logging
 from decimal import Decimal
 
@@ -148,16 +149,16 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         model = Line
         fields = settings.BASKETLINE_FIELDS
 
-    def to_representation(self, obj):
+    def to_representation(self, instance):
         # This override is needed to reflect offer discounts or strategy
         # related prices immediately in the response
-        operations.assign_basket_strategy(obj.basket, self.context["request"])
+        operations.assign_basket_strategy(instance.basket, self.context["request"])
 
         # Oscar stores the calculated discount in line._discount_incl_tax or
         # line._discount_excl_tax when offers are applied. So by just
         # retrieving the line from the db you will loose this values, that's
         # why we need to get the line from the in-memory resultset here
-        lines = (x for x in obj.basket.all_lines() if x.id == obj.id)
+        lines = (x for x in instance.basket.all_lines() if x.id == instance.id)
         line = next(lines, None)
 
         return super(BasketLineSerializer, self).to_representation(line)

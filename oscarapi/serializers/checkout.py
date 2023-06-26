@@ -1,3 +1,4 @@
+# pylint: disable=W0632, W0223
 import warnings
 
 from django.db import IntegrityError
@@ -244,6 +245,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
     def request(self):
         return self.context["request"]
 
+    # pylint: disable=W0613
     def get_initial_order_status(self, basket):
         return settings.INITIAL_ORDER_STATUS
 

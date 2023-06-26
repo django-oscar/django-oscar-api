@@ -1,5 +1,6 @@
-import functools
+# pylint: disable=W0632
 
+import functools
 
 from oscar.core.loading import get_class, get_model
 

@@ -110,8 +110,8 @@ class VoucherWithOfferTest(APITest):
         super(VoucherWithOfferTest, self).setUp()
 
     def test_basket_add_voucher(self):
-        self.login(username="nobody", password="nobody")
         """Check if we can add a voucher with the add-voucher api call"""
+        self.login(username="nobody", password="nobody")
         # first add two products to our basket
         self.response = self.post(
             "api-basket-add-product",

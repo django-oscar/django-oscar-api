@@ -1,3 +1,4 @@
+# pylint: disable=W0632
 from rest_framework import serializers
 
 from oscarapi.utils.loading import get_api_classes

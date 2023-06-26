@@ -1,3 +1,4 @@
+# pylint: disable=W0212, W0201, W0632
 import logging
 import operator
 
@@ -290,6 +291,7 @@ class LazyRemoteFile(RetrieveFileMixin, File):
     It will only download if not allready available locally.
     """
 
+    # pylint: disable=W0231
     def __init__(self, url, name=None, mode="rb"):
         parsed_url = urlsplit(url)
         self.mode = mode
@@ -310,6 +312,7 @@ class LazyRemoteFile(RetrieveFileMixin, File):
                 "Error when downloading image %s, %s: %s" % (self.url, e.code, e.reason)
             )
 
+    # pylint: disable=E0202
     @cached_property
     def file(self):
         return self.retrieve_file()

@@ -1,3 +1,5 @@
+# pylint: disable=W0632, W0212
+
 from django.contrib.auth import get_user_model
 from django.conf import settings as django_settings
 

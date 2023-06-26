@@ -1,3 +1,4 @@
+# pylint: disable=W0632
 from oscar.core.loading import get_model
 
 from rest_framework import generics, response, status, views
@@ -130,11 +131,8 @@ class CheckoutView(views.APIView):
     order_serializer_class = OrderSerializer
     serializer_class = CheckoutSerializer
 
+    # pylint: disable=W0622, W1113
     def post(self, request, format=None, *args, **kwargs):
-        # TODO: Make it possible to create orders with options.
-        # at the moment, no options are passed to this method, which means they
-        # are also not created.
-
         basket = parse_basket_from_hyperlink(request.data, format)
 
         if not request_allows_access_to_basket(request, basket):

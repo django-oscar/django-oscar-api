@@ -48,9 +48,10 @@ lint.installed:
 	touch $@
 
 lint: lint.installed
-	flake8 oscarapi/
+	black --check --exclude "migrations/*" oscarapi/
+	pylint setup.py oscarapi/
 
-black:
+black: lint.installed
 	black --exclude "/migrations/" oscarapi/
 
 uwsgi:

@@ -805,7 +805,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         )
 
         self.assertTrue(ser.is_valid(), str(ser.errors))
-        obj = ser.save()
+        ser.save()
         p.refresh_from_db()
         self.assertTrue(p.attribute_values.filter(attribute__code="image").exists())
 
@@ -830,7 +830,7 @@ class ProductAttributeValueSerializerTest(_ProductSerializerTest):
         )
 
         self.assertTrue(ser.is_valid(), str(ser.errors))
-        obj = ser.save()
+        ser.save()
         p.refresh_from_db()
         self.assertTrue(p.attribute_values.filter(attribute__code="file").exists())
 
@@ -1152,6 +1152,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
     @override_settings(FILE_UPLOAD_MAX_MEMORY_SIZE=1)
     def test_add_image_over_max_size_limit(self):
+        # pylint: disable=no-value-for-parameter
         self.test_add_images()
 
     @override_settings(MEDIA_ROOT=tempfile.gettempdir())
@@ -1219,7 +1220,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         with self.assertRaises(exceptions.ValidationError):
-            obj = ser.save()
+            ser.save()
 
         product.refresh_from_db()
         self.assertEqual(product.images.count(), 0)
@@ -1627,13 +1628,22 @@ class TestProductAdmin(APITest):
 
     def setUp(self):
         super(TestProductAdmin, self).setUp()
-        with open(join(dirname(__file__), "testdata", "oscar-t-shirt.json")) as p:
+        with open(
+            join(dirname(__file__), "testdata", "oscar-t-shirt.json"), encoding="utf-8"
+        ) as p:
             self.tshirt = json.load(p)
-        with open(join(dirname(__file__), "testdata", "lots-of-attributes.json")) as p:
+        with open(
+            join(dirname(__file__), "testdata", "lots-of-attributes.json"),
+            encoding="utf-8",
+        ) as p:
             self.attributes = json.load(p)
-        with open(join(dirname(__file__), "testdata", "child-product.json")) as p:
+        with open(
+            join(dirname(__file__), "testdata", "child-product.json"), encoding="utf-8"
+        ) as p:
             self.child = json.load(p)
-        with open(join(dirname(__file__), "testdata", "entity-product.json")) as p:
+        with open(
+            join(dirname(__file__), "testdata", "entity-product.json"), encoding="utf-8"
+        ) as p:
             self.entity = json.load(p)
 
     def test_staff_has_no_access_by_default(self):
@@ -1699,7 +1709,7 @@ class TestProductAdmin(APITest):
         self.response = self.post("admin-product-list", **data)
         self.response.assertStatusEqual(201)
 
-    def test_patch_product(self):
+    def test_patch_product_custom(self):
         self.login("admin", "admin")
         self.response = self.put(
             "admin-product-list",
@@ -1867,7 +1877,9 @@ class TestProductClassSerializer(APITest):
 
     def setUp(self):
         super(TestProductClassSerializer, self).setUp()
-        with open(join(dirname(__file__), "testdata", "product-class.json")) as p:
+        with open(
+            join(dirname(__file__), "testdata", "product-class.json"), encoding="utf-8"
+        ) as p:
             self.data = json.load(p)
 
     def test_find_existing_attribute_option_groups(self):

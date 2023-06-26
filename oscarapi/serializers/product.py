@@ -1,3 +1,5 @@
+# pylint: disable=W0632
+
 import logging
 from copy import deepcopy
 from django.utils.translation import ugettext as _

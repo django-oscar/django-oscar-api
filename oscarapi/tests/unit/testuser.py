@@ -1,6 +1,5 @@
 from mock import patch
 from django.contrib.auth import get_user_model
-from django.test import override_settings
 from django.urls import reverse
 
 from oscarapi.tests.utils import APITest

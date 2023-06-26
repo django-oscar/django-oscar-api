@@ -1,3 +1,4 @@
+# pylint: disable=W0632
 from django.utils.translation import ugettext_lazy as _
 
 from oscar.apps.basket import signals
@@ -291,6 +292,7 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
         prepped_basket = operations.assign_basket_strategy(basket, self.request)
         return prepped_basket.all_lines()
 
+    # pylint: disable=W1113
     def post(
         self, request, pk, format=None, *args, **kwargs
     ):  # pylint: disable=redefined-builtin,arguments-differ
