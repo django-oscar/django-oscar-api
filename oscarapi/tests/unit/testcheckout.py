@@ -1,5 +1,5 @@
 from decimal import Decimal
-from mock import patch
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.urls import reverse
