@@ -1,5 +1,5 @@
 # pylint: disable=W0632
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from oscar.apps.basket import signals
 from oscar.core.loading import get_model, get_class
