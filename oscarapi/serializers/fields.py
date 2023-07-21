@@ -7,7 +7,7 @@ from urllib.parse import urlsplit, parse_qs
 from urllib.error import HTTPError
 from django.conf import settings as django_settings
 from django.db import IntegrityError
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.files import File
 from django.utils.functional import cached_property
