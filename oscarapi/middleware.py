@@ -202,7 +202,6 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
             and hasattr(request, "user")
             and request.session
         ):
-            print("HIJ HEEFT WEL DIE SHIT GAST")
             # at this point we are sure a basket can be found in the session
             # (if the session hasn't been destroyed by logging out),
             # because it is enforced in process_request.
