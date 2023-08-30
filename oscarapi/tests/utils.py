@@ -121,6 +121,12 @@ class APITest(TestCase):
         for module in modules:
             reload_module(module)
 
+    def assertStartsWith(self, value, startvalue, message=""):
+        if not value.startswith(startvalue):
+            self.fail(
+                "'%s' does not start with '%s'. %s" % (value, startvalue, message)
+            )
+
 
 class ParsedResponse(object):
     def __init__(self, response, unittestcase):

@@ -74,7 +74,7 @@ def get_anonymous_basket(request):
 
     basket_id = get_basket_id_from_session(request)
     try:
-        basket = Basket.open.get(pk=basket_id)
+        basket = Basket.open.get(pk=basket_id, owner=None)
     except Basket.DoesNotExist:
         basket = None
 
@@ -83,7 +83,6 @@ def get_anonymous_basket(request):
 
 def get_user_basket(user):
     "get basket for a user."
-
     try:
         basket, __ = Basket.open.get_or_create(owner=user)
     except Basket.MultipleObjectsReturned:

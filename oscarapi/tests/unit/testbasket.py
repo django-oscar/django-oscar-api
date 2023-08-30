@@ -1,7 +1,7 @@
 import json
 
 from unittest.mock import patch
-
+from django.test import override_settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
@@ -1147,3 +1147,108 @@ class BasketTest(APITest):
         user_basket = get_user_basket(user)
         self.assertEqual(Basket.open.count(), 1)
         self.assertEqual(user_basket, Basket.open.first())
+
+
+@override_settings(
+    MIDDLEWARE=(
+        "django.middleware.common.CommonMiddleware",
+        # 'oscarapi.middleware.HeaderSessionMiddleware',
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        "oscarapi.middleware.ApiBasketMiddleWare",
+        "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
+    )
+)
+class ApiBasketMiddleWareTest(APITest):
+    fixtures = [
+        "product",
+        "productcategory",
+        "productattribute",
+        "productclass",
+        "productattributevalue",
+        "category",
+        "attributeoptiongroup",
+        "attributeoption",
+        "stockrecord",
+        "partner",
+        "option",
+    ]
+
+    def test_basket_login_logout(self):
+        self.assertEqual(
+            Basket.objects.count(), 0, "Initially there should be no baskets"
+        )
+
+        # add something to the anonymous basket, so we get a cookie basket
+        url = reverse("basket:add", kwargs={"pk": 1})
+        post_params = {"child_id": 2, "action": "add", "quantity": 5}
+        response = self.client.post(url, post_params, follow=True)
+
+        self.assertEqual(
+            Basket.objects.count(),
+            1,
+            "After posting to the basket, 1 basket should be created.",
+        )
+        self.assertIn(
+            "oscar_open_basket",
+            self.client.cookies,
+            "An basket cookie should have been created",
+        )
+        self.assertStartsWith(self.client.cookies["oscar_open_basket"].value, "1")
+
+        # retrieve the basket with oscarapi.
+        self.response = self.get("api-basket")
+        self.response.assertValueEqual(
+            "owner", None, "The basket should not have an owner"
+        )
+        self.response.assertValueEqual("id", 1)
+        self.assertStartsWith(self.client.cookies["oscar_open_basket"].value, "1")
+
+        # now lets log in with oscarapi
+        response = self.post("api-login", username="nobody", password="nobody")
+        # and lets retrieve the basket
+        self.response = self.get("api-basket")
+        self.response.assertValueEqual(
+            "owner",
+            "http://testserver/api/users/2/",
+            "the basket after login should have an owner",
+        )
+        self.assertEqual(
+            self.client.cookies["oscar_open_basket"].value,
+            "1:Rdm76bzEHM-N1G6WSTj0Zu9ByZ80a8ggxSkqqvGbC6s",
+            "After logging out the cookie unfortunately does not go away",
+        )
+
+        response = self.client.post(url, post_params, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Basket.objects.count(), 2)
+        self.assertEqual(
+            self.client.cookies["oscar_open_basket"].value,
+            "",
+            "The basket cookie should be removed",
+        )
+
+        self.response = self.delete("api-login")
+        self.assertStartsWith(
+            self.client.cookies["oscar_open_basket"].value,
+            "",
+            "After loging out, nothing happened to the basket cookie",
+        )
+
+        self.response = self.get("api-basket")
+        self.response.assertValueEqual(
+            "owner", None, "The logged out user's basket should not have an owner"
+        )
+        self.assertEqual(
+            Basket.objects.count(),
+            3,
+            "A new basket should be created for the anonymous (logged out) user",
+        )
+        self.assertStartsWith(
+            self.client.cookies["oscar_open_basket"].value,
+            "3",
+            "The basket cookie is re-established after accessing the basket when logged out",
+        )
