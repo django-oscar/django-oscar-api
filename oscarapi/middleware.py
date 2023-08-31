@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import PermissionDenied
 from django.http.response import HttpResponse
-from django.utils.translation import gettext as _
+from django.utils.translation import ugettext as _
 
 from oscar.core.loading import get_class
 
@@ -19,7 +19,6 @@ from oscarapi.basket.operations import (
     get_basket,
 )
 
-from django.utils.functional import SimpleLazyObject, empty
 from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.request import get_domain
 from oscarapi.utils.session import session_id_from_parsed_session_uri, get_session
@@ -157,46 +156,29 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
 
     def __call__(self, request):
         if self.is_api_request(request):
+            request.cookies_to_delete = []
+            # we should make sure that any cookie baskets are turned into
+            # session baskets, since oscarapi uses only baskets from the
+            # session.
+            cookie_key = self.get_cookie_key(request)
 
-            def load_basket_into_session():
-                request.cookies_to_delete = []
-                # we should make sure that any cookie baskets are turned into
-                # session baskets, since oscarapi uses only baskets from the
-                # session.
-                cookie_key = self.get_cookie_key(request)
+            basket = self.get_cookie_basket(
+                cookie_key,
+                request,
+                Exception("get_cookie_basket doesn't use the manager argument"),
+            )
 
-                basket = self.get_cookie_basket(
-                    cookie_key,
-                    request,
-                    Exception("get_cookie_basket doesn't use the manager argument"),
-                )
-
-                if basket is not None:
-                    # when a basket exists and we are already allowed to access
-                    # this basket
-                    if request_allows_access_to_basket(request, basket):
-                        pass
-                    else:
-                        store_basket_in_session(basket, request.session)
-
-            request.basket = SimpleLazyObject(load_basket_into_session)
-
-            response = self.get_response(request)
-            return self.process_response(request, response)
+            if basket is not None:
+                # when a basket exists and we are already allowed to access
+                # this basket
+                if request_allows_access_to_basket(request, basket):
+                    pass
+                else:
+                    store_basket_in_session(basket, request.session)
 
         return super(ApiBasketMiddleWare, self).__call__(request)
 
     def process_response(self, request, response):
-        if not hasattr(request, "basket"):
-            return response
-
-        # If the basket was never initialized we can safely return
-        if (
-            isinstance(request.basket, SimpleLazyObject)
-            and request.basket._wrapped is empty  # pylint: disable=protected-access
-        ):
-            return response
-
         if (
             self.is_api_request(request)
             and hasattr(request, "user")
@@ -208,7 +190,7 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
             # We just have to make sure it is stored as a cookie, because it
             # could have been created by oscarapi.
             cookie_key = self.get_cookie_key(request)
-            basket = get_basket(request)
+            basket = get_basket(request, prepare=False)
             cookie = self.get_basket_hash(basket.id)
 
             # Delete any surplus cookies
