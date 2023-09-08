@@ -9,10 +9,9 @@ sphinx:
   configuration: docs/source/conf.py
 
 python:
-   version: 3.11
    install:
+      - requirements: docs/requirements.txt
       - method: pip
         path: .
         extra_requirements:
           - dev
-      - requirements: docs/requirements.txt
