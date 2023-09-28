@@ -1,6 +1,7 @@
 # pylint: disable=W0212, W0201, W0632
 import logging
 import operator
+import warnings
 
 from os.path import basename, join
 from urllib.parse import urlsplit, parse_qs
@@ -15,8 +16,10 @@ from rest_framework import serializers, relations
 from rest_framework.fields import get_attribute
 
 from oscar.core.loading import get_model, get_class
+from oscarapi.utils.deprecations import RemovedInOScarAPI4
 
 from oscarapi import settings
+from oscarapi.utils.attributes import AttributeFieldBase, attribute_details
 from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.exists import bound_unique_together_get_or_create
 from .exceptions import FieldError
@@ -27,7 +30,6 @@ Category = get_model("catalogue", "Category")
 create_from_breadcrumbs = get_class("catalogue.categories", "create_from_breadcrumbs")
 entity_internal_value = get_api_class("serializers.hooks", "entity_internal_value")
 RetrieveFileMixin = get_api_class(settings.FILE_DOWNLOADER_MODULE, "RetrieveFileMixin")
-attribute_details = operator.itemgetter("code", "value")
 
 
 class TaxIncludedDecimalField(serializers.DecimalField):
@@ -93,7 +95,7 @@ class DrillDownHyperlinkedRelatedField(
         return False
 
 
-class AttributeValueField(serializers.Field):
+class AttributeValueField(AttributeFieldBase, serializers.Field):
     """
     This field is used to handle the value of the ProductAttributeValue model
 
@@ -103,29 +105,45 @@ class AttributeValueField(serializers.Field):
     """
 
     def __init__(self, **kwargs):
+        warnings.warn(
+            "AttributeValueField is deprecated and will be removed in a future version of oscarapi",
+            RemovedInOScarAPI4,
+            stacklevel=2,
+        )
         # this field always needs the full object
         kwargs["source"] = "*"
-        kwargs["error_messages"] = {
-            "no_such_option": _("{code}: Option {value} does not exist."),
-            "invalid": _("Wrong type, {error}."),
-            "attribute_validation_error": _(
-                "Error assigning `{value}` to {code}, {error}."
-            ),
-            "attribute_required": _("Attribute {code} is required."),
-            "attribute_missing": _(
-                "No attribute exist with code={code}, "
-                "please define it in the product_class first."
-            ),
-            "child_without_parent": _(
-                "Can not find attribute if product_class is empty and "
-                "parent is empty as well, child without parent?"
-            ),
-        }
         super(AttributeValueField, self).__init__(**kwargs)
 
     def get_value(self, dictionary):
         # return all the data because this field uses everything
         return dictionary
+
+    def get_data_attribute(self, data):
+        if "product" in data:
+            # we need the attribute to determine the type of the value
+            return ProductAttribute.objects.get(
+                code=data["code"], product_class__products__id=data["product"]
+            )
+        elif "product_class" in data and data["product_class"] is not None:
+            return ProductAttribute.objects.get(
+                code=data["code"], product_class__slug=data.get("product_class")
+            )
+        elif "parent" in data:
+            return ProductAttribute.objects.get(
+                code=data["code"], product_class__products__id=data["parent"]
+            )
+
+    def to_attribute_type_value(self, attribute, code, value):
+        internal_value = super().to_attribute_type_value(attribute, code, value)
+        if attribute.type in [
+            attribute.IMAGE,
+            attribute.FILE,
+        ]:
+            image_field = ImageUrlField()
+            image_field._context = self.context
+            internal_value = image_field.to_internal_value(value)
+
+        return internal_value
 
     def to_internal_value(self, data):  # noqa
         assert "product" in data or "product_class" in data or "parent" in data
@@ -134,49 +152,9 @@ class AttributeValueField(serializers.Field):
             code, value = attribute_details(data)
             internal_value = value
 
-            if "product" in data:
-                # we need the attribute to determine the type of the value
-                attribute = ProductAttribute.objects.get(
-                    code=code, product_class__products__id=data["product"]
-                )
-            elif "product_class" in data and data["product_class"] is not None:
-                attribute = ProductAttribute.objects.get(
-                    code=code, product_class__slug=data.get("product_class")
-                )
-            elif "parent" in data:
-                attribute = ProductAttribute.objects.get(
-                    code=code, product_class__products__id=data["parent"]
-                )
+            attribute = self.get_data_attribute(data)
 
-            if attribute.required and value is None:
-                self.fail("attribute_required", code=code)
-
-            # some of these attribute types need special processing, or their
-            # validation will fail
-            if attribute.type == attribute.OPTION:
-                internal_value = attribute.option_group.options.get(option=value)
-            elif attribute.type == attribute.MULTI_OPTION:
-                if attribute.required and not value:
-                    self.fail("attribute_required", code=code)
-                internal_value = attribute.option_group.options.filter(option__in=value)
-                if len(value) != internal_value.count():
-                    non_existing = set(value) - set(
-                        internal_value.values_list("option", flat=True)
-                    )
-                    non_existing_as_error = ",".join(sorted(non_existing))
-                    self.fail("no_such_option", value=non_existing_as_error, code=code)
-            elif attribute.type == attribute.DATE:
-                date_field = serializers.DateField()
-                internal_value = date_field.to_internal_value(value)
-            elif attribute.type == attribute.DATETIME:
-                date_field = serializers.DateTimeField()
-                internal_value = date_field.to_internal_value(value)
-            elif attribute.type == attribute.ENTITY:
-                internal_value = entity_internal_value(attribute, value)
-            elif attribute.type in [attribute.IMAGE, attribute.FILE]:
-                image_field = ImageUrlField()
-                image_field._context = self.context
-                internal_value = image_field.to_internal_value(value)
+            internal_value = self.to_attribute_type_value(attribute, code, value)
 
             # the rest of the attribute types don't need special processing
             try:

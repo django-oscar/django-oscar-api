@@ -994,6 +994,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         they may cause errors.
         """
         product = Product.objects.get(pk=3)
+        self.assertEqual(product.attribute_values.count(), 11)
         ser = AdminProductSerializer(
             data={
                 "product_class": "t-shirt",
@@ -1006,6 +1007,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
+
         self.assertEqual(
             obj.attribute_values.count(),
             2,
