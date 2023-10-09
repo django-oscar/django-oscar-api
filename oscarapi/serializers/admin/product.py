@@ -145,12 +145,15 @@ class AdminProductSerializer(BaseProductSerializer):
             if (
                 self.partial
             ):  # we need to clean up all the attributes with wrong product class
+                attribute_codes = product_class.attributes.values_list(
+                    "code", flat=True
+                )
                 for attribute_value in instance.attribute_values.exclude(
                     attribute__product_class=product_class
                 ):
                     code = attribute_value.attribute.code
                     if (
-                        code in pclass_option_codes
+                        code in attribute_codes
                     ):  # if the attribute exist also on the new product class, update the attribute
                         attribute_value.attribute = product_class.attributes.get(
                             code=code
