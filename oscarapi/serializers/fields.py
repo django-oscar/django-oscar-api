@@ -16,7 +16,7 @@ from rest_framework import serializers, relations
 from rest_framework.fields import get_attribute
 
 from oscar.core.loading import get_model, get_class
-from oscarapi.utils.deprecations import RemovedInOScarAPI4
+from oscarapi.utils.deprecations import RemovedInFutureRelease
 
 from oscarapi import settings
 from oscarapi.utils.attributes import AttributeFieldBase, attribute_details
@@ -107,7 +107,7 @@ class AttributeValueField(AttributeFieldBase, serializers.Field):
     def __init__(self, **kwargs):
         warnings.warn(
             "AttributeValueField is deprecated and will be removed in a future version of oscarapi",
-            RemovedInOScarAPI4,
+            RemovedInFutureRelease,
             stacklevel=2,
         )
         # this field always needs the full object
