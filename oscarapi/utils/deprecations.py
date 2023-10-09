@@ -1,2 +1,2 @@
-class RemovedInOScarAPI4(PendingDeprecationWarning):
+class RemovedInFutureRelease(PendingDeprecationWarning):
     pass
