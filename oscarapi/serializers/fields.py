@@ -118,7 +118,7 @@ class AttributeValueField(AttributeFieldBase, serializers.Field):
         # return all the data because this field uses everything
         return dictionary
 
-    def get_data_attribute(self, data):
+    def to_product_attribute(self, data):
         if "product" in data:
             # we need the attribute to determine the type of the value
             return ProductAttribute.objects.get(
@@ -152,7 +152,7 @@ class AttributeValueField(AttributeFieldBase, serializers.Field):
             code, value = attribute_details(data)
             internal_value = value
 
-            attribute = self.get_data_attribute(data)
+            attribute = self.to_product_attribute(data)
 
             internal_value = self.to_attribute_type_value(attribute, code, value)
 
