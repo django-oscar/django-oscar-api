@@ -241,24 +241,34 @@ class ProductAttributeValueListSerializer(UpdateListSerializer):
     def to_internal_value(self, data):
         productclasses = set()
         attributes = set()
+        parent = None
 
         for item in data:
             product_class, code = getitems(item, "product_class", "code")
             if product_class:
                 productclasses.add(product_class)
+            if "parent" in item and item["parent"] is not None:
+                parent = item["parent"]
             attributes.add(code)
 
         # if all attributes belong to the same productclass, everything is just
         # as expected and we can take a shortcut by only resolving the
         # productclass to the model instance and nothing else.
-        try:
-            if len(productclasses) == 1 and all(attributes):
-                (product_class,) = productclasses
-                pc = ProductClass.objects.get(slug=product_class)
-                return self.shortcut_to_internal_value(data, pc, attributes)
-        except ProductClass.DoesNotExist:
-            pass
+        attrs_valid = all(attributes)  # no missing attribute codes?
+        if attrs_valid:
+            try:
+                if len(productclasses):
+                    (product_class,) = productclasses
+                    pc = ProductClass.objects.get(slug=product_class)
+                    return self.shortcut_to_internal_value(data, pc, attributes)
+                elif parent:
+                    pc = ProductClass.objects.get(products__id=parent)
+                    return self.shortcut_to_internal_value(data, pc, attributes)
+            except ProductClass.DoesNotExist:
+                pass
 
+        # if we get here we can't take the shortcut, just let everything be
+        # processed by the original serializer and handle the errors.
         return super().to_internal_value(data)
 
     def get_value(self, dictionary):
