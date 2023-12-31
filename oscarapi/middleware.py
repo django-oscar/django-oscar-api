@@ -190,7 +190,7 @@ class ApiBasketMiddleWare(BasketMiddleware, IsApiRequest):
             # We just have to make sure it is stored as a cookie, because it
             # could have been created by oscarapi.
             cookie_key = self.get_cookie_key(request)
-            basket = get_basket(request)
+            basket = get_basket(request, prepare=False)
             cookie = self.get_basket_hash(basket.id)
 
             # Delete any surplus cookies

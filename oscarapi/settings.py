@@ -40,7 +40,7 @@ VOUCHER_FIELDS = overridable(
     "OSCARAPI_VOUCHER_FIELDS",
     default=("name", "code", "start_datetime", "end_datetime"),
 )
-"ik ben harrie"
+
 BASKET_FIELDS = overridable(
     "OSCARAPI_BASKET_FIELDS",
     default=(
