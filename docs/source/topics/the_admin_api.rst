@@ -34,7 +34,7 @@ know the current API url or you only know the product ``upc``.
 
 Suppose we know the full url then it can be done like this::
 
-    session.post(
+    session.patch(
         "http://127.0.0.1:8000/oscarapi/admin/products/1/",
         json={
             "images": [{
@@ -51,7 +51,7 @@ Suppose you don't know the url in the API, you'd have to know some unique attrib
 for example, the UPC. You can just use the product list API and if you send
 enough data to uniquely identify the product, it will succeed::
 
-    session.post(
+    session.patch(
         "http://127.0.0.1:8000/oscarapi/admin/products/",
         json={
             "upc": "1_5_1",
