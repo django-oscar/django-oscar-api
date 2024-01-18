@@ -18,3 +18,4 @@ sandbox/media/
 sandbox/static/
 docs/build/
 lint.installed
+.vscode
