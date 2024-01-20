@@ -5,6 +5,7 @@ To set these settings in you django `settings.py` file, prefix them with
 `OSCARAPI_`. So :const:`oscarapi.settings.EXPOSE_USER_DETAILS` becomes:
 `OSCARAPI_EXPOSE_USER_DETAILS`
 """
+
 from django.contrib.auth import get_user_model
 from oscarapi.utils.settings import overridable
 from oscarapi import version

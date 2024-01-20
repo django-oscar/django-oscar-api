@@ -160,7 +160,6 @@ MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'oscarapi.middleware.HeaderSessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    "django.contrib.sessions.middleware.SessionMiddleware",
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
