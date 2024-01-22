@@ -253,12 +253,12 @@ class BasketTest(APITest):
         basket_lines = self.response["lines"]
 
         self.response = self.client.get(
-            basket_url, HTTP_SESSION_ID="SID:ANON:testserver:anonymous"
+            basket_url, headers={"session-id": "SID:ANON:testserver:anonymous"}
         )
         self.response.assertStatusEqual(200)
 
         self.response = self.client.get(
-            basket_lines, HTTP_SESSION_ID="SID:ANON:testserver:anonymous"
+            basket_lines, headers={"session-id": "SID:ANON:testserver:anonymous"}
         )
         self.response.assertStatusEqual(200)
 
@@ -270,7 +270,7 @@ class BasketTest(APITest):
         # try to acces somebody else's basket (hihi).
         url = reverse("basket-detail", args=(2,))
         self.response = self.client.get(
-            url, HTTP_SESSION_ID="SID:ANON:testserver:anonymous"
+            url, headers={"session-id": "SID:ANON:testserver:anonymous"}
         )
         self.response.assertStatusEqual(
             403, "Script kiddies should fail to collect other users carts."
@@ -278,7 +278,7 @@ class BasketTest(APITest):
 
         url = reverse("basket-lines-list", args=(2,))
         self.response = self.client.get(
-            url, HTTP_SESSION_ID="SID:ANON:testserver:anonymous"
+            url, headers={"session-id": "SID:ANON:testserver:anonymous"}
         )
         self.response.assertStatusEqual(
             403, "Script kiddies should fail to collect other users cart items."
@@ -294,19 +294,19 @@ class BasketTest(APITest):
         basket_lines = self.response["lines"]
 
         self.response = self.client.get(
-            basket_url, HTTP_SESSION_ID="SID:AUTH:testserver:nobody"
+            basket_url, headers={"session-id": "SID:AUTH:testserver:nobody"}
         )
         self.response.assertStatusEqual(200)
 
         self.response = self.client.get(
-            basket_lines, HTTP_SESSION_ID="SID:AUTH:testserver:nobody"
+            basket_lines, headers={"session-id": "SID:AUTH:testserver:nobody"}
         )
         self.response.assertStatusEqual(200)
 
         # try to access somebody else's basket (hihi).
         url = reverse("basket-detail", args=(1,))
         self.response = self.client.get(
-            url, HTTP_SESSION_ID="SID:AUTH:testserver:nobody"
+            url, headers={"session-id": "SID:AUTH:testserver:nobody"}
         )
         self.response.assertStatusEqual(
             403, "Script kiddies should fail to collect other users carts."
@@ -314,7 +314,7 @@ class BasketTest(APITest):
 
         url = reverse("basket-lines-list", args=(1,))
         self.response = self.client.get(
-            url, HTTP_SESSION_ID="SID:AUTH:testserver:nobody"
+            url, headers={"session-id": "SID:AUTH:testserver:nobody"}
         )
         self.response.assertStatusEqual(
             403, "Script kiddies should fail to collect other users cart items."
@@ -329,19 +329,19 @@ class BasketTest(APITest):
         basket_lines = self.response["lines"]
 
         self.response = self.client.get(
-            basket_url, HTTP_SESSION_ID="SID:AUTH:testserver:admin"
+            basket_url, headers={"session-id": "SID:AUTH:testserver:admin"}
         )
         self.response.assertStatusEqual(200)
 
         self.response = self.client.get(
-            basket_lines, HTTP_SESSION_ID="SID:AUTH:testserver:admin"
+            basket_lines, headers={"session-id": "SID:AUTH:testserver:admin"}
         )
         self.response.assertStatusEqual(200)
 
         # try to access somebody else's basket (hihi).
         url = reverse("basket-detail", args=(1,))
         self.response = self.client.get(
-            url, HTTP_SESSION_ID="SID:AUTH:testserver:admin"
+            url, headers={"session-id": "SID:AUTH:testserver:admin"}
         )
         self.response.assertStatusEqual(
             403, "Users cannot access other peoples baskets."
@@ -349,7 +349,7 @@ class BasketTest(APITest):
 
         url = reverse("basket-lines-list", args=(1,))
         self.response = self.client.get(
-            url, HTTP_SESSION_ID="SID:AUTH:testserver:admin"
+            url, headers={"session-id": "SID:AUTH:testserver:admin"}
         )
         self.response.assertStatusEqual(
             403, "Users cannot access other peoples baskets."
