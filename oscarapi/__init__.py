@@ -1,4 +1,3 @@
-default_app_config = "oscarapi.apps.OscarAPIConfig"
 
 try:
     import importlib.metadata as importlib_metadata

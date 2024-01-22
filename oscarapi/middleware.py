@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import PermissionDenied
 from django.http.response import HttpResponse
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from oscar.core.loading import get_class
 
@@ -37,7 +37,7 @@ HTTP_SESSION_ID_REGEX = re.compile(
 
 def parse_session_id(request):
     """Parse a session id from the request"""
-    unparsed_session_id = request.META.get("HTTP_SESSION_ID", None)
+    unparsed_session_id = request.headers.get("session-id", None)
     if unparsed_session_id is not None:
         parsed_session_id = HTTP_SESSION_ID_REGEX.match(unparsed_session_id)
         if parsed_session_id is not None:
