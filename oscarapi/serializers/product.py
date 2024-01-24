@@ -317,7 +317,7 @@ class ProductAttributeValueListSerializer(UpdateListSerializer):
         # child product.
         product.attr._dirty.clear()  # pylint: disable=protected-access
         product.attr.save()
-        return list(product.attr.get_values().filter(attribute__code__in=attr_codes))
+        return list(product.attribute_values.filter(attribute__code__in=attr_codes))
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
