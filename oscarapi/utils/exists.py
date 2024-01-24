@@ -2,6 +2,7 @@
 This module contains functions that can be used to identify an existing piece
 of data in the database based on it's unique attributes
 """
+
 from django.db import models
 
 from oscar.core.loading import get_model
