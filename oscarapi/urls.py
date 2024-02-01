@@ -230,6 +230,8 @@ urlpatterns = [
         UserAddressDetail.as_view(),
         name="useraddress-detail",
     ),
+    # customer wishlist
+    path("wishlists/", WishListListView.as_view(), name="customer-wishlist"),
 ]
 
 admin_urlpatterns = [
