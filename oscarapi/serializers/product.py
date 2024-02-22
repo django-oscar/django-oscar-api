@@ -317,7 +317,12 @@ class ProductAttributeValueListSerializer(UpdateListSerializer):
         # child product.
         product.attr._dirty.clear()  # pylint: disable=protected-access
         product.attr.save()
-        return list(product.attribute_values.filter(attribute__code__in=attr_codes))
+        # we have to make sure to use the correct db_manager in a multidatabase
+        # context, we make sure to use the same database as the passed in manager
+        local_attribute_values = product.attribute_values.db_manager(
+            instance.db
+        ).filter(attribute__code__in=attr_codes)
+        return list(local_attribute_values)
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
