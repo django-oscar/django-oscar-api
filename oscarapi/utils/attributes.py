@@ -69,7 +69,6 @@ class AttributeConverter(AttributeFieldBase):
     def __init__(self, context):
         self.context = context
         self.errors = []
-        self.parent = None
 
     def fail(self, key, **kwargs):
         """
