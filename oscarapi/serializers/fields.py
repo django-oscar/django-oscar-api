@@ -199,10 +199,12 @@ class AttributeValueField(AttributeFieldBase, serializers.Field):
             return value.value.option
         elif obj_type == value.attribute.MULTI_OPTION:
             return value.value.values_list("option", flat=True)
-        elif obj_type == value.attribute.FILE:
-            return value.value.url
-        elif obj_type == value.attribute.IMAGE:
-            return value.value.url
+        elif obj_type in [value.attribute.FILE, value.attribute.IMAGE]:
+            url = value.value.url
+            request = self.context.get("request", None)
+            if request is not None:
+                url = request.build_absolute_uri(url)
+            return url
         elif obj_type == value.attribute.ENTITY:
             if hasattr(value.value, "json"):
                 return value.value.json()

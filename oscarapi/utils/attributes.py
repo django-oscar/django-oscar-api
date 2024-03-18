@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.fields import MISSING_ERROR_MESSAGE
 from rest_framework.exceptions import ErrorDetail
 from oscarapi.utils.loading import get_api_class
+from oscarapi.serializers import fields as oscarapi_fields
 
 attribute_details = operator.itemgetter("code", "value")
 entity_internal_value = get_api_class("serializers.hooks", "entity_internal_value")
@@ -55,6 +56,11 @@ class AttributeFieldBase:
             internal_value = date_field.to_internal_value(value)
         elif attribute.type == attribute.ENTITY:
             internal_value = entity_internal_value(attribute, value)
+        elif attribute.type in [attribute.IMAGE, attribute.FILE]:
+            image_field = oscarapi_fields.ImageUrlField()
+            # pylint: disable=protected-access
+            image_field._context = self.context
+            internal_value = image_field.to_internal_value(value)
 
         return internal_value
 
