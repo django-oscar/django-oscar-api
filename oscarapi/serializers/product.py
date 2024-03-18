@@ -207,6 +207,8 @@ class ProductAttributeValueListSerializer(UpdateListSerializer):
                     ProductAttribute.DATE,
                     ProductAttribute.DATETIME,
                     ProductAttribute.ENTITY,
+                    ProductAttribute.FILE,
+                    ProductAttribute.IMAGE,
                 ]
             )
         }
