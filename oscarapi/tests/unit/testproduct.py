@@ -237,7 +237,8 @@ class ProductTest(APITest):
         self.assertEqual(attributes_by_name["datetime"], "2018-01-02T10:45:00Z")
         self.assertIsInstance(attributes_by_name["file"], str)
         self.assertEqual(
-            attributes_by_name["file"], "/media/images/products/2018/01/sony-xa50ES.pdf"
+            attributes_by_name["file"],
+            "http://testserver/media/images/products/2018/01/sony-xa50ES.pdf",
         )
         self.assertIsInstance(attributes_by_name["float"], float)
         self.assertEqual(attributes_by_name["float"], 3.2)
@@ -247,7 +248,8 @@ class ProductTest(APITest):
         )
         self.assertIsInstance(attributes_by_name["image"], str)
         self.assertEqual(
-            attributes_by_name["image"], "/media/images/products/2018/01/IMG_3777.JPG"
+            attributes_by_name["image"],
+            "http://testserver/media/images/products/2018/01/IMG_3777.JPG",
         )
         self.assertIsInstance(attributes_by_name["integer"], int)
         self.assertEqual(attributes_by_name["integer"], 7)
@@ -994,6 +996,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         they may cause errors.
         """
         product = Product.objects.get(pk=3)
+        self.assertEqual(product.attribute_values.count(), 11)
         ser = AdminProductSerializer(
             data={
                 "product_class": "t-shirt",
@@ -1006,6 +1009,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
+
         self.assertEqual(
             obj.attribute_values.count(),
             2,
