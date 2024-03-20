@@ -16,8 +16,8 @@ from oscarapi import settings
 from oscarapi.utils.files import file_hash
 from oscarapi.utils.exists import find_existing_attribute_option_group
 from oscarapi.utils.accessors import getitems
-from oscarapi.utils.attributes import AttributeConverter
 from oscarapi.serializers.fields import DrillDownHyperlinkedIdentityField
+from oscarapi.utils.attributes import AttributeConverter
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
