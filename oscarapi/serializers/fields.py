@@ -200,6 +200,8 @@ class AttributeValueField(AttributeFieldBase, serializers.Field):
         elif obj_type == value.attribute.MULTI_OPTION:
             return value.value.values_list("option", flat=True)
         elif obj_type in [value.attribute.FILE, value.attribute.IMAGE]:
+            if not value.value:
+                return None
             url = value.value.url
             request = self.context.get("request", None)
             if request is not None:
