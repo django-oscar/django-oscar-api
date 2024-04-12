@@ -186,7 +186,7 @@ class PartnerSerializer(OscarHyperlinkedModelSerializer):
 
 
 class OptionSerializer(OscarHyperlinkedModelSerializer):
-    option_group = AttributeOptionGroupSerializer()
+    option_group = AttributeOptionGroupSerializer(required=False)
     code = serializers.SlugField()
 
     class Meta:
