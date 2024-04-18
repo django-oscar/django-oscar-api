@@ -7,8 +7,13 @@ from rest_framework import serializers
 
 import oscar.models.fields
 
+from oscarapi.utils.loading import get_api_class
 from oscarapi.utils.exists import construct_id_filter
 from .fields import ImageUrlField
+
+get_related_objects_to_delete = get_api_class(
+    "utils.exists", "get_related_objects_to_delete"
+)
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +62,10 @@ class OscarSerializer(object):
             # the product class changing for example, lots of attributes would become
             # obsolete.
             current_pks = [p.pk for p in updated_values]
-            manager.exclude(pk__in=current_pks).delete()
+            related_objects_to_delete = get_related_objects_to_delete(
+                name, manager, current_pks
+            )
+            related_objects_to_delete.delete()
         else:
             manager.set(updated_values)
 

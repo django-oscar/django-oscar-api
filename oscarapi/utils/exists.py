@@ -93,3 +93,8 @@ def bound_unique_together_get_or_create(bound_queryset, datum):
 
 def bound_unique_together_get_or_create_multiple(bound_queryset, data):
     return [bound_unique_together_get_or_create(bound_queryset, date) for date in data]
+
+
+# pylint: disable=W0613
+def get_related_objects_to_delete(name, manager, current_pks):
+    return manager.exclude(pk__in=current_pks)
