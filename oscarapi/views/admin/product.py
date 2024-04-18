@@ -2,10 +2,13 @@
 from django.http import Http404
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.exists import construct_id_filter
+from oscarapi.utils.categories import upsert_categories
 
 APIAdminPermission = get_api_class("permissions", "APIAdminPermission")
 ProductAttributeSerializer, AttributeOptionGroupSerializer = get_api_classes(
@@ -140,3 +143,13 @@ class CategoryAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = AdminCategorySerializer
     permission_classes = (APIAdminPermission,)
+    
+    
+class CategoryBulkAdminApi(APIView):
+    def get(self, request, format=None):
+        return Response(Category.dump_bulk(keep_ids=False))
+        
+    def post(self, request):
+        upsert_categories(request.data)
+        
+        return self.get(request)

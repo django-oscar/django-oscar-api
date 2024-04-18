@@ -37,6 +37,7 @@ def ADMIN_APIS(r, f):
         ("productclasses", reverse("admin-productclass-list", request=r, format=f)),
         ("products", reverse("admin-product-list", request=r, format=f)),
         ("categories", reverse("admin-category-list", request=r, format=f)),
+        ("categories-bulk", reverse("admin-category-bulk", request=r, format=f)),
         ("orders", reverse("admin-order-list", request=r, format=f)),
         ("partners", reverse("admin-partner-list", request=r, format=f)),
         ("users", reverse("admin-user-list", request=r, format=f)),

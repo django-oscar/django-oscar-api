@@ -71,3 +71,38 @@ def find_from_full_slug(breadcrumb_str, separator="/"):
     category_names = [x.strip() for x in breadcrumb_str.split(separator)]
     categories = create_from_sequence(category_names, False)
     return categories[-1]
+
+
+
+def upsert_categories(data, parent_category=None):
+    if parent_category is None:
+        # Starting from root, we want the first category in the root
+        sibling = Category.get_first_root_node()
+    else:
+        # We are further down the category tree, we want to get the first child from the parent
+        sibling = parent_category.get_first_child()
+
+    for cat in data:
+        children = cat.pop("children", None)
+        
+        try:
+            category = Category.objects.get(code=cat["data"]["code"])
+        except Category.DoesNotExist:
+            # Category with code does not exist, create it on the root
+            category = Category.add_root(**cat["data"])
+
+        if sibling is not None:
+            if category.pk != sibling.pk:
+                # Move the category to the right of the sibling
+                category.move(sibling, pos="right")
+        elif parent_category is not None:
+            if category.get_parent().pk != parent_category.pk:
+                # Move the category as the first child under the parent category since we have not sibling
+                category.move(parent_category, pos="first-child")
+
+        # The category is now the sibling, new categories will be moved to the right of this category
+        sibling = category
+        
+        if children:
+            # Add children under this category
+            upsert_categories(children, parent_category=category)
