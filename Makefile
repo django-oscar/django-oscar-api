@@ -18,10 +18,10 @@ test:
 	python sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_true
 	python sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_false
 
-coverage:
-	coverage run sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_true
+coverage:	
 	coverage run sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_false
 	coverage report -m
+	coverage html
 	coverage xml -i
 
 docker-build:
