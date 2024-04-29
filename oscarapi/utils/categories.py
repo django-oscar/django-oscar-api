@@ -110,7 +110,6 @@ def _upsert_categories(data, parent_category=None):
                 category = Category.add_root(**cat["data"])
 
         if sibling is not None:
-
             if category.pk != sibling.pk:
                 # Move the category to the right of the sibling
                 category.move(sibling, pos="right")
@@ -121,7 +120,6 @@ def _upsert_categories(data, parent_category=None):
             ):
                 # Move the category as the first child under the parent category since we have not sibling
                 category.move(parent_category, pos="first-child")
-                # category.save()
 
         # The category is now the sibling, new categories will be moved to the right of this category
         sibling = category
