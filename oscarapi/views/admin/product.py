@@ -143,13 +143,12 @@ class CategoryAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = AdminCategorySerializer
     permission_classes = (APIAdminPermission,)
-    
-    
+
+
 class CategoryBulkAdminApi(APIView):
-    def get(self, request, format=None):
+    def get(self, request, *args, **kwargs):
         return Response(Category.dump_bulk(keep_ids=False))
-        
+
     def post(self, request):
         upsert_categories(request.data)
-        
         return self.get(request)
