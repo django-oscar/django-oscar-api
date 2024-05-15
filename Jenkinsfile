@@ -8,7 +8,7 @@ pipeline {
         stage('Build') {
             steps {
                 withPythonEnv('System-CPython-3.10') {
-                    withEnv(['PIP_INDEX_URL=https://pypi.uwkm.nl/voxyan/testing/+simple/']) {
+                    withEnv(['PIP_INDEX_URL=https://pypi.uwkm.nl/voxyan/oscar/+simple/']) {
                         pysh "make install"
                     }
                 }
