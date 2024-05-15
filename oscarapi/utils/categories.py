@@ -71,3 +71,66 @@ def find_from_full_slug(breadcrumb_str, separator="/"):
     category_names = [x.strip() for x in breadcrumb_str.split(separator)]
     categories = create_from_sequence(category_names, False)
     return categories[-1]
+
+
+def upsert_categories(data):
+    categories_to_update, fields_to_update = _upsert_categories(data)
+
+    if categories_to_update and fields_to_update:
+        Category.objects.bulk_update(categories_to_update, fields_to_update)
+
+
+def _upsert_categories(data, parent_category=None):
+    if parent_category is None:
+        # Starting from root, we want the first category in the root
+        sibling = Category.get_first_root_node()
+    else:
+        # We are further down the category tree, we want to get the first child from the parent
+        sibling = parent_category.get_first_child()
+
+    categories_to_update = []
+    category_fields_to_update = set()
+
+    for cat in data:
+        children = cat.pop("children", None)
+
+        try:
+            category = Category.objects.get(code=cat["data"]["code"])
+
+            for key, value in cat["data"].items():
+                setattr(category, key, value)
+                category_fields_to_update.add(key)
+
+            categories_to_update.append(category)
+        except Category.DoesNotExist:
+            # Category with code does not exist, create it on the root or under the parent
+            if parent_category:
+                category = parent_category.add_child(**cat["data"])
+            else:
+                category = Category.add_root(**cat["data"])
+
+        if sibling is not None:
+            if category.pk != sibling.pk:
+                # Move the category to the right of the sibling
+                category.move(sibling, pos="right")
+        elif parent_category is not None:
+            get_parent = category.get_parent()
+            if (get_parent is None and parent_category is not None) or (
+                get_parent.pk != parent_category.pk
+            ):
+                # Move the category as the first child under the parent category since we have not sibling
+                category.move(parent_category, pos="first-child")
+
+        # The category is now the sibling, new categories will be moved to the right of this category
+        sibling = category
+
+        if children:
+            # Add children under this category
+            _categories_to_update, _category_fields_to_update = _upsert_categories(
+                children, parent_category=category
+            )
+            categories_to_update.extend(_categories_to_update)
+            if _category_fields_to_update:
+                category_fields_to_update.update(_category_fields_to_update)
+
+    return categories_to_update, category_fields_to_update

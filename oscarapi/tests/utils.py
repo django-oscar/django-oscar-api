@@ -53,7 +53,15 @@ class APITest(TestCase):
         )
         return True
 
-    def api_call(self, url_name, method, session_id=None, authenticated=False, **data):
+    def api_call(
+        self,
+        url_name,
+        method,
+        session_id=None,
+        authenticated=False,
+        manual_data=None,
+        **data
+    ):
         try:
             url = reverse(url_name)
         except NoReverseMatch:
@@ -65,7 +73,9 @@ class APITest(TestCase):
             kwargs["HTTP_SESSION_ID"] = "SID:%s:testserver:%s" % (auth_type, session_id)
 
         response = None
-        if data:
+        if manual_data is not None:
+            response = method(url, json.dumps(manual_data), **kwargs)
+        elif data:
             response = method(url, json.dumps(data), **kwargs)
         else:
             response = method(url, **kwargs)
