@@ -54,7 +54,7 @@ setup(
     ],
     # mark test target to require extras.
     extras_require={
-        "dev": ["coverage", "mock", "twine", "wheel", "easy_thumbnails"],
+        "dev": ["coverage", "mock", "twine", "wheel", "sorl-thumbnail"],
         "lint": ["pylint", "pylint-django", "black>=23.1.0"],
     },
 )
