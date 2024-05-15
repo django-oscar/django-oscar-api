@@ -24,7 +24,7 @@ pipeline {
         stage('Test') {
             steps {
                 withPythonEnv('System-CPython-3.10') {
-                    pysh "make test"
+                    pysh "make coverage"
                 }
             }
             post {
