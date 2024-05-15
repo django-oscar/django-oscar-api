@@ -43,15 +43,11 @@ publish_release_testpypi: build_release
 publish_release: build_release
 	twine upload dist/*
 
-lint.installed:
-	pip install -e .[lint]
-	touch $@
-
-lint: lint.installed
+lint:
 	black --check --exclude "migrations/*" oscarapi/
 	pylint setup.py oscarapi/
 
-black: lint.installed
+black:
 	black --exclude "/migrations/" oscarapi/
 
 uwsgi:
