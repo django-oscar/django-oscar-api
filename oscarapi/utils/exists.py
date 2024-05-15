@@ -57,7 +57,7 @@ def find_existing_attribute_option_group(name, options):
         AttributeOptionGroup.objects.filter(name=name)
         .annotate(options_count=models.Count("options"))
         .filter(options_count=len(options))
-        .filter(options__option__in=option)
+        .filter(options__option__in=options)
     )
 
     try:
