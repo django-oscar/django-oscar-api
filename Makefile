@@ -8,7 +8,7 @@ clean:
 	rm -Rf build/
 
 install:
-	pip install -e .[dev]
+	pip install -e .[dev] --upgrade --upgrade-strategy=eager --pre
 
 sandbox: install
 	python sandbox/manage.py migrate
@@ -43,15 +43,11 @@ publish_release_testpypi: build_release
 publish_release: build_release
 	twine upload dist/*
 
-lint.installed:
-	pip install -e .[lint]
-	touch $@
-
-lint: lint.installed
+lint:
 	black --check --exclude "migrations/*" oscarapi/
 	pylint setup.py oscarapi/
 
-black: lint.installed
+black:
 	black --exclude "/migrations/" oscarapi/
 
 uwsgi:

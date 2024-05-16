@@ -237,7 +237,8 @@ class ProductTest(APITest):
         self.assertEqual(attributes_by_name["datetime"], "2018-01-02T10:45:00Z")
         self.assertIsInstance(attributes_by_name["file"], str)
         self.assertEqual(
-            attributes_by_name["file"], "/media/images/products/2018/01/sony-xa50ES.pdf"
+            attributes_by_name["file"],
+            "http://testserver/media/images/products/2018/01/sony-xa50ES.pdf",
         )
         self.assertIsInstance(attributes_by_name["float"], float)
         self.assertEqual(attributes_by_name["float"], 3.2)
@@ -247,7 +248,8 @@ class ProductTest(APITest):
         )
         self.assertIsInstance(attributes_by_name["image"], str)
         self.assertEqual(
-            attributes_by_name["image"], "/media/images/products/2018/01/IMG_3777.JPG"
+            attributes_by_name["image"],
+            "http://testserver/media/images/products/2018/01/IMG_3777.JPG",
         )
         self.assertIsInstance(attributes_by_name["integer"], int)
         self.assertEqual(attributes_by_name["integer"], 7)
@@ -994,6 +996,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         they may cause errors.
         """
         product = Product.objects.get(pk=3)
+        self.assertEqual(product.attribute_values.count(), 11)
         ser = AdminProductSerializer(
             data={
                 "product_class": "t-shirt",
@@ -1006,6 +1009,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
+
         self.assertEqual(
             obj.attribute_values.count(),
             2,
@@ -2131,3 +2135,284 @@ class AdminCategoryApiTest(APITest):
         self.assertEqual(Category.objects.count(), 3)
         self.response.assertStatusEqual(201)
         self.assertEqual(self.response["description"], "Klakaa")
+
+
+@skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
+class AdminBulkCategoryApiTest(APITest):
+    def test_create_category_tree(self):
+        Category.objects.all().delete()
+        data = [
+            {
+                "data": {"code": "henk", "name": "Henk"},
+                "children": [
+                    {"data": {"code": "klaas", "name": "Klaas"}},
+                    {"data": {"code": "klaas2", "name": "Klaas 2"}},
+                ],
+            },
+            {
+                "data": {
+                    "code": "harrie",
+                    "name": "Harrie",
+                    "description": "Dit is de description",
+                }
+            },
+        ]
+
+        self.response = self.post("admin-category-bulk", manual_data=data)
+
+        self.assertEqual(Category.objects.count(), 4)
+
+        self.assertTrue(Category.objects.filter(name="Henk", code="henk").exists())
+
+        klaas2 = Category.objects.get(code="klaas2")
+        self.assertEqual(klaas2.get_parent().code, "henk")
+        self.assertEqual(klaas2.depth, 2)
+        self.assertEqual(
+            Category.dump_bulk(),
+            [
+                {
+                    "data": {
+                        "name": "Henk",
+                        "code": "henk",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "henk",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 1,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Klaas",
+                                "code": "klaas",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 2,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 2",
+                                "code": "klaas2",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-2",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 3,
+                        },
+                    ],
+                },
+                {
+                    "data": {
+                        "name": "Harrie",
+                        "code": "harrie",
+                        "description": "Dit is de description",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "harrie",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 4,
+                },
+            ],
+        )
+
+        data = [
+            {
+                "data": {"code": "henk", "name": "Henk nieuw"},
+                "children": [
+                    {"data": {"code": "klaas", "name": "Klaas"}},
+                ],
+            },
+            {
+                "data": {
+                    "code": "harrie",
+                    "name": "Harrie",
+                    "description": "Dit is de description",
+                }
+            },
+            {"data": {"code": "klaas2", "name": "Klaas 2"}},
+        ]
+
+        self.response = self.post("admin-category-bulk", manual_data=data)
+
+        self.assertTrue(
+            Category.objects.filter(name="Henk nieuw", code="henk").exists()
+        )
+
+        self.assertEqual(Category.objects.count(), 4)
+
+        klaas2.refresh_from_db()
+        self.assertEqual(klaas2.get_parent(), None)
+        self.assertEqual(klaas2.depth, 1)
+
+        self.assertEqual(
+            Category.dump_bulk(),
+            [
+                {
+                    "data": {
+                        "name": "Henk nieuw",
+                        "code": "henk",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "henk",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 1,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Klaas",
+                                "code": "klaas",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 2,
+                        }
+                    ],
+                },
+                {
+                    "data": {
+                        "name": "Harrie",
+                        "code": "harrie",
+                        "description": "Dit is de description",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "harrie",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 4,
+                },
+                {
+                    "data": {
+                        "name": "Klaas 2",
+                        "code": "klaas2",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "klaas-2",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 3,
+                },
+            ],
+        )
+
+        data = [
+            {
+                "data": {
+                    "code": "harrie",
+                    "name": "Harrie",
+                    "description": "Dit is de description",
+                }
+            },
+            {
+                "data": {"code": "henk", "name": "Henk nieuw"},
+                "children": [
+                    {"data": {"code": "klaas", "name": "Klaas"}},
+                    {"data": {"code": "klaas2", "name": "Klaas 2"}},
+                ],
+            },
+        ]
+
+        self.response = self.post("admin-category-bulk", manual_data=data)
+
+        self.assertTrue(
+            Category.objects.filter(name="Henk nieuw", code="henk").exists()
+        )
+
+        self.assertEqual(Category.objects.count(), 4)
+
+        klaas2.refresh_from_db()
+        self.assertEqual(klaas2.get_parent().code, "henk")
+        self.assertEqual(klaas2.depth, 2)
+
+        self.assertEqual(
+            Category.dump_bulk(),
+            [
+                {
+                    "data": {
+                        "name": "Harrie",
+                        "code": "harrie",
+                        "description": "Dit is de description",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "harrie",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 4,
+                },
+                {
+                    "data": {
+                        "name": "Henk nieuw",
+                        "code": "henk",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "henk",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 1,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Klaas",
+                                "code": "klaas",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 2,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 2",
+                                "code": "klaas2",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-2",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 3,
+                        },
+                    ],
+                },
+            ],
+        )

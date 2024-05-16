@@ -2,6 +2,7 @@
 
 import logging
 from copy import deepcopy
+from django.db.models.manager import Manager
 from django.utils.translation import gettext as _
 
 from rest_framework import serializers
@@ -15,8 +16,8 @@ from oscarapi import settings
 from oscarapi.utils.files import file_hash
 from oscarapi.utils.exists import find_existing_attribute_option_group
 from oscarapi.utils.accessors import getitems
-
 from oscarapi.serializers.fields import DrillDownHyperlinkedIdentityField
+from oscarapi.utils.attributes import AttributeConverter
 from oscarapi.serializers.utils import (
     OscarModelSerializer,
     OscarHyperlinkedModelSerializer,
@@ -195,6 +196,83 @@ class OptionSerializer(OscarHyperlinkedModelSerializer):
 
 
 class ProductAttributeValueListSerializer(UpdateListSerializer):
+    # pylint: disable=unused-argument
+    def shortcut_to_internal_value(self, data, productclass, attributes):
+        difficult_attributes = {
+            at.code: at
+            for at in productclass.attributes.filter(
+                type__in=[
+                    ProductAttribute.OPTION,
+                    ProductAttribute.MULTI_OPTION,
+                    ProductAttribute.DATE,
+                    ProductAttribute.DATETIME,
+                    ProductAttribute.ENTITY,
+                    ProductAttribute.FILE,
+                    ProductAttribute.IMAGE,
+                ]
+            )
+        }
+        cv = AttributeConverter(self.context)
+        internal_value = []
+        for item in data:
+            code, value = getitems(item, "code", "value")
+            if code is None:  # delegate error state to child serializer
+                internal_value.append(self.child.to_internal_value(item))
+
+            if code in difficult_attributes:
+                attribute = difficult_attributes[code]
+                converted_value = cv.to_attribute_type_value(attribute, code, value)
+                internal_value.append(
+                    {
+                        "value": converted_value,
+                        "attribute": attribute,
+                        "product_class": productclass,
+                    }
+                )
+            else:
+                internal_value.append(
+                    {
+                        "value": value,
+                        "attribute": code,
+                        "product_class": productclass,
+                    }
+                )
+
+        return internal_value
+
+    def to_internal_value(self, data):
+        productclasses = set()
+        attributes = set()
+        parent = None
+
+        for item in data:
+            product_class, code = getitems(item, "product_class", "code")
+            if product_class:
+                productclasses.add(product_class)
+            if "parent" in item and item["parent"] is not None:
+                parent = item["parent"]
+            attributes.add(code)
+
+        # if all attributes belong to the same productclass, everything is just
+        # as expected and we can take a shortcut by only resolving the
+        # productclass to the model instance and nothing else.
+        attrs_valid = all(attributes)  # no missing attribute codes?
+        if attrs_valid:
+            try:
+                if len(productclasses):
+                    (product_class,) = productclasses
+                    pc = ProductClass.objects.get(slug=product_class)
+                    return self.shortcut_to_internal_value(data, pc, attributes)
+                elif parent:
+                    pc = ProductClass.objects.get(products__id=parent)
+                    return self.shortcut_to_internal_value(data, pc, attributes)
+            except ProductClass.DoesNotExist:
+                pass
+
+        # if we get here we can't take the shortcut, just let everything be
+        # processed by the original serializer and handle the errors.
+        return super().to_internal_value(data)
+
     def get_value(self, dictionary):
         values = super(ProductAttributeValueListSerializer, self).get_value(dictionary)
         if values is empty:
@@ -204,6 +282,49 @@ class ProductAttributeValueListSerializer(UpdateListSerializer):
         return [
             dict(value, product_class=product_class, parent=parent) for value in values
         ]
+
+    def to_representation(self, data):
+        if isinstance(data, Manager):
+            # use a cached query from product.attr to get the attributes instead
+            # if an silly .all() that clones the queryset and performs a new query
+            _, product = self.get_name_and_rel_instance(data)
+            iterable = product.attr.get_values()
+        else:
+            iterable = data
+
+        return [self.child.to_representation(item) for item in iterable]
+
+    def update(self, instance, validated_data):
+        assert isinstance(instance, Manager)
+
+        _, product = self.get_name_and_rel_instance(instance)
+
+        attr_codes = []
+        product.attr.initialize()
+        for validated_datum in validated_data:
+            # leave all the attribute saving to the ProductAttributesContainer instead
+            # of the child serializers
+            attribute, value = getitems(validated_datum, "attribute", "value")
+            if hasattr(
+                attribute, "code"
+            ):  # if the attribute is a model instance use the code
+                product.attr.set(attribute.code, value, validate_identifier=False)
+                attr_codes.append(attribute.code)
+            else:
+                product.attr.set(attribute, value, validate_identifier=False)
+                attr_codes.append(attribute)
+
+        # if we don't clear the dirty attributes all parent attributes
+        # are marked as explicitly set, so they will be copied to the
+        # child product.
+        product.attr._dirty.clear()  # pylint: disable=protected-access
+        product.attr.save()
+        # we have to make sure to use the correct db_manager in a multidatabase
+        # context, we make sure to use the same database as the passed in manager
+        local_attribute_values = product.attribute_values.db_manager(
+            instance.db
+        ).filter(attribute__code__in=attr_codes)
+        return list(local_attribute_values)
 
 
 class ProductAttributeValueSerializer(OscarModelSerializer):
