@@ -1173,8 +1173,9 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "description": "Henk",
                 "images": [
                     {
-                        "original": "https://testserver/%s/image.jpg"
-                        % settings.MEDIA_ROOT,
+                        "original": (
+                            "https://testserver/%s/image.jpg" % settings.MEDIA_ROOT
+                        ),
                         "caption": "HA! IK HEET HARRIE",
                     }
                 ],
@@ -1210,7 +1211,9 @@ class AdminProductSerializerTest(_ProductSerializerTest):
                 "description": "Henk",
                 "images": [
                     {
-                        "original": "https://example.com/image-that-does-not-exist-at-all.png",
+                        "original": (
+                            "https://example.com/image-that-does-not-exist-at-all.png"
+                        ),
                         "caption": "HA! IK HEET HARRIE",
                     }
                 ],

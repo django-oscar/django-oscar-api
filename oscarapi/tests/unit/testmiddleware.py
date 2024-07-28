@@ -105,7 +105,7 @@ class HeaderSessionMiddlewareTest(TestCase):
         request = self.rf.get(
             basket_url, HTTP_SESSION_ID="SID:ANON:example.com:987171879"
         )
-        response = HeaderSessionMiddleware().process_request(request)
+        response = HeaderSessionMiddleware(lambda: None).process_request(request)
         self.assertEqual(response.status_code, 403)
         self.assertEqual(
             response.content,

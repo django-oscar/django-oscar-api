@@ -27,6 +27,7 @@
         <field type="PositiveIntegerField" name="num_applications">0</field>
         <field type="PositiveIntegerField" name="num_orders">0</field>
         <field type="CharField" name="redirect_url"/>
+        <field type="BooleanField" name="exclusive">False</field>
         <field type="DateTimeField" name="date_created">2015-11-16T11:08:15.653721+00:00</field>
     </object>
     <object pk="1" model="offer.benefit">
