@@ -1,4 +1,5 @@
 from django.utils.translation import gettext as _
+from django.db import transaction
 
 from rest_framework.exceptions import NotFound
 
@@ -74,12 +75,13 @@ def find_from_full_slug(breadcrumb_str, separator="/"):
 
 
 def upsert_categories(data):
-    categories_to_update, fields_to_update = _upsert_categories(data)
+    with transaction.atomic():
+        categories_to_update, fields_to_update = _upsert_categories(data)
 
-    if categories_to_update and fields_to_update:
-        Category.objects.bulk_update(categories_to_update, fields_to_update)
+        if categories_to_update and fields_to_update:
+            Category.objects.bulk_update(categories_to_update, fields_to_update)
 
-    Category.fix_tree()
+        Category.fix_tree()
 
 
 def _upsert_categories(data, parent_category=None):
