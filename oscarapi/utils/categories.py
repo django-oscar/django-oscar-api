@@ -1,4 +1,5 @@
 from django.utils.translation import gettext as _
+from django.db import transaction
 
 from rest_framework.exceptions import NotFound
 
@@ -74,19 +75,22 @@ def find_from_full_slug(breadcrumb_str, separator="/"):
 
 
 def upsert_categories(data):
-    categories_to_update, fields_to_update = _upsert_categories(data)
+    with transaction.atomic():
+        categories_to_update, fields_to_update = _upsert_categories(data)
 
-    if categories_to_update and fields_to_update:
-        Category.objects.bulk_update(categories_to_update, fields_to_update)
+        if categories_to_update and fields_to_update:
+            Category.objects.bulk_update(categories_to_update, fields_to_update)
+
+        Category.fix_tree()
 
 
 def _upsert_categories(data, parent_category=None):
     if parent_category is None:
-        # Starting from root, we want the first category in the root
-        sibling = Category.get_first_root_node()
+        # Get the last category in the root
+        sibling = Category.get_last_root_node()
     else:
-        # We are further down the category tree, we want to get the first child from the parent
-        sibling = parent_category.get_first_child()
+        # Set sibling to None if there is a parent category, we want the first category in the data to be added as a first-child of the parent
+        sibling = None
 
     categories_to_update = []
     category_fields_to_update = set()
@@ -118,8 +122,11 @@ def _upsert_categories(data, parent_category=None):
             if (get_parent is None and parent_category is not None) or (
                 get_parent.pk != parent_category.pk
             ):
-                # Move the category as the first child under the parent category since we have not sibling
+                # Move the category as the first child under the parent category since we have no sibling
                 category.move(parent_category, pos="first-child")
+
+        # Update the new path from the database after moving the category to it's new home
+        category.refresh_from_db(fields=["path"])
 
         # The category is now the sibling, new categories will be moved to the right of this category
         sibling = category
