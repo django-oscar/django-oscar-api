@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-__version__ = "3.2.4"
+__version__ = "3.2.7"
 
 setup(
     # package name in pypi
@@ -50,11 +50,18 @@ setup(
         "setuptools",
         "django-oscar>=3.2",
         "Django>=3.2",
-        "djangorestframework>=3.9"
+        "djangorestframework>=3.9",
     ],
     # mark test target to require extras.
     extras_require={
-        "dev": ["coverage", "mock", "twine", "wheel", "easy_thumbnails"],
-        "lint": ["pylint", "pylint-django", "black>=23.1.0"],
+        "dev": [
+            "coverage",
+            "wheel",
+            "easy_thumbnails",
+            "vdt.versionplugin.wheel",
+            "pylint",
+            "pylint-django",
+            "black>=23.1.0",
+        ],
     },
 )

@@ -237,7 +237,8 @@ class ProductTest(APITest):
         self.assertEqual(attributes_by_name["datetime"], "2018-01-02T10:45:00Z")
         self.assertIsInstance(attributes_by_name["file"], str)
         self.assertEqual(
-            attributes_by_name["file"], "/media/images/products/2018/01/sony-xa50ES.pdf"
+            attributes_by_name["file"],
+            "http://testserver/media/images/products/2018/01/sony-xa50ES.pdf",
         )
         self.assertIsInstance(attributes_by_name["float"], float)
         self.assertEqual(attributes_by_name["float"], 3.2)
@@ -247,7 +248,8 @@ class ProductTest(APITest):
         )
         self.assertIsInstance(attributes_by_name["image"], str)
         self.assertEqual(
-            attributes_by_name["image"], "/media/images/products/2018/01/IMG_3777.JPG"
+            attributes_by_name["image"],
+            "http://testserver/media/images/products/2018/01/IMG_3777.JPG",
         )
         self.assertIsInstance(attributes_by_name["integer"], int)
         self.assertEqual(attributes_by_name["integer"], 7)
@@ -994,6 +996,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         they may cause errors.
         """
         product = Product.objects.get(pk=3)
+        self.assertEqual(product.attribute_values.count(), 11)
         ser = AdminProductSerializer(
             data={
                 "product_class": "t-shirt",
@@ -1006,6 +1009,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
+
         self.assertEqual(
             obj.attribute_values.count(),
             2,
@@ -2131,3 +2135,872 @@ class AdminCategoryApiTest(APITest):
         self.assertEqual(Category.objects.count(), 3)
         self.response.assertStatusEqual(201)
         self.assertEqual(self.response["description"], "Klakaa")
+
+
+@skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
+class AdminBulkCategoryApiTest(APITest):
+    def test_create_category_tree(self):
+        Category.objects.all().delete()
+        data = [
+            {
+                "data": {"code": "henk", "name": "Henk"},
+                "children": [
+                    {"data": {"code": "klaas", "name": "Klaas"}},
+                    {"data": {"code": "klaas2", "name": "Klaas 2"}},
+                ],
+            },
+            {
+                "data": {
+                    "code": "harrie",
+                    "name": "Harrie",
+                    "description": "Dit is de description",
+                }
+            },
+        ]
+
+        self.response = self.post("admin-category-bulk", manual_data=data)
+
+        self.assertEqual(Category.objects.count(), 4)
+
+        self.assertTrue(Category.objects.filter(name="Henk", code="henk").exists())
+
+        klaas2 = Category.objects.get(code="klaas2")
+        self.assertEqual(klaas2.get_parent().code, "henk")
+        self.assertEqual(klaas2.depth, 2)
+        self.assertEqual(
+            Category.dump_bulk(),
+            [
+                {
+                    "data": {
+                        "name": "Henk",
+                        "code": "henk",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "henk",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 1,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Klaas",
+                                "code": "klaas",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 2,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 2",
+                                "code": "klaas2",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-2",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 3,
+                        },
+                    ],
+                },
+                {
+                    "data": {
+                        "name": "Harrie",
+                        "code": "harrie",
+                        "description": "Dit is de description",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "harrie",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 4,
+                },
+            ],
+        )
+
+        data = [
+            {
+                "data": {"code": "henk", "name": "Henk nieuw"},
+                "children": [
+                    {"data": {"code": "klaas", "name": "Klaas"}},
+                ],
+            },
+            {
+                "data": {
+                    "code": "harrie",
+                    "name": "Harrie",
+                    "description": "Dit is de description",
+                }
+            },
+            {"data": {"code": "klaas2", "name": "Klaas 2"}},
+        ]
+
+        self.response = self.post("admin-category-bulk", manual_data=data)
+
+        self.assertTrue(
+            Category.objects.filter(name="Henk nieuw", code="henk").exists()
+        )
+
+        self.assertEqual(Category.objects.count(), 4)
+
+        klaas2.refresh_from_db()
+        self.assertEqual(klaas2.get_parent(), None)
+        self.assertEqual(klaas2.depth, 1)
+
+        self.assertEqual(
+            Category.dump_bulk(),
+            [
+                {
+                    "data": {
+                        "name": "Henk nieuw",
+                        "code": "henk",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "henk",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 1,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Klaas",
+                                "code": "klaas",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 2,
+                        }
+                    ],
+                },
+                {
+                    "data": {
+                        "name": "Harrie",
+                        "code": "harrie",
+                        "description": "Dit is de description",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "harrie",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 4,
+                },
+                {
+                    "data": {
+                        "name": "Klaas 2",
+                        "code": "klaas2",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "klaas-2",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 3,
+                },
+            ],
+        )
+
+        data = [
+            {
+                "data": {
+                    "code": "harrie",
+                    "name": "Harrie",
+                    "description": "Dit is de description",
+                }
+            },
+            {
+                "data": {"code": "henk", "name": "Henk nieuw"},
+                "children": [
+                    {"data": {"code": "klaas", "name": "Klaas"}},
+                    {"data": {"code": "klaas2", "name": "Klaas 2"}},
+                ],
+            },
+        ]
+
+        self.response = self.post("admin-category-bulk", manual_data=data)
+
+        self.assertTrue(
+            Category.objects.filter(name="Henk nieuw", code="henk").exists()
+        )
+
+        self.assertEqual(Category.objects.count(), 4)
+
+        klaas2.refresh_from_db()
+        self.assertEqual(klaas2.get_parent().code, "henk")
+        self.assertEqual(klaas2.depth, 2)
+
+        self.assertEqual(
+            Category.dump_bulk(),
+            [
+                {
+                    "data": {
+                        "name": "Harrie",
+                        "code": "harrie",
+                        "description": "Dit is de description",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "harrie",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 4,
+                },
+                {
+                    "data": {
+                        "name": "Henk nieuw",
+                        "code": "henk",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "henk",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 1,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Klaas",
+                                "code": "klaas",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 2,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 2",
+                                "code": "klaas2",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-2",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 3,
+                        },
+                    ],
+                },
+            ],
+        )
+
+    def test_crazy_stuff(self):
+        Category.objects.all().delete()
+        data = [
+            {
+                "data": {"code": "henk", "name": "Henk"},
+                "children": [
+                    {"data": {"code": "klaas", "name": "Klaas"}},
+                    {"data": {"code": "klaas2", "name": "Klaas 2"}},
+                    {"data": {"code": "klaas3", "name": "Klaas 3"}},
+                    {"data": {"code": "klaas4", "name": "Klaas 4"}},
+                    {"data": {"code": "klaas5", "name": "Klaas 5"}},
+                    {"data": {"code": "klaas6", "name": "Klaas 6"}},
+                ],
+            },
+            {
+                "data": {
+                    "code": "harrie",
+                    "name": "Harrie",
+                    "description": "Dit is de description",
+                },
+                "children": [
+                    {"data": {"code": "koe", "name": "Koe"}},
+                    {"data": {"code": "koe2", "name": "Koe 2"}},
+                    {"data": {"code": "koe3", "name": "Koe 3"}},
+                    {"data": {"code": "koe4", "name": "Koe 4"}},
+                    {"data": {"code": "koe5", "name": "Koe 5"}},
+                    {"data": {"code": "koe6", "name": "Koe 6"}},
+                ],
+            },
+        ]
+
+        self.response = self.post("admin-category-bulk", manual_data=data)
+
+        self.assertEqual(Category.objects.count(), 14)
+
+        self.assertEqual(
+            Category.dump_bulk(),
+            [
+                {
+                    "data": {
+                        "name": "Henk",
+                        "code": "henk",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "henk",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 1,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Klaas",
+                                "code": "klaas",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 2,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 2",
+                                "code": "klaas2",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-2",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 3,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 3",
+                                "code": "klaas3",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-3",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 4,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 4",
+                                "code": "klaas4",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-4",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 5,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 5",
+                                "code": "klaas5",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-5",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 6,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 6",
+                                "code": "klaas6",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-6",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 7,
+                        },
+                    ],
+                },
+                {
+                    "data": {
+                        "name": "Harrie",
+                        "code": "harrie",
+                        "description": "Dit is de description",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "harrie",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 8,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Koe",
+                                "code": "koe",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 9,
+                        },
+                        {
+                            "data": {
+                                "name": "Koe 2",
+                                "code": "koe2",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe-2",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 10,
+                        },
+                        {
+                            "data": {
+                                "name": "Koe 3",
+                                "code": "koe3",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe-3",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 11,
+                        },
+                        {
+                            "data": {
+                                "name": "Koe 4",
+                                "code": "koe4",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe-4",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 12,
+                        },
+                        {
+                            "data": {
+                                "name": "Koe 5",
+                                "code": "koe5",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe-5",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 13,
+                        },
+                        {
+                            "data": {
+                                "name": "Koe 6",
+                                "code": "koe6",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe-6",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 14,
+                        },
+                    ],
+                },
+            ],
+        )
+
+        data = [
+            {
+                "data": {"code": "nieuwe1", "name": "Nieuwe 1"},
+                "children": [
+                    {"data": {"code": "klaas", "name": "Klaas"}},
+                    {"data": {"code": "klaas2", "name": "Klaas 2"}},
+                ],
+            },
+            {
+                "data": {"code": "nieuwe2", "name": "Nieuwe 2"},
+                "children": [
+                    {"data": {"code": "klaas3", "name": "Klaas 3"}},
+                    {"data": {"code": "klaas4", "name": "Klaas 4"}},
+                ],
+            },
+            {
+                "data": {"code": "nieuwe3", "name": "Nieuwe 3"},
+                "children": [
+                    {"data": {"code": "klaas5", "name": "Klaas 5"}},
+                    {"data": {"code": "klaas6", "name": "Klaas 6"}},
+                ],
+            },
+            {
+                "data": {"code": "gekke1", "name": "Gekke 1"},
+                "children": [
+                    {"data": {"code": "koe", "name": "Koe"}},
+                    {"data": {"code": "koe2", "name": "Koe 2"}},
+                ],
+            },
+            {
+                "data": {"code": "gekke2", "name": "Gekke 2"},
+                "children": [
+                    {"data": {"code": "koe3", "name": "Koe 3"}},
+                    {"data": {"code": "koe4", "name": "Koe 4"}},
+                ],
+            },
+            {
+                "data": {"code": "gekke3", "name": "Gekke 3"},
+                "children": [
+                    {"data": {"code": "koe5", "name": "Koe 5"}},
+                    {"data": {"code": "koe6", "name": "Koe 6"}},
+                ],
+            },
+        ]
+
+        self.response = self.post("admin-category-bulk", manual_data=data)
+
+        self.assertEqual(Category.objects.count(), 20)
+
+        self.assertEqual(
+            Category.dump_bulk(),
+            [
+                {
+                    "data": {
+                        "name": "Henk",
+                        "code": "henk",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "henk",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 1,
+                },
+                {
+                    "data": {
+                        "name": "Harrie",
+                        "code": "harrie",
+                        "description": "Dit is de description",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "harrie",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 8,
+                },
+                {
+                    "data": {
+                        "name": "Nieuwe 1",
+                        "code": "nieuwe1",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "nieuwe-1",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 15,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Klaas",
+                                "code": "klaas",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 2,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 2",
+                                "code": "klaas2",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-2",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 3,
+                        },
+                    ],
+                },
+                {
+                    "data": {
+                        "name": "Nieuwe 2",
+                        "code": "nieuwe2",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "nieuwe-2",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 16,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Klaas 3",
+                                "code": "klaas3",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-3",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 4,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 4",
+                                "code": "klaas4",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-4",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 5,
+                        },
+                    ],
+                },
+                {
+                    "data": {
+                        "name": "Nieuwe 3",
+                        "code": "nieuwe3",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "nieuwe-3",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 17,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Klaas 5",
+                                "code": "klaas5",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-5",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 6,
+                        },
+                        {
+                            "data": {
+                                "name": "Klaas 6",
+                                "code": "klaas6",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "klaas-6",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 7,
+                        },
+                    ],
+                },
+                {
+                    "data": {
+                        "name": "Gekke 1",
+                        "code": "gekke1",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "gekke-1",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 18,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Koe",
+                                "code": "koe",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 9,
+                        },
+                        {
+                            "data": {
+                                "name": "Koe 2",
+                                "code": "koe2",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe-2",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 10,
+                        },
+                    ],
+                },
+                {
+                    "data": {
+                        "name": "Gekke 2",
+                        "code": "gekke2",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "gekke-2",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 19,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Koe 3",
+                                "code": "koe3",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe-3",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 11,
+                        },
+                        {
+                            "data": {
+                                "name": "Koe 4",
+                                "code": "koe4",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe-4",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 12,
+                        },
+                    ],
+                },
+                {
+                    "data": {
+                        "name": "Gekke 3",
+                        "code": "gekke3",
+                        "description": "",
+                        "meta_title": None,
+                        "meta_description": None,
+                        "image": "",
+                        "slug": "gekke-3",
+                        "is_public": True,
+                        "ancestors_are_public": True,
+                    },
+                    "id": 20,
+                    "children": [
+                        {
+                            "data": {
+                                "name": "Koe 5",
+                                "code": "koe5",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe-5",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 13,
+                        },
+                        {
+                            "data": {
+                                "name": "Koe 6",
+                                "code": "koe6",
+                                "description": "",
+                                "meta_title": None,
+                                "meta_description": None,
+                                "image": "",
+                                "slug": "koe-6",
+                                "is_public": True,
+                                "ancestors_are_public": True,
+                            },
+                            "id": 14,
+                        },
+                    ],
+                },
+            ],
+        )

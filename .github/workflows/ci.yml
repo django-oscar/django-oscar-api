@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout the repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         path: ./src
     - name: Setup Python 3.11
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
          python-version: '3.11'
     - name: Install all dependencies
@@ -22,7 +22,7 @@ jobs:
     - name: Run all linting
       run: make lint
     - name: Upload src dir as artefact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: src
         path: ./src
@@ -38,12 +38,12 @@ jobs:
         oscar-version: ["3.2"]
     steps:
       - name: Download src dir
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: src
           path: ./src
       - name: Setup Python 3.x
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
            python-version: ${{ matrix.python-version }}
       - name: Install all dependencies

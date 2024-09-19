@@ -114,6 +114,7 @@ api_root = get_api_class("views.root", "api_root")
     AttributeOptionGroupAdminDetail,
     CategoryAdminList,
     CategoryAdminDetail,
+    CategoryBulkAdminApi,
 ) = get_api_classes(
     "views.admin.product",
     [
@@ -127,6 +128,7 @@ api_root = get_api_class("views.root", "api_root")
         "AttributeOptionGroupAdminDetail",
         "CategoryAdminList",
         "CategoryAdminDetail",
+        "CategoryBulkAdminApi",
     ],
 )
 
@@ -204,6 +206,9 @@ urlpatterns = [
     path("ranges/<int:pk>/", RangeDetail.as_view(), name="range-detail"),
     path("categories/", CategoryList.as_view(), name="category-list"),
     path("categories/<int:pk>/", CategoryDetail.as_view(), name="category-detail"),
+    path(
+        "categories-bulk/", CategoryBulkAdminApi.as_view(), name="admin-category-bulk"
+    ),
     re_path(
         "^categories/(?P<breadcrumbs>.*)/$",
         CategoryList.as_view(),
