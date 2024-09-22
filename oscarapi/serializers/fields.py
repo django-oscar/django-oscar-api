@@ -305,7 +305,7 @@ class LazyRemoteFile(RetrieveFileMixin, File):
     def __bool__(self):
         return bool(self.url)
 
-    def open(self, mode="rb"):
+    def open(self, *args, mode="rb", **kwargs):
         if not self.closed:
             self.seek(0)
 
