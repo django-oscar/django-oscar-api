@@ -125,8 +125,8 @@ def _upsert_categories(data, parent_category=None):
                 # Move the category as the first child under the parent category since we have no sibling
                 category.move(parent_category, pos="first-child")
 
-        # Update the new path from the database after moving the category to it's new home
-        category.refresh_from_db(fields=["path"])
+        # Update the category to make it aware of it's new home after moving
+        category.refresh_from_db()
 
         # The category is now the sibling, new categories will be moved to the right of this category
         sibling = category
