@@ -26,7 +26,7 @@ OrderLineAttribute = get_model("order", "LineAttribute")
 
 class OrderAdminList(generics.ListAPIView):
     serializer_class = AdminOrderSerializer
-    queryset = Order.objects.get_queryset()
+    queryset = Order.objects.get_queryset().order_by("-date_placed")
     permission_classes = (APIAdminPermission,)
 
 
