@@ -22,6 +22,4 @@ class AdminOrderLineAttributeSerializer(OrderLineAttributeSerializer):
 
 class AdminOrderLineSerializer(OrderLineSerializer):
     url = serializers.HyperlinkedIdentityField(view_name="admin-order-lines-detail")
-    attributes = AdminOrderLineAttributeSerializer(
-        many=True, fields=("url", "option", "value"), required=False
-    )
+    attributes = AdminOrderLineAttributeSerializer(many=True, required=False)

@@ -118,16 +118,14 @@ class OrderLineAttributeSerializer(OscarHyperlinkedModelSerializer):
 
     class Meta:
         model = OrderLineAttribute
-        fields = "__all__"
+        fields = ["url", "option", "value"]
 
 
 class OrderLineSerializer(OscarHyperlinkedModelSerializer):
     "This serializer renames some fields so they match up with the basket"
 
     url = serializers.HyperlinkedIdentityField(view_name="order-lines-detail")
-    attributes = OrderLineAttributeSerializer(
-        many=True, fields=("url", "option", "value"), required=False
-    )
+    attributes = OrderLineAttributeSerializer(many=True, required=False)
     price_currency = serializers.CharField(source="order.currency", max_length=12)
     price_excl_tax = serializers.DecimalField(
         decimal_places=2, max_digits=12, source="line_price_excl_tax"
