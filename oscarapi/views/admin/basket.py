@@ -14,7 +14,8 @@ from oscarapi.views.utils import QuerySetList, CustomPageNumberPagination
 
 APIAdminPermission = get_api_class("permissions", "APIAdminPermission")
 AdminBasketSerializer = get_api_class(
-    "serializers.admin.basket", "AdminBasketSerializer")
+    "serializers.admin.basket", "AdminBasketSerializer"
+)
 Basket = get_model("basket", "Basket")
 
 
@@ -22,6 +23,7 @@ class BasketAdminList(generics.ListCreateAPIView):
     """
     List of all baskets for admin users
     """
+
     serializer_class = AdminBasketSerializer
     pagination_class = CustomPageNumberPagination
     permission_classes = (APIAdminPermission,)
@@ -30,7 +32,7 @@ class BasketAdminList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = super(BasketAdminList, self).get_queryset()
-        qs = qs.order_by('-id')
+        qs = qs.order_by("-id")
         return qs
 
     def list(self, request, *args, **kwargs):
@@ -39,8 +41,10 @@ class BasketAdminList(generics.ListCreateAPIView):
 
         if page is not None:
             mapped_with_baskets = list(
-                map(functools.partial(assign_basket_strategy,
-                    request=self.request), page)
+                map(
+                    functools.partial(assign_basket_strategy, request=self.request),
+                    page,
+                )
             )
             serializer = self.get_serializer(mapped_with_baskets, many=True)
             return self.get_paginated_response(serializer.data)
