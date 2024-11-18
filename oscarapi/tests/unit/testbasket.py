@@ -1288,6 +1288,35 @@ class BasketAdminTest(APITest):
         basket_ids = [basket['id'] for basket in response.data['results']]
         self.assertEqual(basket_ids, sorted(basket_ids, reverse=True))
 
+    def test_assign_basket_strategy_call_frequency(self):
+        admin_user, _ = User.objects.get_or_create(
+            username="admin",
+            defaults={"is_staff": True, "password": "admin"}
+        )
+        total_baskets = 350
+
+        # Populate baskets for the test
+        Basket.objects.bulk_create([
+            Basket(owner=admin_user) for _ in range(total_baskets)
+        ])
+
+        # Log in as admin
+        self.client.login(username="admin", password="admin")
+
+        url = reverse('admin-basket-list')
+
+        # Mock assign_basket_strategy and bypass serialization
+        with patch('oscarapi.views.admin.basket.assign_basket_strategy') as mock_assign:
+            with patch('oscarapi.serializers.basket.BasketSerializer.to_representation', return_value={}):
+                self.client.get(url)
+
+        # Assert that the mock was called exactly 100 times instead of 350
+        self.assertEqual(
+            mock_assign.call_count,
+            100,
+            f"First page should have 100 assign_basket_strategy calls, got {mock_assign.call_count}"
+        )
+
 
 @override_settings(
     MIDDLEWARE=(
