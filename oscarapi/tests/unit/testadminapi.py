@@ -80,6 +80,7 @@ class AdminAPIEnabledTest(APITest):
             "partners",
             "users",
             "attributeoptiongroups",
+            "baskets",
         ]
 
         for api in admin_apis:
