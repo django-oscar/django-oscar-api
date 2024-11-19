@@ -2,16 +2,11 @@ from rest_framework import serializers
 
 from oscar.core.loading import get_model
 
-from oscarapi.utils.loading import get_api_classes
+from oscarapi.utils.loading import get_api_class
 
 
 Basket = get_model("basket", "Basket")
-(BasketSerializer,) = get_api_classes(
-    "serializers.basket",
-    [
-        "BasketSerializer",
-    ],
-)[0]
+BasketSerializer = get_api_class("serializers.basket", "BasketSerializer")
 
 
 class AdminBasketSerializer(BasketSerializer):
