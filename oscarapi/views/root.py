@@ -34,6 +34,7 @@ def PUBLIC_APIS(r, f):
 
 def ADMIN_APIS(r, f):
     return [
+        ("baskets", reverse("admin-basket-list", request=r, format=f)),
         ("productclasses", reverse("admin-productclass-list", request=r, format=f)),
         ("products", reverse("admin-product-list", request=r, format=f)),
         ("categories", reverse("admin-category-list", request=r, format=f)),

@@ -149,6 +149,17 @@ api_root = get_api_class("views.root", "api_root")
     ],
 )
 
+(
+    BasketAdminList,
+    BasketAdminDetail,
+) = get_api_classes(
+    "views.admin.basket",
+    [
+        "BasketAdminList",
+        "BasketAdminDetail",
+    ],
+)
+
 (UserAdminList, UserAdminDetail) = get_api_classes(
     "views.admin.user", ["UserAdminList", "UserAdminDetail"]
 )
@@ -238,6 +249,12 @@ urlpatterns = [
 ]
 
 admin_urlpatterns = [
+    path("baskets/", BasketAdminList.as_view(), name="admin-basket-list"),
+    path(
+        "baskets/<int:pk>/",
+        BasketAdminDetail.as_view(),
+        name="admin-basket-detail",
+    ),
     path("products/", ProductAdminList.as_view(), name="admin-product-list"),
     path(
         "products/<int:pk>/",
