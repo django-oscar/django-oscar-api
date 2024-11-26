@@ -71,6 +71,7 @@ class BasketList(generics.ListAPIView):
     def get_queryset(self):
         qs = super(BasketList, self).get_queryset()
 
+        mapped_with_baskets = []
         if self.request.user.is_authenticated:
             qs = qs.filter(owner=self.request.user)
             mapped_with_baskets = list(
@@ -78,7 +79,8 @@ class BasketList(generics.ListAPIView):
             )
         else:  # anonymous users have max 1 basket.
             basket = get_anonymous_basket(self.request)
-            mapped_with_baskets = [prepare_basket(basket, self.request)]
+            if basket is not None:
+                mapped_with_baskets = [prepare_basket(basket, self.request)]
 
         return QuerySetList(mapped_with_baskets, qs)
 
