@@ -21,7 +21,6 @@ test:
 coverage:	
 	coverage run sandbox/manage.py test oscarapi --settings=sandbox.settings.block_admin_api_false
 	coverage report -m
-	coverage html
 	coverage xml -i
 
 docker-build:
