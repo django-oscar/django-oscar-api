@@ -12,6 +12,7 @@ from oscarapi import permissions
 from oscarapi.basket import operations
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.views.utils import BasketPermissionMixin
+from rest_framework.permissions import IsAuthenticated
 
 __all__ = (
     "BasketView",
@@ -51,18 +52,19 @@ AddProductSerializer = get_api_class("serializers.product", "AddProductSerialize
 
 class BasketView(APIView):
     """
-    Api for retrieving a user's basket.
+    API for retrieving a user's basket.
 
     GET:
     Retrieve your basket.
     """
 
+    permission_classes = [IsAuthenticated]  # Ensure the user is authenticated
     serializer_class = BasketSerializer
 
-    def get(self, request, *args, **kwargs):  # pylint: disable=redefined-builtin
+    def get(self, request, *args, **kwargs):
         basket = operations.get_basket(request)
-        ser = self.serializer_class(basket, context={"request": request})
-        return Response(ser.data)
+        serializer = self.serializer_class(basket, context={"request": request})
+        return Response(serializer.data)
 
 
 class AddProductView(APIView):
@@ -86,7 +88,8 @@ class AddProductView(APIView):
         }]
     }
     """
-
+    permission_classes = [IsAuthenticated]
+    
     add_product_serializer_class = AddProductSerializer
     serializer_class = BasketSerializer
 

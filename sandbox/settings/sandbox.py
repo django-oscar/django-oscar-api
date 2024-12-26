@@ -167,13 +167,13 @@ MIDDLEWARE = (
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 )
 
-REST_FRAMEWORK = {
-    'CHARSET': 'utf-8',
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-    )
-}
+# REST_FRAMEWORK = {
+#     'CHARSET': 'utf-8',
+#     'DEFAULT_RENDERER_CLASSES': (
+#         'rest_framework.renderers.JSONRenderer',
+#         'rest_framework.renderers.BrowsableAPIRenderer',
+#     )
+# }
 
 ROOT_URLCONF = 'urls'
 
