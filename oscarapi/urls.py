@@ -238,7 +238,7 @@ urlpatterns = [
         name="useraddress-detail",
     ),
     path('vendor/vendors/<int:pk>/', VendorDetailView.as_view(), name='vendor-detail'),
-    path('vendor/', include('server.apps.vendor.urls', namespace='vendor')),
+    # path('vendor/', include('server.apps.vendor.urls', namespace='vendor')),
     path('customuser/<int:pk>/', CustomUserView.as_view(), name='customuser-detail'),
     path("categories/", CategoryAdminList.as_view(), name="admin-category-list"),
 ]
