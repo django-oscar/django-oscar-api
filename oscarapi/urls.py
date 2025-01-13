@@ -4,6 +4,8 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 from oscarapi import settings
 from oscarapi.utils.loading import get_api_classes, get_api_class
+from server.apps.user.views import CustomUserView
+from server.apps.vendor.views import VendorDetailView
 
 api_root = get_api_class("views.root", "api_root")
 (LoginView, UserDetail, RegistrationView) = get_api_classes(
@@ -235,6 +237,10 @@ urlpatterns = [
         UserAddressDetail.as_view(),
         name="useraddress-detail",
     ),
+    path('vendor/vendors/<int:pk>/', VendorDetailView.as_view(), name='vendor-detail'),
+    path('vendor/', include('server.apps.vendor.urls', namespace='vendor')),
+    path('customuser/<int:pk>/', CustomUserView.as_view(), name='customuser-detail'),
+    path("categories/", CategoryAdminList.as_view(), name="admin-category-list"),
 ]
 
 admin_urlpatterns = [
@@ -254,7 +260,7 @@ admin_urlpatterns = [
         ProductClassAdminDetail.as_view(),
         name="admin-productclass-detail",
     ),
-    path("categories/", CategoryAdminList.as_view(), name="admin-category-list"),
+    
     path(
         "categories/<int:pk>/",
         CategoryAdminDetail.as_view(),
@@ -311,7 +317,10 @@ admin_urlpatterns = [
     ),
     path("users/", UserAdminList.as_view(), name="admin-user-list"),
     path("users/<int:pk>/", UserAdminDetail.as_view(), name="admin-user-detail"),
+    # path("vendor/", include("server.apps.vendor.urls"), name='vendor'),
+
 ]
+
 
 if not settings.BLOCK_ADMIN_API_ACCESS:
     urlpatterns.append(path("admin/", include(admin_urlpatterns)))

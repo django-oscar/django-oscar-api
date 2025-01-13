@@ -12,6 +12,7 @@ from oscarapi.serializers.utils import OscarHyperlinkedModelSerializer
 from oscarapi.utils.categories import create_from_full_slug
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.utils.models import fake_autocreated
+from server.apps.vendor.models import Vendor
 
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")

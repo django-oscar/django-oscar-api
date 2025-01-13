@@ -121,7 +121,7 @@ class AttributeOptionGroupAdminDetail(generics.RetrieveUpdateDestroyAPIView):
 class CategoryAdminList(generics.ListCreateAPIView, CategoryList):
     queryset = Category.get_root_nodes()
     serializer_class = AdminCategorySerializer
-    permission_classes = (APIAdminPermission,)
+    # permission_classes = (APIAdminPermission,)
 
     def get_queryset(self):
         try:

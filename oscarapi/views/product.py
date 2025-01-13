@@ -109,15 +109,28 @@ class ProductAvailability(generics.RetrieveAPIView):
 
 
 class CategoryList(generics.ListAPIView):
-    queryset = Category.get_root_nodes()
     serializer_class = CategorySerializer
 
     def get_queryset(self):
+        """
+        Fetches the root nodes or children of a category filtered by vendor if provided.
+        """
         breadcrumb_path = self.kwargs.get("breadcrumbs", None)
-        if breadcrumb_path is None:
-            return super(CategoryList, self).get_queryset()
+        vendor_id = self.request.query_params.get("vendor", None)
 
-        return find_from_full_slug(breadcrumb_path, separator="/").get_children()
+        # Get root nodes or filter by breadcrumbs
+        if breadcrumb_path:
+            category = find_from_full_slug(breadcrumb_path, separator="/")
+            queryset = category.get_children()
+        else:
+            queryset = Category.get_root_nodes()
+
+        # Filter by vendor if vendor_id is provided
+        if vendor_id:
+            queryset = queryset.filter(vendor__id=vendor_id)
+
+        return queryset
+
 
 
 class CategoryDetail(generics.RetrieveAPIView):

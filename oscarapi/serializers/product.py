@@ -24,6 +24,7 @@ from oscarapi.serializers.utils import (
     UpdateListSerializer,
     UpdateForwardManyToManySerializer,
 )
+from server.apps.vendor.models import Vendor
 
 from .exceptions import FieldError
 
@@ -105,6 +106,11 @@ class AttributeOptionGroupSerializer(OscarHyperlinkedModelSerializer):
 
 class BaseCategorySerializer(OscarHyperlinkedModelSerializer):
     breadcrumbs = serializers.CharField(source="full_name", read_only=True)
+    vendor = serializers.HyperlinkedRelatedField(
+        view_name="vendor-detail",
+        queryset=Vendor.objects.all(),
+        lookup_field="pk",
+    )
 
     class Meta:
         model = Category
