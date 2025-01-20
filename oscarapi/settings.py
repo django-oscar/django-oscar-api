@@ -155,7 +155,10 @@ USER_FIELDS = overridable(
     "OSCARAPI_USER_FIELDS",
     default=(User.USERNAME_FIELD, "email", "date_joined"),
 )
-OPTION_FIELDS = overridable("OSCARAPI_OPTION_FIELDS", default="__all__")
+OPTION_FIELDS = overridable(
+    "OSCARAPI_OPTION_FIELDS",
+    default=("url", "code", "name", "type", "required", "help_text", "order", "option_group")
+)
 PRODUCT_ATTRIBUTE_VALUE_FIELDS = overridable(
     "OSCARAPI_PRODUCT_ATTRIBUTE_VALUE_FIELDS",
     default=("name", "value", "code", "product"),
@@ -180,9 +183,14 @@ CHILDPRODUCTDETAIL_FIELDS = overridable(
         "attributes",
         "categories",
         "product_class",
-        "price",
+        # "price",
+        "price_currency",
+        "original_price",
+        "selling_price",
         "availability",
         "options",
+        "stockrecords",
+        "availability",
     ),
 )
 PRODUCTDETAIL_FIELDS = overridable(
@@ -201,7 +209,9 @@ PRODUCTDETAIL_FIELDS = overridable(
         "categories",
         "product_class",
         "images",
-        "price",
+        "price_currency",
+        "original_price",
+        "selling_price",
         "availability",
         "stockrecords",
         "options",

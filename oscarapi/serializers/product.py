@@ -46,62 +46,41 @@ AttributeValueField, CategoryField, SingleValueSlugRelatedField = get_api_classe
     ["AttributeValueField", "CategoryField", "SingleValueSlugRelatedField"],
 )
 
+class AttributeOptionSerializer(serializers.ModelSerializer):
+    """
+    Serializer for AttributeOption to include the price field.
+    """
+    class Meta:
+        model = AttributeOption
+        fields = ['id', 'option', 'price']  # Include 'price' here
+
 
 class AttributeOptionGroupSerializer(OscarHyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(
-        view_name="admin-attributeoptiongroup-detail"
+        view_name="attributeoptiongroup-detail"
     )
-    options = SingleValueSlugRelatedField(
-        many=True,
-        required=True,
-        slug_field="option",
-        queryset=AttributeOption.objects.get_queryset(),
-    )
+    options = AttributeOptionSerializer(many=True, required=True)
 
     def create(self, validated_data):
-        existing_option = find_existing_attribute_option_group(
-            validated_data["name"], validated_data["options"]
-        )
-        if existing_option is not None:
-            return existing_option
-        else:
-            options = validated_data.pop("options", None)
-            instance = super(AttributeOptionGroupSerializer, self).create(
-                validated_data
-            )
-            options = bound_unique_together_get_or_create_multiple(
-                instance.options, options
-            )
-            instance.options.set(options)
-            return instance
+        options_data = validated_data.pop('options', [])
+        instance = super().create(validated_data)
+        options = [AttributeOption.objects.get_or_create(**option_data)[0] for option_data in options_data]
+        instance.options.set(options)
+        return instance
 
     def update(self, instance, validated_data):
-        existing_option = find_existing_attribute_option_group(
-            validated_data["name"], validated_data["options"]
-        )
-        if existing_option is not None:
-            return existing_option
-        else:
-            options = validated_data.pop("options", None)
-            updated_instance = super(AttributeOptionGroupSerializer, self).update(
-                instance, validated_data
-            )
-            # if the field was returned unbound,
-            options = bound_unique_together_get_or_create_multiple(
-                updated_instance.options, options
-            )
-            updated_instance.options.set(options, bulk=False)
-            if not self.partial:
-                # we need to manually remove the options
-                updated_instance.options.exclude(
-                    pk__in=[o.pk for o in options]
-                ).delete()
-
-            return updated_instance
+        options_data = validated_data.pop('options', [])
+        instance = super().update(instance, validated_data)
+        options = [AttributeOption.objects.get_or_create(**option_data)[0] for option_data in options_data]
+        instance.options.set(options)
+        return instance
 
     class Meta:
         model = AttributeOptionGroup
-        fields = "__all__"
+        fields = ("url", "name", "code", "options")
+        
+        depth = 1
+
 
 
 class BaseCategorySerializer(OscarHyperlinkedModelSerializer):
@@ -111,6 +90,7 @@ class BaseCategorySerializer(OscarHyperlinkedModelSerializer):
         queryset=Vendor.objects.all(),
         lookup_field="pk",
     )
+    id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Category
@@ -194,12 +174,12 @@ class PartnerSerializer(OscarHyperlinkedModelSerializer):
 
 class OptionSerializer(OscarHyperlinkedModelSerializer):
     code = serializers.SlugField()
-
+    option_group = AttributeOptionGroupSerializer(required=True)
     class Meta:
         model = Option
         fields = settings.OPTION_FIELDS
         list_serializer_class = UpdateForwardManyToManySerializer
-
+        depth = 1
 
 class ProductAttributeValueListSerializer(UpdateListSerializer):
     # pylint: disable=unused-argument
@@ -483,9 +463,9 @@ class BaseProductSerializer(OscarModelSerializer):
 class PublicProductSerializer(BaseProductSerializer):
     "Serializer base class used for public products api"
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
-    price = serializers.HyperlinkedIdentityField(
-        view_name="product-price", read_only=True
-    )
+    # price = serializers.HyperlinkedIdentityField(
+    #     view_name="product-price", read_only=True
+    # )
     availability = serializers.HyperlinkedIdentityField(
         view_name="product-availability", read_only=True
     )
@@ -507,6 +487,7 @@ class ChildProductSerializer(PublicProductSerializer):
     # the below fields can be filled from the parent product if enabled.
     images = ProductImageSerializer(many=True, required=False, source="parent.images")
     description = serializers.CharField(source="parent.description")
+    stockrecords = ProductStockRecordSerializer(many=True, required=False)
 
     class Meta(PublicProductSerializer.Meta):
         fields = settings.CHILDPRODUCTDETAIL_FIELDS
@@ -514,10 +495,10 @@ class ChildProductSerializer(PublicProductSerializer):
 
 class ProductSerializer(PublicProductSerializer):
     "Serializer for public api with strategy fields added for price and availability"
-    url = serializers.HyperlinkedIdentityField(view_name="product-detail")
-    price = serializers.HyperlinkedIdentityField(
-        view_name="product-price", read_only=True
-    )
+    # url = serializers.HyperlinkedIdentityField(view_name="product-detail")
+    # price = serializers.HyperlinkedIdentityField(
+    #     view_name="product-price", read_only=True
+    # )
     availability = serializers.HyperlinkedIdentityField(
         view_name="product-availability", read_only=True
     )
@@ -525,9 +506,11 @@ class ProductSerializer(PublicProductSerializer):
     images = ProductImageSerializer(many=True, required=False)
     children = ChildProductSerializer(many=True, required=False)
 
-    stockrecords = serializers.HyperlinkedIdentityField(
-        view_name="product-stockrecords", read_only=True
-    )
+    # stockrecords = serializers.HyperlinkedIdentityField(
+    #     view_name="product-stockrecords", read_only=True
+    # )
+
+    stockrecords = ProductStockRecordSerializer(many=True, required=False)
 
     class Meta(PublicProductSerializer.Meta):
         fields = settings.PRODUCTDETAIL_FIELDS

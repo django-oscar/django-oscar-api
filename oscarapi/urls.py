@@ -241,6 +241,16 @@ urlpatterns = [
     # path('vendor/', include('server.apps.vendor.urls', namespace='vendor')),
     path('customuser/<int:pk>/', CustomUserView.as_view(), name='customuser-detail'),
     path("categories/", CategoryAdminList.as_view(), name="admin-category-list"),
+    path(
+        "attributeoptiongroups/<int:pk>/",
+        AttributeOptionGroupAdminDetail.as_view(),
+        name="attributeoptiongroup-detail",
+    ),
+    path(
+        "attributeoptiongroups/",
+        AttributeOptionGroupAdminList.as_view(),
+        name="admin-attributeoptiongroup-list",
+    ),
 ]
 
 admin_urlpatterns = [
@@ -288,16 +298,8 @@ admin_urlpatterns = [
         ProductAttributeAdminDetail.as_view(),
         name="admin-productattribute-detail",
     ),
-    path(
-        "attributeoptiongroups/",
-        AttributeOptionGroupAdminList.as_view(),
-        name="admin-attributeoptiongroup-list",
-    ),
-    path(
-        "attributeoptiongroups/<int:pk>/",
-        AttributeOptionGroupAdminDetail.as_view(),
-        name="admin-attributeoptiongroup-detail",
-    ),
+    
+    
     path("orders/", OrderAdminList.as_view(), name="admin-order-list"),
     path("orders/<int:pk>/", OrderAdminDetail.as_view(), name="admin-order-detail"),
     path(

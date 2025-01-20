@@ -6,8 +6,11 @@ from oscar.core.loading import get_class, get_model
 
 from oscarapi.utils.categories import find_from_full_slug
 from oscarapi.utils.loading import get_api_classes, get_api_class
-
+from rest_framework.exceptions import ValidationError
+from server.apps.vendor.models import Vendor
+Store = get_model('stores', 'store')
 Selector = get_class("partner.strategy", "Selector")
+
 (
     CategorySerializer,
     ProductLinkSerializer,
@@ -36,24 +39,30 @@ StockRecord = get_model("partner", "StockRecord")
 
 
 class ProductList(generics.ListAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductLinkSerializer
+    serializer_class = ProductSerializer
 
     def get_queryset(self):
         """
-        Allow filtering on structure so standalone and parent products can
-        be selected separately, eg::
-
-            http://127.0.0.1:8000/api/products/?structure=standalone
-
-        or::
-
-            http://127.0.0.1:8000/api/products/?structure=parent
+        Filters products based on:
+        - branch_id (required)
+        - at least one category is_public
+        - branch is_active
+        - optional structure
         """
-        qs = super(ProductList, self).get_queryset()
+        branch_id = self.request.query_params.get("branch_id")
+        if not branch_id:
+            raise ValidationError({"branch_id": "This parameter is required."})
+
+        qs = Product.objects.filter(
+            branches__id=branch_id,
+            branches__is_active=True,
+            categories__is_public=True,
+            is_public=True,
+        ).distinct()
+
         structure = self.request.query_params.get("structure")
-        if structure is not None:
-            return qs.filter(structure=structure)
+        if structure:
+            qs = qs.filter(structure=structure)
 
         return qs
 
@@ -116,7 +125,20 @@ class CategoryList(generics.ListAPIView):
         Fetches the root nodes or children of a category filtered by vendor if provided.
         """
         breadcrumb_path = self.kwargs.get("breadcrumbs", None)
-        vendor_id = self.request.query_params.get("vendor", None)
+        branch_id = self.request.query_params.get("branch", None)
+
+        # Ensure branch_id is provided
+        if not branch_id:
+            raise ValidationError({"branch": "This query parameter is required."})
+
+        # Get the store and its vendor
+        try:
+            store = Store.objects.get(id=branch_id)
+            vendor = store.vendor  # Access the related vendor
+        except Store.DoesNotExist:
+            raise ValidationError({"branch": f"No store found with ID {branch_id}."})
+        except AttributeError:
+            raise ValidationError({"branch": "This store has no associated vendor."})
 
         # Get root nodes or filter by breadcrumbs
         if breadcrumb_path:
@@ -125,11 +147,12 @@ class CategoryList(generics.ListAPIView):
         else:
             queryset = Category.get_root_nodes()
 
-        # Filter by vendor if vendor_id is provided
-        if vendor_id:
-            queryset = queryset.filter(vendor__id=vendor_id)
+        # Filter by vendor
+        queryset = queryset.filter(vendor=vendor)
 
         return queryset
+
+
 
 
 

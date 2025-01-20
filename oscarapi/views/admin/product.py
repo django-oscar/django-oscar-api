@@ -78,44 +78,44 @@ class ProductAdminList(generics.UpdateAPIView, generics.ListCreateAPIView):
 class ProductAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AdminProductSerializer
     queryset = Product.objects.get_queryset()
-    permission_classes = (APIAdminPermission,)
+    # permission_classes = (APIAdminPermission,)
 
 
 class ProductClassAdminList(generics.ListCreateAPIView):
     serializer_class = AdminProductClassSerializer
     queryset = ProductClass.objects.get_queryset()
-    permission_classes = (APIAdminPermission,)
+    # permission_classes = (APIAdminPermission,)
 
 
 class ProductClassAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AdminProductClassSerializer
     queryset = ProductClass.objects.get_queryset()
-    permission_classes = (APIAdminPermission,)
+    # permission_classes = (APIAdminPermission,)
     lookup_field = "slug"
 
 
 class ProductAttributeAdminList(generics.ListCreateAPIView):
     serializer_class = ProductAttributeSerializer
     queryset = ProductAttribute.objects.get_queryset()
-    permission_classes = (APIAdminPermission,)
+    # permission_classes = (APIAdminPermission,)
 
 
 class ProductAttributeAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductAttributeSerializer
     queryset = ProductAttribute.objects.get_queryset()
-    permission_classes = (APIAdminPermission,)
+    # permission_classes = (APIAdminPermission,)
 
 
 class AttributeOptionGroupAdminList(generics.ListCreateAPIView):
     serializer_class = AttributeOptionGroupSerializer
     queryset = AttributeOptionGroup.objects.get_queryset()
-    permission_classes = (APIAdminPermission,)
+    # permission_classes = (APIAdminPermission,)
 
 
 class AttributeOptionGroupAdminDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AttributeOptionGroupSerializer
     queryset = AttributeOptionGroup.objects.get_queryset()
-    permission_classes = (APIAdminPermission,)
+    # permission_classes = (APIAdminPermission,)
 
 
 class CategoryAdminList(generics.ListCreateAPIView, CategoryList):
