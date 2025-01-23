@@ -104,6 +104,18 @@ class CategorySerializer(BaseCategorySerializer):
         lookup_url_kwarg="breadcrumbs",
     )
 
+    products = serializers.SerializerMethodField()
+
+    def get_products(self, obj):
+        # Fetch products for the current category
+        products = Product.objects.filter(categories=obj, is_public=True)
+        serializer = ProductSerializer(products, many=True, context=self.context)
+        return serializer.data
+
+    # class Meta(BaseCategorySerializer.Meta):
+    #     fields = BaseCategorySerializer.Meta.fields + ['children', 'products']
+
+
 
 class ProductAttributeListSerializer(UpdateListSerializer):
     def select_existing_item(self, manager, datum):
@@ -429,7 +441,7 @@ class BaseProductSerializer(OscarModelSerializer):
     attributes = ProductAttributeValueSerializer(
         many=True, required=False, source="attribute_values"
     )
-    categories = CategoryField(many=True, required=False)
+    # categories = CategorySerializer(many=True, required=False)
     product_class = serializers.SlugRelatedField(
         slug_field="slug", queryset=ProductClass.objects, allow_null=True
     )

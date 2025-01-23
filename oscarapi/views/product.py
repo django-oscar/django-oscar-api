@@ -64,6 +64,10 @@ class ProductList(generics.ListAPIView):
         if structure:
             qs = qs.filter(structure=structure)
 
+        category_id = self.request.query_params.get("category_id")
+        if category_id:
+            qs = qs.filter(categories__id=category_id)
+            
         return qs
 
 
