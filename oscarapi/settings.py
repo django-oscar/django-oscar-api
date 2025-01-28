@@ -191,6 +191,7 @@ CHILDPRODUCTDETAIL_FIELDS = overridable(
         "options",
         "stockrecords",
         "availability",
+        "service_details",
     ),
 )
 PRODUCTDETAIL_FIELDS = overridable(
@@ -216,6 +217,7 @@ PRODUCTDETAIL_FIELDS = overridable(
         "stockrecords",
         "options",
         "children",
+        "services",
     ),
 )
 PRODUCT_FIELDS = overridable(

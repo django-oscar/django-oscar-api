@@ -24,6 +24,7 @@ from oscarapi.serializers.utils import (
     UpdateListSerializer,
     UpdateForwardManyToManySerializer,
 )
+from server.apps.service.models import Service
 from server.apps.vendor.models import Vendor
 
 from .exceptions import FieldError
@@ -46,6 +47,37 @@ AttributeValueField, CategoryField, SingleValueSlugRelatedField = get_api_classe
     ["AttributeValueField", "CategoryField", "SingleValueSlugRelatedField"],
 )
 
+
+class ServiceSerializer(OscarModelSerializer):
+    """
+    Serializer for the Service model.
+    """
+    
+    available_time_slots = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Service
+        fields = [
+            "id",
+            "product",
+            "branch",
+            "service_type",
+            "provider_name",
+            "duration_minutes",
+            "max_services_per_slot",
+            "max_notice_days",
+            "available_time_slots",
+        ]
+        # If you want a custom list serializer that supports "updates", 
+        # you can set:
+        # list_serializer_class = SomeUpdateListSerializer
+        
+    def get_available_time_slots(self, obj):
+        """
+        Call the Service model method that calculates available slots.
+        """
+        return obj.get_available_time_slots()
+    
 class AttributeOptionSerializer(serializers.ModelSerializer):
     """
     Serializer for AttributeOption to include the price field.
@@ -523,6 +555,11 @@ class ProductSerializer(PublicProductSerializer):
     # )
 
     stockrecords = ProductStockRecordSerializer(many=True, required=False)
+    services = ServiceSerializer(
+        many=True,
+        required=False,
+        source="service",  # or 'services' if using a ManyToMany
+    )
 
     class Meta(PublicProductSerializer.Meta):
         fields = settings.PRODUCTDETAIL_FIELDS
@@ -557,3 +594,5 @@ class AddProductSerializer(serializers.Serializer):  # pylint: disable=abstract-
         view_name="product-detail", queryset=Product.objects, required=True
     )
     options = OptionValueSerializer(many=True, required=False)
+
+    
