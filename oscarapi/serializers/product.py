@@ -132,7 +132,7 @@ class BaseCategorySerializer(OscarHyperlinkedModelSerializer):
 class CategorySerializer(BaseCategorySerializer):
     children = serializers.HyperlinkedIdentityField(
         view_name="category-child-list",
-        lookup_field="full_slug",
+        # lookup_field="full_slug",
         lookup_url_kwarg="breadcrumbs",
     )
 
