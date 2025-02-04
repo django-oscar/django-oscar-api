@@ -590,6 +590,8 @@ class AddProductSerializer(serializers.Serializer):  # pylint: disable=abstract-
     """
 
     quantity = serializers.IntegerField(required=True)
+    branch_id = serializers.IntegerField(required=True)
+    confirm = serializers.BooleanField(required=False)
     url = serializers.HyperlinkedRelatedField(
         view_name="product-detail", queryset=Product.objects, required=True
     )

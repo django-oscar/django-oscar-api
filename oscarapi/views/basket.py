@@ -70,13 +70,11 @@ class BasketView(APIView):
 class AddProductView(APIView):
     """
     Add a certain quantity of a product to the basket.
-
     POST(url, quantity)
     {
         "url": "http://testserver.org/oscarapi/products/209/",
         "quantity": 6
     }
-
     If you've got some options to configure for the product to add to the
     basket, you should pass the optional ``options`` property:
     {
@@ -89,28 +87,25 @@ class AddProductView(APIView):
     }
     """
     permission_classes = [IsAuthenticated]
-    
+
     add_product_serializer_class = AddProductSerializer
     serializer_class = BasketSerializer
 
     def validate(
-        self, basket, product, quantity, options
+        self, basket, branch_id, product, quantity, options
     ):  # pylint: disable=unused-argument
-        availability = basket.strategy.fetch_for_product(product).availability
-
-        # check if product is available at all
+        availability = basket.strategy.fetch_for_product(product, branch_id).availability
+        basket.branch_id = branch_id
+        # Check if product is available at all
         if not availability.is_available_to_buy:
             return False, availability.message
-
         current_qty = basket.product_quantity(product)
         desired_qty = current_qty + quantity
-
-        # check if we can buy this quantity
+        # Check if we can buy this quantity
         allowed, message = availability.is_purchase_permitted(desired_qty)
         if not allowed:
             return False, message
-
-        # check if there is a limit on amount
+        # Check if there is a limit on amount
         allowed, message = basket.is_quantity_allowed(desired_qty)
         if not allowed:
             return False, message
@@ -125,20 +120,40 @@ class AddProductView(APIView):
             product = p_ser.validated_data["url"]
             quantity = p_ser.validated_data["quantity"]
             options = p_ser.validated_data.get("options", [])
+            branch_id = p_ser.validated_data.get("branch_id", [])
+            confirm = p_ser.validated_data.get("confirm", False)  # Confirmation flag
 
-            basket_valid, message = self.validate(basket, product, quantity, options)
+            # Validate the product addition
+            basket_valid, message = self.validate(basket, branch_id, product, quantity, options)
             if not basket_valid:
                 return Response(
                     {"reason": message}, status=status.HTTP_406_NOT_ACCEPTABLE
                 )
 
-            basket.add_product(product, quantity=quantity, options=options)
+            # Check for branch mismatch
+            if basket.lines.exists():
+                first_line = basket.lines.first()
+                existing_stockrecord = first_line.stockrecord  # StockRecord of the first item in the cart
+                existing_branch = existing_stockrecord.branch.id  # Branch of the first item in the cart
+                
+                if existing_branch != branch_id:
+                    if not confirm:
+                        # Return a warning message requiring confirmation
+                        return Response({
+                            "message": "Your cart contains items from a different branch. Confirm to clear the cart and add this item.",
+                        }, status=status.HTTP_409_CONFLICT)
 
+                    # User confirmed, flush the cart
+                    basket.flush()
+
+            # Add the product to the basket
+            basket.add_product(product, quantity=quantity, options=options)
             signals.basket_addition.send(
                 sender=self, product=product, user=request.user, request=request
             )
-
             operations.apply_offers(request, basket)
+
+            # Serialize and return the updated basket
             ser = self.serializer_class(basket, context={"request": request})
             return Response(ser.data)
 
@@ -311,13 +326,11 @@ class LineList(BasketPermissionMixin, generics.ListCreateAPIView):
             )
         return super(LineList, self).post(request, format=format)
 
-
 class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
     """
     Only the field `quantity` can be changed in this view.
     All other fields are readonly.
     """
-
     queryset = Line.objects.all()
     serializer_class = BasketLineSerializer
     permission_classes = (permissions.RequestAllowsAccessTo,)
@@ -330,3 +343,55 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
             return prepped_basket.all_lines()
         else:
             return self.queryset.none()
+
+    def validate(self, basket, branch_id, product, quantity, options):  # pylint: disable=unused-argument
+        """
+        Validate whether the requested quantity can be added to the basket.
+        """
+        availability = basket.strategy.fetch_for_product(product, branch_id).availability
+        basket.branch_id = branch_id
+
+        # Check if the product is available at all
+        if not availability.is_available_to_buy:
+            return False, availability.message
+
+        # Calculate the total desired quantity (current + requested)
+        current_qty = basket.product_quantity(product)
+        desired_qty = current_qty + quantity
+        # Check if the desired quantity is permitted
+        allowed, message = availability.is_purchase_permitted(quantity)
+        if not allowed:
+            return False, message
+
+        # Check if the basket's quantity limit is exceeded
+        allowed, message = basket.is_quantity_allowed(quantity)
+        if not allowed:
+            return False, message
+
+        return True, None
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        new_quantity = request.data.get("quantity")
+        branch_id = request.data.get("branch_id")
+
+        # Validate input
+        if not isinstance(new_quantity, int) or new_quantity <= 0:
+            return Response(
+              _("Invalid quantity."),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Perform stock validation
+        basket = instance.basket
+        product = instance.product
+        options = list(instance.attributes.values("option", "value"))
+        basket_valid, message = self.validate(basket, branch_id, product, new_quantity, options)
+        if not basket_valid:
+            return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update the quantity
+        instance.quantity = new_quantity
+        instance.save()
+
+        return Response(_("Quantity updated successfully."))

@@ -94,11 +94,21 @@ class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
     line = DrillDownHyperlinkedIdentityField(
         view_name="basket-line-detail", extra_url_kwargs={"basket_pk": "line.basket.id"}
     )
+    price = serializers.SerializerMethodField()
 
     class Meta:
         model = LineAttribute
-        fields = "__all__"
+        fields = "__all__"  # Include all fields
 
+    def get_price(self, obj):
+        """
+        Retrieve the price of the related Option.
+        """
+        try:
+           attribute_option = obj.option.option_group.options.get(option=obj.value)  # Retrieve all related AttributeOption objects
+           return str(attribute_option.price) 
+        except :
+            return str(0)
 
 class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     """
@@ -110,7 +120,7 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         view_name="basket-line-detail", extra_url_kwargs={"basket_pk": "basket.id"}
     )
     attributes = LineAttributeSerializer(
-        many=True, fields=("url", "option", "value"), required=False, read_only=True
+        many=True, fields=("url", "option", "value","price"), required=False, read_only=True
     )
     price_excl_tax = serializers.DecimalField(
         decimal_places=2,
