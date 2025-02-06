@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment with Razorpay</title>
+</head>
+<body>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "{{ rz_key }}",
+        "amount": "{{ amount }}",
+        "buttontext": "Pay with Razorpay",
+        "name": "{{name}}",
+        "description": "{{description}}",
+        "image": "{{logo_url}}",
+        "theme.color": "{{theme_color}}",
+        "order_id": "{{ rz_order.id }}",
+        "handler": function (response){
+            var url = "{% url 'razorpay-success-response' basket_id=basket.id %}";
+            var params = {
+                'rz_id': response.razorpay_payment_id,
+                'txn_id': "{{ txn_id }}"
+            };
+            window.location = url + "?" + $.param(params);
+        },
+        "prefill": {
+            "email": "{{ email }}"
+        },
+        "modal": {
+            "ondismiss": function(){
+                var url = "{% url 'razorpay-cancel-response' basket_id=basket.id %}";
+                window.location = url;
+            }
+        },
+        "notes": {
+            "txn_id": "{{ txn_id }}",
+        }
+    };
+    var rzp = new Razorpay(options);
+    rzp.open();
+</script>
+</body>
+</html>

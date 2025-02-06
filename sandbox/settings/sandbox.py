@@ -86,7 +86,10 @@ INSTALLED_APPS = [
     'haystack',
     'treebeard',
     'django_tables2',
-    'easy_thumbnails'
+    'easy_thumbnails',
+
+    'django_oscar_api_razorpay',
+    'django_oscar_razorpay'
 ]
 
 LANGUAGE_CODE = 'en-us'
@@ -220,3 +223,9 @@ OSCARAPI_ENABLE_REGISTRATION = True
 from oscar.defaults import *  # noqa
 
 OSCAR_THUMBNAILER = 'oscar.core.thumbnails.EasyThumbnails'
+
+RAZORPAY_API_KEY = "rzp_test_Cpsc2xluAYLfSK"
+RAZORPAY_API_SECRET = "vH4uDegnkL106sPJqGxmomhm"
+RAZORPAY_CURRENCY = "INR"
+
+OSCAR_DEFAULT_CURRENCY = "INR"

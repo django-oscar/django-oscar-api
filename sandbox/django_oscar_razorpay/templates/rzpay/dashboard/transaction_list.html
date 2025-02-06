@@ -1,0 +1,73 @@
+{% load currency_filters %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% trans "Razorpay Transactions" %}</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container my-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a>
+                </li>
+                <li class="breadcrumb-item">Razorpay</li>
+                <li class="breadcrumb-item active" aria-current="page">{% trans "Razorpay Transactions" %}</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <h1 class="mb-4">{% trans "Razorpay Transactions" %}</h1>
+
+        <!-- Transaction Table -->
+        {% if transactions %}
+            <table class="table table-striped table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>{% trans "Transaction ID" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Amount" %}</th>
+                        <th>{% trans "Razorpay ID" %}</th>
+                        <th>{% trans "Error Code" %}</th>
+                        <th>{% trans "Error Message" %}</th>
+                        <th>{% trans "Date" %}</th>
+                        <th>{% trans "User" %}</th>
+                        <th>{% trans "Email" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in transactions %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'razorpay-detail' txn.id %}">{{ txn.txnid }}</a>
+                            </td>
+                            <td>{{ txn.status }}</td>
+                            <td>{{ txn.amount|currency:txn.currency }}</td>
+                            <td>{{ txn.rz_id|default:"-" }}</td>
+                            <td>{{ txn.error_code|default:"-" }}</td>
+                            <td>{{ txn.error_message|default:"-" }}</td>
+                            <td>{{ txn.date_created }}</td>
+                            <td>{{ txn.user }}</td>
+                            <td>{{ txn.email }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                {% trans "No transactions have been made yet." %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Include Bootstrap JS (Optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

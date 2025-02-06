@@ -2,3 +2,5 @@ Django<4
 django-oscar>=3.2,<3.3
 sphinx
 sphinx-wagtail-theme
+django-oscar-api
+easy-thumbnails
