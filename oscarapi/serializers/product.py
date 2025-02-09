@@ -458,11 +458,14 @@ class RecommmendedProductSerializer(OscarModelSerializer):
 
 
 class ProductStockRecordSerializer(OscarModelSerializer):
-    url = DrillDownHyperlinkedIdentityField(
-        view_name="product-stockrecord-detail",
-        extra_url_kwargs={"product_pk": "product_id"},
-    )
-
+    available_to_buy = serializers.SerializerMethodField()
+    
+    def get_available_to_buy(self, obj):
+        """
+        Calculate the available to buy quantity as num_in_stock - num_allocated.
+        """
+        return max(0, obj.num_in_stock - obj.num_allocated)
+    
     class Meta:
         model = StockRecord
         fields = "__all__"
@@ -554,13 +557,26 @@ class ProductSerializer(PublicProductSerializer):
     #     view_name="product-stockrecords", read_only=True
     # )
 
-    stockrecords = ProductStockRecordSerializer(many=True, required=False)
     services = ServiceSerializer(
         many=True,
         required=False,
         source="service",  # or 'services' if using a ManyToMany
     )
+    stockrecords = serializers.SerializerMethodField()
+    def get_stockrecords(self, obj):
+            """
+            Retrieve the stock record for the product based on the branch_id.
+            """
+            branch_id = self.context["request"].query_params.get("branch_id")
+            
+            if not branch_id:
+                return None
 
+            try:
+                stockrecord = obj.stockrecords.get(branch_id=branch_id)
+                return ProductStockRecordSerializer(stockrecord).data
+            except StockRecord.DoesNotExist:
+                return None
     class Meta(PublicProductSerializer.Meta):
         fields = settings.PRODUCTDETAIL_FIELDS
 

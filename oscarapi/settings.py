@@ -59,6 +59,7 @@ BASKET_FIELDS = overridable(
         "voucher_discounts",
         "offer_discounts",
         "is_tax_known",
+        "branch_id"
     ),
 )
 BASKETLINE_FIELDS = overridable(

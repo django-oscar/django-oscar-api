@@ -19,6 +19,7 @@ from oscarapi.serializers.utils import (
     OscarHyperlinkedModelSerializer,
 )
 from oscarapi.serializers.fields import TaxIncludedDecimalField
+from oscarapi.serializers.product import ProductSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,7 @@ LineAttribute = get_model("basket", "LineAttribute")
 StockRecord = get_model("partner", "StockRecord")
 Voucher = get_model("voucher", "Voucher")
 Product = get_model("catalogue", "Product")
+ProductImage = get_model("catalogue", "ProductImage")
 
 
 class VoucherSerializer(OscarModelSerializer):
@@ -49,10 +51,21 @@ class OfferDiscountSerializer(
 
 class VoucherDiscountSerializer(OfferDiscountSerializer):
     voucher = VoucherSerializer(required=False)
+    
+    
+class AbstractLineSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)  # Nested serializer for the product field
 
+    class Meta:
+        model = Line
+        fields = [
+            'id',
+            'product',  # This will now include all fields of the product
+            'quantity',
+        ]
 
 class BasketSerializer(serializers.HyperlinkedModelSerializer):
-    lines = serializers.HyperlinkedIdentityField(view_name="basket-lines-list")
+    lines = AbstractLineSerializer(many=True, read_only=True)  # Use the updated AbstractLineSerializer
     offer_discounts = OfferDiscountSerializer(many=True, required=False)
     total_excl_tax = serializers.DecimalField(
         decimal_places=2, max_digits=12, required=False
@@ -83,7 +96,7 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Basket
-        fields = settings.BASKET_FIELDS
+        fields = settings.BASKET_FIELDS 
 
 
 class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
