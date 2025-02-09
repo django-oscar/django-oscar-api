@@ -9,6 +9,7 @@ from rest_framework import serializers
 from rest_framework.fields import empty
 
 from oscar.core.loading import get_model
+from oscarapi.basket import operations
 
 from oscarapi.utils.exists import bound_unique_together_get_or_create_multiple
 from oscarapi.utils.loading import get_api_classes
@@ -568,12 +569,11 @@ class ProductSerializer(PublicProductSerializer):
             Retrieve the stock record for the product based on the branch_id.
             """
             branch_id = self.context["request"].query_params.get("branch_id")
-            
             if not branch_id:
-                return None
-
+                basket = operations.get_basket( self.context["request"])
+                branch_id = basket.branch_id
             try:
-                stockrecord = obj.stockrecords.get(branch_id=branch_id)
+                stockrecord = obj.stockrecords.get(branch_id=basket.branch_id)
                 return ProductStockRecordSerializer(stockrecord).data
             except StockRecord.DoesNotExist:
                 return None
