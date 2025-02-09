@@ -465,8 +465,10 @@ class ProductStockRecordSerializer(OscarModelSerializer):
         """
         Calculate the available to buy quantity as num_in_stock - num_allocated.
         """
-        return max(0, obj.num_in_stock - obj.num_allocated)
-    
+        try:
+            return max(0, obj.num_in_stock - obj.num_allocated)
+        except:
+            return
     class Meta:
         model = StockRecord
         fields = "__all__"
