@@ -41,6 +41,8 @@ class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
         view_name="basket-line-detail", extra_url_kwargs={"basket_pk": "line.basket.id"}
     )
     price = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
 
     class Meta:
         model = LineAttribute
@@ -55,6 +57,27 @@ class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
            return str(attribute_option.price) 
         except :
             return str(0)
+        
+    def get_type(self, obj):
+        """
+        Retrieve the type of the related Option.
+        """
+        try:
+           attribute_option = obj.option.type  # Retrieve all related AttributeOption objects
+           return attribute_option 
+        except :
+            return ""
+        
+    def get_name(self, obj):
+        """
+        Retrieve the name of the related Option.
+        """
+        try:
+           attribute_option = obj.option.name  # Retrieve all related AttributeOption objects
+           return attribute_option 
+        except :
+            return ""
+
 
 class VoucherSerializer(OscarModelSerializer):
     class Meta:
@@ -79,7 +102,7 @@ class VoucherDiscountSerializer(OfferDiscountSerializer):
 class AbstractLineSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)  # Nested serializer for the product field
     attributes = LineAttributeSerializer(
-        many=True, fields=("id", "option", "value","price"), required=False, read_only=True
+        many=True, fields=("id", "option", "value","price","type","name"), required=False, read_only=True
     )
     class Meta:
         model = Line

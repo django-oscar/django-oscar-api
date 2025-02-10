@@ -27,6 +27,7 @@ from oscarapi.serializers.utils import (
 )
 from server.apps.service.models import Service
 from server.apps.vendor.models import Vendor
+from server.apps.vendor.serializers import VendorSerializer
 
 from .exceptions import FieldError
 
@@ -549,6 +550,7 @@ class ProductSerializer(PublicProductSerializer):
     # price = serializers.HyperlinkedIdentityField(
     #     view_name="product-price", read_only=True
     # )
+    vendor = VendorSerializer(read_only=True)
     availability = serializers.HyperlinkedIdentityField(
         view_name="product-availability", read_only=True
     )
