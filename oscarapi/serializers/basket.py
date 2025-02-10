@@ -32,6 +32,29 @@ Voucher = get_model("voucher", "Voucher")
 Product = get_model("catalogue", "Product")
 ProductImage = get_model("catalogue", "ProductImage")
 
+class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
+    url = DrillDownHyperlinkedIdentityField(
+        view_name="lineattribute-detail",
+        extra_url_kwargs={"basket_pk": "line.basket.id", "line_pk": "line.id"},
+    )
+    line = DrillDownHyperlinkedIdentityField(
+        view_name="basket-line-detail", extra_url_kwargs={"basket_pk": "line.basket.id"}
+    )
+    price = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LineAttribute
+        fields = "__all__"  # Include all fields
+
+    def get_price(self, obj):
+        """
+        Retrieve the price of the related Option.
+        """
+        try:
+           attribute_option = obj.option.option_group.options.get(option=obj.value)  # Retrieve all related AttributeOption objects
+           return str(attribute_option.price) 
+        except :
+            return str(0)
 
 class VoucherSerializer(OscarModelSerializer):
     class Meta:
@@ -55,13 +78,16 @@ class VoucherDiscountSerializer(OfferDiscountSerializer):
     
 class AbstractLineSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)  # Nested serializer for the product field
-
+    attributes = LineAttributeSerializer(
+        many=True, fields=("id", "option", "value","price"), required=False, read_only=True
+    )
     class Meta:
         model = Line
         fields = [
             'id',
             'product',  # This will now include all fields of the product
             'quantity',
+            'attributes'
         ]
 
 class BasketSerializer(serializers.HyperlinkedModelSerializer):
@@ -99,29 +125,7 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
         fields = settings.BASKET_FIELDS 
 
 
-class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
-    url = DrillDownHyperlinkedIdentityField(
-        view_name="lineattribute-detail",
-        extra_url_kwargs={"basket_pk": "line.basket.id", "line_pk": "line.id"},
-    )
-    line = DrillDownHyperlinkedIdentityField(
-        view_name="basket-line-detail", extra_url_kwargs={"basket_pk": "line.basket.id"}
-    )
-    price = serializers.SerializerMethodField()
 
-    class Meta:
-        model = LineAttribute
-        fields = "__all__"  # Include all fields
-
-    def get_price(self, obj):
-        """
-        Retrieve the price of the related Option.
-        """
-        try:
-           attribute_option = obj.option.option_group.options.get(option=obj.value)  # Retrieve all related AttributeOption objects
-           return str(attribute_option.price) 
-        except :
-            return str(0)
 
 class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     """

@@ -396,3 +396,22 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
         instance.save()
 
         return Response(_("Quantity updated successfully."))
+    
+    def delete(self, request, *args, **kwargs):
+        """
+        Override the delete method to provide a custom response.
+        """
+        instance = self.get_object()
+        try:
+            # Perform the deletion
+            self.perform_destroy(instance)
+            return Response(
+                {"message": _("Basket line deleted successfully.")},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            # Handle any unexpected errors during deletion
+            return Response(
+                {"error": _("An error occurred while deleting the basket line.")},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
