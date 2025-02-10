@@ -575,10 +575,10 @@ class ProductSerializer(PublicProductSerializer):
                 basket = operations.get_basket( self.context["request"])
                 branch_id = basket.branch_id
             try:
-                stockrecord = obj.stockrecords.get(branch_id=basket.branch_id)
+                stockrecord = obj.stockrecords.get(branch_id=branch_id)
                 return ProductStockRecordSerializer(stockrecord).data
             except StockRecord.DoesNotExist:
-                return None
+                return {}
     class Meta(PublicProductSerializer.Meta):
         fields = settings.PRODUCTDETAIL_FIELDS
 
