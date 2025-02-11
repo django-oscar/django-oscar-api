@@ -372,30 +372,56 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
         return True, None
 
     def partial_update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        new_quantity = request.data.get("quantity")
+        """
+        Partially update a basket line, including quantity and options.
+        """
+        instance = self.get_object()  # Get the basket line instance
+        serializer = BasketLineSerializer(instance, data=request.data, partial=True)
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Extract validated data
+        new_quantity = serializer.validated_data.get("quantity", instance.quantity)
+        new_options = serializer.validated_data.get("options", [])
         branch_id = request.data.get("branch_id")
 
-        # Validate input
+        # Validate input for quantity
         if not isinstance(new_quantity, int) or new_quantity <= 0:
             return Response(
-              _("Invalid quantity."),
+                {"error": _("Invalid quantity.")},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Perform stock validation
         basket = instance.basket
         product = instance.product
-        options = list(instance.attributes.values("option", "value"))
+        options = list(instance.attributes.values("option", "value"))  # Current options
         basket_valid, message = self.validate(basket, branch_id, product, new_quantity, options)
+
         if not basket_valid:
             return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
 
         # Update the quantity
         instance.quantity = new_quantity
+
+        # Update the options
+        if new_options:
+            # Clear existing attributes
+            instance.attributes.all().delete()
+
+            # Add new attributes based on the provided options
+            for option_dict in new_options:
+                option = option_dict["option"]
+                value = option_dict["value"]
+
+                instance.attributes.create(option=option, value=value)
+
+        # Save the updated instance
         instance.save()
 
-        return Response(_("Quantity updated successfully."))
+        # Return success response
+        return Response(_("Basket line updated successfully."), status=status.HTTP_200_OK)
     
     def delete(self, request, *args, **kwargs):
         """

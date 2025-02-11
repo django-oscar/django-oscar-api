@@ -80,6 +80,7 @@ BASKETLINE_FIELDS = overridable(
         "stockrecord",
         "date_created",
         "date_updated",
+        "options",
     ),
 )
 

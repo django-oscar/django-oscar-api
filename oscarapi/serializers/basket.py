@@ -19,7 +19,7 @@ from oscarapi.serializers.utils import (
     OscarHyperlinkedModelSerializer,
 )
 from oscarapi.serializers.fields import TaxIncludedDecimalField
-from oscarapi.serializers.product import ProductSerializer
+from oscarapi.serializers.product import OptionValueSerializer, ProductSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -188,6 +188,7 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     warning = serializers.CharField(
         read_only=True, required=False, source="get_warning"
     )
+    options = OptionValueSerializer(many=True, required=False)
 
     stockrecord = DrillDownHyperlinkedRelatedField(
         view_name="product-stockrecord-detail",
