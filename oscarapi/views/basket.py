@@ -374,10 +374,12 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
     def partial_update(self, request, *args, **kwargs):
         """
         Partially update a basket line, including quantity and options.
+        Return the updated basket object serialized with BasketSerializer.
         """
         instance = self.get_object()  # Get the basket line instance
+
+        # Validate input using the serializer
         serializer = BasketLineSerializer(instance, data=request.data, partial=True)
-        
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -398,7 +400,6 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
         product = instance.product
         options = list(instance.attributes.values("option", "value"))  # Current options
         basket_valid, message = self.validate(basket, branch_id, product, new_quantity, options)
-
         if not basket_valid:
             return Response({"error": message}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -414,14 +415,19 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
             for option_dict in new_options:
                 option = option_dict["option"]
                 value = option_dict["value"]
-
                 instance.attributes.create(option=option, value=value)
 
         # Save the updated instance
         instance.save()
 
-        # Return success response
-        return Response(_("Basket line updated successfully."), status=status.HTTP_200_OK)
+        # Recalculate basket totals (if necessary)
+        operations.apply_offers(request, basket)
+
+        # Serialize the updated basket
+        basket_serializer = BasketSerializer(basket, context={"request": request})
+
+        # Return the serialized basket object
+        return Response(basket_serializer.data, status=status.HTTP_200_OK)
     
     def delete(self, request, *args, **kwargs):
         """
