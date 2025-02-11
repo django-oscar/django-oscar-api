@@ -434,13 +434,14 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
         Override the delete method to provide a custom response.
         """
         instance = self.get_object()
+        basket = instance.basket
         try:
             # Perform the deletion
             self.perform_destroy(instance)
-            return Response(
-                {"message": _("Basket line deleted successfully.")},
-                status=status.HTTP_200_OK
-            )
+            basket_serializer = BasketSerializer(basket, context={"request": request})
+
+            # Return the serialized basket object
+            return Response(basket_serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             # Handle any unexpected errors during deletion
             return Response(
