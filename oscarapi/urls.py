@@ -15,6 +15,7 @@ api_root = get_api_class("views.root", "api_root")
     BasketView,
     AddProductView,
     AddVoucherView,
+    RemoveVoucherView,
     ShippingMethodView,
     LineList,
     BasketLineDetail,
@@ -24,6 +25,7 @@ api_root = get_api_class("views.root", "api_root")
         "BasketView",
         "AddProductView",
         "AddVoucherView",
+        "RemoveVoucherView",
         "ShippingMethodView",
         "LineList",
         "BasketLineDetail",
@@ -165,6 +167,9 @@ urlpatterns = [
     ),
     path(
         "basket/add-voucher/", AddVoucherView.as_view(), name="api-basket-add-voucher"
+    ),
+    path(
+        "basket/remove-voucher/", RemoveVoucherView.as_view(), name="api-basket-remove-voucher"
     ),
     path(
         "basket/shipping-methods/",

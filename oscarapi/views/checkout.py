@@ -123,11 +123,11 @@ class CheckoutView(views.APIView):
             "postcode": "6666LL",
             "state": "Gerendrecht",
             "title": "Mr"
-         }
+        }
     }
     returns the order object.
     """
-
+    permission_classes = (IsOwner,)
     order_serializer_class = OrderSerializer
     serializer_class = CheckoutSerializer
 

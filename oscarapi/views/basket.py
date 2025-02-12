@@ -1,5 +1,6 @@
 # pylint: disable=W0632
 from django.utils.translation import gettext_lazy as _
+from oscarapi.permissions import IsOwner
 
 from oscar.apps.basket import signals
 from oscar.core.loading import get_model, get_class
@@ -13,6 +14,10 @@ from oscarapi.basket import operations
 from oscarapi.utils.loading import get_api_classes, get_api_class
 from oscarapi.views.utils import BasketPermissionMixin
 from rest_framework.permissions import IsAuthenticated ,AllowAny
+from oscar.core.loading import get_model
+from server.apps.voucher.models import Voucher
+
+Store = get_model('stores', 'Store')
 
 __all__ = (
     "BasketView",
@@ -163,53 +168,73 @@ class AddProductView(APIView):
 
 class AddVoucherView(APIView):
     """
-    Add a voucher to the basket.
+    Add a voucher to the basket, ensuring the voucher and basket belong to the same vendor.
 
     POST(vouchercode)
     {
         "vouchercode": "kjadjhgadjgh7667"
     }
 
-    Will return 200 and the voucher as json if successful.
+    Will return 200 and the updated basket if successful.
     If unsuccessful, will return 406 with the error.
     """
-
+    permission_classes = [IsAuthenticated]
     add_voucher_serializer_class = VoucherAddSerializer
     serializer_class = VoucherSerializer
 
-    def post(self, request, *args, **kwargs):  # pylint: disable=redefined-builtin
+    def post(self, request, *args, **kwargs):
         v_ser = self.add_voucher_serializer_class(
             data=request.data, context={"request": request}
         )
+
         if v_ser.is_valid():
             basket = operations.get_basket(request)
-
             voucher = v_ser.instance
-            basket.vouchers.add(voucher)
 
+            # ✅ Step 1: Retrieve the Voucher's Vendor
+            voucher_vendor = voucher.vendor if hasattr(voucher, "vendor") else None
+
+            # ✅ Step 2: Retrieve the Basket's Vendor via Branch ID
+            store_vendor = None
+            if basket.branch_id:
+                try:
+                    store = Store.objects.get(id=basket.branch_id)
+                    store_vendor = store.vendor
+                except Store.DoesNotExist:
+                    return Response(
+                        {"error": _("The associated branch/store does not exist.")},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            # ✅ Step 3: Ensure the Voucher and Basket Have the Same Vendor
+            if voucher_vendor and store_vendor and voucher_vendor != store_vendor:
+                return Response(
+                    {"error": _("Voucher code unknown.")},
+                    status=status.HTTP_406_NOT_ACCEPTABLE,
+                )
+
+            # ✅ Step 4: Add the Voucher to the Basket
+            basket.vouchers.add(voucher)
             signals.voucher_addition.send(sender=None, basket=basket, voucher=voucher)
 
-            # Recalculate discounts to see if the voucher gives any
+            # ✅ Step 5: Apply Offers and Check Discounts
             operations.apply_offers(request, basket)
             discounts_after = basket.offer_applications
 
-            # Look for discounts from this new voucher
+            # ✅ Step 6: Check if the Voucher Applies Any Discount
             for discount in discounts_after:
                 if discount["voucher"] and discount["voucher"] == voucher:
                     break
             else:
                 basket.vouchers.remove(voucher)
                 return Response(
-                    {
-                        "reason": _(
-                            "Your basket does not qualify for a voucher discount"
-                        )
-                    },  # noqa
+                    {"error": _("Your basket does not qualify for a voucher discount.")},
                     status=status.HTTP_406_NOT_ACCEPTABLE,
                 )
 
-            ser = self.serializer_class(voucher, context={"request": request})
-            return Response(ser.data)
+            # ✅ Step 7: Return the Updated Basket
+            basket_data = BasketSerializer(basket, context={"request": request}).data
+            return Response(basket_data, status=status.HTTP_200_OK)
 
         return Response(v_ser.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -238,6 +263,7 @@ class ShippingMethodView(APIView):
     Post a shipping_address if your shipping methods are dependent on the
     address.
     """
+    permission_classes = (IsOwner,)
 
     serializer_class = ShippingAddressSerializer
     shipping_method_serializer_class = ShippingMethodSerializer
@@ -448,3 +474,77 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
                 {"error": _("An error occurred while deleting the basket line.")},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+class RemoveVoucherView(APIView):
+    """
+    Remove a voucher from the basket.
+
+    DELETE(vouchercode)
+    {
+        "vouchercode": "kjadjhgadjgh7667"
+    }
+
+    Will return 200 and the updated basket if successful.
+    If unsuccessful, will return 404 or 406 with an error.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        vouchercode = request.data.get("vouchercode")
+
+        if not vouchercode:
+            return Response(
+                {"error": _("Voucher code is required.")},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        basket = operations.get_basket(request)
+
+        print("vouchercode: ", vouchercode)
+        print("basket: ", basket)
+        # ✅ Step 1: Retrieve the Voucher
+        try:
+            voucher = Voucher.objects.get(code=vouchercode.upper())
+            print("voucher: ", voucher)
+
+        except Voucher.DoesNotExist:
+            return Response(
+                {"error": _("Voucher not found.")},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # ✅ Step 2: Check if the Voucher is in the Basket
+        if voucher not in basket.vouchers.all():
+            return Response(
+                {"error": _("The voucher is not in the basket.")},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
+
+        # ✅ Step 3: Retrieve Basket's Vendor via Branch
+        store_vendor = None
+        if basket.branch_id:
+            try:
+                store = Store.objects.get(id=basket.branch_id)
+                store_vendor = store.vendor
+            except Store.DoesNotExist:
+                return Response(
+                    {"error": _("The associated branch/store does not exist.")},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # ✅ Step 4: Ensure the Voucher and Basket Have the Same Vendor
+        if voucher.vendor and store_vendor and voucher.vendor != store_vendor:
+            return Response(
+                {"error": _("The voucher does not belong to the same vendor as the basket.")},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
+
+        # ✅ Step 5: Remove the Voucher from the Basket
+        basket.vouchers.remove(voucher)
+
+        # ✅ Step 6: Recalculate Discounts
+        operations.apply_offers(request, basket)
+
+        # ✅ Step 7: Return the Updated Basket
+        basket_data = BasketSerializer(basket, context={"request": request}).data
+        return Response(basket_data, status=status.HTTP_200_OK)
