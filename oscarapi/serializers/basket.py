@@ -112,9 +112,15 @@ class AbstractLineSerializer(serializers.ModelSerializer):
             'quantity',
             'attributes'
         ]
+class ProductInBasketSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    qty = serializers.IntegerField()
+    line_id = serializers.IntegerField()
 
+    
+    
 class BasketSerializer(serializers.HyperlinkedModelSerializer):
-    lines = AbstractLineSerializer(many=True, read_only=True)  # Use the updated AbstractLineSerializer
+    lines = AbstractLineSerializer(many=True, read_only=True)
     offer_discounts = OfferDiscountSerializer(many=True, required=False)
     total_excl_tax = serializers.DecimalField(
         decimal_places=2, max_digits=12, required=False
@@ -143,12 +149,74 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
         queryset=User.objects.all(),
     )
 
+    # Add the new field for product information
+    products_in_basket = serializers.SerializerMethodField()
+
     class Meta:
         model = Basket
-        fields = settings.BASKET_FIELDS 
+        fields = settings.BASKET_FIELDS  # Include the new field
 
+    def get_products_in_basket(self, obj):
+        """
+        Custom method to retrieve product information from the basket.
+        `obj` is the Basket instance being serialized.
+        """
+        products_data = {}
 
+        # Iterate over all lines in the basket
+        for line in obj.lines.all():  # Adjust this based on your actual model relationships
+            product_id = str(line.product.id)  # Convert to string to match your JSON keys
 
+            # Prepare the data for this line
+            line_data = {
+                "qty": line.quantity,
+                "line_id": line.id,
+                "attributes": self.get_attributes(line),  # Call helper method to get attributes
+                "title": line.product.title,  # Add product title
+                "original_price": line.product.original_price,  # Add product title
+                "price_currency": line.product.price_currency,  # Add product title
+                "selling_price": line.product.selling_price,  # Add product title
+                "image": self.get_product_images(line.product),  # Add product images
+            }
+
+            # Append the line data to the product's list
+            if product_id not in products_data:
+                products_data[product_id] = []
+            products_data[product_id].append(line_data)
+
+        return products_data
+    def get_product_images(self, product):
+            """
+            Helper method to retrieve product images using the `get_all_images` method.
+            """
+            images = []
+
+            # Use the `get_all_images` method from the AbstractProduct model
+            for image in product.get_all_images():
+                images.append(image.original.url)  # Use the `original` field to get the image URL
+                break
+            if len(images)>0:
+                return images[0]
+            else:
+                return ""
+    def get_attributes(self, line):
+        """
+        Helper method to retrieve attributes for a line.
+        This can return either a dictionary or a list of dictionaries.
+        """
+        # Example logic for attributes (adjust based on your actual model/data)
+        attributes = []
+
+        # Assuming `line.attributes` is a related field (e.g., ManyToMany or ForeignKey)
+        for attr in line.attributes.all():
+            attributes.append({
+                "value": attr.value,
+                "name": attr.option.name,
+            })
+
+        # Return as a dictionary if there's only one attribute, otherwise return a list
+        return attributes[0] if len(attributes) == 1 else attributes
+    
 
 class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     """
@@ -160,7 +228,7 @@ class BasketLineSerializer(OscarHyperlinkedModelSerializer):
         view_name="basket-line-detail", extra_url_kwargs={"basket_pk": "basket.id"}
     )
     attributes = LineAttributeSerializer(
-        many=True, fields=("url", "option", "value","price"), required=False, read_only=True
+        many=True, fields=("id", "option", "value","price","type","name"), required=False, read_only=True
     )
     price_excl_tax = serializers.DecimalField(
         decimal_places=2,
