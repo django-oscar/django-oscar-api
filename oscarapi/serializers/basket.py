@@ -215,7 +215,7 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
             })
 
         # Return as a dictionary if there's only one attribute, otherwise return a list
-        return attributes[0] if len(attributes) == 1 else attributes
+        return attributes
     
 
 class BasketLineSerializer(OscarHyperlinkedModelSerializer):
