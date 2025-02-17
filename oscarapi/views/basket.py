@@ -16,6 +16,7 @@ from oscarapi.views.utils import BasketPermissionMixin
 from rest_framework.permissions import IsAuthenticated ,AllowAny
 from oscar.core.loading import get_model
 from server.apps.voucher.models import Voucher
+from django.core.exceptions import PermissionDenied
 
 Store = get_model('stores', 'Store')
 
@@ -71,6 +72,26 @@ class BasketView(APIView):
         serializer = self.serializer_class(basket, context={"request": request})
         return Response(serializer.data)
 
+    def delete(self, request, *args, **kwargs):
+        """
+        Delete all lines from the basket.
+        """
+        basket = operations.get_basket(request)
+        
+        # Check if the basket is frozen
+        if basket.status == basket.FROZEN:
+            return Response(
+                {"message":  _("Cannot delete lines from a frozen basket.")},
+                status=403  # Forbidden
+            )
+        basket.lines.all().delete()
+
+        basket.save()
+        return Response(
+            {"message":  _("All lines have been successfully deleted from the basket.")},
+            status=204  # No Content
+        )
+
 
 class AddProductView(APIView):
     """
@@ -99,9 +120,8 @@ class AddProductView(APIView):
     def validate(
         self, basket, branch_id, product, quantity, options
     ):  # pylint: disable=unused-argument
+        basket.branch = Store.objects.get(id=branch_id)
         availability = basket.strategy.fetch_for_product(product, branch_id).availability
-        basket.branch_id = branch_id
-        basket.save()
         # Check if product is available at all
         if not availability.is_available_to_buy:
             return False, availability.message
@@ -146,7 +166,7 @@ class AddProductView(APIView):
                     if not confirm:
                         # Return a warning message requiring confirmation
                         return Response({
-                            "message": "Your cart contains items from a different branch. Confirm to clear the cart and add this item.",
+                            "message": _("Your cart contains items from a different branch. Confirm to clear the cart and add this item."),
                         }, status=status.HTTP_409_CONFLICT)
 
                     # User confirmed, flush the cart
@@ -196,10 +216,9 @@ class AddVoucherView(APIView):
 
             # ✅ Step 2: Retrieve the Basket's Vendor via Branch ID
             store_vendor = None
-            if basket.branch_id:
+            if basket.branch:
                 try:
-                    store = Store.objects.get(id=basket.branch_id)
-                    store_vendor = store.vendor
+                    store_vendor = basket.branch.vendor
                 except Store.DoesNotExist:
                     return Response(
                         {"error": _("The associated branch/store does not exist.")},
@@ -376,7 +395,7 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
         Validate whether the requested quantity can be added to the basket.
         """
         availability = basket.strategy.fetch_for_product(product, branch_id).availability
-        basket.branch_id = branch_id
+        basket.branch =  Store.objects.get(id=branch_id)
 
         # Check if the product is available at all
         if not availability.is_available_to_buy:
@@ -522,10 +541,9 @@ class RemoveVoucherView(APIView):
 
         # ✅ Step 3: Retrieve Basket's Vendor via Branch
         store_vendor = None
-        if basket.branch_id:
+        if basket.branch:
             try:
-                store = Store.objects.get(id=basket.branch_id)
-                store_vendor = store.vendor
+                store_vendor = basket.branch.vendor
             except Store.DoesNotExist:
                 return Response(
                     {"error": _("The associated branch/store does not exist.")},

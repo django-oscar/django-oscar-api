@@ -27,7 +27,6 @@ from oscarapi.serializers.utils import (
 )
 from server.apps.service.models import Service
 from server.apps.vendor.models import Vendor
-from server.apps.vendor.serializers import VendorSerializer
 
 from .exceptions import FieldError
 
@@ -543,7 +542,11 @@ class ChildProductSerializer(PublicProductSerializer):
     class Meta(PublicProductSerializer.Meta):
         fields = settings.CHILDPRODUCTDETAIL_FIELDS
 
+class VendorSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = Vendor
+        fields = ['id', 'name']
 class ProductSerializer(PublicProductSerializer):
     "Serializer for public api with strategy fields added for price and availability"
     # url = serializers.HyperlinkedIdentityField(view_name="product-detail")
@@ -575,7 +578,7 @@ class ProductSerializer(PublicProductSerializer):
             branch_id = self.context["request"].query_params.get("branch_id")
             if not branch_id:
                 basket = operations.get_basket( self.context["request"])
-                branch_id = basket.branch_id
+                branch_id = basket.branch
             try:
                 stockrecord = obj.stockrecords.get(branch_id=branch_id)
                 return ProductStockRecordSerializer(stockrecord).data

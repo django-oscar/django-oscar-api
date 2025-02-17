@@ -59,7 +59,8 @@ BASKET_FIELDS = overridable(
         "voucher_discounts",
         "offer_discounts",
         "is_tax_known",
-        "branch_id",
+        "branch",
+        "vendor",
         "products_in_basket",
     ),
 )

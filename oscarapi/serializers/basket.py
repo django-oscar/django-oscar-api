@@ -19,7 +19,7 @@ from oscarapi.serializers.utils import (
     OscarHyperlinkedModelSerializer,
 )
 from oscarapi.serializers.fields import TaxIncludedDecimalField
-from oscarapi.serializers.product import OptionValueSerializer, ProductSerializer
+from oscarapi.serializers.product import OptionValueSerializer, ProductSerializer, VendorSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ StockRecord = get_model("partner", "StockRecord")
 Voucher = get_model("voucher", "Voucher")
 Product = get_model("catalogue", "Product")
 ProductImage = get_model("catalogue", "ProductImage")
-
+Store = get_model('stores', 'Store')
 class LineAttributeSerializer(OscarHyperlinkedModelSerializer):
     url = DrillDownHyperlinkedIdentityField(
         view_name="lineattribute-detail",
@@ -100,7 +100,7 @@ class VoucherDiscountSerializer(OfferDiscountSerializer):
     
     
 class AbstractLineSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)  # Nested serializer for the product field
+    product = ProductSerializer(read_only=True,fields=("id", "options","stockrecords","images","services","title", "url","selling_price","original_price","price_currency"))  # Nested serializer for the product field
     attributes = LineAttributeSerializer(
         many=True, fields=("id", "option", "value","price","type","name"), required=False, read_only=True
     )
@@ -142,13 +142,18 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
     )
     currency = serializers.CharField(required=False)
     voucher_discounts = VoucherDiscountSerializer(many=True, required=False)
+    branch = serializers.PrimaryKeyRelatedField(
+        queryset=Store.objects.all(),  # Replace `Store` with your actual model
+        required=False,
+        allow_null=True
+    )
     owner = serializers.HyperlinkedRelatedField(
         view_name="user-detail",
         required=False,
         allow_null=True,
         queryset=User.objects.all(),
     )
-
+    vendor = serializers.SerializerMethodField()
     # Add the new field for product information
     products_in_basket = serializers.SerializerMethodField()
 
@@ -216,7 +221,20 @@ class BasketSerializer(serializers.HyperlinkedModelSerializer):
 
         # Return as a dictionary if there's only one attribute, otherwise return a list
         return attributes
-    
+    def get_vendor(self, obj):
+        """
+        Custom method to retrieve the vendor information from the branch.
+        `obj` is the Basket instance being serialized.
+        """
+        branch = obj.branch  # Access the related branch
+        print(branch)
+        print(33333)
+        if branch and branch.vendor:  # Ensure the branch and vendor exist
+            return {
+                "id": branch.vendor.id,
+                "name": branch.vendor.name,
+            }
+        return None  # Return None if no vendor is associated
 
 class BasketLineSerializer(OscarHyperlinkedModelSerializer):
     """
