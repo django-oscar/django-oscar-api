@@ -85,7 +85,9 @@ class BasketView(APIView):
                 status=403  # Forbidden
             )
         basket.lines.all().delete()
-
+        basket._lines = None
+        basket.branch=None
+        
         basket.save()
         return Response(
             {"message":  _("All lines have been successfully deleted from the basket.")},
@@ -484,6 +486,10 @@ class BasketLineDetail(generics.RetrieveUpdateDestroyAPIView):
         try:
             # Perform the deletion
             self.perform_destroy(instance)
+            
+            if basket.is_empty:
+                basket.branch = None  # Set branch to null if the basket is empty
+                basket.save(update_fields=["branch"])  # Save only the branch field to avoid unnecessary updates
             basket_serializer = BasketSerializer(basket, context={"request": request})
 
             # Return the serialized basket object
