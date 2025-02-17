@@ -121,6 +121,7 @@ class AddProductView(APIView):
         self, basket, branch_id, product, quantity, options
     ):  # pylint: disable=unused-argument
         basket.branch = Store.objects.get(id=branch_id)
+        basket.save()
         availability = basket.strategy.fetch_for_product(product, branch_id).availability
         # Check if product is available at all
         if not availability.is_available_to_buy:
