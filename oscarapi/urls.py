@@ -156,6 +156,7 @@ api_root = get_api_class("views.root", "api_root")
 (UserAdminList, UserAdminDetail) = get_api_classes(
     "views.admin.user", ["UserAdminList", "UserAdminDetail"]
 )
+WishlistView = get_api_class( "views.wishlist", "WishlistView")
 
 urlpatterns = [
     path("", api_root, name="api-root"),
@@ -256,6 +257,7 @@ urlpatterns = [
         AttributeOptionGroupAdminList.as_view(),
         name="admin-attributeoptiongroup-list",
     ),
+    path("wishlist/", WishlistView.as_view(), name="wishlist"),
 ]
 
 admin_urlpatterns = [
