@@ -1,4 +1,5 @@
 "This module contains operation on baskets and lines"
+
 from django.conf import settings
 
 from oscar.core.loading import get_class, get_model
