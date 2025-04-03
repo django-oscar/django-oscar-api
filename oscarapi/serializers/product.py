@@ -440,6 +440,7 @@ class ProductStockRecordSerializer(OscarModelSerializer):
 
 class BaseProductSerializer(OscarModelSerializer):
     "Base class shared by admin and public serializer"
+
     attributes = ProductAttributeValueSerializer(
         many=True, required=False, source="attribute_values"
     )
@@ -476,6 +477,7 @@ class BaseProductSerializer(OscarModelSerializer):
 
 class PublicProductSerializer(BaseProductSerializer):
     "Serializer base class used for public products api"
+
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
     price = serializers.HyperlinkedIdentityField(
         view_name="product-price", read_only=True
@@ -494,6 +496,7 @@ class PublicProductSerializer(BaseProductSerializer):
 
 class ChildProductSerializer(PublicProductSerializer):
     "Serializer for child products"
+
     parent = serializers.HyperlinkedRelatedField(
         view_name="product-detail",
         queryset=Product.objects.filter(structure=Product.PARENT),
@@ -508,6 +511,7 @@ class ChildProductSerializer(PublicProductSerializer):
 
 class ProductSerializer(PublicProductSerializer):
     "Serializer for public api with strategy fields added for price and availability"
+
     url = serializers.HyperlinkedIdentityField(view_name="product-detail")
     price = serializers.HyperlinkedIdentityField(
         view_name="product-price", read_only=True
