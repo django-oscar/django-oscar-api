@@ -490,9 +490,9 @@ class CheckoutTest(APITest):
                 "discount": 0,
                 "price": {
                     "currency": None,
-                    "excl_tax": "0.00",
-                    "incl_tax": "0.00",
-                    "tax": "0.00",
+                    "excl_tax": "0.0000",
+                    "incl_tax": "0.0000",
+                    "tax": "0.0000",
                 },
             },
         )
@@ -516,9 +516,9 @@ class CheckoutTest(APITest):
                 "discount": 0,
                 "price": {
                     "currency": "EUR",
-                    "excl_tax": "0.00",
-                    "incl_tax": "0.00",
-                    "tax": "0.00",
+                    "excl_tax": "0.0000",
+                    "incl_tax": "0.0000",
+                    "tax": "0.0000",
                 },
             },
         )
