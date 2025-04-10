@@ -8,7 +8,7 @@ clean:
 	rm -Rf build/
 
 install:
-	pip install -e .[dev]
+	pip install -e .[dev] --upgrade --upgrade-strategy=eager --pre
 
 sandbox: install
 	python sandbox/manage.py migrate
