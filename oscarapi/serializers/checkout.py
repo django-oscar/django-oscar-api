@@ -49,12 +49,12 @@ class PriceSerializer(serializers.Serializer):
     currency = serializers.CharField(
         max_length=12, default=django_settings.OSCAR_DEFAULT_CURRENCY, required=False
     )
-    excl_tax = serializers.DecimalField(decimal_places=2, max_digits=12, required=True)
+    excl_tax = serializers.DecimalField(decimal_places=4, max_digits=12, required=True)
     incl_tax = TaxIncludedDecimalField(
-        excl_tax_field="excl_tax", decimal_places=2, max_digits=12, required=False
+        excl_tax_field="excl_tax", decimal_places=4, max_digits=12, required=False
     )
     tax = TaxIncludedDecimalField(
-        excl_tax_value="0.00", decimal_places=2, max_digits=12, required=False
+        excl_tax_value="0.00", decimal_places=4, max_digits=12, required=False
     )
 
 
