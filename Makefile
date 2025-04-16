@@ -8,6 +8,9 @@ clean:
 	rm -Rf build/
 
 install:
+	pip install -e .[dev]
+
+install-latest:
 	pip install -e .[dev] --upgrade --upgrade-strategy=eager --pre
 
 sandbox: install
