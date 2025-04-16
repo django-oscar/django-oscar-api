@@ -33,9 +33,24 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
-        django-version: ["3.2", "4.2"]
-        oscar-version: ["3.2"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
+        django-version: ["3.2", "4.2", "5.2"]
+        oscar-version: ["3.2", "4.0"]
+        exclude:
+          - python-version: "3.13"
+            django-version: "3.2"
+          - python-version: "3.13"
+            django-version: "4.2"
+          - python-version: "3.12"
+            django-version: "3.2"
+          - python-version: "3.12"
+            django-version: "4.2"
+          - python-version: "3.11"
+            django-version: "3.2"
+          - python-version: "3.8"
+            django-version: "5.2"
+          - python-version: "3.8"
+            oscar-version: "4.0"
     steps:
       - name: Download src dir
         uses: actions/download-artifact@v4
