@@ -60,6 +60,10 @@ class AdminProductSerializer(BaseProductSerializer):
         categories = validated_data.pop("categories", None)
         recommended_products = validated_data.pop("recommended_products", None)
         children = validated_data.pop("children", None)
+        # Child products are not supposed to have a product class, their product
+        # class comes from the parent product.
+        if validated_data.get("structure") == Product.CHILD:
+            validated_data.pop("product_class", None)
 
         with transaction.atomic():  # it is all or nothing!
             # update instance
@@ -89,6 +93,10 @@ class AdminProductSerializer(BaseProductSerializer):
         categories = validated_data.pop("categories", None)
         recommended_products = validated_data.pop("recommended_products", None)
         children = validated_data.pop("children", None)
+        # Child products are not supposed to have a product class, their product
+        # class comes from the parent product.
+        if instance.is_child:
+            validated_data.pop("product_class", None)
 
         with transaction.atomic():  # it is all or nothing!
             # update instance
@@ -101,7 +109,9 @@ class AdminProductSerializer(BaseProductSerializer):
             # which does not apply at all to these models because they have sane
             # defaults.
 
-            if categories is not None:
+            # Child products are not supposed to have categories, their categories
+            # come from the parent product.
+            if categories is not None and instance.is_child is False:
                 with fake_autocreated(instance.categories) as _categories:
                     if self.partial:
                         _categories.add(*categories)
@@ -117,7 +127,8 @@ class AdminProductSerializer(BaseProductSerializer):
                     else:
                         _recommended_products.set(recommended_products)
 
-            if children is not None:
+            # Only a parent can have children.
+            if children is not None and instance.is_parent is False:
                 if self.partial:
                     instance.children.add(*children)
                 else:

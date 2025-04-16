@@ -886,6 +886,24 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         self.assertEqual(obj.product_class.slug, "testtype")
         self.assertEqual(obj.slug, "new-product")
 
+    def test_create_child_product(self):
+        "Child Products should not have product class and categories"
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "testtype",
+                "slug": "new-product",
+                "categories": ["Clothing"],
+                "structure": "child",
+                "parent": 1,
+            }
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        obj = ser.save()
+        self.assertEqual(obj.pk, 5, "Should be new object, with a high pk")
+        self.assertEqual(obj.product_class, None)
+        self.assertFalse(obj.categories.exists())
+        self.assertEqual(obj.slug, "new-product")
+
     def test_modify_product(self):
         "We should a able to change product fields."
         product = Product.objects.get(pk=3)
