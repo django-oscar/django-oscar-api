@@ -1738,7 +1738,7 @@ class TestProductAdmin(APITest):
         self.login("admin", "admin")
         self.response = self.put(
             "admin-product-list",
-            **{"upc": 1234, "product_class": "t-shirt", "slug": "oscar-t-shirt-henk"}
+            **{"upc": 1234, "product_class": "t-shirt", "slug": "oscar-t-shirt-henk"},
         )
         self.response.assertStatusEqual(200)
 
@@ -1746,7 +1746,7 @@ class TestProductAdmin(APITest):
         self.login("admin", "admin")
         self.response = self.put(
             "admin-product-list",
-            **{"product_class": "t-shirt", "slug": "oscar-t-shirt-henk"}
+            **{"product_class": "t-shirt", "slug": "oscar-t-shirt-henk"},
         )
         self.response.assertStatusEqual(404)
 
@@ -1884,6 +1884,26 @@ class TestAttributeOptionGroupSerializer(APITest):
         obj = ser.save()
         self.assertEqual(obj.options.count(), 1)
 
+    def test_prevent_duplicate_group_creation(self):
+        ser = AttributeOptionGroupSerializer(
+            data={"options": ["Large", "Small"], "name": "Variants"}
+        )
+        self.assertTrue(ser.is_valid())
+        obj1 = ser.save()
+        ser2 = AttributeOptionGroupSerializer(
+            data={"options": ["Small", "Large"], "name": "Variants"}
+        )
+        self.assertTrue(ser2.is_valid(), f"Unexpected validation error: {ser2.errors}")
+        obj2 = ser2.save()
+        self.assertEqual(
+            obj1.id, obj2.id, "Duplicate group was created instead of reused"
+        )
+        self.assertEqual(
+            AttributeOptionGroup.objects.filter(name="Variants").count(),
+            1,
+            "There should be only one group with the same name and options",
+        )
+
 
 class TestProductClassSerializer(APITest):
     fixtures = [
@@ -1914,19 +1934,25 @@ class TestProductClassSerializer(APITest):
             o.options.values_list("option", flat=True), ["Large", "Small"]
         )
 
-        option = find_existing_attribute_option_group("Sizes", ["Large"])
+        option = find_existing_attribute_option_group("Sizes", [{"option": "Large"}])
         self.assertIsNone(option)
 
         option = find_existing_attribute_option_group(
-            "Sizes", ["Large", "Small", "Henk"]
+            "Sizes", [{"option": "Large"}, {"option": "Small"}]
         )
-        self.assertIsNone(option)
-
-        option = find_existing_attribute_option_group("Sizes", ["Large", "Small"])
         self.assertEqual(option.name, "Sizes")
         self.assertCountEqual(
             option.options.values_list("option", flat=True), ["Large", "Small"]
         )
+
+    def test_invalid_option_inputs_raise_errors(self):
+        with self.assertRaises(ValueError) as ctx:
+            find_existing_attribute_option_group("Sizes", [{"name": "Large"}])
+        self.assertIn("Missing 'option' key", str(ctx.exception))
+
+        with self.assertRaises(TypeError) as ctx:
+            find_existing_attribute_option_group("Sizes", ["Large"])
+        self.assertIn("Invalid option type", str(ctx.exception))
 
     @skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
     def test_post_product_class(self):
@@ -1980,7 +2006,9 @@ class TestProductClassSerializer(APITest):
         self.assertEqual(len(self.response["attributes"]), 11)
         self.assertEqual(len(self.response["options"]), 0)
         self.assertIsNotNone(
-            find_existing_attribute_option_group("Sizes", ["Large", "Small"])
+            find_existing_attribute_option_group(
+                "Sizes", [{"option": "Large"}, {"option": "Small"}]
+            )
         )
 
     @skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
@@ -1988,21 +2016,29 @@ class TestProductClassSerializer(APITest):
         "Updating an options group should create new options groups when needed"
         self.assertEqual(AttributeOptionGroup.objects.count(), 1)
         self.assertIsNotNone(
-            find_existing_attribute_option_group("Sizes", ["Large", "Small"])
+            find_existing_attribute_option_group(
+                "Sizes", [{"option": "Large"}, {"option": "Small"}]
+            )
         )
 
         self.test_put_add_attributes()
 
         self.assertEqual(AttributeOptionGroup.objects.count(), 3)
         self.assertIsNotNone(
-            find_existing_attribute_option_group("Sizes", ["Large", "Small"])
-        )
-        self.assertIsNotNone(
-            find_existing_attribute_option_group("Sizes", ["Large", "Small", "Extreme"])
+            find_existing_attribute_option_group(
+                "Sizes", [{"option": "Large"}, {"option": "Small"}]
+            )
         )
         self.assertIsNotNone(
             find_existing_attribute_option_group(
-                "Sizes", ["Large", "Small", "Humongous"]
+                "Sizes",
+                [{"option": "Large"}, {"option": "Small"}, {"option": "Extreme"}],
+            )
+        )
+        self.assertIsNotNone(
+            find_existing_attribute_option_group(
+                "Sizes",
+                [{"option": "Large"}, {"option": "Small"}, {"option": "Humongous"}],
             )
         )
 
@@ -2025,19 +2061,31 @@ class TestProductClassSerializer(APITest):
         self.response.assertStatusEqual(200)
         self.assertEqual(len(self.response["attributes"]), 1)
         self.assertIsNotNone(
-            find_existing_attribute_option_group("Sizes", ["Large", "Small"])
-        )
-        self.assertIsNotNone(
-            find_existing_attribute_option_group("Sizes", ["Large", "Small", "Extreme"])
-        )
-        self.assertIsNotNone(
             find_existing_attribute_option_group(
-                "Sizes", ["Large", "Small", "Humongous"]
+                "Sizes", [{"option": "Large"}, {"option": "Small"}]
             )
         )
         self.assertIsNotNone(
             find_existing_attribute_option_group(
-                "Sizes", ["Large", "Small", "Humongous", "Megalomaniac"]
+                "Sizes",
+                [{"option": "Large"}, {"option": "Small"}, {"option": "Extreme"}],
+            )
+        )
+        self.assertIsNotNone(
+            find_existing_attribute_option_group(
+                "Sizes",
+                [{"option": "Large"}, {"option": "Small"}, {"option": "Humongous"}],
+            )
+        )
+        self.assertIsNotNone(
+            find_existing_attribute_option_group(
+                "Sizes",
+                [
+                    {"option": "Large"},
+                    {"option": "Small"},
+                    {"option": "Humongous"},
+                    {"option": "Megalomaniac"},
+                ],
             )
         )
 
@@ -2078,7 +2126,7 @@ class AdminCategoryApiTest(APITest):
                 "slug": "blaat",
                 "description": "bloep",
                 "image": "https://example.com/testdata/image.jpg",
-            }
+            },
         )
 
         self.response.assertStatusEqual(201)
@@ -2117,7 +2165,7 @@ class AdminCategoryApiTest(APITest):
                 "slug": "blub",
                 "description": "brop",
                 "image": "https://example.com/testdata/image.jpg",
-            }
+            },
         )
 
         self.response.assertStatusEqual(201)
@@ -2130,7 +2178,7 @@ class AdminCategoryApiTest(APITest):
                 "name": "blubbie blob",
                 "description": "brop",
                 "image": "https://example.com/testdata/image.jpg",
-            }
+            },
         )
 
         self.response.assertStatusEqual(201)
@@ -2147,7 +2195,7 @@ class AdminCategoryApiTest(APITest):
 
         self.response = self.post(
             "admin-category-list",
-            **{"name": "blubbie", "slug": "blub", "description": "Klakaa"}
+            **{"name": "blubbie", "slug": "blub", "description": "Klakaa"},
         )
 
         self.assertEqual(Category.objects.count(), 3)

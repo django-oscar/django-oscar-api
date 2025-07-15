@@ -78,7 +78,8 @@ class AttributeOptionGroupSerializer(OscarHyperlinkedModelSerializer):
         existing_option = find_existing_attribute_option_group(
             validated_data["name"], validated_data["options"]
         )
-        if existing_option is not None:
+        if existing_option is not None and existing_option.pk != instance.pk:
+            # Prevent overwriting another group with duplicate
             return existing_option
         else:
             options = validated_data.pop("options", None)

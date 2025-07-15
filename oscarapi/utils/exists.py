@@ -53,21 +53,50 @@ def construct_id_filter(model, data, prefix=None):
 
 
 def find_existing_attribute_option_group(name, options):
+    """
+    Attempts to find an existing AttributeOptionGroup with the given name
+    and exactly the same set of options.
+
+    Parameters:
+        name (str): The name of the option group to look for.
+        options (list): A list of option inputs, each of which must be either:
+            - A dict with an "option" key, e.g., {"option": "Large"}
+            - An AttributeOption instance
+
+    Returns:
+        AttributeOptionGroup instance if an exact match is found, otherwise None.
+    """
+    normalized_options = []
+    for opt in options:
+        if isinstance(opt, dict):
+            if "option" not in opt:
+                raise ValueError(f"Missing 'option' key in dict: {opt}")
+            normalized_options.append(opt)
+        elif hasattr(opt, "option"):
+            # normalize AttributeOption instances
+            normalized_options.append({"option": opt.option})
+        else:
+            raise TypeError(
+                f"Invalid option type: {type(opt).__name__}. Expected dict or AttributeOption instance."
+            )
+
+    option_values = [opt["option"] for opt in normalized_options]
     query = (
         AttributeOptionGroup.objects.filter(name=name)
-        .annotate(options_count=models.Count("options"))
-        .filter(options_count=len(options))
+        .filter(options__option__in=option_values)
+        .annotate(options_count=models.Count("options", distinct=True))
+        .filter(options_count=len(option_values))
     )
-    for option in options:
-        query = query.filter(options__option=option)
 
-    try:
-        return query.get()
-    except (
-        AttributeOptionGroup.DoesNotExist,
-        AttributeOptionGroup.MultipleObjectsReturned,
-    ):
-        return None
+    for q in query:
+        try:
+            # Compare sorted option lists; fallback if non-comparable types
+            if sorted(list(q.options.values_list("option", flat=True))) == sorted(
+                list(option_values)
+            ):
+                return q
+        except TypeError:
+            return None
 
 
 def bound_unique_together_get_or_create(bound_queryset, datum):
