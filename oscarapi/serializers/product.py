@@ -276,7 +276,7 @@ class ProductAttributeValueListSerializer(UpdateListSerializer):
 
     def get_value(self, dictionary):
         values = super(ProductAttributeValueListSerializer, self).get_value(dictionary)
-        if values is empty:
+        if not values or values is empty:
             return values
 
         product_class, parent = getitems(dictionary, "product_class", "parent")
