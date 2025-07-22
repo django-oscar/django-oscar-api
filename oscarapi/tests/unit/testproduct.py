@@ -1750,6 +1750,13 @@ class TestProductAdmin(APITest):
         )
         self.response.assertStatusEqual(404)
 
+    def test_post_product_with_null_attributes(self):
+        "Test creating a product with null attributes should return a 400 Bad Request"
+        self.login("admin", "admin")
+        data = {"product_class": "testtype", "slug": "test", "attributes": None}
+        self.response = self.post("admin-product-list", **data)
+        self.response.assertStatusEqual(400)
+
     def test_put_child(self):
         self.login("admin", "admin")
         url = reverse("admin-product-detail", args=(2,))
