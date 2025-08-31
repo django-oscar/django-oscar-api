@@ -1,7 +1,9 @@
 from django.db import models
 from django.test import TestCase
-from oscarapi.serializers.utils import ImageUrlField
 from rest_framework.fields import ImageField
+from oscarapi.utils.loading import get_api_classes
+
+[ImageUrlField] = get_api_classes("serializers.fields", ["ImageUrlField"])
 
 
 class SerializerstTest(TestCase):
