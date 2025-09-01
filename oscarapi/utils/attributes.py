@@ -4,10 +4,8 @@ from rest_framework import serializers
 from rest_framework.fields import MISSING_ERROR_MESSAGE
 from rest_framework.exceptions import ErrorDetail
 from oscarapi.utils.loading import get_api_class
-from oscarapi.serializers import fields as oscarapi_fields
-from oscarapi.utils.loading import get_api_classes
 
-[ImageUrlField] = get_api_classes("serializers.fields", ["ImageUrlField"])
+ImageUrlField = get_api_class("serializers.fields", "ImageUrlField")
 attribute_details = operator.itemgetter("code", "value")
 entity_internal_value = get_api_class("serializers.hooks", "entity_internal_value")
 
