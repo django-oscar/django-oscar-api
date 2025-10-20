@@ -93,10 +93,14 @@ class AdminProductSerializer(BaseProductSerializer):
         categories = validated_data.pop("categories", None)
         recommended_products = validated_data.pop("recommended_products", None)
         children = validated_data.pop("children", None)
+        structure = validated_data.get("structure", instance.structure)
         # Child products are not supposed to have a product class, their product
         # class comes from the parent product.
-        if instance.is_child:
-            validated_data.pop("product_class", None)
+        if structure == Product.CHILD:
+            validated_data["product_class"] = None
+        else:
+            # Parent and standalone products are not supposed to have a parent
+            validated_data["parent"] = None
 
         with transaction.atomic():  # it is all or nothing!
             # update instance
@@ -117,6 +121,9 @@ class AdminProductSerializer(BaseProductSerializer):
                         _categories.add(*categories)
                     else:
                         _categories.set(categories)
+
+            if instance.is_child:
+                instance.categories.all().delete()
 
             if recommended_products is not None:
                 with fake_autocreated(
@@ -148,10 +155,16 @@ class AdminProductSerializer(BaseProductSerializer):
                     self.update_relation("options", _product_options, new_options)
 
             self.update_relation("images", instance.images, images)
-            self.update_relation("stockrecords", instance.stockrecords, stockrecords)
             self.update_relation(
                 "attributes", instance.attribute_values, attribute_values
             )
+
+            if instance.is_parent:
+                instance.stockrecords.all().delete()
+            else:
+                self.update_relation(
+                    "stockrecords", instance.stockrecords, stockrecords
+                )
 
             if (
                 self.partial
