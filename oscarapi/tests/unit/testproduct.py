@@ -17,6 +17,7 @@ from django.utils.timezone import make_aware
 
 from oscar import VERSION as OSCAR_VERSION
 from oscar.core.loading import get_model
+from oscar.test.factories import ProductFactory
 
 from rest_framework import exceptions
 
@@ -1633,6 +1634,193 @@ class AdminProductSerializerTest(_ProductSerializerTest):
             ProductAttributeValue.objects.filter(product=child_product).count(),
             1,
             "The child has now  1 attributes",
+        )
+
+
+@skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
+class AdminProductSerializerStructureUpdateTest(_ProductSerializerTest):
+    def test_parent_with_children_to_child(self):
+        product = Product.objects.get(pk=5)
+        new_parent = ProductFactory(structure="parent", categories=[])
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "new-shirt",
+                "structure": "child",
+                "parent": new_parent.pk,
+            },
+            instance=product,
+        )
+        self.assertFalse(ser.is_valid(), "Should fail because parent has children")
+        self.assertEqual(len(ser.errors), 1)
+        self.assertIn("structure", ser.errors)
+
+    def test_parent_without_children_to_child(self):
+        product = Product.objects.get(pk=5)
+        product.children.all().delete()
+        new_parent = ProductFactory(structure="parent")
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "new-shirt",
+                "structure": "child",
+                "categories": ["Clothing"],
+                "stockrecords": [
+                    {
+                        "partner_sku": "henk-het-kind",
+                        "price_currency": "EUR",
+                        "price": "110.00",
+                        "partner": "http://127.0.0.1:8000/api/admin/partners/1/",
+                    }
+                ],
+                "parent": new_parent.pk,
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "child")
+        self.assertEqual(new_product.slug, "new-shirt")
+        self.assertEqual(
+            new_product.product_class, None, "Child products have no product class"
+        )
+        self.assertEqual(new_product.parent.pk, new_parent.pk)
+        self.assertFalse(
+            new_product.categories.exists(), "Child products cannot have categories"
+        )
+        self.assertTrue(new_product.stockrecords.exists())
+
+    def test_standalone_to_child(self):
+        product = Product.objects.get(pk=1)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "1234",
+                "structure": "child",
+                "parent": 5,
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "child")
+        self.assertEqual(new_product.slug, "1234")
+        self.assertEqual(
+            new_product.product_class, None, "Child products have no product class"
+        )
+        self.assertEqual(new_product.parent.pk, 5)
+        self.assertFalse(
+            new_product.categories.exists(), "Child products cannot have categories"
+        )
+        self.assertTrue(new_product.stockrecords.exists())
+
+    def test_parent_with_children_to_standalone(self):
+        product = Product.objects.get(pk=5)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "standalone-1234",
+                "structure": "standalone",
+            },
+            instance=product,
+        )
+        self.assertFalse(ser.is_valid(), "Should fail because parent has children")
+        self.assertEqual(len(ser.errors), 1)
+        self.assertIn("structure", ser.errors)
+
+    def test_parent_without_children_to_standalone(self):
+        product = Product.objects.get(pk=5)
+        product.children.all().delete()
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "standalone-1234",
+                "structure": "standalone",
+                "categories": ["Clothing"],
+                "stockrecords": [
+                    {
+                        "partner_sku": "henk-het-kind",
+                        "price_currency": "EUR",
+                        "price": "110.00",
+                        "partner": "http://127.0.0.1:8000/api/admin/partners/1/",
+                    }
+                ],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "standalone")
+        self.assertEqual(new_product.slug, "standalone-1234")
+        self.assertEqual(new_product.product_class.pk, 1)
+        self.assertEqual(new_product.parent, None)
+        self.assertTrue(new_product.categories.exists())
+        self.assertTrue(new_product.stockrecords.exists())
+
+    def test_child_to_standalone(self):
+        product = Product.objects.get(pk=2)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "standalone-1234",
+                "structure": "standalone",
+                "categories": ["Clothing"],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "standalone")
+        self.assertEqual(new_product.slug, "standalone-1234")
+        self.assertEqual(new_product.product_class.pk, 1)
+        self.assertEqual(new_product.parent, None)
+        self.assertTrue(new_product.categories.exists())
+        self.assertTrue(new_product.stockrecords.exists())
+
+    def test_child_to_parent(self):
+        product = Product.objects.get(pk=2)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "new-parent-1234",
+                "structure": "parent",
+                "categories": ["Clothing"],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "parent")
+        self.assertEqual(new_product.slug, "new-parent-1234")
+        self.assertEqual(new_product.product_class.pk, 1)
+        self.assertEqual(new_product.parent, None, "Parent products have no parent")
+        self.assertTrue(new_product.categories.exists())
+        self.assertFalse(
+            new_product.stockrecords.exists(),
+            "Parent products cannot have stockrecords",
+        )
+
+    def test_standalone_to_parent(self):
+        product = Product.objects.get(pk=1)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "new-parent-1234",
+                "structure": "parent",
+                "categories": ["Clothing"],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "parent")
+        self.assertEqual(new_product.slug, "new-parent-1234")
+        self.assertEqual(new_product.product_class.pk, 1)
+        self.assertEqual(new_product.parent, None)
+        self.assertTrue(new_product.categories.exists())
+        self.assertFalse(
+            new_product.stockrecords.exists(),
+            "Parent products cannot have stockrecords",
         )
 
 

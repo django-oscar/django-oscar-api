@@ -460,15 +460,30 @@ class BaseProductSerializer(OscarModelSerializer):
     )
 
     def validate(self, attrs):
-        if "structure" in attrs and "parent" in attrs:
+        structure = attrs.get("structure", None)
+        if structure and "parent" in attrs:
             if attrs["structure"] == Product.CHILD and attrs["parent"] is None:
                 raise serializers.ValidationError(_("child without parent"))
-        if "structure" in attrs and "product_class" in attrs:
+        if structure and "product_class" in attrs:
             if attrs["product_class"] is None and attrs["structure"] != Product.CHILD:
                 raise serializers.ValidationError(
                     _("product_class can not be empty for structure %(structure)s")
                     % attrs
                 )
+        if (
+            self.instance
+            and structure
+            and structure != Product.PARENT
+            and self.instance.structure == Product.PARENT
+            and self.instance.children.exists()
+        ):
+            raise serializers.ValidationError(
+                {
+                    "structure": _(
+                        "Cannot convert parent product with children to a non-parent"
+                    )
+                }
+            )
 
         return super(BaseProductSerializer, self).validate(attrs)
 

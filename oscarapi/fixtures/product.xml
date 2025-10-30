@@ -25,7 +25,7 @@
             <None/>
         </field>
         <field type="CharField" name="title">Oscar T-shirt</field>
-        <field type="SlugField" name="slug">oscar-t-shirt</field>
+        <field type="SlugField" name="slug">parent-1234</field>
         <field type="TextField" name="description">Hank</field>
         <field to="catalogue.productclass" name="product_class" rel="ManyToOneRel">1</field>
         <field type="FloatField" name="rating">
