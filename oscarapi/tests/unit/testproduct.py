@@ -84,7 +84,7 @@ class ProductTest(APITest):
         self.response = self.get("product-list")
         self.response.assertStatusEqual(200)
         # we should have four products
-        self.assertEqual(len(self.response.body), 4)
+        self.assertEqual(len(self.response.body), 5)
         # default we have 3 fields
         product = self.response.body[0]
         default_fields = ["id", "url"]
@@ -95,7 +95,7 @@ class ProductTest(APITest):
         standalone_products_url = "%s?structure=standalone" % reverse("product-list")
         self.response = self.get(standalone_products_url)
         self.response.assertStatusEqual(200)
-        self.assertEqual(len(self.response.body), 2)
+        self.assertEqual(len(self.response.body), 3)
 
         parent_products_url = "%s?structure=parent" % reverse("product-list")
         self.response = self.get(parent_products_url)
@@ -882,7 +882,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
-        self.assertEqual(obj.pk, 5, "Should be new object, with a high pk")
+        self.assertEqual(obj.pk, 6, "Should be new object, with a high pk")
         self.assertEqual(obj.product_class.slug, "testtype")
         self.assertEqual(obj.slug, "new-product")
 
@@ -899,7 +899,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
-        self.assertEqual(obj.pk, 5, "Should be new object, with a high pk")
+        self.assertEqual(obj.pk, 6, "Should be new object, with a high pk")
         self.assertEqual(obj.product_class, None)
         self.assertFalse(obj.categories.exists())
         self.assertEqual(obj.slug, "new-product")
@@ -1499,7 +1499,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
             0,
             "The child has no attributes",
         )
-        self.assertEqual(child_product.parent_id, 1)
+        self.assertEqual(child_product.parent_id, 5)
         self.assertIsNone(child_product.product_class)
         self.assertEqual(child_product.upc, "child-1234")
         self.assertEqual(child_product.slug, "oscar-t-shirt-child")
@@ -1681,14 +1681,14 @@ class TestProductAdmin(APITest):
         self.response.assertStatusEqual(403)
 
     def test_post_product(self):
-        self.assertEqual(Product.objects.count(), 4)
+        self.assertEqual(Product.objects.count(), 5)
         self.login("admin", "admin")
         data = deepcopy(self.attributes)
         data["slug"] = "keikeikke"
         data["upc"] = "roekoekoe"
         self.response = self.post("admin-product-list", **data)
         self.response.assertStatusEqual(201)
-        self.assertEqual(Product.objects.count(), 5)
+        self.assertEqual(Product.objects.count(), 6)
 
         data = deepcopy(self.tshirt)
         data["slug"] = "hoelahoepie"
@@ -1696,7 +1696,7 @@ class TestProductAdmin(APITest):
         data["stockrecords"][0]["partner_sku"] = "kjdfshkshjfkh"
         self.response = self.post("admin-product-list", **data)
         self.response.assertStatusEqual(201)
-        self.assertEqual(Product.objects.count(), 6)
+        self.assertEqual(Product.objects.count(), 7)
 
     def test_put_product(self):
         self.login("admin", "admin")
