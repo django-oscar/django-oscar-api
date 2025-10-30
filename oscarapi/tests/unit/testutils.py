@@ -39,7 +39,7 @@ class UtilsExistTest(TestCase):
         self.assertEqual(c.id, 1)
 
     def test_product_construct_id_filter_upc(self):
-        for upc in ["1234", "child-1234", "attrtypestest", "entity"]:
+        for upc in ["1234", "parent-1234", "child-1234", "attrtypestest", "entity"]:
             p = self._test_construct_id_filter(Product, {"upc": upc, "title": "henk"})
             self.assertEqual(p.upc, upc)
 

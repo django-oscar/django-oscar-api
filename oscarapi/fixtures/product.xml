@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <django-objects version="1.0">
     <object pk="1" model="catalogue.product">
-        <field type="CharField" name="structure">parent</field>
+        <field type="CharField" name="structure">standalone</field>
         <field type="CharField" name="upc">1234</field>
         <field to="catalogue.product" name="parent" rel="ManyToOneRel">
             <None/>
@@ -18,10 +18,28 @@
         <field type="BooleanField" name="is_discountable">True</field>
         <field to="catalogue.option" name="product_options" rel="ManyToManyRel"/>
     </object>
+    <object pk="5" model="catalogue.product">
+        <field type="CharField" name="structure">parent</field>
+        <field type="CharField" name="upc">parent-1234</field>
+        <field to="catalogue.product" name="parent" rel="ManyToOneRel">
+            <None/>
+        </field>
+        <field type="CharField" name="title">Oscar T-shirt</field>
+        <field type="SlugField" name="slug">parent-1234</field>
+        <field type="TextField" name="description">Hank</field>
+        <field to="catalogue.productclass" name="product_class" rel="ManyToOneRel">1</field>
+        <field type="FloatField" name="rating">
+            <None/>
+        </field>
+        <field type="DateTimeField" name="date_created">2013-12-12T16:33:57.426000+00:00</field>
+        <field type="DateTimeField" name="date_updated">2013-12-12T16:33:57.426000+00:00</field>
+        <field type="BooleanField" name="is_discountable">True</field>
+        <field to="catalogue.option" name="product_options" rel="ManyToManyRel"/>
+    </object>
     <object pk="2" model="catalogue.product">
         <field type="CharField" name="structure">child</field>
         <field type="CharField" name="upc">child-1234</field>
-        <field to="catalogue.product" name="parent" rel="ManyToOneRel">1</field>
+        <field to="catalogue.product" name="parent" rel="ManyToOneRel">5</field>
         <field type="CharField" name="title"/>
         <field type="SlugField" name="slug">oscar-t-shirt-child</field>
         <field type="TextField" name="description"/>

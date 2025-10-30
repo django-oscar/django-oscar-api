@@ -15,7 +15,9 @@ from django.urls import reverse
 from django.test import TestCase, RequestFactory, override_settings
 from django.utils.timezone import make_aware
 
+from oscar import VERSION as OSCAR_VERSION
 from oscar.core.loading import get_model
+from oscar.test.factories import ProductFactory
 
 from rest_framework import exceptions
 
@@ -84,7 +86,7 @@ class ProductTest(APITest):
         self.response = self.get("product-list")
         self.response.assertStatusEqual(200)
         # we should have four products
-        self.assertEqual(len(self.response.body), 4)
+        self.assertEqual(len(self.response.body), 5)
         # default we have 3 fields
         product = self.response.body[0]
         default_fields = ["id", "url"]
@@ -95,7 +97,7 @@ class ProductTest(APITest):
         standalone_products_url = "%s?structure=standalone" % reverse("product-list")
         self.response = self.get(standalone_products_url)
         self.response.assertStatusEqual(200)
-        self.assertEqual(len(self.response.body), 2)
+        self.assertEqual(len(self.response.body), 3)
 
         parent_products_url = "%s?structure=parent" % reverse("product-list")
         self.response = self.get(parent_products_url)
@@ -882,7 +884,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
-        self.assertEqual(obj.pk, 5, "Should be new object, with a high pk")
+        self.assertEqual(obj.pk, 6, "Should be new object, with a high pk")
         self.assertEqual(obj.product_class.slug, "testtype")
         self.assertEqual(obj.slug, "new-product")
 
@@ -899,7 +901,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
         )
         self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
         obj = ser.save()
-        self.assertEqual(obj.pk, 5, "Should be new object, with a high pk")
+        self.assertEqual(obj.pk, 6, "Should be new object, with a high pk")
         self.assertEqual(obj.product_class, None)
         self.assertFalse(obj.categories.exists())
         self.assertEqual(obj.slug, "new-product")
@@ -1499,7 +1501,7 @@ class AdminProductSerializerTest(_ProductSerializerTest):
             0,
             "The child has no attributes",
         )
-        self.assertEqual(child_product.parent_id, 1)
+        self.assertEqual(child_product.parent_id, 5)
         self.assertIsNone(child_product.product_class)
         self.assertEqual(child_product.upc, "child-1234")
         self.assertEqual(child_product.slug, "oscar-t-shirt-child")
@@ -1636,6 +1638,193 @@ class AdminProductSerializerTest(_ProductSerializerTest):
 
 
 @skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
+class AdminProductSerializerStructureUpdateTest(_ProductSerializerTest):
+    def test_parent_with_children_to_child(self):
+        product = Product.objects.get(pk=5)
+        new_parent = ProductFactory(structure="parent", categories=[])
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "new-shirt",
+                "structure": "child",
+                "parent": new_parent.pk,
+            },
+            instance=product,
+        )
+        self.assertFalse(ser.is_valid(), "Should fail because parent has children")
+        self.assertEqual(len(ser.errors), 1)
+        self.assertIn("structure", ser.errors)
+
+    def test_parent_without_children_to_child(self):
+        product = Product.objects.get(pk=5)
+        product.children.all().delete()
+        new_parent = ProductFactory(structure="parent")
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "new-shirt",
+                "structure": "child",
+                "categories": ["Clothing"],
+                "stockrecords": [
+                    {
+                        "partner_sku": "henk-het-kind",
+                        "price_currency": "EUR",
+                        "price": "110.00",
+                        "partner": "http://127.0.0.1:8000/api/admin/partners/1/",
+                    }
+                ],
+                "parent": new_parent.pk,
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "child")
+        self.assertEqual(new_product.slug, "new-shirt")
+        self.assertEqual(
+            new_product.product_class, None, "Child products have no product class"
+        )
+        self.assertEqual(new_product.parent.pk, new_parent.pk)
+        self.assertFalse(
+            new_product.categories.exists(), "Child products cannot have categories"
+        )
+        self.assertTrue(new_product.stockrecords.exists())
+
+    def test_standalone_to_child(self):
+        product = Product.objects.get(pk=1)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "1234",
+                "structure": "child",
+                "parent": 5,
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "child")
+        self.assertEqual(new_product.slug, "1234")
+        self.assertEqual(
+            new_product.product_class, None, "Child products have no product class"
+        )
+        self.assertEqual(new_product.parent.pk, 5)
+        self.assertFalse(
+            new_product.categories.exists(), "Child products cannot have categories"
+        )
+        self.assertTrue(new_product.stockrecords.exists())
+
+    def test_parent_with_children_to_standalone(self):
+        product = Product.objects.get(pk=5)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "standalone-1234",
+                "structure": "standalone",
+            },
+            instance=product,
+        )
+        self.assertFalse(ser.is_valid(), "Should fail because parent has children")
+        self.assertEqual(len(ser.errors), 1)
+        self.assertIn("structure", ser.errors)
+
+    def test_parent_without_children_to_standalone(self):
+        product = Product.objects.get(pk=5)
+        product.children.all().delete()
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "standalone-1234",
+                "structure": "standalone",
+                "categories": ["Clothing"],
+                "stockrecords": [
+                    {
+                        "partner_sku": "henk-het-kind",
+                        "price_currency": "EUR",
+                        "price": "110.00",
+                        "partner": "http://127.0.0.1:8000/api/admin/partners/1/",
+                    }
+                ],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "standalone")
+        self.assertEqual(new_product.slug, "standalone-1234")
+        self.assertEqual(new_product.product_class.pk, 1)
+        self.assertEqual(new_product.parent, None)
+        self.assertTrue(new_product.categories.exists())
+        self.assertTrue(new_product.stockrecords.exists())
+
+    def test_child_to_standalone(self):
+        product = Product.objects.get(pk=2)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "standalone-1234",
+                "structure": "standalone",
+                "categories": ["Clothing"],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "standalone")
+        self.assertEqual(new_product.slug, "standalone-1234")
+        self.assertEqual(new_product.product_class.pk, 1)
+        self.assertEqual(new_product.parent, None)
+        self.assertTrue(new_product.categories.exists())
+        self.assertTrue(new_product.stockrecords.exists())
+
+    def test_child_to_parent(self):
+        product = Product.objects.get(pk=2)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "new-parent-1234",
+                "structure": "parent",
+                "categories": ["Clothing"],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "parent")
+        self.assertEqual(new_product.slug, "new-parent-1234")
+        self.assertEqual(new_product.product_class.pk, 1)
+        self.assertEqual(new_product.parent, None, "Parent products have no parent")
+        self.assertTrue(new_product.categories.exists())
+        self.assertFalse(
+            new_product.stockrecords.exists(),
+            "Parent products cannot have stockrecords",
+        )
+
+    def test_standalone_to_parent(self):
+        product = Product.objects.get(pk=1)
+        ser = AdminProductSerializer(
+            data={
+                "product_class": "t-shirt",
+                "slug": "new-parent-1234",
+                "structure": "parent",
+                "categories": ["Clothing"],
+            },
+            instance=product,
+        )
+        self.assertTrue(ser.is_valid(), "Something wrong %s" % ser.errors)
+        new_product = ser.save()
+        self.assertEqual(new_product.structure, "parent")
+        self.assertEqual(new_product.slug, "new-parent-1234")
+        self.assertEqual(new_product.product_class.pk, 1)
+        self.assertEqual(new_product.parent, None)
+        self.assertTrue(new_product.categories.exists())
+        self.assertFalse(
+            new_product.stockrecords.exists(),
+            "Parent products cannot have stockrecords",
+        )
+
+
+@skipIf(settings.OSCARAPI_BLOCK_ADMIN_API_ACCESS, "Admin API is not enabled")
 class TestProductAdmin(APITest):
     fixtures = [
         "product",
@@ -1681,14 +1870,14 @@ class TestProductAdmin(APITest):
         self.response.assertStatusEqual(403)
 
     def test_post_product(self):
-        self.assertEqual(Product.objects.count(), 4)
+        self.assertEqual(Product.objects.count(), 5)
         self.login("admin", "admin")
         data = deepcopy(self.attributes)
         data["slug"] = "keikeikke"
         data["upc"] = "roekoekoe"
         self.response = self.post("admin-product-list", **data)
         self.response.assertStatusEqual(201)
-        self.assertEqual(Product.objects.count(), 5)
+        self.assertEqual(Product.objects.count(), 6)
 
         data = deepcopy(self.tshirt)
         data["slug"] = "hoelahoepie"
@@ -1696,7 +1885,7 @@ class TestProductAdmin(APITest):
         data["stockrecords"][0]["partner_sku"] = "kjdfshkshjfkh"
         self.response = self.post("admin-product-list", **data)
         self.response.assertStatusEqual(201)
-        self.assertEqual(Product.objects.count(), 6)
+        self.assertEqual(Product.objects.count(), 7)
 
     def test_put_product(self):
         self.login("admin", "admin")
@@ -2231,6 +2420,13 @@ class AdminBulkCategoryApiTest(APITest):
             },
         ]
 
+        if OSCAR_VERSION[0] >= 4 and OSCAR_VERSION[1] >= 1:
+            long_description = {"long_description": ""}
+            exclude_from_menu = {"exclude_from_menu": False}
+        else:
+            long_description = {}
+            exclude_from_menu = {}
+
         self.response = self.post("admin-category-bulk", manual_data=data)
 
         self.assertEqual(Category.objects.count(), 4)
@@ -2248,11 +2444,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Henk",
                         "code": "henk",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "henk",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 1,
@@ -2262,11 +2460,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas",
                                 "code": "klaas",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 2,
@@ -2276,11 +2476,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 2",
                                 "code": "klaas2",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-2",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 3,
@@ -2292,11 +2494,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Harrie",
                         "code": "harrie",
                         "description": "Dit is de description",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "harrie",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 4,
@@ -2341,11 +2545,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Henk nieuw",
                         "code": "henk",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "henk",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 1,
@@ -2355,11 +2561,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas",
                                 "code": "klaas",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 2,
@@ -2371,11 +2579,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Harrie",
                         "code": "harrie",
                         "description": "Dit is de description",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "harrie",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 4,
@@ -2385,11 +2595,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Klaas 2",
                         "code": "klaas2",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "klaas-2",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 3,
@@ -2434,11 +2646,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Harrie",
                         "code": "harrie",
                         "description": "Dit is de description",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "harrie",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 4,
@@ -2448,11 +2662,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Henk nieuw",
                         "code": "henk",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "henk",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 1,
@@ -2462,11 +2678,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas",
                                 "code": "klaas",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 2,
@@ -2476,11 +2694,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 2",
                                 "code": "klaas2",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-2",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 3,
@@ -2521,6 +2741,13 @@ class AdminBulkCategoryApiTest(APITest):
             },
         ]
 
+        if OSCAR_VERSION[0] >= 4 and OSCAR_VERSION[1] >= 1:
+            long_description = {"long_description": ""}
+            exclude_from_menu = {"exclude_from_menu": False}
+        else:
+            long_description = {}
+            exclude_from_menu = {}
+
         self.response = self.post("admin-category-bulk", manual_data=data)
 
         self.assertEqual(Category.objects.count(), 14)
@@ -2533,11 +2760,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Henk",
                         "code": "henk",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "henk",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 1,
@@ -2547,11 +2776,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas",
                                 "code": "klaas",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 2,
@@ -2561,11 +2792,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 2",
                                 "code": "klaas2",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-2",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 3,
@@ -2575,11 +2808,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 3",
                                 "code": "klaas3",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-3",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 4,
@@ -2589,11 +2824,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 4",
                                 "code": "klaas4",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-4",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 5,
@@ -2603,11 +2840,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 5",
                                 "code": "klaas5",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-5",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 6,
@@ -2617,11 +2856,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 6",
                                 "code": "klaas6",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-6",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 7,
@@ -2633,11 +2874,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Harrie",
                         "code": "harrie",
                         "description": "Dit is de description",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "harrie",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 8,
@@ -2647,11 +2890,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe",
                                 "code": "koe",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 9,
@@ -2661,11 +2906,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe 2",
                                 "code": "koe2",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe-2",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 10,
@@ -2675,11 +2922,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe 3",
                                 "code": "koe3",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe-3",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 11,
@@ -2689,11 +2938,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe 4",
                                 "code": "koe4",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe-4",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 12,
@@ -2703,11 +2954,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe 5",
                                 "code": "koe5",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe-5",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 13,
@@ -2717,11 +2970,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe 6",
                                 "code": "koe6",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe-6",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 14,
@@ -2788,11 +3043,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Henk",
                         "code": "henk",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "henk",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 1,
@@ -2802,11 +3059,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Harrie",
                         "code": "harrie",
                         "description": "Dit is de description",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "harrie",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 8,
@@ -2816,11 +3075,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Nieuwe 1",
                         "code": "nieuwe1",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "nieuwe-1",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 15,
@@ -2830,11 +3091,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas",
                                 "code": "klaas",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 2,
@@ -2844,11 +3107,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 2",
                                 "code": "klaas2",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-2",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 3,
@@ -2860,11 +3125,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Nieuwe 2",
                         "code": "nieuwe2",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "nieuwe-2",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 16,
@@ -2874,11 +3141,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 3",
                                 "code": "klaas3",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-3",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 4,
@@ -2888,11 +3157,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 4",
                                 "code": "klaas4",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-4",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 5,
@@ -2904,11 +3175,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Nieuwe 3",
                         "code": "nieuwe3",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "nieuwe-3",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 17,
@@ -2918,11 +3191,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 5",
                                 "code": "klaas5",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-5",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 6,
@@ -2932,11 +3207,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Klaas 6",
                                 "code": "klaas6",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "klaas-6",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 7,
@@ -2948,11 +3225,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Gekke 1",
                         "code": "gekke1",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "gekke-1",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 18,
@@ -2962,11 +3241,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe",
                                 "code": "koe",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 9,
@@ -2976,11 +3257,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe 2",
                                 "code": "koe2",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe-2",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 10,
@@ -2992,11 +3275,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Gekke 2",
                         "code": "gekke2",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "gekke-2",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 19,
@@ -3006,11 +3291,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe 3",
                                 "code": "koe3",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe-3",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 11,
@@ -3020,11 +3307,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe 4",
                                 "code": "koe4",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe-4",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 12,
@@ -3036,11 +3325,13 @@ class AdminBulkCategoryApiTest(APITest):
                         "name": "Gekke 3",
                         "code": "gekke3",
                         "description": "",
+                        **long_description,
                         "meta_title": None,
                         "meta_description": None,
                         "image": "",
                         "slug": "gekke-3",
                         "is_public": True,
+                        **exclude_from_menu,
                         "ancestors_are_public": True,
                     },
                     "id": 20,
@@ -3050,11 +3341,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe 5",
                                 "code": "koe5",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe-5",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 13,
@@ -3064,11 +3357,13 @@ class AdminBulkCategoryApiTest(APITest):
                                 "name": "Koe 6",
                                 "code": "koe6",
                                 "description": "",
+                                **long_description,
                                 "meta_title": None,
                                 "meta_description": None,
                                 "image": "",
                                 "slug": "koe-6",
                                 "is_public": True,
+                                **exclude_from_menu,
                                 "ancestors_are_public": True,
                             },
                             "id": 14,
