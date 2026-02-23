@@ -4,7 +4,6 @@ from rest_framework import generics
 from oscar.core.loading import get_model
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
-
 APIAdminPermission = get_api_class("permissions", "APIAdminPermission")
 Order = get_model("order", "Order")
 OrderLine = get_model("order", "Line")

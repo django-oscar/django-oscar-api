@@ -23,7 +23,6 @@ from oscarapi.serializers.fields import (
     TaxIncludedDecimalField,
 )
 
-
 OrderPlacementMixin = get_class("checkout.mixins", "OrderPlacementMixin")
 OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
 ShippingAddress = get_model("order", "ShippingAddress")

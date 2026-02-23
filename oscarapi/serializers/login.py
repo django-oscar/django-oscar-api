@@ -6,7 +6,6 @@ from rest_framework import serializers
 
 from oscarapi import settings
 
-
 User = get_user_model()
 
 

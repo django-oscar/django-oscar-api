@@ -12,7 +12,6 @@ from oscarapi.basket.operations import get_basket, get_user_basket
 from oscarapi.tests.utils import APITest
 from oscarapi import settings
 
-
 Basket = get_model("basket", "Basket")
 Product = get_model("catalogue", "Product")
 User = get_user_model()

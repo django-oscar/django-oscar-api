@@ -8,7 +8,6 @@ from django.urls import reverse, NoReverseMatch
 from django.http import SimpleCookie
 from django.test import TestCase
 
-
 User = get_user_model()
 
 

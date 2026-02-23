@@ -32,7 +32,6 @@ from oscarapi.serializers.admin.partner import AdminStockRecordSerializer
 from oscarapi.serializers.admin.product import AdminProductSerializer
 from oscarapi.serializers.product import AttributeOptionGroupSerializer
 
-
 Product = get_model("catalogue", "Product")
 ProductClass = get_model("catalogue", "ProductClass")
 ProductAttributeValue = get_model("catalogue", "ProductAttributeValue")

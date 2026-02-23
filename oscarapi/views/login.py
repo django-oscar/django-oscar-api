@@ -17,7 +17,6 @@ from oscarapi.utils.session import login_and_upgrade_session
 from oscarapi.utils.loading import get_api_classes
 from oscarapi.basket import operations
 
-
 LoginSerializer, UserSerializer, RegisterUserSerializer = get_api_classes(
     "serializers.login", ["LoginSerializer", "UserSerializer", "RegisterUserSerializer"]
 )

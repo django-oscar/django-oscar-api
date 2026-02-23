@@ -4,7 +4,6 @@ from oscar.core.loading import get_model
 
 from oscarapi.tests.utils import APITest
 
-
 Basket = get_model("basket", "Basket")
 ConditionalOffer = get_model("offer", "ConditionalOffer")
 Voucher = get_model("voucher", "Voucher")

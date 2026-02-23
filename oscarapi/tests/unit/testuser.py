@@ -4,7 +4,6 @@ from django.urls import reverse
 
 from oscarapi.tests.utils import APITest
 
-
 User = get_user_model()
 
 

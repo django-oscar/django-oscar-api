@@ -24,7 +24,6 @@ from oscarapi.utils.request import get_domain
 from oscarapi.utils.session import session_id_from_parsed_session_uri, get_session
 from oscarapi import models
 
-
 BasketMiddleware = get_class("basket.middleware", "BasketMiddleware")
 IsApiRequest = get_api_class("utils.request", "IsApiRequest")
 

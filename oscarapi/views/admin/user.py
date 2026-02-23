@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from oscarapi.utils.loading import get_api_class
 from rest_framework import generics
 
-
 APIAdminPermission = get_api_class("permissions", "APIAdminPermission")
 AdminUserSerializer = get_api_class("serializers.admin.user", "AdminUserSerializer")
 User = get_user_model()

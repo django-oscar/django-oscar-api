@@ -6,7 +6,7 @@ from oscarapi import settings
 from oscarapi.utils.loading import get_api_classes, get_api_class
 
 api_root = get_api_class("views.root", "api_root")
-(LoginView, UserDetail, RegistrationView) = get_api_classes(
+LoginView, UserDetail, RegistrationView = get_api_classes(
     "views.login", ["LoginView", "UserDetail", "RegistrationView"]
 )
 (
@@ -28,7 +28,7 @@ api_root = get_api_class("views.root", "api_root")
     ],
 )
 
-(StockRecordDetail, PartnerList, PartnerDetail) = get_api_classes(
+StockRecordDetail, PartnerList, PartnerDetail = get_api_classes(
     "views.admin.partner", ["StockRecordDetail", "PartnerList", "PartnerDetail"]
 )
 
@@ -160,7 +160,7 @@ api_root = get_api_class("views.root", "api_root")
     ],
 )
 
-(UserAdminList, UserAdminDetail) = get_api_classes(
+UserAdminList, UserAdminDetail = get_api_classes(
     "views.admin.user", ["UserAdminList", "UserAdminDetail"]
 )
 
