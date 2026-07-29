@@ -2,14 +2,12 @@ import logging
 from django.db import models
 from django.db.models.manager import Manager
 from django.db.models.constants import LOOKUP_SEP
-
 from rest_framework import serializers
-
 import oscar.models.fields
-
 from oscarapi.utils.exists import construct_id_filter
-from .fields import ImageUrlField
+from oscarapi.utils.loading import get_api_class
 
+ImageUrlField = get_api_class("serializers.fields", "ImageUrlField")
 logger = logging.getLogger(__name__)
 
 
