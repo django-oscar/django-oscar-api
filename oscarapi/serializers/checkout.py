@@ -24,6 +24,11 @@ from oscarapi.serializers.fields import (
 )
 from server.apps.branch.serializers import StoreListSerializer
 from oscar.apps.partner.strategy import Selector
+from server.apps.basket.constants import (
+    UNAVAILABLE_ACTION_CHOICES,
+    UNAVAILABLE_ACTION_DEFAULT,
+)
+from server.apps.partner.availability import ItemsUnavailable, unavailable_lines
 from server.apps.vehicle.serializers import VehicleSerializer
 
 
@@ -263,6 +268,12 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
         allow_null=True
     )
 
+    # What to do if the vendor cannot supply part of this order. Optional:
+    # absent means whatever the review screen already saved on the basket.
+    unavailable_item_action = serializers.ChoiceField(
+        choices=UNAVAILABLE_ACTION_CHOICES, required=False
+    )
+
     @property
     def request(self):
         return self.context["request"]
@@ -294,28 +305,18 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
             message = _("Cannot checkout with empty basket")
             raise serializers.ValidationError(message)
 
-        # Validate availability for all basket lines to prevent checkout
-        # with out-of-stock items (handles stock changes after adding to basket)
-        messages_list = []
-
-        for line in basket.all_lines():
-            available_stock = line.stockrecord.num_in_stock - line.stockrecord.num_allocated
-            if available_stock is None or available_stock <= 0:
-                messages_list.append(
-                    _("'%(title)s' is out of stock. Please adjust your basket to continue")
-                    % {"title": line.product.get_title()}
-                )
-            elif available_stock < line.quantity:
-                messages_list.append(
-                    _("'%(title)s' only has %(stock)d available, but you requested %(qty)d.")
-                    % {
-                        "title": line.product.get_title(),
-                        "stock": available_stock,
-                        "qty": line.quantity,
-                    }
-                )   
-        if messages_list:
-            raise serializers.ValidationError({"availability": messages_list})
+        # Stock moves between adding to the basket and tapping checkout, so
+        # this read is the authoritative one -- the review screen's is
+        # advisory. The customer is on the screen here, so we block and name
+        # what is short rather than applying their unavailable-item policy:
+        # that policy is a standing instruction for the moment they are gone,
+        # and silently dropping a line in front of them would be worse than
+        # saying so. See server/apps/partner/availability.py.
+        short_lines = unavailable_lines(
+            basket.all_lines(), self.context.get("locked_stock_records")
+        )
+        if short_lines:
+            raise ItemsUnavailable(short_lines)
 
         from server.apps.service.models import Service
 
@@ -406,6 +407,19 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
             request = self.request
             vehicle = validated_data.pop('vehicle', None)
 
+            # Precedence is body, then basket, then default. Persisting the
+            # posted value first keeps the basket and the order agreeing;
+            # passing it on explicitly is what OrderCreator's setdefault
+            # expects, so the body still wins if the save is a no-op.
+            unavailable_item_action = validated_data.get("unavailable_item_action")
+            if unavailable_item_action:
+                if basket.unavailable_item_action != unavailable_item_action:
+                    basket.unavailable_item_action = unavailable_item_action
+                    basket.save(update_fields=["unavailable_item_action"])
+            else:
+                unavailable_item_action = (
+                    basket.unavailable_item_action or UNAVAILABLE_ACTION_DEFAULT
+                )
 
             if "shipping_address" in validated_data:
                 shipping_address = ShippingAddress(**validated_data["shipping_address"])
@@ -428,6 +442,7 @@ class CheckoutSerializer(serializers.Serializer, OrderPlacementMixin):
                 order_total=validated_data.get("order_total"),
                 guest_email=validated_data.get("guest_email") or "",
                 vehicle=vehicle,
+                unavailable_item_action=unavailable_item_action,
             )
         except ValueError as e:
             raise exceptions.NotAcceptable(str(e))

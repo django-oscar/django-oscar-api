@@ -14,6 +14,7 @@ from django.utils import timezone
 from datetime import timedelta
 
 from server.apps.service.holds import lock_service_slots
+from server.apps.partner.availability import lock_stock_records
 from oscar.apps.partner.strategy import Selector
 
 
@@ -174,14 +175,29 @@ class CheckoutView(views.APIView):
                 "Unauthorized", status=status.HTTP_401_UNAUTHORIZED
             )
 
-        c_ser = self.serializer_class(data=request.data, context={"request": request})
-
         with transaction.atomic():
             # Lock this basket's service slots so a concurrent checkout for the
             # same slot cannot both pass the capacity check (first-checkout-wins).
             lock_service_slots(basket)
+            # Then the stockrecords, in that order and never the reverse, so
+            # two baskets holding one of each cannot deadlock. Availability is
+            # read from what comes back rather than from the lines, which
+            # carry figures fetched before the lock was held.
+            locked_stock_records = lock_stock_records(basket)
+            c_ser = self.serializer_class(
+                data=request.data,
+                context={
+                    "request": request,
+                    "locked_stock_records": locked_stock_records,
+                },
+            )
             if c_ser.is_valid():
                 order = c_ser.save()
+                # Re-read first: the serializer works on its own instance of
+                # this basket and may have written to the row (the
+                # unavailable-item policy posted with the checkout), and
+                # freeze() saves every field, stale ones included.
+                basket.refresh_from_db()
                 basket.freeze()
             else:
                 return response.Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
