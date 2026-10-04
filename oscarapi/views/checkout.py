@@ -10,6 +10,7 @@ from oscarapi.signals import oscarapi_post_checkout
 from oscarapi.views.utils import parse_basket_from_hyperlink
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
+from django.db.models import Prefetch
 from django.utils import timezone
 from datetime import timedelta
 
@@ -59,6 +60,26 @@ __all__ = (
 
 
 
+def _with_line_details(queryset):
+    """Load what each order line's title, image and options read, in bulk.
+
+    Otherwise every line costs its own product, image and option queries,
+    and the order list repeats that for every order on the page.
+    """
+    return queryset.prefetch_related(
+        Prefetch(
+            "lines",
+            queryset=OrderLine.objects.select_related(
+                "product", "product__parent", "service"
+            ).prefetch_related(
+                "product__images",
+                "product__parent__images",
+                "attributes__option__option_group__options",
+            ),
+        )
+    )
+
+
 class OrderList(generics.ListAPIView):
     serializer_class = DetailedOrderSerializer  # Use the detailed serializer
     permission_classes = (IsOwner,)
@@ -66,7 +87,7 @@ class OrderList(generics.ListAPIView):
     def get_queryset(self):
         # Start with only the user's orders
         user = self.request.user
-        qs = Order.objects.filter(user=user)
+        qs = _with_line_details(Order.objects.filter(user=user))
 
         # Get multiple 'status' query params, e.g. ?status=Pending&status=Finished
         statuses = self.request.query_params.getlist('status')
@@ -87,7 +108,7 @@ class OrderList(generics.ListAPIView):
 
 
 class OrderDetail(generics.RetrieveAPIView):
-    queryset = Order.objects.all()
+    queryset = _with_line_details(Order.objects.all())
     serializer_class = DetailedOrderSerializer  # Also use the detailed serializer here
     permission_classes = (IsOwner,)
 

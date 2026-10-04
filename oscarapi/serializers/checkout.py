@@ -1,5 +1,6 @@
 # pylint: disable=W0632, W0223
 import warnings
+from decimal import Decimal
 
 from django.db import IntegrityError
 
@@ -122,6 +123,52 @@ class ShippingMethodSerializer(serializers.Serializer):
         return PriceSerializer(price).data
 
 
+def _money(amount):
+    """A price as the rest of this payload writes one: "15.00"."""
+    return str(Decimal(str(amount or 0)).quantize(Decimal("0.01")))
+
+
+def _resolve_attribute_option(option, value):
+    """The AttributeOption a stored line option value names, or None.
+
+    Values are stored as "ID:<pk>" now and as the display label on older
+    lines. Resolved the way ``Basket._get_option_prices`` does it -- id first,
+    then the label in any language -- but read from ``option_group.options``
+    in memory so a prefetch covers it.
+    """
+    group = getattr(option, "option_group", None)
+    if group is None or value is None:
+        return None
+    candidates = list(group.options.all())
+
+    raw = value
+    if isinstance(raw, dict):
+        raw = raw.get("id") or raw.get("pk")
+    if isinstance(raw, str):
+        raw = raw.strip()
+        if raw.upper().startswith("ID:"):
+            raw = raw.split(":", 1)[1].strip()
+        if raw.isdigit():
+            raw = int(raw)
+    if isinstance(raw, int):
+        for candidate in candidates:
+            if candidate.pk == raw:
+                return candidate
+
+    label = str(value).strip().lower()
+    if not label:
+        return None
+    fields = ["option"] + [
+        "option_%s" % code for code, __ in getattr(django_settings, "LANGUAGES", [])
+    ]
+    for candidate in sorted(candidates, key=lambda c: c.pk):
+        for field in fields:
+            text = getattr(candidate, field, None)
+            if text and text.strip().lower() == label:
+                return candidate
+    return None
+
+
 class OrderLineAttributeSerializer(OscarHyperlinkedModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name="order-lineattributes-detail")
 
@@ -155,6 +202,81 @@ class OrderLineSerializer(OscarHyperlinkedModelSerializer):
     )
     service_id = serializers.IntegerField(source="service.id", read_only=True, default=None, allow_null=True)
     service_start_at = serializers.DateTimeField(read_only=True, default=None, allow_null=True)
+
+    # Enough to draw the line without a second source. The app used to take
+    # its item list from ``basket.products`` for want of these -- and the
+    # basket is frozen at checkout, so a line the vendor later removed kept
+    # showing there as an ordinary item inside the old total.
+    product_id = serializers.IntegerField(read_only=True, allow_null=True)
+    product_title = serializers.SerializerMethodField()
+    product_image = serializers.SerializerMethodField()
+
+    # Priced options (size, extras). ``price_*`` above is the product alone:
+    # the basket adds options on top at checkout, into the order total and
+    # onto no line. Without these the lines of an order with a priced option
+    # add up to less than ``total_incl_tax`` and nothing says why.
+    options = serializers.SerializerMethodField()
+    options_price = serializers.SerializerMethodField()
+    total_incl_tax = serializers.SerializerMethodField()
+    total_excl_tax = serializers.SerializerMethodField()
+
+    def get_product_title(self, obj):
+        # The product's title follows the request language; the line's own
+        # is a snapshot in whatever language the order was placed in.
+        if obj.product is not None:
+            return obj.product.get_title()
+        return obj.title
+
+    def get_product_image(self, obj):
+        if obj.product is None:
+            return None
+        for image in obj.product.get_all_images():
+            if getattr(image, "original", None):
+                return image.original.url
+        return None
+
+    def get_options(self, obj):
+        options = []
+        for attribute in obj.attributes.all():
+            option = attribute.option
+            raw = attribute.value
+            for value in raw if isinstance(raw, (list, tuple)) else [raw]:
+                chosen = _resolve_attribute_option(option, value)
+                if chosen is None and str(value).strip().upper().startswith("ID:"):
+                    # The option it pointed at has since been deleted. A bare
+                    # "ID:31" means nothing to the customer, and its price is
+                    # gone with it.
+                    continue
+                options.append(
+                    {
+                        # The option's code is all that is left once a vendor
+                        # deletes the option itself.
+                        "name": option.name if option else attribute.type,
+                        "value": chosen.option if chosen else str(value),
+                        "value_id": chosen.id if chosen else None,
+                        # Per unit, as on the product screen.
+                        # ``options_price`` is the line's whole share.
+                        "price": _money(chosen.price if chosen else 0),
+                    }
+                )
+        return options
+
+    def _options_price(self, obj):
+        # Priced by the basket's own method, the one that built the order
+        # total, so the line totals here cannot drift from it.
+        if not hasattr(obj, "_options_price_cache"):
+            obj._options_price_cache = Basket()._get_option_prices(obj)
+        return obj._options_price_cache
+
+    def get_options_price(self, obj):
+        return _money(self._options_price(obj))
+
+    def get_total_incl_tax(self, obj):
+        return _money((obj.line_price_incl_tax or 0) + self._options_price(obj))
+
+    def get_total_excl_tax(self, obj):
+        # The basket adds option prices to the excl-tax total unchanged too.
+        return _money((obj.line_price_excl_tax or 0) + self._options_price(obj))
 
     class Meta:
         model = OrderLine
